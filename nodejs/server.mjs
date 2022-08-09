@@ -23,6 +23,7 @@ export class Server {
         this.server.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencoded
 
         this.server.post('/proposals', async (req, res) => {
+            console.info("POST request /proposals");
             const {contractAddress} = req.body;
             if (!contractAddress) {
                 res.status(400).send('Missing contractAddress');
@@ -43,6 +44,7 @@ export class Server {
         });
 
         this.server.post('/proposal', async (req, res) => {
+            console.info("POST request /proposal");
             const {contractAddress, id} = req.body;
             if (!contractAddress || !id) {
                 res.status(400).send('Missing contractAddress or id');
@@ -64,6 +66,7 @@ export class Server {
         });
 
         this.server.post('/config', async (req, res) => {
+            console.info("POST request /config");
             const {contractAddress} = req.body;
             if (!contractAddress) {
                 res.status(400).send('Missing contractAddress');
