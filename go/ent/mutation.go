@@ -47,7 +47,6 @@ type ContractMutation struct {
 	name             *string
 	description      *string
 	image_url        *string
-	gov_token        *string
 	clearedFields    map[string]struct{}
 	proposals        map[int]struct{}
 	removedproposals map[int]struct{}
@@ -371,42 +370,6 @@ func (m *ContractMutation) ResetImageURL() {
 	m.image_url = nil
 }
 
-// SetGovToken sets the "gov_token" field.
-func (m *ContractMutation) SetGovToken(s string) {
-	m.gov_token = &s
-}
-
-// GovToken returns the value of the "gov_token" field in the mutation.
-func (m *ContractMutation) GovToken() (r string, exists bool) {
-	v := m.gov_token
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldGovToken returns the old "gov_token" field's value of the Contract entity.
-// If the Contract object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ContractMutation) OldGovToken(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldGovToken is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldGovToken requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldGovToken: %w", err)
-	}
-	return oldValue.GovToken, nil
-}
-
-// ResetGovToken resets all changes to the "gov_token" field.
-func (m *ContractMutation) ResetGovToken() {
-	m.gov_token = nil
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by ids.
 func (m *ContractMutation) AddProposalIDs(ids ...int) {
 	if m.proposals == nil {
@@ -480,7 +443,7 @@ func (m *ContractMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ContractMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 6)
 	if m.create_time != nil {
 		fields = append(fields, contract.FieldCreateTime)
 	}
@@ -498,9 +461,6 @@ func (m *ContractMutation) Fields() []string {
 	}
 	if m.image_url != nil {
 		fields = append(fields, contract.FieldImageURL)
-	}
-	if m.gov_token != nil {
-		fields = append(fields, contract.FieldGovToken)
 	}
 	return fields
 }
@@ -522,8 +482,6 @@ func (m *ContractMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case contract.FieldImageURL:
 		return m.ImageURL()
-	case contract.FieldGovToken:
-		return m.GovToken()
 	}
 	return nil, false
 }
@@ -545,8 +503,6 @@ func (m *ContractMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDescription(ctx)
 	case contract.FieldImageURL:
 		return m.OldImageURL(ctx)
-	case contract.FieldGovToken:
-		return m.OldGovToken(ctx)
 	}
 	return nil, fmt.Errorf("unknown Contract field %s", name)
 }
@@ -597,13 +553,6 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetImageURL(v)
-		return nil
-	case contract.FieldGovToken:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetGovToken(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -671,9 +620,6 @@ func (m *ContractMutation) ResetField(name string) error {
 		return nil
 	case contract.FieldImageURL:
 		m.ResetImageURL()
-		return nil
-	case contract.FieldGovToken:
-		m.ResetGovToken()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -1486,7 +1432,8 @@ type ProposalMutation struct {
 	id              *int
 	create_time     *time.Time
 	update_time     *time.Time
-	proposal_id     *string
+	proposal_id     *int
+	addproposal_id  *int
 	title           *string
 	description     *string
 	expires_at      *time.Time
@@ -1670,12 +1617,13 @@ func (m *ProposalMutation) ResetUpdateTime() {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (m *ProposalMutation) SetProposalID(s string) {
-	m.proposal_id = &s
+func (m *ProposalMutation) SetProposalID(i int) {
+	m.proposal_id = &i
+	m.addproposal_id = nil
 }
 
 // ProposalID returns the value of the "proposal_id" field in the mutation.
-func (m *ProposalMutation) ProposalID() (r string, exists bool) {
+func (m *ProposalMutation) ProposalID() (r int, exists bool) {
 	v := m.proposal_id
 	if v == nil {
 		return
@@ -1686,7 +1634,7 @@ func (m *ProposalMutation) ProposalID() (r string, exists bool) {
 // OldProposalID returns the old "proposal_id" field's value of the Proposal entity.
 // If the Proposal object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ProposalMutation) OldProposalID(ctx context.Context) (v string, err error) {
+func (m *ProposalMutation) OldProposalID(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldProposalID is only allowed on UpdateOne operations")
 	}
@@ -1700,9 +1648,28 @@ func (m *ProposalMutation) OldProposalID(ctx context.Context) (v string, err err
 	return oldValue.ProposalID, nil
 }
 
+// AddProposalID adds i to the "proposal_id" field.
+func (m *ProposalMutation) AddProposalID(i int) {
+	if m.addproposal_id != nil {
+		*m.addproposal_id += i
+	} else {
+		m.addproposal_id = &i
+	}
+}
+
+// AddedProposalID returns the value that was added to the "proposal_id" field in this mutation.
+func (m *ProposalMutation) AddedProposalID() (r int, exists bool) {
+	v := m.addproposal_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetProposalID resets all changes to the "proposal_id" field.
 func (m *ProposalMutation) ResetProposalID() {
 	m.proposal_id = nil
+	m.addproposal_id = nil
 }
 
 // SetTitle sets the "title" field.
@@ -1998,7 +1965,7 @@ func (m *ProposalMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdateTime(v)
 		return nil
 	case proposal.FieldProposalID:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -2039,13 +2006,21 @@ func (m *ProposalMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *ProposalMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addproposal_id != nil {
+		fields = append(fields, proposal.FieldProposalID)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *ProposalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case proposal.FieldProposalID:
+		return m.AddedProposalID()
+	}
 	return nil, false
 }
 
@@ -2054,6 +2029,13 @@ func (m *ProposalMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ProposalMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case proposal.FieldProposalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProposalID(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Proposal numeric field %s", name)
 }

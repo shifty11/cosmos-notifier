@@ -36,8 +36,15 @@ func (pu *ProposalUpdate) SetUpdateTime(t time.Time) *ProposalUpdate {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (pu *ProposalUpdate) SetProposalID(s string) *ProposalUpdate {
-	pu.mutation.SetProposalID(s)
+func (pu *ProposalUpdate) SetProposalID(i int) *ProposalUpdate {
+	pu.mutation.ResetProposalID()
+	pu.mutation.SetProposalID(i)
+	return pu
+}
+
+// AddProposalID adds i to the "proposal_id" field.
+func (pu *ProposalUpdate) AddProposalID(i int) *ProposalUpdate {
+	pu.mutation.AddProposalID(i)
 	return pu
 }
 
@@ -201,7 +208,14 @@ func (pu *ProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.ProposalID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: proposal.FieldProposalID,
+		})
+	}
+	if value, ok := pu.mutation.AddedProposalID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})
@@ -295,8 +309,15 @@ func (puo *ProposalUpdateOne) SetUpdateTime(t time.Time) *ProposalUpdateOne {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (puo *ProposalUpdateOne) SetProposalID(s string) *ProposalUpdateOne {
-	puo.mutation.SetProposalID(s)
+func (puo *ProposalUpdateOne) SetProposalID(i int) *ProposalUpdateOne {
+	puo.mutation.ResetProposalID()
+	puo.mutation.SetProposalID(i)
+	return puo
+}
+
+// AddProposalID adds i to the "proposal_id" field.
+func (puo *ProposalUpdateOne) AddProposalID(i int) *ProposalUpdateOne {
+	puo.mutation.AddProposalID(i)
 	return puo
 }
 
@@ -490,7 +511,14 @@ func (puo *ProposalUpdateOne) sqlSave(ctx context.Context) (_node *Proposal, err
 	}
 	if value, ok := puo.mutation.ProposalID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt,
+			Value:  value,
+			Column: proposal.FieldProposalID,
+		})
+	}
+	if value, ok := puo.mutation.AddedProposalID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})

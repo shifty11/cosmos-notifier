@@ -123,13 +123,6 @@ func ImageURL(v string) predicate.Contract {
 	})
 }
 
-// GovToken applies equality check predicate on the "gov_token" field. It's identical to GovTokenEQ.
-func GovToken(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGovToken), v))
-	})
-}
-
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
@@ -723,117 +716,6 @@ func ImageURLEqualFold(v string) predicate.Contract {
 func ImageURLContainsFold(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldImageURL), v))
-	})
-}
-
-// GovTokenEQ applies the EQ predicate on the "gov_token" field.
-func GovTokenEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenNEQ applies the NEQ predicate on the "gov_token" field.
-func GovTokenNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenIn applies the In predicate on the "gov_token" field.
-func GovTokenIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldGovToken), v...))
-	})
-}
-
-// GovTokenNotIn applies the NotIn predicate on the "gov_token" field.
-func GovTokenNotIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldGovToken), v...))
-	})
-}
-
-// GovTokenGT applies the GT predicate on the "gov_token" field.
-func GovTokenGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenGTE applies the GTE predicate on the "gov_token" field.
-func GovTokenGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenLT applies the LT predicate on the "gov_token" field.
-func GovTokenLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenLTE applies the LTE predicate on the "gov_token" field.
-func GovTokenLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenContains applies the Contains predicate on the "gov_token" field.
-func GovTokenContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenHasPrefix applies the HasPrefix predicate on the "gov_token" field.
-func GovTokenHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenHasSuffix applies the HasSuffix predicate on the "gov_token" field.
-func GovTokenHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenEqualFold applies the EqualFold predicate on the "gov_token" field.
-func GovTokenEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldGovToken), v))
-	})
-}
-
-// GovTokenContainsFold applies the ContainsFold predicate on the "gov_token" field.
-func GovTokenContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldGovToken), v))
 	})
 }
 

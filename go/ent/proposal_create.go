@@ -50,8 +50,8 @@ func (pc *ProposalCreate) SetNillableUpdateTime(t *time.Time) *ProposalCreate {
 }
 
 // SetProposalID sets the "proposal_id" field.
-func (pc *ProposalCreate) SetProposalID(s string) *ProposalCreate {
-	pc.mutation.SetProposalID(s)
+func (pc *ProposalCreate) SetProposalID(i int) *ProposalCreate {
+	pc.mutation.SetProposalID(i)
 	return pc
 }
 
@@ -258,7 +258,7 @@ func (pc *ProposalCreate) createSpec() (*Proposal, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := pc.mutation.ProposalID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
+			Type:   field.TypeInt,
 			Value:  value,
 			Column: proposal.FieldProposalID,
 		})

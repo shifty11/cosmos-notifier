@@ -73,12 +73,6 @@ func (cc *ContractCreate) SetImageURL(s string) *ContractCreate {
 	return cc
 }
 
-// SetGovToken sets the "gov_token" field.
-func (cc *ContractCreate) SetGovToken(s string) *ContractCreate {
-	cc.mutation.SetGovToken(s)
-	return cc
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cc *ContractCreate) AddProposalIDs(ids ...int) *ContractCreate {
 	cc.mutation.AddProposalIDs(ids...)
@@ -201,9 +195,6 @@ func (cc *ContractCreate) check() error {
 	if _, ok := cc.mutation.ImageURL(); !ok {
 		return &ValidationError{Name: "image_url", err: errors.New(`ent: missing required field "Contract.image_url"`)}
 	}
-	if _, ok := cc.mutation.GovToken(); !ok {
-		return &ValidationError{Name: "gov_token", err: errors.New(`ent: missing required field "Contract.gov_token"`)}
-	}
 	return nil
 }
 
@@ -278,14 +269,6 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 			Column: contract.FieldImageURL,
 		})
 		_node.ImageURL = value
-	}
-	if value, ok := cc.mutation.GovToken(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldGovToken,
-		})
-		_node.GovToken = value
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -23,8 +23,6 @@ const (
 	FieldDescription = "description"
 	// FieldImageURL holds the string denoting the image_url field in the database.
 	FieldImageURL = "image_url"
-	// FieldGovToken holds the string denoting the gov_token field in the database.
-	FieldGovToken = "gov_token"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// Table holds the table name of the contract in the database.
@@ -47,7 +45,6 @@ var Columns = []string{
 	FieldName,
 	FieldDescription,
 	FieldImageURL,
-	FieldGovToken,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "contracts"

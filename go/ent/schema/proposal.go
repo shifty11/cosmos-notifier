@@ -5,16 +5,8 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
+	"github.com/shifty11/dao-dao-notifier/types"
 )
-
-var ProposalStatus = map[int32]string{
-	0: "PROPOSAL_STATUS_UNSPECIFIED",
-	1: "PROPOSAL_STATUS_DEPOSIT_PERIOD",
-	2: "PROPOSAL_STATUS_VOTING_PERIOD",
-	3: "PROPOSAL_STATUS_PASSED",
-	4: "PROPOSAL_STATUS_REJECTED",
-	5: "PROPOSAL_STATUS_FAILED",
-}
 
 // Proposal holds the schema definition for the Proposal entity.
 type Proposal struct {
@@ -30,11 +22,11 @@ func (Proposal) Mixin() []ent.Mixin {
 // Fields of the Proposal.
 func (Proposal) Fields() []ent.Field {
 	var statusValues []string
-	for _, status := range ProposalStatus {
-		statusValues = append(statusValues, status)
+	for _, status := range types.ProposalStatusValues {
+		statusValues = append(statusValues, string(status))
 	}
 	return []ent.Field{
-		field.String("proposal_id"),
+		field.Int("proposal_id"),
 		field.String("title"),
 		field.String("description"),
 		field.Time("expires_at"),

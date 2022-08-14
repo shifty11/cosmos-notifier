@@ -22,7 +22,7 @@ type Proposal struct {
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// ProposalID holds the value of the "proposal_id" field.
-	ProposalID string `json:"proposal_id,omitempty"`
+	ProposalID int `json:"proposal_id,omitempty"`
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Description holds the value of the "description" field.
@@ -65,9 +65,9 @@ func (*Proposal) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case proposal.FieldID:
+		case proposal.FieldID, proposal.FieldProposalID:
 			values[i] = new(sql.NullInt64)
-		case proposal.FieldProposalID, proposal.FieldTitle, proposal.FieldDescription, proposal.FieldStatus:
+		case proposal.FieldTitle, proposal.FieldDescription, proposal.FieldStatus:
 			values[i] = new(sql.NullString)
 		case proposal.FieldCreateTime, proposal.FieldUpdateTime, proposal.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -107,10 +107,10 @@ func (pr *Proposal) assignValues(columns []string, values []interface{}) error {
 				pr.UpdateTime = value.Time
 			}
 		case proposal.FieldProposalID:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field proposal_id", values[i])
 			} else if value.Valid {
-				pr.ProposalID = value.String
+				pr.ProposalID = int(value.Int64)
 			}
 		case proposal.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -183,7 +183,7 @@ func (pr *Proposal) String() string {
 	builder.WriteString(pr.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("proposal_id=")
-	builder.WriteString(pr.ProposalID)
+	builder.WriteString(fmt.Sprintf("%v", pr.ProposalID))
 	builder.WriteString(", ")
 	builder.WriteString("title=")
 	builder.WriteString(pr.Title)

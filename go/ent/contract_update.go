@@ -59,12 +59,6 @@ func (cu *ContractUpdate) SetImageURL(s string) *ContractUpdate {
 	return cu
 }
 
-// SetGovToken sets the "gov_token" field.
-func (cu *ContractUpdate) SetGovToken(s string) *ContractUpdate {
-	cu.mutation.SetGovToken(s)
-	return cu
-}
-
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cu *ContractUpdate) AddProposalIDs(ids ...int) *ContractUpdate {
 	cu.mutation.AddProposalIDs(ids...)
@@ -222,13 +216,6 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: contract.FieldImageURL,
 		})
 	}
-	if value, ok := cu.mutation.GovToken(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldGovToken,
-		})
-	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -329,12 +316,6 @@ func (cuo *ContractUpdateOne) SetDescription(s string) *ContractUpdateOne {
 // SetImageURL sets the "image_url" field.
 func (cuo *ContractUpdateOne) SetImageURL(s string) *ContractUpdateOne {
 	cuo.mutation.SetImageURL(s)
-	return cuo
-}
-
-// SetGovToken sets the "gov_token" field.
-func (cuo *ContractUpdateOne) SetGovToken(s string) *ContractUpdateOne {
-	cuo.mutation.SetGovToken(s)
 	return cuo
 }
 
@@ -523,13 +504,6 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: contract.FieldImageURL,
-		})
-	}
-	if value, ok := cuo.mutation.GovToken(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldGovToken,
 		})
 	}
 	if cuo.mutation.ProposalsCleared() {

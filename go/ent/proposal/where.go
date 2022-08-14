@@ -96,7 +96,7 @@ func UpdateTime(v time.Time) predicate.Proposal {
 }
 
 // ProposalID applies equality check predicate on the "proposal_id" field. It's identical to ProposalIDEQ.
-func ProposalID(v string) predicate.Proposal {
+func ProposalID(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldProposalID), v))
 	})
@@ -276,21 +276,21 @@ func UpdateTimeLTE(v time.Time) predicate.Proposal {
 }
 
 // ProposalIDEQ applies the EQ predicate on the "proposal_id" field.
-func ProposalIDEQ(v string) predicate.Proposal {
+func ProposalIDEQ(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDNEQ applies the NEQ predicate on the "proposal_id" field.
-func ProposalIDNEQ(v string) predicate.Proposal {
+func ProposalIDNEQ(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDIn applies the In predicate on the "proposal_id" field.
-func ProposalIDIn(vs ...string) predicate.Proposal {
+func ProposalIDIn(vs ...int) predicate.Proposal {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -307,7 +307,7 @@ func ProposalIDIn(vs ...string) predicate.Proposal {
 }
 
 // ProposalIDNotIn applies the NotIn predicate on the "proposal_id" field.
-func ProposalIDNotIn(vs ...string) predicate.Proposal {
+func ProposalIDNotIn(vs ...int) predicate.Proposal {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -324,65 +324,30 @@ func ProposalIDNotIn(vs ...string) predicate.Proposal {
 }
 
 // ProposalIDGT applies the GT predicate on the "proposal_id" field.
-func ProposalIDGT(v string) predicate.Proposal {
+func ProposalIDGT(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.GT(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDGTE applies the GTE predicate on the "proposal_id" field.
-func ProposalIDGTE(v string) predicate.Proposal {
+func ProposalIDGTE(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.GTE(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDLT applies the LT predicate on the "proposal_id" field.
-func ProposalIDLT(v string) predicate.Proposal {
+func ProposalIDLT(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.LT(s.C(FieldProposalID), v))
 	})
 }
 
 // ProposalIDLTE applies the LTE predicate on the "proposal_id" field.
-func ProposalIDLTE(v string) predicate.Proposal {
+func ProposalIDLTE(v int) predicate.Proposal {
 	return predicate.Proposal(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldProposalID), v))
-	})
-}
-
-// ProposalIDContains applies the Contains predicate on the "proposal_id" field.
-func ProposalIDContains(v string) predicate.Proposal {
-	return predicate.Proposal(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldProposalID), v))
-	})
-}
-
-// ProposalIDHasPrefix applies the HasPrefix predicate on the "proposal_id" field.
-func ProposalIDHasPrefix(v string) predicate.Proposal {
-	return predicate.Proposal(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldProposalID), v))
-	})
-}
-
-// ProposalIDHasSuffix applies the HasSuffix predicate on the "proposal_id" field.
-func ProposalIDHasSuffix(v string) predicate.Proposal {
-	return predicate.Proposal(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldProposalID), v))
-	})
-}
-
-// ProposalIDEqualFold applies the EqualFold predicate on the "proposal_id" field.
-func ProposalIDEqualFold(v string) predicate.Proposal {
-	return predicate.Proposal(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldProposalID), v))
-	})
-}
-
-// ProposalIDContainsFold applies the ContainsFold predicate on the "proposal_id" field.
-func ProposalIDContainsFold(v string) predicate.Proposal {
-	return predicate.Proposal(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldProposalID), v))
 	})
 }
 

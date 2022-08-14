@@ -17,7 +17,6 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString},
-		{Name: "gov_token", Type: field.TypeString},
 		{Name: "discord_channel_chains", Type: field.TypeInt, Nullable: true},
 		{Name: "telegram_chat_contracts", Type: field.TypeInt, Nullable: true},
 	}
@@ -29,13 +28,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "contracts_discord_channels_chains",
-				Columns:    []*schema.Column{ContractsColumns[8]},
+				Columns:    []*schema.Column{ContractsColumns[7]},
 				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "contracts_telegram_chats_contracts",
-				Columns:    []*schema.Column{ContractsColumns[9]},
+				Columns:    []*schema.Column{ContractsColumns[8]},
 				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -77,11 +76,11 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "proposal_id", Type: field.TypeString},
+		{Name: "proposal_id", Type: field.TypeInt},
 		{Name: "title", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "rejected", "passed", "executed", "closed", "execution_failed"}},
 		{Name: "contract_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ProposalsTable holds the schema information for the "proposals" table.
