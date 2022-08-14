@@ -37,6 +37,11 @@ go generate ./ent
 ```bash
 go run main.go createMigrations
 ```
+combined
+    
+```bash
+go generate ./ent && go run main.go createMigrations
+```
 
 ### Apply migrations
 
