@@ -36,7 +36,7 @@ export class Server {
                     res.send(props)
                 } catch (error) {
                     console.log("Error while querying list_proposals: ", error);
-                    res.status(400).send(new Error('Error while querying list_proposals: ' + error));
+                    res.status(this.errorStatus(error)).send(new Error('Error while querying list_proposals: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
@@ -59,7 +59,7 @@ export class Server {
                     res.send(props)
                 } catch (error) {
                     console.log("Error while querying proposals: ", error);
-                    res.status(400).send(new Error('Error while querying proposals: ' + error));
+                    res.status(this.errorStatus(error)).send(new Error('Error while querying proposals: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
@@ -83,7 +83,7 @@ export class Server {
                     res.send(prop)
                 } catch (error) {
                     console.log("Error while querying proposal: ", error);
-                    res.status(400).send(new Error('Error while querying proposal: ' + error));
+                    res.status(this.errorStatus(error)).send(new Error('Error while querying proposal: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
@@ -106,7 +106,7 @@ export class Server {
                     const prop = await cwClient.queryContractSmart(contractAddress, {get_config: {}});
                     res.send(prop)
                 } catch (error) {
-                    res.status(400).send(new Error('Error while querying get_config: ' + error));
+                    res.status(this.errorStatus(error)).send(new Error('Error while querying get_config: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
@@ -129,7 +129,7 @@ export class Server {
                     const prop = await cwClient.queryContractSmart(contractAddress, {config: {}});
                     res.send(prop)
                 } catch (error) {
-                    res.status(400).send(new Error('Error while querying config: ' + error));
+                    res.status(this.errorStatus(error)).send(new Error('Error while querying config: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
@@ -152,7 +152,7 @@ export class Server {
                     const prop = await cwClient.queryContractSmart(contractAddress, {proposal_modules: {}});
                     res.send(prop)
                 } catch (error) {
-                    res.status(400).send(new Error('Error while querying proposal_modules: ' + error));
+                    res.status(this.errorStatus(error)).send(new Error('Error while querying proposal_modules: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
@@ -165,5 +165,13 @@ export class Server {
         this.server.listen(this.port, () => {
             console.log(`${this.serverName} Started at http://${this.hostname}:${this.port}/`);
         })
+    }
+
+    unknownCall(e) {
+        return String(e).includes("unknown variant");
+    }
+
+    errorStatus(e) {
+        return this.unknownCall(e) ? 406 : 400;
     }
 }

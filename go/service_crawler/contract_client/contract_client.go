@@ -41,7 +41,11 @@ func (cc *ContractClient) config() (*types.ContractData, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return cc.configV1(jsonData)
+		if resp.StatusCode == http.StatusNotAcceptable {
+			return cc.configV1(jsonData)
+		}
+		log.Sugar.Errorf("error querying /get_config (%v): %v", resp.StatusCode, resp.Body)
+		return nil, errors.New("error querying /get_config")
 	}
 
 	var config types.Config
@@ -91,11 +95,15 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		proposalModules := cc.proposalModules(jsonData)
-		if len(proposalModules) > 0 {
-			return NewContractClient(proposalModules[0]).proposals()
+		if resp.StatusCode == http.StatusNotAcceptable {
+			proposalModules := cc.proposalModules(jsonData)
+			if len(proposalModules) > 0 {
+				return NewContractClient(proposalModules[0]).proposals()
+			}
+			return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
 		}
-		return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
+		log.Sugar.Errorf("error querying /list_proposals (%v): %v", resp.StatusCode, resp.Body)
+		return nil, errors.New("error querying /list_proposals")
 	}
 
 	var proposals types.ProposalList
