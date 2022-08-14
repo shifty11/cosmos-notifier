@@ -217,7 +217,11 @@ func UpdateContracts(cm *database.ContractManager, pm *database.ProposalManager)
 
 		contract, _ := cm.CreateOrUpdate(contractAddr, config)
 		for _, proposal := range proposals.Proposals {
-			pm.CreateOrUpdate(contract, &proposal)
+			dbProp, status := pm.CreateOrUpdate(contract, &proposal)
+			if status == database.ProposalStatusChanged {
+				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
+				//TODO: send notifications to users
+			}
 		}
 		log.Sugar.Infof("updated contract %v (%v)", config.Name, contractAddr)
 	}
