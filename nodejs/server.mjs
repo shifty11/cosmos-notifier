@@ -22,11 +22,11 @@ export class Server {
         this.server.use(bodyParser.json()); // for parsing application/json
         this.server.use(bodyParser.urlencoded({extended: true})); // for parsing application/x-www-form-urlencoded
 
-        this.server.post('/proposals', async (req, res) => {
-            console.info("POST request /proposals");
+        this.server.post('/list_proposals', async (req, res) => {
+            console.info("POST request /list_proposals");
             const {contractAddress} = req.body;
             if (!contractAddress) {
-                res.status(400).send('Missing contractAddress');
+                res.status(400).send(new Error("Missing contractAddress"));
                 return;
             }
             try {
@@ -35,11 +35,36 @@ export class Server {
                     const props = await cwClient.queryContractSmart(contractAddress, {list_proposals: {}});
                     res.send(props)
                 } catch (error) {
-                    res.status(400).send({message: 'Error while querying proposals: ', error});
+                    console.log("Error while querying list_proposals: ", error);
+                    res.status(400).send(new Error('Error while querying list_proposals: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
-                res.status(400).send({message: 'Could not connect cosmwasm client: ', error});
+                console.log("Error while connecting to rpc: ", error);
+                res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
+            }
+        });
+
+        this.server.post('/proposals', async (req, res) => {
+            console.info("POST request /proposals");
+            const {contractAddress} = req.body;
+            if (!contractAddress) {
+                res.status(400).send(new Error("Missing contractAddress"));
+                return;
+            }
+            try {
+                const cwClient = await CosmWasmClient.connect(this.rpcEndpoint);
+                try {
+                    const props = await cwClient.queryContractSmart(contractAddress, {proposals: {}});
+                    res.send(props)
+                } catch (error) {
+                    console.log("Error while querying proposals: ", error);
+                    res.status(400).send(new Error('Error while querying proposals: ' + error));
+                }
+                cwClient.disconnect()
+            } catch (error) {
+                console.log("Error while connecting to rpc: ", error);
+                res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
 
@@ -47,7 +72,7 @@ export class Server {
             console.info("POST request /proposal");
             const {contractAddress, id} = req.body;
             if (!contractAddress || !id) {
-                res.status(400).send('Missing contractAddress or id');
+                res.status(400).send(new Error("Missing contractAddress or id"));
                 return;
             }
             try {
@@ -57,19 +82,21 @@ export class Server {
                     const prop = await cwClient.queryContractSmart(contractAddress, {proposal: {proposal_id: Number(id)}});
                     res.send(prop)
                 } catch (error) {
-                    res.status(400).send({message: 'Error while querying proposal: ', error});
+                    console.log("Error while querying proposal: ", error);
+                    res.status(400).send(new Error('Error while querying proposal: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
-                res.status(400).send({message: 'Could not connect cosmwasm client: ', error});
+                console.log("Error while connecting to rpc: ", error);
+                res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
 
-        this.server.post('/config', async (req, res) => {
-            console.info("POST request /config");
+        this.server.post('/get_config', async (req, res) => {
+            console.info("POST request /get_config");
             const {contractAddress} = req.body;
             if (!contractAddress) {
-                res.status(400).send('Missing contractAddress');
+                res.status(400).send(new Error("Missing contractAddress"));
                 return;
             }
             try {
@@ -79,11 +106,58 @@ export class Server {
                     const prop = await cwClient.queryContractSmart(contractAddress, {get_config: {}});
                     res.send(prop)
                 } catch (error) {
-                    res.status(400).send({message: 'Error while querying config: ', error});
+                    res.status(400).send(new Error('Error while querying get_config: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
-                res.status(400).send({message: 'Could not connect cosmwasm client: ', error});
+                console.log("Error while connecting to rpc: ", error);
+                res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
+            }
+        });
+
+        this.server.post('/config', async (req, res) => {
+            console.info("POST request /config");
+            const {contractAddress} = req.body;
+            if (!contractAddress) {
+                res.status(400).send(new Error("Missing contractAddress"));
+                return;
+            }
+            try {
+                const cwClient = await CosmWasmClient.connect(this.rpcEndpoint);
+                try {
+                    const cwClient = await CosmWasmClient.connect(this.rpcEndpoint);
+                    const prop = await cwClient.queryContractSmart(contractAddress, {config: {}});
+                    res.send(prop)
+                } catch (error) {
+                    res.status(400).send(new Error('Error while querying config: ' + error));
+                }
+                cwClient.disconnect()
+            } catch (error) {
+                console.log("Error while connecting to rpc: ", error);
+                res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
+            }
+        });
+
+        this.server.post('/proposal_modules', async (req, res) => {
+            console.info("POST request /proposal_modules");
+            const {contractAddress} = req.body;
+            if (!contractAddress) {
+                res.status(400).send(new Error("Missing contractAddress"));
+                return;
+            }
+            try {
+                const cwClient = await CosmWasmClient.connect(this.rpcEndpoint);
+                try {
+                    const cwClient = await CosmWasmClient.connect(this.rpcEndpoint);
+                    const prop = await cwClient.queryContractSmart(contractAddress, {proposal_modules: {}});
+                    res.send(prop)
+                } catch (error) {
+                    res.status(400).send(new Error('Error while querying proposal_modules: ' + error));
+                }
+                cwClient.disconnect()
+            } catch (error) {
+                console.log("Error while connecting to rpc: ", error);
+                res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
 
