@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14.5
+    container_name: daodao_notifier_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=daodao-notifier-db
+
+  db-test:
+    image: postgres:14.5
+    container_name: daodao_notifier_test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - test_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=daodao-notifier-db
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: daodao_notifier_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    logging:
+      driver: "none"
+    volumes:
+       - pgadmin:/root/.pgadmin
+       - ./local-db-servers.json:/pgadmin4/servers.json
+    ports:
+      - "5051:80"
+    restart: unless-stopped
+
+volumes:
+  data:
+    name: daodao_notifier_data
+  test_data:
+    name: daodao_notifier_test_data
+  pgadmin:

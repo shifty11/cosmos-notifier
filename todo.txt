@@ -1,0 +1,3 @@
+## ToDo
+- [ ] Dockerify nodejs
+- [ ] Create frontend
