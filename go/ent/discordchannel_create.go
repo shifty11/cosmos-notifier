@@ -87,19 +87,19 @@ func (dcc *DiscordChannelCreate) SetUser(u *User) *DiscordChannelCreate {
 	return dcc.SetUserID(u.ID)
 }
 
-// AddChainIDs adds the "chains" edge to the Contract entity by IDs.
-func (dcc *DiscordChannelCreate) AddChainIDs(ids ...int) *DiscordChannelCreate {
-	dcc.mutation.AddChainIDs(ids...)
+// AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
+func (dcc *DiscordChannelCreate) AddContractIDs(ids ...int) *DiscordChannelCreate {
+	dcc.mutation.AddContractIDs(ids...)
 	return dcc
 }
 
-// AddChains adds the "chains" edges to the Contract entity.
-func (dcc *DiscordChannelCreate) AddChains(c ...*Contract) *DiscordChannelCreate {
+// AddContracts adds the "contracts" edges to the Contract entity.
+func (dcc *DiscordChannelCreate) AddContracts(c ...*Contract) *DiscordChannelCreate {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return dcc.AddChainIDs(ids...)
+	return dcc.AddContractIDs(ids...)
 }
 
 // Mutation returns the DiscordChannelMutation object of the builder.
@@ -293,12 +293,12 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 		_node.discord_channel_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := dcc.mutation.ChainsIDs(); len(nodes) > 0 {
+	if nodes := dcc.mutation.ContractsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   discordchannel.ChainsTable,
-			Columns: []string{discordchannel.ChainsColumn},
+			Table:   discordchannel.ContractsTable,
+			Columns: []string{discordchannel.ContractsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

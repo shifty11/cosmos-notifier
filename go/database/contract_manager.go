@@ -55,3 +55,20 @@ func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.Cont
 	}
 	return c, false
 }
+
+func (m *ContractManager) All() []*ent.Contract {
+	all, err := m.client.Contract.
+		Query().
+		All(m.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying contracts: %v", err)
+	}
+	return all
+}
+
+func (m *ContractManager) Get(id int) (*ent.Contract, error) {
+	return m.client.Contract.
+		Query().
+		Where(contract.ID(id)).
+		Only(m.ctx)
+}

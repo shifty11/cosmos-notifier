@@ -50,7 +50,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "contracts"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"discord_channel_chains",
+	"discord_channel_contracts",
 	"telegram_chat_contracts",
 }
 

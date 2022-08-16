@@ -27,9 +27,9 @@ type DiscordChannelQuery struct {
 	fields     []string
 	predicates []predicate.DiscordChannel
 	// eager-loading edges.
-	withUser   *UserQuery
-	withChains *ContractQuery
-	withFKs    bool
+	withUser      *UserQuery
+	withContracts *ContractQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -88,8 +88,8 @@ func (dcq *DiscordChannelQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// QueryChains chains the current query on the "chains" edge.
-func (dcq *DiscordChannelQuery) QueryChains() *ContractQuery {
+// QueryContracts chains the current query on the "contracts" edge.
+func (dcq *DiscordChannelQuery) QueryContracts() *ContractQuery {
 	query := &ContractQuery{config: dcq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dcq.prepareQuery(ctx); err != nil {
@@ -102,7 +102,7 @@ func (dcq *DiscordChannelQuery) QueryChains() *ContractQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
 			sqlgraph.To(contract.Table, contract.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ChainsTable, discordchannel.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ContractsTable, discordchannel.ContractsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
 		return fromU, nil
@@ -286,13 +286,13 @@ func (dcq *DiscordChannelQuery) Clone() *DiscordChannelQuery {
 		return nil
 	}
 	return &DiscordChannelQuery{
-		config:     dcq.config,
-		limit:      dcq.limit,
-		offset:     dcq.offset,
-		order:      append([]OrderFunc{}, dcq.order...),
-		predicates: append([]predicate.DiscordChannel{}, dcq.predicates...),
-		withUser:   dcq.withUser.Clone(),
-		withChains: dcq.withChains.Clone(),
+		config:        dcq.config,
+		limit:         dcq.limit,
+		offset:        dcq.offset,
+		order:         append([]OrderFunc{}, dcq.order...),
+		predicates:    append([]predicate.DiscordChannel{}, dcq.predicates...),
+		withUser:      dcq.withUser.Clone(),
+		withContracts: dcq.withContracts.Clone(),
 		// clone intermediate query.
 		sql:    dcq.sql.Clone(),
 		path:   dcq.path,
@@ -311,14 +311,14 @@ func (dcq *DiscordChannelQuery) WithUser(opts ...func(*UserQuery)) *DiscordChann
 	return dcq
 }
 
-// WithChains tells the query-builder to eager-load the nodes that are connected to
-// the "chains" edge. The optional arguments are used to configure the query builder of the edge.
-func (dcq *DiscordChannelQuery) WithChains(opts ...func(*ContractQuery)) *DiscordChannelQuery {
+// WithContracts tells the query-builder to eager-load the nodes that are connected to
+// the "contracts" edge. The optional arguments are used to configure the query builder of the edge.
+func (dcq *DiscordChannelQuery) WithContracts(opts ...func(*ContractQuery)) *DiscordChannelQuery {
 	query := &ContractQuery{config: dcq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	dcq.withChains = query
+	dcq.withContracts = query
 	return dcq
 }
 
@@ -395,7 +395,7 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		_spec       = dcq.querySpec()
 		loadedTypes = [2]bool{
 			dcq.withUser != nil,
-			dcq.withChains != nil,
+			dcq.withContracts != nil,
 		}
 	)
 	if dcq.withUser != nil {
@@ -452,32 +452,32 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		}
 	}
 
-	if query := dcq.withChains; query != nil {
+	if query := dcq.withContracts; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*DiscordChannel)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Chains = []*Contract{}
+			nodes[i].Edges.Contracts = []*Contract{}
 		}
 		query.withFKs = true
 		query.Where(predicate.Contract(func(s *sql.Selector) {
-			s.Where(sql.InValues(discordchannel.ChainsColumn, fks...))
+			s.Where(sql.InValues(discordchannel.ContractsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.discord_channel_chains
+			fk := n.discord_channel_contracts
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "discord_channel_chains" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "discord_channel_contracts" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "discord_channel_chains" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "discord_channel_contracts" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Chains = append(node.Edges.Chains, n)
+			node.Edges.Contracts = append(node.Edges.Contracts, n)
 		}
 	}
 

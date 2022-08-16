@@ -5,6 +5,8 @@ import (
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/auth"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/auth_service"
+	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/subscription_service"
+	"github.com/shifty11/dao-dao-notifier/service_grpc/subscription"
 	"google.golang.org/grpc"
 	"net"
 	"time"
@@ -34,6 +36,7 @@ func (s GRPCServer) Run() {
 	interceptor := auth.NewAuthInterceptor(jwtManager, s.dbManagers.UserManager, auth.AccessibleRoles())
 
 	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken)
+	subsServer := subscription.NewSubscriptionsServer(s.dbManagers.SubscriptionManager)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -41,6 +44,7 @@ func (s GRPCServer) Run() {
 	)
 
 	auth_service.RegisterAuthServiceServer(server, authServer)
+	subscription_service.RegisterSubscriptionServiceServer(server, subsServer)
 
 	lis, err := net.Listen("tcp", s.config.Port)
 	if err != nil {

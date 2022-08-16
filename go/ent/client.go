@@ -358,15 +358,15 @@ func (c *DiscordChannelClient) QueryUser(dc *DiscordChannel) *UserQuery {
 	return query
 }
 
-// QueryChains queries the chains edge of a DiscordChannel.
-func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ContractQuery {
+// QueryContracts queries the contracts edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery {
 	query := &ContractQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
 			sqlgraph.To(contract.Table, contract.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ChainsTable, discordchannel.ChainsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ContractsTable, discordchannel.ContractsColumn),
 		)
 		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
 		return fromV, nil

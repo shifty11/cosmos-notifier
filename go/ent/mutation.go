@@ -712,24 +712,24 @@ func (m *ContractMutation) ResetEdge(name string) error {
 // DiscordChannelMutation represents an operation that mutates the DiscordChannel nodes in the graph.
 type DiscordChannelMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	create_time   *time.Time
-	update_time   *time.Time
-	channel_id    *int64
-	addchannel_id *int64
-	name          *string
-	is_group      *bool
-	clearedFields map[string]struct{}
-	user          *int
-	cleareduser   bool
-	chains        map[int]struct{}
-	removedchains map[int]struct{}
-	clearedchains bool
-	done          bool
-	oldValue      func(context.Context) (*DiscordChannel, error)
-	predicates    []predicate.DiscordChannel
+	op               Op
+	typ              string
+	id               *int
+	create_time      *time.Time
+	update_time      *time.Time
+	channel_id       *int64
+	addchannel_id    *int64
+	name             *string
+	is_group         *bool
+	clearedFields    map[string]struct{}
+	user             *int
+	cleareduser      bool
+	contracts        map[int]struct{}
+	removedcontracts map[int]struct{}
+	clearedcontracts bool
+	done             bool
+	oldValue         func(context.Context) (*DiscordChannel, error)
+	predicates       []predicate.DiscordChannel
 }
 
 var _ ent.Mutation = (*DiscordChannelMutation)(nil)
@@ -1069,58 +1069,58 @@ func (m *DiscordChannelMutation) ResetUser() {
 	m.cleareduser = false
 }
 
-// AddChainIDs adds the "chains" edge to the Contract entity by ids.
-func (m *DiscordChannelMutation) AddChainIDs(ids ...int) {
-	if m.chains == nil {
-		m.chains = make(map[int]struct{})
+// AddContractIDs adds the "contracts" edge to the Contract entity by ids.
+func (m *DiscordChannelMutation) AddContractIDs(ids ...int) {
+	if m.contracts == nil {
+		m.contracts = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.chains[ids[i]] = struct{}{}
+		m.contracts[ids[i]] = struct{}{}
 	}
 }
 
-// ClearChains clears the "chains" edge to the Contract entity.
-func (m *DiscordChannelMutation) ClearChains() {
-	m.clearedchains = true
+// ClearContracts clears the "contracts" edge to the Contract entity.
+func (m *DiscordChannelMutation) ClearContracts() {
+	m.clearedcontracts = true
 }
 
-// ChainsCleared reports if the "chains" edge to the Contract entity was cleared.
-func (m *DiscordChannelMutation) ChainsCleared() bool {
-	return m.clearedchains
+// ContractsCleared reports if the "contracts" edge to the Contract entity was cleared.
+func (m *DiscordChannelMutation) ContractsCleared() bool {
+	return m.clearedcontracts
 }
 
-// RemoveChainIDs removes the "chains" edge to the Contract entity by IDs.
-func (m *DiscordChannelMutation) RemoveChainIDs(ids ...int) {
-	if m.removedchains == nil {
-		m.removedchains = make(map[int]struct{})
+// RemoveContractIDs removes the "contracts" edge to the Contract entity by IDs.
+func (m *DiscordChannelMutation) RemoveContractIDs(ids ...int) {
+	if m.removedcontracts == nil {
+		m.removedcontracts = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.chains, ids[i])
-		m.removedchains[ids[i]] = struct{}{}
+		delete(m.contracts, ids[i])
+		m.removedcontracts[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedChains returns the removed IDs of the "chains" edge to the Contract entity.
-func (m *DiscordChannelMutation) RemovedChainsIDs() (ids []int) {
-	for id := range m.removedchains {
+// RemovedContracts returns the removed IDs of the "contracts" edge to the Contract entity.
+func (m *DiscordChannelMutation) RemovedContractsIDs() (ids []int) {
+	for id := range m.removedcontracts {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ChainsIDs returns the "chains" edge IDs in the mutation.
-func (m *DiscordChannelMutation) ChainsIDs() (ids []int) {
-	for id := range m.chains {
+// ContractsIDs returns the "contracts" edge IDs in the mutation.
+func (m *DiscordChannelMutation) ContractsIDs() (ids []int) {
+	for id := range m.contracts {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetChains resets all changes to the "chains" edge.
-func (m *DiscordChannelMutation) ResetChains() {
-	m.chains = nil
-	m.clearedchains = false
-	m.removedchains = nil
+// ResetContracts resets all changes to the "contracts" edge.
+func (m *DiscordChannelMutation) ResetContracts() {
+	m.contracts = nil
+	m.clearedcontracts = false
+	m.removedcontracts = nil
 }
 
 // Where appends a list predicates to the DiscordChannelMutation builder.
@@ -1328,8 +1328,8 @@ func (m *DiscordChannelMutation) AddedEdges() []string {
 	if m.user != nil {
 		edges = append(edges, discordchannel.EdgeUser)
 	}
-	if m.chains != nil {
-		edges = append(edges, discordchannel.EdgeChains)
+	if m.contracts != nil {
+		edges = append(edges, discordchannel.EdgeContracts)
 	}
 	return edges
 }
@@ -1342,9 +1342,9 @@ func (m *DiscordChannelMutation) AddedIDs(name string) []ent.Value {
 		if id := m.user; id != nil {
 			return []ent.Value{*id}
 		}
-	case discordchannel.EdgeChains:
-		ids := make([]ent.Value, 0, len(m.chains))
-		for id := range m.chains {
+	case discordchannel.EdgeContracts:
+		ids := make([]ent.Value, 0, len(m.contracts))
+		for id := range m.contracts {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1355,8 +1355,8 @@ func (m *DiscordChannelMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DiscordChannelMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedchains != nil {
-		edges = append(edges, discordchannel.EdgeChains)
+	if m.removedcontracts != nil {
+		edges = append(edges, discordchannel.EdgeContracts)
 	}
 	return edges
 }
@@ -1365,9 +1365,9 @@ func (m *DiscordChannelMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *DiscordChannelMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case discordchannel.EdgeChains:
-		ids := make([]ent.Value, 0, len(m.removedchains))
-		for id := range m.removedchains {
+	case discordchannel.EdgeContracts:
+		ids := make([]ent.Value, 0, len(m.removedcontracts))
+		for id := range m.removedcontracts {
 			ids = append(ids, id)
 		}
 		return ids
@@ -1381,8 +1381,8 @@ func (m *DiscordChannelMutation) ClearedEdges() []string {
 	if m.cleareduser {
 		edges = append(edges, discordchannel.EdgeUser)
 	}
-	if m.clearedchains {
-		edges = append(edges, discordchannel.EdgeChains)
+	if m.clearedcontracts {
+		edges = append(edges, discordchannel.EdgeContracts)
 	}
 	return edges
 }
@@ -1393,8 +1393,8 @@ func (m *DiscordChannelMutation) EdgeCleared(name string) bool {
 	switch name {
 	case discordchannel.EdgeUser:
 		return m.cleareduser
-	case discordchannel.EdgeChains:
-		return m.clearedchains
+	case discordchannel.EdgeContracts:
+		return m.clearedcontracts
 	}
 	return false
 }
@@ -1417,8 +1417,8 @@ func (m *DiscordChannelMutation) ResetEdge(name string) error {
 	case discordchannel.EdgeUser:
 		m.ResetUser()
 		return nil
-	case discordchannel.EdgeChains:
-		m.ResetChains()
+	case discordchannel.EdgeContracts:
+		m.ResetContracts()
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel edge %s", name)

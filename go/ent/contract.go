@@ -30,9 +30,9 @@ type Contract struct {
 	ImageURL string `json:"image_url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ContractQuery when eager-loading is set.
-	Edges                   ContractEdges `json:"edges"`
-	discord_channel_chains  *int
-	telegram_chat_contracts *int
+	Edges                     ContractEdges `json:"edges"`
+	discord_channel_contracts *int
+	telegram_chat_contracts   *int
 }
 
 // ContractEdges holds the relations/edges for other nodes in the graph.
@@ -64,7 +64,7 @@ func (*Contract) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case contract.FieldCreateTime, contract.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case contract.ForeignKeys[0]: // discord_channel_chains
+		case contract.ForeignKeys[0]: // discord_channel_contracts
 			values[i] = new(sql.NullInt64)
 		case contract.ForeignKeys[1]: // telegram_chat_contracts
 			values[i] = new(sql.NullInt64)
@@ -127,10 +127,10 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 			}
 		case contract.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field discord_channel_chains", value)
+				return fmt.Errorf("unexpected type %T for edge-field discord_channel_contracts", value)
 			} else if value.Valid {
-				c.discord_channel_chains = new(int)
-				*c.discord_channel_chains = int(value.Int64)
+				c.discord_channel_contracts = new(int)
+				*c.discord_channel_contracts = int(value.Int64)
 			}
 		case contract.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

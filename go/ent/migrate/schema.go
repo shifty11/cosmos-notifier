@@ -17,7 +17,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString},
-		{Name: "discord_channel_chains", Type: field.TypeInt, Nullable: true},
+		{Name: "discord_channel_contracts", Type: field.TypeInt, Nullable: true},
 		{Name: "telegram_chat_contracts", Type: field.TypeInt, Nullable: true},
 	}
 	// ContractsTable holds the schema information for the "contracts" table.
@@ -27,7 +27,7 @@ var (
 		PrimaryKey: []*schema.Column{ContractsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "contracts_discord_channels_chains",
+				Symbol:     "contracts_discord_channels_contracts",
 				Columns:    []*schema.Column{ContractsColumns[7]},
 				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
 				OnDelete:   schema.SetNull,

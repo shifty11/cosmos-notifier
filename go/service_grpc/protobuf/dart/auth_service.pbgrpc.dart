@@ -16,12 +16,12 @@ export 'auth_service.pb.dart';
 class AuthServiceClient extends $grpc.Client {
   static final _$telegramLogin =
       $grpc.ClientMethod<$0.TelegramLoginRequest, $0.LoginResponse>(
-          '/cosmosgov_grpc.AuthService/TelegramLogin',
+          '/daodao_notifier_grpc.AuthService/TelegramLogin',
           ($0.TelegramLoginRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $0.LoginResponse.fromBuffer(value));
   static final _$refreshAccessToken = $grpc.ClientMethod<
           $0.RefreshAccessTokenRequest, $0.RefreshAccessTokenResponse>(
-      '/cosmosgov_grpc.AuthService/RefreshAccessToken',
+      '/daodao_notifier_grpc.AuthService/RefreshAccessToken',
       ($0.RefreshAccessTokenRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $0.RefreshAccessTokenResponse.fromBuffer(value));
@@ -45,7 +45,7 @@ class AuthServiceClient extends $grpc.Client {
 }
 
 abstract class AuthServiceBase extends $grpc.Service {
-  $core.String get $name => 'cosmosgov_grpc.AuthService';
+  $core.String get $name => 'daodao_notifier_grpc.AuthService';
 
   AuthServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.TelegramLoginRequest, $0.LoginResponse>(

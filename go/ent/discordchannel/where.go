@@ -497,25 +497,25 @@ func HasUserWith(preds ...predicate.User) predicate.DiscordChannel {
 	})
 }
 
-// HasChains applies the HasEdge predicate on the "chains" edge.
-func HasChains() predicate.DiscordChannel {
+// HasContracts applies the HasEdge predicate on the "contracts" edge.
+func HasContracts() predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChainsTable, ChainsColumn),
+			sqlgraph.To(ContractsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ContractsTable, ContractsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasChainsWith applies the HasEdge predicate on the "chains" edge with a given conditions (other predicates).
-func HasChainsWith(preds ...predicate.Contract) predicate.DiscordChannel {
+// HasContractsWith applies the HasEdge predicate on the "contracts" edge with a given conditions (other predicates).
+func HasContractsWith(preds ...predicate.Contract) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChainsTable, ChainsColumn),
+			sqlgraph.To(ContractsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ContractsTable, ContractsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

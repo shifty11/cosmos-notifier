@@ -23,8 +23,8 @@ const (
 	FieldIsGroup = "is_group"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
-	// EdgeChains holds the string denoting the chains edge name in mutations.
-	EdgeChains = "chains"
+	// EdgeContracts holds the string denoting the contracts edge name in mutations.
+	EdgeContracts = "contracts"
 	// Table holds the table name of the discordchannel in the database.
 	Table = "discord_channels"
 	// UserTable is the table that holds the user relation/edge.
@@ -34,13 +34,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "discord_channel_user"
-	// ChainsTable is the table that holds the chains relation/edge.
-	ChainsTable = "contracts"
-	// ChainsInverseTable is the table name for the Contract entity.
+	// ContractsTable is the table that holds the contracts relation/edge.
+	ContractsTable = "contracts"
+	// ContractsInverseTable is the table name for the Contract entity.
 	// It exists in this package in order to avoid circular dependency with the "contract" package.
-	ChainsInverseTable = "contracts"
-	// ChainsColumn is the table column denoting the chains relation/edge.
-	ChainsColumn = "discord_channel_chains"
+	ContractsInverseTable = "contracts"
+	// ContractsColumn is the table column denoting the contracts relation/edge.
+	ContractsColumn = "discord_channel_contracts"
 )
 
 // Columns holds all SQL columns for discordchannel fields.

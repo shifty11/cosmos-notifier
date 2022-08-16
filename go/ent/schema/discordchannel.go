@@ -34,6 +34,6 @@ func (DiscordChannel) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("user", User.Type).
 			Unique(),
-		edge.To("chains", Contract.Type),
+		edge.To("contracts", Contract.Type),
 	}
 }

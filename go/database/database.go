@@ -75,9 +75,12 @@ func WithTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) 
 }
 
 type DbManagers struct {
-	ContractManager *ContractManager
-	ProposalManager *ProposalManager
-	UserManager     *UserManager
+	ContractManager       *ContractManager
+	ProposalManager       *ProposalManager
+	UserManager           *UserManager
+	DiscordChannelManager *DiscordChannelManager
+	TelegramChatManager   *TelegramChatManager
+	SubscriptionManager   *SubscriptionManager
 }
 
 func NewDefaultDbManagers() *DbManagers {
@@ -89,9 +92,15 @@ func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 	contractManager := NewContractManager(client, ctx)
 	proposalManager := NewProposalManager(client, ctx)
 	userManager := NewUserManager(client, ctx)
+	discordChannelManager := NewDiscordChannelManager(client, ctx, contractManager)
+	telegramChatManager := NewTelegramChatManager(client, ctx, contractManager)
+	subscriptionManager := NewSubscriptionManager(client, ctx, userManager, contractManager, telegramChatManager, discordChannelManager)
 	return &DbManagers{
-		ContractManager: contractManager,
-		ProposalManager: proposalManager,
-		UserManager:     userManager,
+		ContractManager:       contractManager,
+		ProposalManager:       proposalManager,
+		UserManager:           userManager,
+		DiscordChannelManager: discordChannelManager,
+		TelegramChatManager:   telegramChatManager,
+		SubscriptionManager:   subscriptionManager,
 	}
 }
