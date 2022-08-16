@@ -36,6 +36,19 @@ func (uu *UserUpdate) SetUpdateTime(t time.Time) *UserUpdate {
 	return uu
 }
 
+// SetUserID sets the "user_id" field.
+func (uu *UserUpdate) SetUserID(i int64) *UserUpdate {
+	uu.mutation.ResetUserID()
+	uu.mutation.SetUserID(i)
+	return uu
+}
+
+// AddUserID adds i to the "user_id" field.
+func (uu *UserUpdate) AddUserID(i int64) *UserUpdate {
+	uu.mutation.AddUserID(i)
+	return uu
+}
+
 // SetName sets the "name" field.
 func (uu *UserUpdate) SetName(s string) *UserUpdate {
 	uu.mutation.SetName(s)
@@ -207,6 +220,20 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldUpdateTime,
 		})
 	}
+	if value, ok := uu.mutation.UserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uu.mutation.AddedUserID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
 	if value, ok := uu.mutation.Name(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -344,6 +371,19 @@ type UserUpdateOne struct {
 // SetUpdateTime sets the "update_time" field.
 func (uuo *UserUpdateOne) SetUpdateTime(t time.Time) *UserUpdateOne {
 	uuo.mutation.SetUpdateTime(t)
+	return uuo
+}
+
+// SetUserID sets the "user_id" field.
+func (uuo *UserUpdateOne) SetUserID(i int64) *UserUpdateOne {
+	uuo.mutation.ResetUserID()
+	uuo.mutation.SetUserID(i)
+	return uuo
+}
+
+// AddUserID adds i to the "user_id" field.
+func (uuo *UserUpdateOne) AddUserID(i int64) *UserUpdateOne {
+	uuo.mutation.AddUserID(i)
 	return uuo
 }
 
@@ -546,6 +586,20 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeTime,
 			Value:  value,
 			Column: user.FieldUpdateTime,
+		})
+	}
+	if value, ok := uuo.mutation.UserID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
+		})
+	}
+	if value, ok := uuo.mutation.AddedUserID(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeInt64,
+			Value:  value,
+			Column: user.FieldUserID,
 		})
 	}
 	if value, ok := uuo.mutation.Name(); ok {
