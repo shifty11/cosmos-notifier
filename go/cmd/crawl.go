@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/service_crawler/contract_client"
+	"github.com/shifty11/dao-dao-notifier/service_crawler"
 
 	"github.com/spf13/cobra"
 )
@@ -22,5 +22,5 @@ func init() {
 
 func crawl() {
 	managers := database.NewDefaultDbManagers()
-	contract_client.UpdateContracts(managers.ContractManager, managers.ProposalManager)
+	service_crawler.UpdateContracts(managers.ContractManager, managers.ProposalManager)
 }

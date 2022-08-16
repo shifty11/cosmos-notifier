@@ -1,4 +1,4 @@
-package contract_client
+package service_crawler
 
 import (
 	"bufio"
