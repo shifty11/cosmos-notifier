@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package daodao_notifier_grpc;
+
+option go_package = "go/subscription_service";
+
+service SubscriptionService {
+  rpc GetSubscriptions (google.protobuf.Empty) returns (GetSubscriptionsResponse) {}
+  rpc ToggleSubscription (ToggleSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
+}
+
+message Subscription {
+  int64 id = 1;
+  string name = 2;
+  bool is_subscribed = 3;
+}
+
+message ChatRoom {
+  int64 id = 1;
+  string name = 2;
+  enum Type {
+    TELEGRAM = 0;
+    DISCORD = 1;
+  }
+  Type TYPE = 3;
+  repeated Subscription subscriptions = 4;
+}
+
+message GetSubscriptionsResponse {
+  repeated ChatRoom chat_rooms = 1;
+}
+
+message ToggleSubscriptionRequest {
+  int64 chatRoomId = 1;
+  int64 contractId = 2;
+}
+
+message ToggleSubscriptionResponse {
+  bool isSubscribed = 1;
+}

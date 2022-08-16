@@ -1,5 +1,5 @@
 syntax = "proto3";
-package cosmosgov_grpc;
+package daodao_notifier_grpc;
 
 option go_package = "go/auth_service";
 
