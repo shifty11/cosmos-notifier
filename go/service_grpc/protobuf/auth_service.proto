@@ -1,0 +1,30 @@
+syntax = "proto3";
+package cosmosgov_grpc;
+
+option go_package = "go/auth_service";
+
+service AuthService {
+  rpc TelegramLogin (TelegramLoginRequest) returns (LoginResponse) {}
+  rpc RefreshAccessToken (RefreshAccessTokenRequest) returns (RefreshAccessTokenResponse) {}
+}
+
+message TelegramLoginRequest {
+  int64 userId = 1;
+  string dataStr = 2;
+  string username = 4;
+  int64 authDate = 6;
+  string hash = 3;
+}
+
+message LoginResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+message RefreshAccessTokenRequest {
+  string refresh_token = 1;
+}
+
+message RefreshAccessTokenResponse {
+  string access_token = 1;
+}

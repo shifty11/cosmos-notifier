@@ -35,16 +35,24 @@ go generate ./ent
 ### Create migrations
 
 ```bash
-go run main.go createMigrations
+go run main.go create-migrations
 ```
-combined
+combined (generate models and migrations)
     
 ```bash
-go generate ./ent && go run main.go createMigrations
+go generate ./ent && go run main.go create-migrations
 ```
 
 ### Apply migrations
 
 ```bash
 migrate -source file://database/migrations -database "postgres://postgres:postgres@localhost:5432/daodao-notifier-db?sslmode=disable&TimeZone=Europe/Zurich" up
+```
+
+
+## API
+
+### Protoc Installation
+```bash
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```

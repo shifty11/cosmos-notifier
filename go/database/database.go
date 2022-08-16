@@ -12,18 +12,18 @@ import (
 var dbClient *ent.Client
 
 var (
-	dbType   = "postgres"
-	host     = "localhost"
-	user     = "postgres"
-	password = "postgres"
-	dbName   = "daodao-notifier-db"
-	port     = "5432"
-	sslmode  = "disable"
-	timezone = "Europe/Zurich"
+	dbType     = "postgres"
+	dbHost     = "localhost"
+	dbUser     = "postgres"
+	dbPassword = "postgres"
+	dbName     = "daodao-notifier-db"
+	dbPort     = "5432"
+	dbSSLMode  = "disable"
+	dbTimezone = "Europe/Zurich"
 )
 
 func DbCon() string {
-	return fmt.Sprintf("%v://%v:%v@%v:%v/%v?sslmode=%v&TimeZone=%v", dbType, user, password, host, port, dbName, sslmode, timezone)
+	return fmt.Sprintf("%v://%v:%v@%v:%v/%v?sslmode=%v&TimeZone=%v", dbType, dbUser, dbPassword, dbHost, dbPort, dbName, dbSSLMode, dbTimezone)
 }
 
 func connect() (*ent.Client, context.Context) {
@@ -77,6 +77,7 @@ func WithTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) 
 type DbManagers struct {
 	ContractManager *ContractManager
 	ProposalManager *ProposalManager
+	UserManager     *UserManager
 }
 
 func NewDefaultDbManagers() *DbManagers {
@@ -87,8 +88,10 @@ func NewDefaultDbManagers() *DbManagers {
 func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 	contractManager := NewContractManager(client, ctx)
 	proposalManager := NewProposalManager(client, ctx)
+	userManager := NewUserManager(client, ctx)
 	return &DbManagers{
 		ContractManager: contractManager,
 		ProposalManager: proposalManager,
+		UserManager:     userManager,
 	}
 }

@@ -20,19 +20,19 @@ func NewContractManager(client *ent.Client, ctx context.Context) *ContractManage
 // CreateOrUpdate creates a new contract or updates an existing one
 //
 // returns (contract, created)
-func (manager *ContractManager) CreateOrUpdate(contractAddr string, config *types.ContractData) (*ent.Contract, bool) {
-	c, err := manager.client.Contract.
+func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.ContractData) (*ent.Contract, bool) {
+	c, err := m.client.Contract.
 		Query().
 		Where(contract.AddressEQ(contractAddr)).
-		First(manager.ctx)
+		First(m.ctx)
 	if err != nil && ent.IsNotFound(err) {
-		c, err = manager.client.Contract.
+		c, err = m.client.Contract.
 			Create().
 			SetAddress(contractAddr).
 			SetName(config.Name).
 			SetDescription(config.Description).
 			SetImageURL(config.ImageUrl).
-			Save(manager.ctx)
+			Save(m.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while creating contract: %v", err)
 		}
@@ -41,12 +41,12 @@ func (manager *ContractManager) CreateOrUpdate(contractAddr string, config *type
 		log.Sugar.Panicf("Error while querying contract: %v", err)
 	} else {
 		if c.Name != config.Name || c.Description != config.Description || c.ImageURL != config.ImageUrl {
-			c, err = manager.client.Contract.
+			c, err = m.client.Contract.
 				UpdateOne(c).
 				SetName(config.Name).
 				SetDescription(config.Description).
 				SetImageURL(config.ImageUrl).
-				Save(manager.ctx)
+				Save(m.ctx)
 			if err != nil {
 				log.Sugar.Panicf("Error while updating contract: %v", err)
 			}

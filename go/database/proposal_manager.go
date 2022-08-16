@@ -35,17 +35,17 @@ const (
 // - no_changes: proposal not changed
 //
 // returns (proposal, status)
-func (manager *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.Proposal) (*ent.Proposal, ProposalStatus) {
-	prop, err := manager.client.Proposal.
+func (m *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.Proposal) (*ent.Proposal, ProposalStatus) {
+	prop, err := m.client.Proposal.
 		Query().
 		Where(
 			proposal.And(
 				proposal.HasContractWith(contract.IDEQ(c.ID)),
 				proposal.ProposalIDEQ(propData.Id),
 			)).
-		First(manager.ctx)
+		First(m.ctx)
 	if err != nil && ent.IsNotFound(err) {
-		prop, err = manager.client.Proposal.
+		prop, err = m.client.Proposal.
 			Create().
 			SetContract(c).
 			SetProposalID(propData.Id).
@@ -53,7 +53,7 @@ func (manager *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.
 			SetDescription(propData.Description).
 			SetStatus(proposal.Status(propData.Status)).
 			SetExpiresAt(propData.Expires.AtTime).
-			Save(manager.ctx)
+			Save(m.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while creating proposal: %v", err)
 		}
@@ -62,12 +62,12 @@ func (manager *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.
 		log.Sugar.Errorf("Error while querying proposal: %v", err)
 	} else {
 		if prop.Title != propData.Title || prop.Description != propData.Description || prop.Status != proposal.Status(propData.Status) {
-			updatedProp, err := manager.client.Proposal.
+			updatedProp, err := m.client.Proposal.
 				UpdateOne(prop).
 				SetTitle(propData.Title).
 				SetDescription(propData.Description).
 				SetStatus(proposal.Status(propData.Status)).
-				Save(manager.ctx)
+				Save(m.ctx)
 			if err != nil {
 				log.Sugar.Panicf("Error while updating proposal: %v", err)
 			}

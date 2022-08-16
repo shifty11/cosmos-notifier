@@ -16,7 +16,7 @@ import (
 
 // createMigrationsCmd represents the createMigrations command
 var createMigrationsCmd = &cobra.Command{
-	Use:   "createMigrations",
+	Use:   "create-migrations",
 	Short: "Create migrations based on ent/schema/*.go files",
 	Long: `Create migrations based on ent/schema/*.go files
 
