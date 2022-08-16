@@ -209,7 +209,7 @@ func contracts() []string {
 	return contracts
 }
 
-func UpdateContracts(cm *database.ContractManager, pm *database.ProposalManager) {
+func updateContracts(cm *database.ContractManager, pm *database.ProposalManager) {
 	for _, contractAddr := range contracts() {
 		client := NewContractClient(contractAddr)
 		config, err := client.config()
