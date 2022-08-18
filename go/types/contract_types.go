@@ -23,23 +23,34 @@ type ConfigV1 struct {
 }
 
 type ContractData struct {
+	Address     string
 	Name        string
 	Description string
 	ImageUrl    string
 }
 
-func (c *Config) ToContractData() *ContractData {
-	return &ContractData{
+func (c *Config) ToContractData(address string) *ContractData {
+	data := &ContractData{
+		Address:     address,
 		Name:        c.Config.Name,
 		Description: c.Config.Description,
 		ImageUrl:    c.Config.ImageUrl,
 	}
+	if data.Name == "" {
+		data.Name = address
+	}
+	return data
 }
 
-func (c *ConfigV1) ToContractData() *ContractData {
-	return &ContractData{
+func (c *ConfigV1) ToContractData(address string) *ContractData {
+	data := &ContractData{
+		Address:     address,
 		Name:        c.Name,
 		Description: c.Description,
 		ImageUrl:    c.ImageUrl,
 	}
+	if data.Name == "" {
+		data.Name = address
+	}
+	return data
 }

@@ -14,14 +14,20 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type ContractClient struct {
+	URL             string
 	ContractAddress string
 }
 
-func NewContractClient(contractAddress string) *ContractClient {
+func NewContractClient(URL string, contractAddress string) *ContractClient {
+	if strings.HasSuffix(URL, "/") {
+		URL = URL[:len(URL)-1]
+	}
 	return &ContractClient{
+		URL:             URL,
 		ContractAddress: contractAddress,
 	}
 }
@@ -34,7 +40,7 @@ func (cc *ContractClient) config() (*types.ContractData, error) {
 		return nil, err
 	}
 
-	resp, err := http.Post("http://localhost:8080/get_config", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(fmt.Sprintf("%v/get_config", cc.URL), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil, err
@@ -55,11 +61,11 @@ func (cc *ContractClient) config() (*types.ContractData, error) {
 		return nil, err
 	}
 
-	return config.ToContractData(), nil
+	return config.ToContractData(cc.ContractAddress), nil
 }
 
 func (cc *ContractClient) configV1(jsonData []byte) (*types.ContractData, error) {
-	resp, err := http.Post("http://localhost:8080/config", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(fmt.Sprintf("%v/config", cc.URL), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil, err
@@ -77,7 +83,7 @@ func (cc *ContractClient) configV1(jsonData []byte) (*types.ContractData, error)
 		return nil, err
 	}
 
-	return configV1.ToContractData(), nil
+	return configV1.ToContractData(cc.ContractAddress), nil
 }
 
 func (cc *ContractClient) proposals() (*types.ProposalList, error) {
@@ -88,7 +94,7 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 		return nil, err
 	}
 
-	resp, err := http.Post("http://localhost:8080/list_proposals", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(fmt.Sprintf("%v/list_proposals", cc.URL), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil, err
@@ -98,7 +104,7 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 		if resp.StatusCode == http.StatusNotAcceptable {
 			proposalModules := cc.proposalModules(jsonData)
 			if len(proposalModules) > 0 {
-				return NewContractClient(proposalModules[0]).proposals()
+				return NewContractClient(cc.URL, proposalModules[0]).proposals()
 			}
 			return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
 		}
@@ -138,7 +144,7 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 }
 
 func (cc *ContractClient) proposalModules(jsonData []byte) []string {
-	resp, err := http.Post("http://localhost:8080/proposal_modules", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(fmt.Sprintf("%v/proposal_modules", cc.URL), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil
@@ -166,7 +172,7 @@ func (cc *ContractClient) proposal(proposalId int) (*types.Proposal, error) {
 		return nil, err
 	}
 
-	resp, err := http.Post("http://localhost:8080/proposal", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(fmt.Sprintf("%v/proposal", cc.URL), "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil, err
@@ -211,7 +217,7 @@ func contracts() []string {
 
 func updateContracts(cm *database.ContractManager, pm *database.ProposalManager) {
 	for _, contractAddr := range contracts() {
-		client := NewContractClient(contractAddr)
+		client := NewContractClient("http://localhost:8081/", contractAddr)
 		config, err := client.config()
 		if err != nil {
 			log.Sugar.Errorf("while getting config for contract %v: %v", contractAddr, err)
