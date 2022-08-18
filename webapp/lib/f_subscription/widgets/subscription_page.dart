@@ -60,8 +60,8 @@ class SubscriptionPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: sidePadding, right: sidePadding),
+                    const SizedBox(width: sidePadding),
+                    Expanded(
                       child: Text(
                         subscription.name,
                         style: const TextStyle(fontSize: 20),
@@ -73,7 +73,7 @@ class SubscriptionPage extends StatelessWidget {
                             padding: const EdgeInsets.only(right: sidePadding),
                             child: Icon(Icons.check_circle_rounded, color: Theme.of(context).primaryColor, size: 24),
                           )
-                        : const SizedBox(width: 24),
+                        : const SizedBox(width: sidePadding),
                   ],
                 ),
               ),
