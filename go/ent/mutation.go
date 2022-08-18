@@ -38,22 +38,28 @@ const (
 // ContractMutation represents an operation that mutates the Contract nodes in the graph.
 type ContractMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	create_time      *time.Time
-	update_time      *time.Time
-	address          *string
-	name             *string
-	description      *string
-	image_url        *string
-	clearedFields    map[string]struct{}
-	proposals        map[int]struct{}
-	removedproposals map[int]struct{}
-	clearedproposals bool
-	done             bool
-	oldValue         func(context.Context) (*Contract, error)
-	predicates       []predicate.Contract
+	op                      Op
+	typ                     string
+	id                      *int
+	create_time             *time.Time
+	update_time             *time.Time
+	address                 *string
+	name                    *string
+	description             *string
+	image_url               *string
+	clearedFields           map[string]struct{}
+	proposals               map[int]struct{}
+	removedproposals        map[int]struct{}
+	clearedproposals        bool
+	telegram_chats          map[int]struct{}
+	removedtelegram_chats   map[int]struct{}
+	clearedtelegram_chats   bool
+	discord_channels        map[int]struct{}
+	removeddiscord_channels map[int]struct{}
+	cleareddiscord_channels bool
+	done                    bool
+	oldValue                func(context.Context) (*Contract, error)
+	predicates              []predicate.Contract
 }
 
 var _ ent.Mutation = (*ContractMutation)(nil)
@@ -424,6 +430,114 @@ func (m *ContractMutation) ResetProposals() {
 	m.removedproposals = nil
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
+func (m *ContractMutation) AddTelegramChatIDs(ids ...int) {
+	if m.telegram_chats == nil {
+		m.telegram_chats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.telegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTelegramChats clears the "telegram_chats" edge to the TelegramChat entity.
+func (m *ContractMutation) ClearTelegramChats() {
+	m.clearedtelegram_chats = true
+}
+
+// TelegramChatsCleared reports if the "telegram_chats" edge to the TelegramChat entity was cleared.
+func (m *ContractMutation) TelegramChatsCleared() bool {
+	return m.clearedtelegram_chats
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (m *ContractMutation) RemoveTelegramChatIDs(ids ...int) {
+	if m.removedtelegram_chats == nil {
+		m.removedtelegram_chats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.telegram_chats, ids[i])
+		m.removedtelegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTelegramChats returns the removed IDs of the "telegram_chats" edge to the TelegramChat entity.
+func (m *ContractMutation) RemovedTelegramChatsIDs() (ids []int) {
+	for id := range m.removedtelegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TelegramChatsIDs returns the "telegram_chats" edge IDs in the mutation.
+func (m *ContractMutation) TelegramChatsIDs() (ids []int) {
+	for id := range m.telegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTelegramChats resets all changes to the "telegram_chats" edge.
+func (m *ContractMutation) ResetTelegramChats() {
+	m.telegram_chats = nil
+	m.clearedtelegram_chats = false
+	m.removedtelegram_chats = nil
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by ids.
+func (m *ContractMutation) AddDiscordChannelIDs(ids ...int) {
+	if m.discord_channels == nil {
+		m.discord_channels = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.discord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscordChannels clears the "discord_channels" edge to the DiscordChannel entity.
+func (m *ContractMutation) ClearDiscordChannels() {
+	m.cleareddiscord_channels = true
+}
+
+// DiscordChannelsCleared reports if the "discord_channels" edge to the DiscordChannel entity was cleared.
+func (m *ContractMutation) DiscordChannelsCleared() bool {
+	return m.cleareddiscord_channels
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (m *ContractMutation) RemoveDiscordChannelIDs(ids ...int) {
+	if m.removeddiscord_channels == nil {
+		m.removeddiscord_channels = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.discord_channels, ids[i])
+		m.removeddiscord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscordChannels returns the removed IDs of the "discord_channels" edge to the DiscordChannel entity.
+func (m *ContractMutation) RemovedDiscordChannelsIDs() (ids []int) {
+	for id := range m.removeddiscord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscordChannelsIDs returns the "discord_channels" edge IDs in the mutation.
+func (m *ContractMutation) DiscordChannelsIDs() (ids []int) {
+	for id := range m.discord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscordChannels resets all changes to the "discord_channels" edge.
+func (m *ContractMutation) ResetDiscordChannels() {
+	m.discord_channels = nil
+	m.cleareddiscord_channels = false
+	m.removeddiscord_channels = nil
+}
+
 // Where appends a list predicates to the ContractMutation builder.
 func (m *ContractMutation) Where(ps ...predicate.Contract) {
 	m.predicates = append(m.predicates, ps...)
@@ -627,9 +741,15 @@ func (m *ContractMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ContractMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.proposals != nil {
 		edges = append(edges, contract.EdgeProposals)
+	}
+	if m.telegram_chats != nil {
+		edges = append(edges, contract.EdgeTelegramChats)
+	}
+	if m.discord_channels != nil {
+		edges = append(edges, contract.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -644,15 +764,33 @@ func (m *ContractMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case contract.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.telegram_chats))
+		for id := range m.telegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case contract.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.discord_channels))
+		for id := range m.discord_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ContractMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.removedproposals != nil {
 		edges = append(edges, contract.EdgeProposals)
+	}
+	if m.removedtelegram_chats != nil {
+		edges = append(edges, contract.EdgeTelegramChats)
+	}
+	if m.removeddiscord_channels != nil {
+		edges = append(edges, contract.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -667,15 +805,33 @@ func (m *ContractMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case contract.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.removedtelegram_chats))
+		for id := range m.removedtelegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case contract.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.removeddiscord_channels))
+		for id := range m.removeddiscord_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ContractMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.clearedproposals {
 		edges = append(edges, contract.EdgeProposals)
+	}
+	if m.clearedtelegram_chats {
+		edges = append(edges, contract.EdgeTelegramChats)
+	}
+	if m.cleareddiscord_channels {
+		edges = append(edges, contract.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -686,6 +842,10 @@ func (m *ContractMutation) EdgeCleared(name string) bool {
 	switch name {
 	case contract.EdgeProposals:
 		return m.clearedproposals
+	case contract.EdgeTelegramChats:
+		return m.clearedtelegram_chats
+	case contract.EdgeDiscordChannels:
+		return m.cleareddiscord_channels
 	}
 	return false
 }
@@ -704,6 +864,12 @@ func (m *ContractMutation) ResetEdge(name string) error {
 	switch name {
 	case contract.EdgeProposals:
 		m.ResetProposals()
+		return nil
+	case contract.EdgeTelegramChats:
+		m.ResetTelegramChats()
+		return nil
+	case contract.EdgeDiscordChannels:
+		m.ResetDiscordChannels()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract edge %s", name)

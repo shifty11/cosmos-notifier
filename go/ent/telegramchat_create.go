@@ -295,10 +295,10 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 	}
 	if nodes := tcc.mutation.ContractsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   telegramchat.ContractsTable,
-			Columns: []string{telegramchat.ContractsColumn},
+			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

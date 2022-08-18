@@ -17,28 +17,12 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString},
-		{Name: "discord_channel_contracts", Type: field.TypeInt, Nullable: true},
-		{Name: "telegram_chat_contracts", Type: field.TypeInt, Nullable: true},
 	}
 	// ContractsTable holds the schema information for the "contracts" table.
 	ContractsTable = &schema.Table{
 		Name:       "contracts",
 		Columns:    ContractsColumns,
 		PrimaryKey: []*schema.Column{ContractsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "contracts_discord_channels_contracts",
-				Columns:    []*schema.Column{ContractsColumns[7]},
-				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "contracts_telegram_chats_contracts",
-				Columns:    []*schema.Column{ContractsColumns[8]},
-				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "contract_address",
@@ -136,6 +120,56 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// DiscordChannelContractsColumns holds the columns for the "discord_channel_contracts" table.
+	DiscordChannelContractsColumns = []*schema.Column{
+		{Name: "discord_channel_id", Type: field.TypeInt},
+		{Name: "contract_id", Type: field.TypeInt},
+	}
+	// DiscordChannelContractsTable holds the schema information for the "discord_channel_contracts" table.
+	DiscordChannelContractsTable = &schema.Table{
+		Name:       "discord_channel_contracts",
+		Columns:    DiscordChannelContractsColumns,
+		PrimaryKey: []*schema.Column{DiscordChannelContractsColumns[0], DiscordChannelContractsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "discord_channel_contracts_discord_channel_id",
+				Columns:    []*schema.Column{DiscordChannelContractsColumns[0]},
+				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "discord_channel_contracts_contract_id",
+				Columns:    []*schema.Column{DiscordChannelContractsColumns[1]},
+				RefColumns: []*schema.Column{ContractsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// TelegramChatContractsColumns holds the columns for the "telegram_chat_contracts" table.
+	TelegramChatContractsColumns = []*schema.Column{
+		{Name: "telegram_chat_id", Type: field.TypeInt},
+		{Name: "contract_id", Type: field.TypeInt},
+	}
+	// TelegramChatContractsTable holds the schema information for the "telegram_chat_contracts" table.
+	TelegramChatContractsTable = &schema.Table{
+		Name:       "telegram_chat_contracts",
+		Columns:    TelegramChatContractsColumns,
+		PrimaryKey: []*schema.Column{TelegramChatContractsColumns[0], TelegramChatContractsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "telegram_chat_contracts_telegram_chat_id",
+				Columns:    []*schema.Column{TelegramChatContractsColumns[0]},
+				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "telegram_chat_contracts_contract_id",
+				Columns:    []*schema.Column{TelegramChatContractsColumns[1]},
+				RefColumns: []*schema.Column{ContractsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		ContractsTable,
@@ -143,13 +177,17 @@ var (
 		ProposalsTable,
 		TelegramChatsTable,
 		UsersTable,
+		DiscordChannelContractsTable,
+		TelegramChatContractsTable,
 	}
 )
 
 func init() {
-	ContractsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
-	ContractsTable.ForeignKeys[1].RefTable = TelegramChatsTable
 	DiscordChannelsTable.ForeignKeys[0].RefTable = UsersTable
 	ProposalsTable.ForeignKeys[0].RefTable = ContractsTable
 	TelegramChatsTable.ForeignKeys[0].RefTable = UsersTable
+	DiscordChannelContractsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
+	DiscordChannelContractsTable.ForeignKeys[1].RefTable = ContractsTable
+	TelegramChatContractsTable.ForeignKeys[0].RefTable = TelegramChatsTable
+	TelegramChatContractsTable.ForeignKeys[1].RefTable = ContractsTable
 }

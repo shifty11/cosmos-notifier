@@ -38,6 +38,16 @@ func (Contract) Edges() []ent.Edge {
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),
+		edge.From("telegram_chats", TelegramChat.Type).
+			Ref("contracts").
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.From("discord_channels", DiscordChannel.Type).
+			Ref("contracts").
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 	}
 }
 

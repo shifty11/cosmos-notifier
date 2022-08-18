@@ -30,18 +30,20 @@ type Contract struct {
 	ImageURL string `json:"image_url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ContractQuery when eager-loading is set.
-	Edges                     ContractEdges `json:"edges"`
-	discord_channel_contracts *int
-	telegram_chat_contracts   *int
+	Edges ContractEdges `json:"edges"`
 }
 
 // ContractEdges holds the relations/edges for other nodes in the graph.
 type ContractEdges struct {
 	// Proposals holds the value of the proposals edge.
 	Proposals []*Proposal `json:"proposals,omitempty"`
+	// TelegramChats holds the value of the telegram_chats edge.
+	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
+	// DiscordChannels holds the value of the discord_channels edge.
+	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // ProposalsOrErr returns the Proposals value or an error if the edge
@@ -51,6 +53,24 @@ func (e ContractEdges) ProposalsOrErr() ([]*Proposal, error) {
 		return e.Proposals, nil
 	}
 	return nil, &NotLoadedError{edge: "proposals"}
+}
+
+// TelegramChatsOrErr returns the TelegramChats value or an error if the edge
+// was not loaded in eager-loading.
+func (e ContractEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
+	if e.loadedTypes[1] {
+		return e.TelegramChats, nil
+	}
+	return nil, &NotLoadedError{edge: "telegram_chats"}
+}
+
+// DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
+// was not loaded in eager-loading.
+func (e ContractEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
+	if e.loadedTypes[2] {
+		return e.DiscordChannels, nil
+	}
+	return nil, &NotLoadedError{edge: "discord_channels"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -64,10 +84,6 @@ func (*Contract) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case contract.FieldCreateTime, contract.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case contract.ForeignKeys[0]: // discord_channel_contracts
-			values[i] = new(sql.NullInt64)
-		case contract.ForeignKeys[1]: // telegram_chat_contracts
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Contract", columns[i])
 		}
@@ -125,20 +141,6 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.ImageURL = value.String
 			}
-		case contract.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field discord_channel_contracts", value)
-			} else if value.Valid {
-				c.discord_channel_contracts = new(int)
-				*c.discord_channel_contracts = int(value.Int64)
-			}
-		case contract.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field telegram_chat_contracts", value)
-			} else if value.Valid {
-				c.telegram_chat_contracts = new(int)
-				*c.telegram_chat_contracts = int(value.Int64)
-			}
 		}
 	}
 	return nil
@@ -147,6 +149,16 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 // QueryProposals queries the "proposals" edge of the Contract entity.
 func (c *Contract) QueryProposals() *ProposalQuery {
 	return (&ContractClient{config: c.config}).QueryProposals(c)
+}
+
+// QueryTelegramChats queries the "telegram_chats" edge of the Contract entity.
+func (c *Contract) QueryTelegramChats() *TelegramChatQuery {
+	return (&ContractClient{config: c.config}).QueryTelegramChats(c)
+}
+
+// QueryDiscordChannels queries the "discord_channels" edge of the Contract entity.
+func (c *Contract) QueryDiscordChannels() *DiscordChannelQuery {
+	return (&ContractClient{config: c.config}).QueryDiscordChannels(c)
 }
 
 // Update returns a builder for updating this Contract.

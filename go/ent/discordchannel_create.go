@@ -295,10 +295,10 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 	}
 	if nodes := dcc.mutation.ContractsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

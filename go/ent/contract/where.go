@@ -747,6 +747,62 @@ func HasProposalsWith(preds ...predicate.Proposal) predicate.Contract {
 	})
 }
 
+// HasTelegramChats applies the HasEdge predicate on the "telegram_chats" edge.
+func HasTelegramChats() predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTelegramChatsWith applies the HasEdge predicate on the "telegram_chats" edge with a given conditions (other predicates).
+func HasTelegramChatsWith(preds ...predicate.TelegramChat) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDiscordChannels applies the HasEdge predicate on the "discord_channels" edge.
+func HasDiscordChannels() predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDiscordChannelsWith applies the HasEdge predicate on the "discord_channels" edge with a given conditions (other predicates).
+func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Contract) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {

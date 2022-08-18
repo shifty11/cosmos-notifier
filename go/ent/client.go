@@ -252,6 +252,38 @@ func (c *ContractClient) QueryProposals(co *Contract) *ProposalQuery {
 	return query
 }
 
+// QueryTelegramChats queries the telegram_chats edge of a Contract.
+func (c *ContractClient) QueryTelegramChats(co *Contract) *TelegramChatQuery {
+	query := &TelegramChatQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(contract.Table, contract.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, contract.TelegramChatsTable, contract.TelegramChatsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels queries the discord_channels edge of a Contract.
+func (c *ContractClient) QueryDiscordChannels(co *Contract) *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := co.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(contract.Table, contract.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, contract.DiscordChannelsTable, contract.DiscordChannelsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ContractClient) Hooks() []Hook {
 	return c.hooks.Contract
@@ -366,7 +398,7 @@ func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
 			sqlgraph.To(contract.Table, contract.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.ContractsTable, discordchannel.ContractsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ContractsTable, discordchannel.ContractsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
 		return fromV, nil
@@ -594,7 +626,7 @@ func (c *TelegramChatClient) QueryContracts(tc *TelegramChat) *ContractQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
 			sqlgraph.To(contract.Table, contract.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, telegramchat.ContractsTable, telegramchat.ContractsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ContractsTable, telegramchat.ContractsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
 		return fromV, nil

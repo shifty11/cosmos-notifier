@@ -34,13 +34,11 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "telegram_chat_user"
-	// ContractsTable is the table that holds the contracts relation/edge.
-	ContractsTable = "contracts"
+	// ContractsTable is the table that holds the contracts relation/edge. The primary key declared below.
+	ContractsTable = "telegram_chat_contracts"
 	// ContractsInverseTable is the table name for the Contract entity.
 	// It exists in this package in order to avoid circular dependency with the "contract" package.
 	ContractsInverseTable = "contracts"
-	// ContractsColumn is the table column denoting the contracts relation/edge.
-	ContractsColumn = "telegram_chat_contracts"
 )
 
 // Columns holds all SQL columns for telegramchat fields.
@@ -58,6 +56,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"telegram_chat_user",
 }
+
+var (
+	// ContractsPrimaryKey and ContractsColumn2 are the table columns denoting the
+	// primary key for the contracts relation (M2M).
+	ContractsPrimaryKey = []string{"telegram_chat_id", "contract_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

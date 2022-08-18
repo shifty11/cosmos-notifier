@@ -26,10 +26,13 @@ const (
 func AccessibleRoles() map[string][]Role {
 	const path = "/daodao_notifier_grpc"
 	const authService = path + ".AuthService/"
+	const subsService = path + ".SubscriptionService/"
 
 	return map[string][]Role{
 		authService + "TelegramLogin":      {Unauthenticated, User, Admin},
 		authService + "RefreshAccessToken": {Unauthenticated, User, Admin},
+		subsService + "GetSubscriptions":   {User, Admin},
+		subsService + "ToggleSubscription": {User, Admin},
 	}
 }
 

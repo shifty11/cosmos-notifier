@@ -503,7 +503,7 @@ func HasContracts() predicate.DiscordChannel {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ContractsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ContractsTable, ContractsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, ContractsTable, ContractsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -515,7 +515,7 @@ func HasContractsWith(preds ...predicate.Contract) predicate.DiscordChannel {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ContractsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ContractsTable, ContractsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, ContractsTable, ContractsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

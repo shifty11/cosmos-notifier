@@ -56,3 +56,9 @@ migrate -source file://database/migrations -database "postgres://postgres:postgr
 ```bash
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```
+
+## Frontend
+
+```bash
+envoy -c envoy.yaml
+```

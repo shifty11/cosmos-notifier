@@ -25,6 +25,10 @@ const (
 	FieldImageURL = "image_url"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
+	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
+	EdgeTelegramChats = "telegram_chats"
+	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
+	EdgeDiscordChannels = "discord_channels"
 	// Table holds the table name of the contract in the database.
 	Table = "contracts"
 	// ProposalsTable is the table that holds the proposals relation/edge.
@@ -34,6 +38,16 @@ const (
 	ProposalsInverseTable = "proposals"
 	// ProposalsColumn is the table column denoting the proposals relation/edge.
 	ProposalsColumn = "contract_proposals"
+	// TelegramChatsTable is the table that holds the telegram_chats relation/edge. The primary key declared below.
+	TelegramChatsTable = "telegram_chat_contracts"
+	// TelegramChatsInverseTable is the table name for the TelegramChat entity.
+	// It exists in this package in order to avoid circular dependency with the "telegramchat" package.
+	TelegramChatsInverseTable = "telegram_chats"
+	// DiscordChannelsTable is the table that holds the discord_channels relation/edge. The primary key declared below.
+	DiscordChannelsTable = "discord_channel_contracts"
+	// DiscordChannelsInverseTable is the table name for the DiscordChannel entity.
+	// It exists in this package in order to avoid circular dependency with the "discordchannel" package.
+	DiscordChannelsInverseTable = "discord_channels"
 )
 
 // Columns holds all SQL columns for contract fields.
@@ -47,22 +61,19 @@ var Columns = []string{
 	FieldImageURL,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "contracts"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"discord_channel_contracts",
-	"telegram_chat_contracts",
-}
+var (
+	// TelegramChatsPrimaryKey and TelegramChatsColumn2 are the table columns denoting the
+	// primary key for the telegram_chats relation (M2M).
+	TelegramChatsPrimaryKey = []string{"telegram_chat_id", "contract_id"}
+	// DiscordChannelsPrimaryKey and DiscordChannelsColumn2 are the table columns denoting the
+	// primary key for the discord_channels relation (M2M).
+	DiscordChannelsPrimaryKey = []string{"discord_channel_id", "contract_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

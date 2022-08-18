@@ -267,10 +267,10 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if dcu.mutation.ContractsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -283,10 +283,10 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if nodes := dcu.mutation.RemovedContractsIDs(); len(nodes) > 0 && !dcu.mutation.ContractsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -302,10 +302,10 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 	}
 	if nodes := dcu.mutation.ContractsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -605,10 +605,10 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 	}
 	if dcuo.mutation.ContractsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -621,10 +621,10 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 	}
 	if nodes := dcuo.mutation.RemovedContractsIDs(); len(nodes) > 0 && !dcuo.mutation.ContractsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -640,10 +640,10 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 	}
 	if nodes := dcuo.mutation.ContractsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   discordchannel.ContractsTable,
-			Columns: []string{discordchannel.ContractsColumn},
+			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

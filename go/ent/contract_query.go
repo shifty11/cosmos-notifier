@@ -12,8 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
 	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 )
 
 // ContractQuery is the builder for querying Contract entities.
@@ -26,8 +28,9 @@ type ContractQuery struct {
 	fields     []string
 	predicates []predicate.Contract
 	// eager-loading edges.
-	withProposals *ProposalQuery
-	withFKs       bool
+	withProposals       *ProposalQuery
+	withTelegramChats   *TelegramChatQuery
+	withDiscordChannels *DiscordChannelQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +82,50 @@ func (cq *ContractQuery) QueryProposals() *ProposalQuery {
 			sqlgraph.From(contract.Table, contract.FieldID, selector),
 			sqlgraph.To(proposal.Table, proposal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, contract.ProposalsTable, contract.ProposalsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTelegramChats chains the current query on the "telegram_chats" edge.
+func (cq *ContractQuery) QueryTelegramChats() *TelegramChatQuery {
+	query := &TelegramChatQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(contract.Table, contract.FieldID, selector),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, contract.TelegramChatsTable, contract.TelegramChatsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels chains the current query on the "discord_channels" edge.
+func (cq *ContractQuery) QueryDiscordChannels() *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: cq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(contract.Table, contract.FieldID, selector),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, contract.DiscordChannelsTable, contract.DiscordChannelsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,12 +309,14 @@ func (cq *ContractQuery) Clone() *ContractQuery {
 		return nil
 	}
 	return &ContractQuery{
-		config:        cq.config,
-		limit:         cq.limit,
-		offset:        cq.offset,
-		order:         append([]OrderFunc{}, cq.order...),
-		predicates:    append([]predicate.Contract{}, cq.predicates...),
-		withProposals: cq.withProposals.Clone(),
+		config:              cq.config,
+		limit:               cq.limit,
+		offset:              cq.offset,
+		order:               append([]OrderFunc{}, cq.order...),
+		predicates:          append([]predicate.Contract{}, cq.predicates...),
+		withProposals:       cq.withProposals.Clone(),
+		withTelegramChats:   cq.withTelegramChats.Clone(),
+		withDiscordChannels: cq.withDiscordChannels.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
@@ -283,6 +332,28 @@ func (cq *ContractQuery) WithProposals(opts ...func(*ProposalQuery)) *ContractQu
 		opt(query)
 	}
 	cq.withProposals = query
+	return cq
+}
+
+// WithTelegramChats tells the query-builder to eager-load the nodes that are connected to
+// the "telegram_chats" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ContractQuery) WithTelegramChats(opts ...func(*TelegramChatQuery)) *ContractQuery {
+	query := &TelegramChatQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withTelegramChats = query
+	return cq
+}
+
+// WithDiscordChannels tells the query-builder to eager-load the nodes that are connected to
+// the "discord_channels" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ContractQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery)) *ContractQuery {
+	query := &DiscordChannelQuery{config: cq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withDiscordChannels = query
 	return cq
 }
 
@@ -355,15 +426,13 @@ func (cq *ContractQuery) prepareQuery(ctx context.Context) error {
 func (cq *ContractQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Contract, error) {
 	var (
 		nodes       = []*Contract{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [3]bool{
 			cq.withProposals != nil,
+			cq.withTelegramChats != nil,
+			cq.withDiscordChannels != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, contract.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*Contract).scanValues(nil, columns)
 	}
@@ -409,6 +478,112 @@ func (cq *ContractQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Con
 				return nil, fmt.Errorf(`unexpected foreign-key "contract_proposals" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Proposals = append(node.Edges.Proposals, n)
+		}
+	}
+
+	if query := cq.withTelegramChats; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*Contract)
+		nids := make(map[int]map[*Contract]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.TelegramChats = []*TelegramChat{}
+		}
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(contract.TelegramChatsTable)
+			s.Join(joinT).On(s.C(telegramchat.FieldID), joinT.C(contract.TelegramChatsPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(contract.TelegramChatsPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(contract.TelegramChatsPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Contract]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
+			}
+			for kn := range nodes {
+				kn.Edges.TelegramChats = append(kn.Edges.TelegramChats, n)
+			}
+		}
+	}
+
+	if query := cq.withDiscordChannels; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*Contract)
+		nids := make(map[int]map[*Contract]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.DiscordChannels = []*DiscordChannel{}
+		}
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(contract.DiscordChannelsTable)
+			s.Join(joinT).On(s.C(discordchannel.FieldID), joinT.C(contract.DiscordChannelsPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(contract.DiscordChannelsPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(contract.DiscordChannelsPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Contract]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
+			}
+			for kn := range nodes {
+				kn.Edges.DiscordChannels = append(kn.Edges.DiscordChannels, n)
+			}
 		}
 	}
 

@@ -102,7 +102,7 @@ func (tcq *TelegramChatQuery) QueryContracts() *ContractQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, selector),
 			sqlgraph.To(contract.Table, contract.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, telegramchat.ContractsTable, telegramchat.ContractsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ContractsTable, telegramchat.ContractsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -453,31 +453,55 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	}
 
 	if query := tcq.withContracts; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*TelegramChat)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Contracts = []*Contract{}
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*TelegramChat)
+		nids := make(map[int]map[*TelegramChat]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Contracts = []*Contract{}
 		}
-		query.withFKs = true
-		query.Where(predicate.Contract(func(s *sql.Selector) {
-			s.Where(sql.InValues(telegramchat.ContractsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(telegramchat.ContractsTable)
+			s.Join(joinT).On(s.C(contract.FieldID), joinT.C(telegramchat.ContractsPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(telegramchat.ContractsPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(telegramchat.ContractsPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TelegramChat]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.telegram_chat_contracts
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "telegram_chat_contracts" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "telegram_chat_contracts" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "contracts" node returned %v`, n.ID)
 			}
-			node.Edges.Contracts = append(node.Edges.Contracts, n)
+			for kn := range nodes {
+				kn.Edges.Contracts = append(kn.Edges.Contracts, n)
+			}
 		}
 	}
 

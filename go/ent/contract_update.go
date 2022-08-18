@@ -12,8 +12,10 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
 	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 )
 
 // ContractUpdate is the builder for updating Contract entities.
@@ -74,6 +76,36 @@ func (cu *ContractUpdate) AddProposals(p ...*Proposal) *ContractUpdate {
 	return cu.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cu *ContractUpdate) AddTelegramChatIDs(ids ...int) *ContractUpdate {
+	cu.mutation.AddTelegramChatIDs(ids...)
+	return cu
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cu *ContractUpdate) AddTelegramChats(t ...*TelegramChat) *ContractUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cu.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cu *ContractUpdate) AddDiscordChannelIDs(ids ...int) *ContractUpdate {
+	cu.mutation.AddDiscordChannelIDs(ids...)
+	return cu
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cu *ContractUpdate) AddDiscordChannels(d ...*DiscordChannel) *ContractUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ContractMutation object of the builder.
 func (cu *ContractUpdate) Mutation() *ContractMutation {
 	return cu.mutation
@@ -98,6 +130,48 @@ func (cu *ContractUpdate) RemoveProposals(p ...*Proposal) *ContractUpdate {
 		ids[i] = p[i].ID
 	}
 	return cu.RemoveProposalIDs(ids...)
+}
+
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (cu *ContractUpdate) ClearTelegramChats() *ContractUpdate {
+	cu.mutation.ClearTelegramChats()
+	return cu
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (cu *ContractUpdate) RemoveTelegramChatIDs(ids ...int) *ContractUpdate {
+	cu.mutation.RemoveTelegramChatIDs(ids...)
+	return cu
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (cu *ContractUpdate) RemoveTelegramChats(t ...*TelegramChat) *ContractUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cu.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (cu *ContractUpdate) ClearDiscordChannels() *ContractUpdate {
+	cu.mutation.ClearDiscordChannels()
+	return cu
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (cu *ContractUpdate) RemoveDiscordChannelIDs(ids ...int) *ContractUpdate {
+	cu.mutation.RemoveDiscordChannelIDs(ids...)
+	return cu
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (cu *ContractUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ContractUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cu.RemoveDiscordChannelIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -270,6 +344,114 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !cu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !cu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{contract.Label}
@@ -334,6 +516,36 @@ func (cuo *ContractUpdateOne) AddProposals(p ...*Proposal) *ContractUpdateOne {
 	return cuo.AddProposalIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cuo *ContractUpdateOne) AddTelegramChatIDs(ids ...int) *ContractUpdateOne {
+	cuo.mutation.AddTelegramChatIDs(ids...)
+	return cuo
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cuo *ContractUpdateOne) AddTelegramChats(t ...*TelegramChat) *ContractUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cuo.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cuo *ContractUpdateOne) AddDiscordChannelIDs(ids ...int) *ContractUpdateOne {
+	cuo.mutation.AddDiscordChannelIDs(ids...)
+	return cuo
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cuo *ContractUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ContractUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ContractMutation object of the builder.
 func (cuo *ContractUpdateOne) Mutation() *ContractMutation {
 	return cuo.mutation
@@ -358,6 +570,48 @@ func (cuo *ContractUpdateOne) RemoveProposals(p ...*Proposal) *ContractUpdateOne
 		ids[i] = p[i].ID
 	}
 	return cuo.RemoveProposalIDs(ids...)
+}
+
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (cuo *ContractUpdateOne) ClearTelegramChats() *ContractUpdateOne {
+	cuo.mutation.ClearTelegramChats()
+	return cuo
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (cuo *ContractUpdateOne) RemoveTelegramChatIDs(ids ...int) *ContractUpdateOne {
+	cuo.mutation.RemoveTelegramChatIDs(ids...)
+	return cuo
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (cuo *ContractUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *ContractUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cuo.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (cuo *ContractUpdateOne) ClearDiscordChannels() *ContractUpdateOne {
+	cuo.mutation.ClearDiscordChannels()
+	return cuo
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (cuo *ContractUpdateOne) RemoveDiscordChannelIDs(ids ...int) *ContractUpdateOne {
+	cuo.mutation.RemoveDiscordChannelIDs(ids...)
+	return cuo
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (cuo *ContractUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ContractUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cuo.RemoveDiscordChannelIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -552,6 +806,114 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !cuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !cuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
 				},
 			},
 		}

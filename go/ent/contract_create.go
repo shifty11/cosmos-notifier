@@ -11,7 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 )
 
 // ContractCreate is the builder for creating a Contract entity.
@@ -86,6 +88,36 @@ func (cc *ContractCreate) AddProposals(p ...*Proposal) *ContractCreate {
 		ids[i] = p[i].ID
 	}
 	return cc.AddProposalIDs(ids...)
+}
+
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (cc *ContractCreate) AddTelegramChatIDs(ids ...int) *ContractCreate {
+	cc.mutation.AddTelegramChatIDs(ids...)
+	return cc
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (cc *ContractCreate) AddTelegramChats(t ...*TelegramChat) *ContractCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cc.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (cc *ContractCreate) AddDiscordChannelIDs(ids ...int) *ContractCreate {
+	cc.mutation.AddDiscordChannelIDs(ids...)
+	return cc
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (cc *ContractCreate) AddDiscordChannels(d ...*DiscordChannel) *ContractCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return cc.AddDiscordChannelIDs(ids...)
 }
 
 // Mutation returns the ContractMutation object of the builder.
@@ -281,6 +313,44 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: proposal.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.TelegramChatsTable,
+			Columns: contract.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: telegramchat.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   contract.DiscordChannelsTable,
+			Columns: contract.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: discordchannel.FieldID,
 				},
 			},
 		}
