@@ -11,7 +11,7 @@ void main() {
   runApp(ProviderScope(child: Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
     final state = ref.watch(themeProvider);
     return MaterialApp.router(
-      title: 'Cosmos Governance',
+      title: 'DAO DAO Notifier',
       theme: state.map(initial: (theme) => theme.lightStyle, custom: (theme) => theme.style),
       darkTheme: state.map(initial: (theme) => theme.darkStyle, custom: (theme) => theme.style),
       themeMode: ThemeMode.system,
