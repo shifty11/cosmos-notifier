@@ -229,14 +229,30 @@ func updateContracts(cm *database.ContractManager, pm *database.ProposalManager)
 			continue
 		}
 
-		contract, _ := cm.CreateOrUpdate(contractAddr, config)
+		contract, contractStatus := cm.CreateOrUpdate(contractAddr, config)
 		for _, proposal := range proposals.Proposals {
-			dbProp, status := pm.CreateOrUpdate(contract, &proposal)
-			if status == database.ProposalStatusChanged {
+			dbProp, proposalStatus := pm.CreateOrUpdate(contract, &proposal)
+			if proposalStatus == database.ProposalStatusChanged {
 				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
 				//TODO: send notifications to users
 			}
 		}
-		log.Sugar.Infof("updated contract %v (%v)", config.Name, contractAddr)
+
+		if contractStatus == database.ContractCreated || contractStatus == database.ContractImageChanged {
+			if contract.ImageURL != "" {
+				im := NewImageManager(contractAddr, "../webapp/web/assets/", "images/contracts/", 100, 100)
+				err := im.downloadAndCreateThumbnail(contract.ImageURL)
+				if err != nil {
+					log.Sugar.Errorf("while downloading image for contract %v: %v", contractAddr, err)
+				} else {
+					cm.SaveThumbnailUrl(contract, im.ThumbnailUrl)
+				}
+			} else if contractStatus == database.ContractImageChanged {
+				cm.SaveThumbnailUrl(contract, "")
+				//TODO: delete old thumbnail
+			}
+		}
+
+		log.Sugar.Infof("processed contract %v (%v): %v", config.Name, contractAddr, contractStatus)
 	}
 }

@@ -32,6 +32,10 @@ func init() {
 	contract.DefaultUpdateTime = contractDescUpdateTime.Default.(func() time.Time)
 	// contract.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	contract.UpdateDefaultUpdateTime = contractDescUpdateTime.UpdateDefault.(func() time.Time)
+	// contractDescThumbnailURL is the schema descriptor for thumbnail_url field.
+	contractDescThumbnailURL := contractFields[4].Descriptor()
+	// contract.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
+	contract.DefaultThumbnailURL = contractDescThumbnailURL.Default.(string)
 	discordchannelMixin := schema.DiscordChannel{}.Mixin()
 	discordchannelMixinFields0 := discordchannelMixin[0].Fields()
 	_ = discordchannelMixinFields0

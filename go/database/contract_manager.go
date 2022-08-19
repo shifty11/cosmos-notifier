@@ -17,10 +17,19 @@ func NewContractManager(client *ent.Client, ctx context.Context) *ContractManage
 	return &ContractManager{client: client, ctx: ctx}
 }
 
+type ContractStatus string
+
+const (
+	ContractCreated      ContractStatus = "created"
+	ContractUpdated      ContractStatus = "updated"
+	ContractImageChanged ContractStatus = "image_changed"
+	ContractNoChanges    ContractStatus = "no_changes"
+)
+
 // CreateOrUpdate creates a new contract or updates an existing one
 //
 // returns (contract, created)
-func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.ContractData) (*ent.Contract, bool) {
+func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.ContractData) (*ent.Contract, ContractStatus) {
 	c, err := m.client.Contract.
 		Query().
 		Where(contract.AddressEQ(contractAddr)).
@@ -36,12 +45,12 @@ func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.Cont
 		if err != nil {
 			log.Sugar.Panicf("Error while creating contract: %v", err)
 		}
-		return c, false
+		return c, ContractCreated
 	} else if err != nil {
 		log.Sugar.Panicf("Error while querying contract: %v", err)
 	} else {
 		if c.Name != config.Name || c.Description != config.Description || c.ImageURL != config.ImageUrl {
-			c, err = m.client.Contract.
+			updated, err := m.client.Contract.
 				UpdateOne(c).
 				SetName(config.Name).
 				SetDescription(config.Description).
@@ -50,10 +59,13 @@ func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.Cont
 			if err != nil {
 				log.Sugar.Panicf("Error while updating contract: %v", err)
 			}
-			return c, true
+			if c.ImageURL != updated.ImageURL {
+				return updated, ContractImageChanged
+			}
+			return updated, ContractUpdated
 		}
 	}
-	return c, false
+	return c, ContractNoChanges
 }
 
 func (m *ContractManager) All() []*ent.Contract {
@@ -71,4 +83,15 @@ func (m *ContractManager) Get(id int) (*ent.Contract, error) {
 		Query().
 		Where(contract.ID(id)).
 		Only(m.ctx)
+}
+
+func (m *ContractManager) SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract {
+	updated, err := m.client.Contract.
+		UpdateOne(entContract).
+		SetThumbnailURL(url).
+		Save(m.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while updating contract: %v", err)
+	}
+	return updated
 }

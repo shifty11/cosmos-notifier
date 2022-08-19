@@ -123,6 +123,13 @@ func ImageURL(v string) predicate.Contract {
 	})
 }
 
+// ThumbnailURL applies equality check predicate on the "thumbnail_url" field. It's identical to ThumbnailURLEQ.
+func ThumbnailURL(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldThumbnailURL), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
@@ -716,6 +723,117 @@ func ImageURLEqualFold(v string) predicate.Contract {
 func ImageURLContainsFold(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldImageURL), v))
+	})
+}
+
+// ThumbnailURLEQ applies the EQ predicate on the "thumbnail_url" field.
+func ThumbnailURLEQ(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLNEQ applies the NEQ predicate on the "thumbnail_url" field.
+func ThumbnailURLNEQ(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLIn applies the In predicate on the "thumbnail_url" field.
+func ThumbnailURLIn(vs ...string) predicate.Contract {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldThumbnailURL), v...))
+	})
+}
+
+// ThumbnailURLNotIn applies the NotIn predicate on the "thumbnail_url" field.
+func ThumbnailURLNotIn(vs ...string) predicate.Contract {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldThumbnailURL), v...))
+	})
+}
+
+// ThumbnailURLGT applies the GT predicate on the "thumbnail_url" field.
+func ThumbnailURLGT(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLGTE applies the GTE predicate on the "thumbnail_url" field.
+func ThumbnailURLGTE(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLLT applies the LT predicate on the "thumbnail_url" field.
+func ThumbnailURLLT(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLLTE applies the LTE predicate on the "thumbnail_url" field.
+func ThumbnailURLLTE(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLContains applies the Contains predicate on the "thumbnail_url" field.
+func ThumbnailURLContains(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLHasPrefix applies the HasPrefix predicate on the "thumbnail_url" field.
+func ThumbnailURLHasPrefix(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLHasSuffix applies the HasSuffix predicate on the "thumbnail_url" field.
+func ThumbnailURLHasSuffix(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLEqualFold applies the EqualFold predicate on the "thumbnail_url" field.
+func ThumbnailURLEqualFold(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// ThumbnailURLContainsFold applies the ContainsFold predicate on the "thumbnail_url" field.
+func ThumbnailURLContainsFold(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldThumbnailURL), v))
 	})
 }
 

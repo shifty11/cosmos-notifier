@@ -19,6 +19,7 @@ class Subscription extends $pb.GeneratedMessage {
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSubscribed')
+    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'thumbnailUrl')
     ..hasRequiredFields = false
   ;
 
@@ -27,6 +28,7 @@ class Subscription extends $pb.GeneratedMessage {
     $fixnum.Int64? id,
     $core.String? name,
     $core.bool? isSubscribed,
+    $core.String? thumbnailUrl,
   }) {
     final _result = create();
     if (id != null) {
@@ -37,6 +39,9 @@ class Subscription extends $pb.GeneratedMessage {
     }
     if (isSubscribed != null) {
       _result.isSubscribed = isSubscribed;
+    }
+    if (thumbnailUrl != null) {
+      _result.thumbnailUrl = thumbnailUrl;
     }
     return _result;
   }
@@ -87,6 +92,15 @@ class Subscription extends $pb.GeneratedMessage {
   $core.bool hasIsSubscribed() => $_has(2);
   @$pb.TagNumber(3)
   void clearIsSubscribed() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.String get thumbnailUrl => $_getSZ(3);
+  @$pb.TagNumber(4)
+  set thumbnailUrl($core.String v) { $_setString(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasThumbnailUrl() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearThumbnailUrl() => clearField(4);
 }
 
 class ChatRoom extends $pb.GeneratedMessage {

@@ -28,6 +28,8 @@ func (Contract) Fields() []ent.Field {
 		field.String("name"),
 		field.String("description"),
 		field.String("image_url"),
+		field.String("thumbnail_url").
+			Default(""),
 	}
 }
 

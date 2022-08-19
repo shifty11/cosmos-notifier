@@ -61,6 +61,16 @@ class SubscriptionPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const SizedBox(width: sidePadding),
+                    CircleAvatar(
+                      child: ClipOval(
+                        child: Image.asset(
+                          subscription.thumbnailUrl,
+                          width: 40,
+                          height: 40,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         subscription.name,

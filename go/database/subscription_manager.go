@@ -8,16 +8,16 @@ import (
 )
 
 type Subscription struct {
-	Id     int64
-	Name   string
-	Notify bool
+	Id           int64
+	Name         string
+	Notify       bool
+	ThumbnailUrl string
 }
 
 type ChatRoom struct {
-	Id                  int64
-	Name                string
-	Subscriptions       []*Subscription
-	WantsDraftProposals bool
+	Id            int64
+	Name          string
+	Subscriptions []*Subscription
 }
 
 type SubscriptionManager struct {
@@ -51,7 +51,7 @@ func getSubscriptions(contractManager *ContractManager, ofUser []*ent.Contract) 
 	contracts := contractManager.All()
 	var subs []*Subscription
 	for _, c := range contracts {
-		var subscription = Subscription{Id: int64(c.ID), Name: c.Name, Notify: false}
+		var subscription = Subscription{Id: int64(c.ID), Name: c.Name, Notify: false, ThumbnailUrl: c.ThumbnailURL}
 		for _, nc := range ofUser { // check if user gets notified for this contract
 			if nc.ID == c.ID {
 				subscription.Notify = true

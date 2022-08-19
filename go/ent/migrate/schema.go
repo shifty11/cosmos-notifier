@@ -17,6 +17,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "description", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString},
+		{Name: "thumbnail_url", Type: field.TypeString, Default: ""},
 	}
 	// ContractsTable holds the schema information for the "contracts" table.
 	ContractsTable = &schema.Table{

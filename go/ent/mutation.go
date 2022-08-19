@@ -47,6 +47,7 @@ type ContractMutation struct {
 	name                    *string
 	description             *string
 	image_url               *string
+	thumbnail_url           *string
 	clearedFields           map[string]struct{}
 	proposals               map[int]struct{}
 	removedproposals        map[int]struct{}
@@ -376,6 +377,42 @@ func (m *ContractMutation) ResetImageURL() {
 	m.image_url = nil
 }
 
+// SetThumbnailURL sets the "thumbnail_url" field.
+func (m *ContractMutation) SetThumbnailURL(s string) {
+	m.thumbnail_url = &s
+}
+
+// ThumbnailURL returns the value of the "thumbnail_url" field in the mutation.
+func (m *ContractMutation) ThumbnailURL() (r string, exists bool) {
+	v := m.thumbnail_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThumbnailURL returns the old "thumbnail_url" field's value of the Contract entity.
+// If the Contract object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContractMutation) OldThumbnailURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThumbnailURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThumbnailURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThumbnailURL: %w", err)
+	}
+	return oldValue.ThumbnailURL, nil
+}
+
+// ResetThumbnailURL resets all changes to the "thumbnail_url" field.
+func (m *ContractMutation) ResetThumbnailURL() {
+	m.thumbnail_url = nil
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by ids.
 func (m *ContractMutation) AddProposalIDs(ids ...int) {
 	if m.proposals == nil {
@@ -557,7 +594,7 @@ func (m *ContractMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ContractMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.create_time != nil {
 		fields = append(fields, contract.FieldCreateTime)
 	}
@@ -575,6 +612,9 @@ func (m *ContractMutation) Fields() []string {
 	}
 	if m.image_url != nil {
 		fields = append(fields, contract.FieldImageURL)
+	}
+	if m.thumbnail_url != nil {
+		fields = append(fields, contract.FieldThumbnailURL)
 	}
 	return fields
 }
@@ -596,6 +636,8 @@ func (m *ContractMutation) Field(name string) (ent.Value, bool) {
 		return m.Description()
 	case contract.FieldImageURL:
 		return m.ImageURL()
+	case contract.FieldThumbnailURL:
+		return m.ThumbnailURL()
 	}
 	return nil, false
 }
@@ -617,6 +659,8 @@ func (m *ContractMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldDescription(ctx)
 	case contract.FieldImageURL:
 		return m.OldImageURL(ctx)
+	case contract.FieldThumbnailURL:
+		return m.OldThumbnailURL(ctx)
 	}
 	return nil, fmt.Errorf("unknown Contract field %s", name)
 }
@@ -667,6 +711,13 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetImageURL(v)
+		return nil
+	case contract.FieldThumbnailURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThumbnailURL(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -734,6 +785,9 @@ func (m *ContractMutation) ResetField(name string) error {
 		return nil
 	case contract.FieldImageURL:
 		m.ResetImageURL()
+		return nil
+	case contract.FieldThumbnailURL:
+		m.ResetThumbnailURL()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)

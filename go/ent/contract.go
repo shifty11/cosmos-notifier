@@ -28,6 +28,8 @@ type Contract struct {
 	Description string `json:"description,omitempty"`
 	// ImageURL holds the value of the "image_url" field.
 	ImageURL string `json:"image_url,omitempty"`
+	// ThumbnailURL holds the value of the "thumbnail_url" field.
+	ThumbnailURL string `json:"thumbnail_url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ContractQuery when eager-loading is set.
 	Edges ContractEdges `json:"edges"`
@@ -80,7 +82,7 @@ func (*Contract) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case contract.FieldID:
 			values[i] = new(sql.NullInt64)
-		case contract.FieldAddress, contract.FieldName, contract.FieldDescription, contract.FieldImageURL:
+		case contract.FieldAddress, contract.FieldName, contract.FieldDescription, contract.FieldImageURL, contract.FieldThumbnailURL:
 			values[i] = new(sql.NullString)
 		case contract.FieldCreateTime, contract.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -140,6 +142,12 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field image_url", values[i])
 			} else if value.Valid {
 				c.ImageURL = value.String
+			}
+		case contract.FieldThumbnailURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field thumbnail_url", values[i])
+			} else if value.Valid {
+				c.ThumbnailURL = value.String
 			}
 		}
 	}
@@ -201,6 +209,9 @@ func (c *Contract) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("image_url=")
 	builder.WriteString(c.ImageURL)
+	builder.WriteString(", ")
+	builder.WriteString("thumbnail_url=")
+	builder.WriteString(c.ThumbnailURL)
 	builder.WriteByte(')')
 	return builder.String()
 }

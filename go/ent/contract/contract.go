@@ -23,6 +23,8 @@ const (
 	FieldDescription = "description"
 	// FieldImageURL holds the string denoting the image_url field in the database.
 	FieldImageURL = "image_url"
+	// FieldThumbnailURL holds the string denoting the thumbnail_url field in the database.
+	FieldThumbnailURL = "thumbnail_url"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
@@ -59,6 +61,7 @@ var Columns = []string{
 	FieldName,
 	FieldDescription,
 	FieldImageURL,
+	FieldThumbnailURL,
 }
 
 var (
@@ -87,4 +90,6 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
+	// DefaultThumbnailURL holds the default value on creation for the "thumbnail_url" field.
+	DefaultThumbnailURL string
 )

@@ -61,6 +61,20 @@ func (cu *ContractUpdate) SetImageURL(s string) *ContractUpdate {
 	return cu
 }
 
+// SetThumbnailURL sets the "thumbnail_url" field.
+func (cu *ContractUpdate) SetThumbnailURL(s string) *ContractUpdate {
+	cu.mutation.SetThumbnailURL(s)
+	return cu
+}
+
+// SetNillableThumbnailURL sets the "thumbnail_url" field if the given value is not nil.
+func (cu *ContractUpdate) SetNillableThumbnailURL(s *string) *ContractUpdate {
+	if s != nil {
+		cu.SetThumbnailURL(*s)
+	}
+	return cu
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cu *ContractUpdate) AddProposalIDs(ids ...int) *ContractUpdate {
 	cu.mutation.AddProposalIDs(ids...)
@@ -290,6 +304,13 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: contract.FieldImageURL,
 		})
 	}
+	if value, ok := cu.mutation.ThumbnailURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: contract.FieldThumbnailURL,
+		})
+	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -498,6 +519,20 @@ func (cuo *ContractUpdateOne) SetDescription(s string) *ContractUpdateOne {
 // SetImageURL sets the "image_url" field.
 func (cuo *ContractUpdateOne) SetImageURL(s string) *ContractUpdateOne {
 	cuo.mutation.SetImageURL(s)
+	return cuo
+}
+
+// SetThumbnailURL sets the "thumbnail_url" field.
+func (cuo *ContractUpdateOne) SetThumbnailURL(s string) *ContractUpdateOne {
+	cuo.mutation.SetThumbnailURL(s)
+	return cuo
+}
+
+// SetNillableThumbnailURL sets the "thumbnail_url" field if the given value is not nil.
+func (cuo *ContractUpdateOne) SetNillableThumbnailURL(s *string) *ContractUpdateOne {
+	if s != nil {
+		cuo.SetThumbnailURL(*s)
+	}
 	return cuo
 }
 
@@ -758,6 +793,13 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: contract.FieldImageURL,
+		})
+	}
+	if value, ok := cuo.mutation.ThumbnailURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: contract.FieldThumbnailURL,
 		})
 	}
 	if cuo.mutation.ProposalsCleared() {

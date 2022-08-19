@@ -75,6 +75,20 @@ func (cc *ContractCreate) SetImageURL(s string) *ContractCreate {
 	return cc
 }
 
+// SetThumbnailURL sets the "thumbnail_url" field.
+func (cc *ContractCreate) SetThumbnailURL(s string) *ContractCreate {
+	cc.mutation.SetThumbnailURL(s)
+	return cc
+}
+
+// SetNillableThumbnailURL sets the "thumbnail_url" field if the given value is not nil.
+func (cc *ContractCreate) SetNillableThumbnailURL(s *string) *ContractCreate {
+	if s != nil {
+		cc.SetThumbnailURL(*s)
+	}
+	return cc
+}
+
 // AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
 func (cc *ContractCreate) AddProposalIDs(ids ...int) *ContractCreate {
 	cc.mutation.AddProposalIDs(ids...)
@@ -205,6 +219,10 @@ func (cc *ContractCreate) defaults() {
 		v := contract.DefaultUpdateTime()
 		cc.mutation.SetUpdateTime(v)
 	}
+	if _, ok := cc.mutation.ThumbnailURL(); !ok {
+		v := contract.DefaultThumbnailURL
+		cc.mutation.SetThumbnailURL(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -226,6 +244,9 @@ func (cc *ContractCreate) check() error {
 	}
 	if _, ok := cc.mutation.ImageURL(); !ok {
 		return &ValidationError{Name: "image_url", err: errors.New(`ent: missing required field "Contract.image_url"`)}
+	}
+	if _, ok := cc.mutation.ThumbnailURL(); !ok {
+		return &ValidationError{Name: "thumbnail_url", err: errors.New(`ent: missing required field "Contract.thumbnail_url"`)}
 	}
 	return nil
 }
@@ -301,6 +322,14 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 			Column: contract.FieldImageURL,
 		})
 		_node.ImageURL = value
+	}
+	if value, ok := cc.mutation.ThumbnailURL(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: contract.FieldThumbnailURL,
+		})
+		_node.ThumbnailURL = value
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
