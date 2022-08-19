@@ -32,10 +32,11 @@ func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.
 				thumbUrl = "images/logo.png"
 			}
 			subs = append(subs, &pb.Subscription{
-				Id:           sub.Id,
-				Name:         sub.Name,
-				IsSubscribed: sub.Notify,
-				ThumbnailUrl: thumbUrl,
+				Id:              sub.Id,
+				Name:            sub.Name,
+				IsSubscribed:    sub.Notify,
+				ThumbnailUrl:    thumbUrl,
+				ContractAddress: sub.ContractAddress,
 			})
 		}
 		roomType := pb.ChatRoom_TELEGRAM
