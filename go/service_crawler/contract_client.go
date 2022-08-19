@@ -239,8 +239,8 @@ func updateContracts(cm *database.ContractManager, pm *database.ProposalManager)
 		}
 
 		if contractStatus == database.ContractCreated || contractStatus == database.ContractImageChanged {
+			im := NewImageManager(contractAddr, "../webapp/web/assets/", "images/contracts/", 100, 100)
 			if contract.ImageURL != "" {
-				im := NewImageManager(contractAddr, "../webapp/web/assets/", "images/contracts/", 100, 100)
 				err := im.downloadAndCreateThumbnail(contract.ImageURL)
 				if err != nil {
 					log.Sugar.Errorf("while downloading image for contract %v: %v", contractAddr, err)
@@ -249,7 +249,10 @@ func updateContracts(cm *database.ContractManager, pm *database.ProposalManager)
 				}
 			} else if contractStatus == database.ContractImageChanged {
 				cm.SaveThumbnailUrl(contract, "")
-				//TODO: delete old thumbnail
+				e := os.Remove(im.ThumbnailPath)
+				if e != nil {
+					log.Sugar.Errorf("while removing image for contract %v: %v", contractAddr, e)
+				}
 			}
 		}
 
