@@ -20,6 +20,7 @@ class Subscription extends $pb.GeneratedMessage {
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSubscribed')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'thumbnailUrl')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress')
     ..hasRequiredFields = false
   ;
 
@@ -29,6 +30,7 @@ class Subscription extends $pb.GeneratedMessage {
     $core.String? name,
     $core.bool? isSubscribed,
     $core.String? thumbnailUrl,
+    $core.String? contractAddress,
   }) {
     final _result = create();
     if (id != null) {
@@ -42,6 +44,9 @@ class Subscription extends $pb.GeneratedMessage {
     }
     if (thumbnailUrl != null) {
       _result.thumbnailUrl = thumbnailUrl;
+    }
+    if (contractAddress != null) {
+      _result.contractAddress = contractAddress;
     }
     return _result;
   }
@@ -101,6 +106,15 @@ class Subscription extends $pb.GeneratedMessage {
   $core.bool hasThumbnailUrl() => $_has(3);
   @$pb.TagNumber(4)
   void clearThumbnailUrl() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get contractAddress => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set contractAddress($core.String v) { $_setString(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasContractAddress() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearContractAddress() => clearField(5);
 }
 
 class ChatRoom extends $pb.GeneratedMessage {

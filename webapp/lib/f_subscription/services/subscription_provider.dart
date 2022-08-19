@@ -1,3 +1,7 @@
+import 'package:fixnum/fixnum.dart' as fixnum;
+import 'package:fixnum/fixnum.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tuple/tuple.dart';
 import 'package:webapp/api/protobuf/dart/google/protobuf/empty.pb.dart';
 import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:webapp/config.dart';
@@ -5,10 +9,6 @@ import 'package:webapp/f_home/services/message_provider.dart';
 import 'package:webapp/f_subscription/services/state/subscription_state.dart';
 import 'package:webapp/f_subscription/services/subscription_service.dart';
 import 'package:webapp/f_subscription/services/type/subscription_data_type.dart';
-import 'package:fixnum/fixnum.dart' as fixnum;
-import 'package:fixnum/fixnum.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tuple/tuple.dart';
 
 final subscriptionProvider = Provider<SubscriptionService>((ref) => subsService);
 
@@ -17,7 +17,8 @@ final chatroomListStateProvider = FutureProvider<List<ChatRoom>>((ref) async {
   final response = await subsService.getSubscriptions(Empty());
 
   final selectedChatRoom = ref.read(chatRoomProvider.notifier).state;
-  if (selectedChatRoom != null) { // if chat room was selected before, select it again
+  if (selectedChatRoom != null) {
+    // if chat room was selected before, select it again
     ref.read(chatRoomProvider.notifier).state = response.chatRooms.where((c) => c.id == selectedChatRoom.id).first;
   } else {
     if (response.chatRooms.length > 1) {
@@ -64,7 +65,8 @@ class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
   Future<void> toggleSubscription() async {
     try {
       final subsService = _ref.read(subscriptionProvider);
-      final response = await subsService.toggleSubscription(ToggleSubscriptionRequest(chatRoomId: _chatRoomId, contractId: _subscription.id));
+      final response =
+          await subsService.toggleSubscription(ToggleSubscriptionRequest(chatRoomId: _chatRoomId, contractId: _subscription.id));
       _subscription.isSubscribed = response.isSubscribed;
       state = SubscriptionState.loaded(subscription: _subscription);
     } catch (e) {
@@ -99,7 +101,9 @@ final searchedSubsProvider = Provider<ChatroomData>((ref) {
                 cr.subscriptions
                     .asMap()
                     .entries
-                    .where((e) => e.value.name.toLowerCase().contains(search.toLowerCase()))
+                    .where((e) =>
+                        e.value.name.toLowerCase().contains(search.toLowerCase()) ||
+                        e.value.contractAddress.toLowerCase().contains(search.toLowerCase()))
                     .map((e) => SubscriptionData(e.value, e.key))
                     .toList());
           }
@@ -107,33 +111,4 @@ final searchedSubsProvider = Provider<ChatroomData>((ref) {
         return ChatroomData(fixnum.Int64(), "", [], []);
       }) ??
       ChatroomData(fixnum.Int64(), "", [], []);
-});
-
-final wantsPreVotePropsStateProvider = StateNotifierProvider<WantsPreVotePropsNotifier, bool>((ref) => WantsPreVotePropsNotifier(ref));
-
-class WantsPreVotePropsNotifier extends StateNotifier<bool> {
-  final StateNotifierProviderRef _ref;
-
-  WantsPreVotePropsNotifier(this._ref) : super(false);
-
-  Future<void> toggleWantsPreVoteProps() async {
-    try {
-      final subsService = _ref.read(subscriptionProvider);
-      final chatRoom = _ref.read(chatRoomProvider);
-      if (chatRoom == null) {
-        return;
-      }
-      // final response = await subsService.updateSettings(UpdateSettingsRequest(chatRoomId: chatRoom.id, wantsDraftProposals: !chatRoom.wantsDraftProposals));
-      // chatRoom.wantsDraftProposals = response.wantsDraftProposals;
-      // state = response.wantsDraftProposals;
-    } catch (e) {
-      _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
-    }
-  }
-}
-
-final wantsPreVotePropsProvider = Provider<bool>((ref) {
-  final chatRoom = ref.watch(chatRoomProvider);
-  ref.watch(wantsPreVotePropsStateProvider);
-  return false;
 });

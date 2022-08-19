@@ -24,7 +24,7 @@ extension ColorBrightness on Color {
 }
 
 class Styles {
-  static const selectCardBorderWith = 1.5;
+  static const selectCardBorderWidth = 1.5;
 
   static ThemeData customTheme(CustomThemeData themeParams, bool isDarkTheme) {
     return _defaultTheme(

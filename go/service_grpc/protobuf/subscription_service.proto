@@ -16,6 +16,7 @@ message Subscription {
   string name = 2;
   bool is_subscribed = 3;
   string thumbnail_url = 4;
+  string contract_address = 5;
 }
 
 message ChatRoom {

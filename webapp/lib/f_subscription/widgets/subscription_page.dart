@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:riverpod_messages/riverpod_messages.dart';
+import 'package:tuple/tuple.dart';
 import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:webapp/config.dart';
 import 'package:webapp/f_home/services/message_provider.dart';
@@ -5,11 +10,6 @@ import 'package:webapp/f_home/widgets/bottom_navigation_bar_widget.dart';
 import 'package:webapp/f_subscription/services/subscription_provider.dart';
 import 'package:webapp/f_subscription/services/type/subscription_data_type.dart';
 import 'package:webapp/style.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:riverpod_messages/riverpod_messages.dart';
-import 'package:tuple/tuple.dart';
 
 class SubscriptionPage extends StatelessWidget {
   final double sideBarWith = 0;
@@ -33,7 +33,7 @@ class SubscriptionPage extends StatelessWidget {
         crossAxisCount: getCrossAxisCount(context),
         crossAxisSpacing: 10,
         mainAxisSpacing: 10,
-        mainAxisExtent: 50,
+        mainAxisExtent: 60,
       ),
       itemCount: chatRoom.filtered.length,
       itemBuilder: (BuildContext context, int index) {
@@ -45,7 +45,7 @@ class SubscriptionPage extends StatelessWidget {
             loaded: (subscription) => Container(
               decoration: BoxDecoration(
                   border: Border.all(
-                    width: Styles.selectCardBorderWith,
+                    width: Styles.selectCardBorderWidth,
                     color: Theme.of(context).inputDecorationTheme.enabledBorder!.borderSide.color,
                   ),
                   borderRadius: const BorderRadius.all(Radius.circular(5))),
@@ -72,10 +72,21 @@ class SubscriptionPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: Text(
-                        subscription.name,
-                        style: const TextStyle(fontSize: 20),
-                        overflow: TextOverflow.ellipsis,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            subscription.name,
+                            style: const TextStyle(fontSize: 20),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
+                            style: TextStyle(fontSize: 12, color: Theme.of(context).inputDecorationTheme.iconColor),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
                       ),
                     ),
                     subscription.isSubscribed
@@ -179,9 +190,10 @@ class SubscriptionPage extends StatelessWidget {
                 children: [
                   Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
                   const SizedBox(height: 10),
-                  settingsRow(context),
+                  chatDropdownWidget(context),
+                  const SizedBox(height: 10),
                   const Text(
-                      "Select the projects that you want to follow. You will receive notifications about new governance proposals once they enter the voting period."),
+                      "Select the DAO's that you want to follow. You will receive notifications about new governance proposals."),
                   const SizedBox(height: 20),
                   searchWidget(context),
                   const SizedBox(height: 20),

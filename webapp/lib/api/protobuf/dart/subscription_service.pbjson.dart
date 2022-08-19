@@ -16,11 +16,12 @@ const Subscription$json = const {
     const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'is_subscribed', '3': 3, '4': 1, '5': 8, '10': 'isSubscribed'},
     const {'1': 'thumbnail_url', '3': 4, '4': 1, '5': 9, '10': 'thumbnailUrl'},
+    const {'1': 'contract_address', '3': 5, '4': 1, '5': 9, '10': 'contractAddress'},
   ],
 };
 
 /// Descriptor for `Subscription`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscriptionDescriptor = $convert.base64Decode('CgxTdWJzY3JpcHRpb24SDgoCaWQYASABKANSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSIwoNaXNfc3Vic2NyaWJlZBgDIAEoCFIMaXNTdWJzY3JpYmVkEiMKDXRodW1ibmFpbF91cmwYBCABKAlSDHRodW1ibmFpbFVybA==');
+final $typed_data.Uint8List subscriptionDescriptor = $convert.base64Decode('CgxTdWJzY3JpcHRpb24SDgoCaWQYASABKANSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSIwoNaXNfc3Vic2NyaWJlZBgDIAEoCFIMaXNTdWJzY3JpYmVkEiMKDXRodW1ibmFpbF91cmwYBCABKAlSDHRodW1ibmFpbFVybBIpChBjb250cmFjdF9hZGRyZXNzGAUgASgJUg9jb250cmFjdEFkZHJlc3M=');
 @$core.Deprecated('Use chatRoomDescriptor instead')
 const ChatRoom$json = const {
   '1': 'ChatRoom',
