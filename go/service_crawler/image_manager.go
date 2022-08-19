@@ -1,4 +1,4 @@
-package service_crawler
+package crawler
 
 import (
 	"bytes"

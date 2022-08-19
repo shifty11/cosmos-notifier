@@ -11,7 +11,7 @@ var crawlCmd = &cobra.Command{
 	Use:   "crawl",
 	Short: "Run the crawler script",
 	Run: func(cmd *cobra.Command, args []string) {
-		service_crawler.Crawl()
+		crawler.Crawl()
 	},
 }
 

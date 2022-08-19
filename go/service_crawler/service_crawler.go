@@ -1,4 +1,4 @@
-package service_crawler
+package crawler
 
 import "github.com/shifty11/dao-dao-notifier/database"
 
