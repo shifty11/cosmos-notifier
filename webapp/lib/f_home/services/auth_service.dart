@@ -53,9 +53,6 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
   }
 
   LoginData _getLoginData() {
-    // TODO: remove this
-    return LoginData("chat_id=194140490&id=194140490&first_name=Raphael&username=RaphaelT&photo_url=https%3A%2F%2Ft.me%2Fi%2Fuserpic%2F320%2FlRaqUt69PH5pBGg0PMQozEgAO2-UudSNM-AAIv6rteY.jpg&auth_date=1660657326&hash=fb016838dd2f5739b6a107d7872cd2d33c595204911a01017f90a6f6d8217a6a");
-    
     final loginData = LoginData(Uri.base.queryParameters.entries.map((e) => "${e.key}=${e.value}").join("\n"));
     if (loginData.isValid) {
       return loginData;
