@@ -1,0 +1,60 @@
+version: '3.9'
+
+services:
+  nodejs:
+    build: nodejs
+    container_name: daodao_notifier_nodejs
+    working_dir: /usr/src/app
+    volumes:
+      - /usr/app/node_modules
+    command: npm run start
+
+  telegram:
+    build: go
+    container_name: daodao_notifier_telegram
+    working_dir: /app
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
+      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+    command: "/dao-dao-notifier start-telegram-bot"
+
+  grpc:
+    build: go
+    container_name: daodao_notifier_grpc
+    working_dir: /app
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
+      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    command: "/dao-dao-notifier grpc"
+
+  crawler:
+    build: go
+    container_name: daodao_notifier_crawler
+    working_dir: /app
+    volumes:
+      - ./contracts.txt:/app/contracts.txt
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
+      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+      - NODEJS_URL=${NODEJS_URL}
+    command: "/dao-dao-notifier crawl --repeat"
+    depends_on:
+      - nodejs
+
+  envoy:
+    image: envoyproxy/envoy-dev
+    container_name: daodao_notifier_envoy
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./webapp/envoy.yaml:/etc/envoy/envoy.yaml

@@ -1,3 +1,3 @@
 import {Server} from "./server.mjs"
 
-new Server("localhost", "8081");
+new Server("0.0.0.0", "8081");

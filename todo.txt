@@ -1,3 +1,0 @@
-## ToDo
-- [ ] Dockerify nodejs
-- [ ] Extract env vars and make more configurable

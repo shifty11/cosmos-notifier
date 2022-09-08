@@ -1,0 +1,91 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14.5
+    container_name: daodao_notifier_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=daodao-notifier-db
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  nodejs:
+    build: nodejs
+    container_name: daodao_notifier_nodejs
+    working_dir: /usr/src/app
+    volumes:
+      - /usr/app/node_modules
+    command: npm run start
+
+  telegram:
+    build: go
+    container_name: daodao_notifier_telegram
+    working_dir: /app
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
+      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+    command: "/dao-dao-notifier start-telegram-bot"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  grpc:
+    build: go
+    container_name: daodao_notifier_grpc
+    working_dir: /app
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
+      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    command: "/dao-dao-notifier grpc"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  crawler:
+    build: go
+    container_name: daodao_notifier_crawler
+    working_dir: /app
+    volumes:
+      - ./contracts.txt:/app/contracts.txt
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
+      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+      - NODEJS_URL=${NODEJS_URL}
+    command: "/dao-dao-notifier crawl --repeat"
+    depends_on:
+      nodejs:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  envoy:
+    image: envoyproxy/envoy-dev
+    container_name: daodao_notifier_envoy
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./webapp/envoy.yaml:/etc/envoy/envoy.yaml
+
+volumes:
+  data:
+    name: daodao_notifier_data
+  pgadmin:

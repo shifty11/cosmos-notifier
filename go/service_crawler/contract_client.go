@@ -194,9 +194,12 @@ func (cc *ContractClient) proposal(proposalId int) (*types.Proposal, error) {
 }
 
 func contracts() []string {
-	file, err := os.Open("../contracts.txt")
+	file, err := os.Open("contracts.txt")
 	if err != nil {
-		log.Sugar.Error(err)
+		file, err = os.Open("../contracts.txt")
+		if err != nil {
+			log.Sugar.Error(err)
+		}
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer file.Close()
@@ -215,9 +218,10 @@ func contracts() []string {
 	return contracts
 }
 
-func updateContracts(cm *database.ContractManager, pm *database.ProposalManager) {
+func updateContracts(url string, cm *database.ContractManager, pm *database.ProposalManager) {
+	log.Sugar.Info("updating contracts")
 	for _, contractAddr := range contracts() {
-		client := NewContractClient("http://localhost:8081/", contractAddr)
+		client := NewContractClient(url, contractAddr)
 		config, err := client.config()
 		if err != nil {
 			log.Sugar.Errorf("while getting config for contract %v: %v", contractAddr, err)
