@@ -18,6 +18,18 @@ services:
       timeout: 5s
       retries: 5
 
+  db-migration:
+    build: go
+    container_name: daodao_notifier_db_migration
+    working_dir: /app
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN}
+      - DATABASE_URL=${DATABASE_URL}
+    command: "/dao-dao-notifier migrate"
+    depends_on:
+      db:
+        condition: service_healthy
+
   nodejs:
     build: nodejs
     container_name: daodao_notifier_nodejs
@@ -40,6 +52,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-migration:
+        condition: service_completed_successfully
 
   grpc:
     build: go
@@ -56,6 +70,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      db-migration:
+        condition: service_completed_successfully
 
   crawler:
     build: go
@@ -76,6 +92,8 @@ services:
         condition: service_started
       db:
         condition: service_healthy
+      db-migration:
+        condition: service_completed_successfully
 
   envoy:
     image: envoyproxy/envoy-dev
