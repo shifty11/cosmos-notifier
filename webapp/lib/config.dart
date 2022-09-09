@@ -7,7 +7,7 @@ import 'package:grpc/grpc_web.dart';
 
 const refreshBeforeExpDuration = Duration(seconds: 10 * 60);
 
-const uri = kReleaseMode ? 'https://app.decrypto.online:8090' : 'http://test.mydomain.com:8090';
+const uri = kReleaseMode ? 'https://app.decrypto.online' : 'http://test.mydomain.com:8090';
 
 final channel = GrpcWebClientChannel.xhr(Uri.parse(uri));
 
