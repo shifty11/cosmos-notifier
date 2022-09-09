@@ -17,10 +17,11 @@ services:
     volumes:
       - /usr/app/node_modules
     command: npm run start
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
+    healthcheck:
+      test: curl --fail http://localhost:8081 || exit 1
+      interval: 10s
+      retries: 3
+      timeout: 10s
 
   telegram:
     build: go
@@ -36,10 +37,6 @@ services:
     depends_on:
       db-migration:
         condition: service_completed_successfully
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
 
   grpc:
     build: go
@@ -56,10 +53,6 @@ services:
     depends_on:
       db-migration:
         condition: service_completed_successfully
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
 
   crawler:
     build: go
@@ -77,13 +70,9 @@ services:
     command: "/dao-dao-notifier crawl --repeat"
     depends_on:
       nodejs:
-        condition: service_started
+        condition: service_healthy
       db-migration:
         condition: service_completed_successfully
-    deploy:
-      restart_policy:
-        condition: on-failure
-        max_attempts: 3
 
   envoy:
     image: envoyproxy/envoy-dev

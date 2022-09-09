@@ -37,6 +37,13 @@ services:
     volumes:
       - /usr/app/node_modules
     command: npm run start
+    ports:
+      - "8081:8081"
+    healthcheck:
+      test: curl --fail http://localhost:8081 || exit 1
+      interval: 10s
+      retries: 3
+      timeout: 10s
 
   telegram:
     build: go
@@ -89,7 +96,7 @@ services:
     command: "/dao-dao-notifier crawl --repeat"
     depends_on:
       nodejs:
-        condition: service_started
+        condition: service_healthy
       db:
         condition: service_healthy
       db-migration:
