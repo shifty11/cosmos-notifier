@@ -4,3 +4,5 @@
 
 .env
 prod.env
+
+ansible/inventory

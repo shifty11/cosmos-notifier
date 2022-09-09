@@ -1,13 +1,11 @@
+import 'package:grpc/grpc_web.dart';
+import 'package:webapp/env.dart';
 import 'package:webapp/f_home/services/auth_interceptor.dart';
 import 'package:webapp/f_home/services/auth_service.dart';
 import 'package:webapp/f_home/services/jwt_manager.dart';
 import 'package:webapp/f_subscription/services/subscription_service.dart';
-import 'package:flutter/foundation.dart';
-import 'package:grpc/grpc_web.dart';
 
 const refreshBeforeExpDuration = Duration(seconds: 10 * 60);
-
-const uri = kReleaseMode ? 'https://app.decrypto.online' : 'http://test.mydomain.com:8090';
 
 final channel = GrpcWebClientChannel.xhr(Uri.parse(uri));
 

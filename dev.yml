@@ -22,9 +22,8 @@ services:
     build: go
     container_name: daodao_notifier_db_migration
     working_dir: /app
-    environment:
-      - SENTRY_DSN=${SENTRY_DSN}
-      - DATABASE_URL=${DATABASE_URL}
+    env_file:
+      - .env
     command: "/dao-dao-notifier migrate"
     depends_on:
       db:
@@ -37,8 +36,8 @@ services:
     volumes:
       - /usr/app/node_modules
     command: npm run start
-    ports:
-      - "8081:8081"
+#    ports:
+#      - "8081:8081"
     healthcheck:
       test: curl --fail http://localhost:8081 || exit 1
       interval: 10s
@@ -49,12 +48,8 @@ services:
     build: go
     container_name: daodao_notifier_telegram
     working_dir: /app
-    environment:
-      - SENTRY_DSN=${SENTRY_DSN}
-      - DATABASE_URL=${DATABASE_URL}
-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
-      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
+    env_file:
+      - .env
     command: "/dao-dao-notifier start-telegram-bot"
     depends_on:
       db:
@@ -66,13 +61,8 @@ services:
     build: go
     container_name: daodao_notifier_grpc
     working_dir: /app
-    environment:
-      - SENTRY_DSN=${SENTRY_DSN}
-      - DATABASE_URL=${DATABASE_URL}
-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
-      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    env_file:
+      - .env
     command: "/dao-dao-notifier grpc"
     depends_on:
       db:
@@ -86,13 +76,8 @@ services:
     working_dir: /app
     volumes:
       - ./contracts.txt:/app/contracts.txt
-    environment:
-      - SENTRY_DSN=${SENTRY_DSN}
-      - DATABASE_URL=${DATABASE_URL}
-      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
-      - TELEGRAM_USE_TEST_API=${TELEGRAM_USE_TEST_API}
-      - TELEGRAM_WEBAPP_URL=${TELEGRAM_WEBAPP_URL}
-      - NODEJS_URL=${NODEJS_URL}
+    env_file:
+      - .env
     command: "/dao-dao-notifier crawl --repeat"
     depends_on:
       nodejs:
@@ -109,6 +94,18 @@ services:
       - "8090:8090"
     volumes:
       - ./webapp/envoy.yaml:/etc/envoy/envoy.yaml
+
+  webapp:
+    env_file:
+      - .env
+    build:
+      context: webapp
+      dockerfile: Dockerfile
+      args:
+        CONFIG_FILE: ${FLUTTER_CONFIG_FILE}
+    container_name: daodao_notifier_webapp
+    ports:
+      - "80:80"
 
 volumes:
   data:
