@@ -17,6 +17,10 @@ services:
     volumes:
       - /usr/app/node_modules
     command: npm run start
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
 
   telegram:
     build: go
@@ -32,6 +36,10 @@ services:
     depends_on:
       db-migration:
         condition: service_completed_successfully
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
 
   grpc:
     build: go
@@ -48,6 +56,10 @@ services:
     depends_on:
       db-migration:
         condition: service_completed_successfully
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
 
   crawler:
     build: go
@@ -68,6 +80,10 @@ services:
         condition: service_started
       db-migration:
         condition: service_completed_successfully
+    deploy:
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
 
   envoy:
     image: envoyproxy/envoy-dev
