@@ -1,0 +1,25 @@
+[dao-dao-notifier]
+64.227.69.148
+
+[dao-dao-notifier:vars]
+# Promtail
+log_name=odin-log
+log_monitor=http://159.223.5.75:3100
+
+# DaoDao Notifier
+daodao_sentry_dns=SENTRY_DNS
+daodao_database_url=DB_URL
+daodao_telegram_bot_token=TELEGRAM_BOT_TOKEN
+daodao_telegram_use_test_api=false
+daodao_telegram_webapp_url=https://dao-dao-notifier.netlify.app
+daodao_nodejs_url=http://nodejs:8081
+daodao_jwt_secret_key=JWT_SECRET_KEY
+daodao_flutter_config_file=lib/env.dart
+
+# Git
+github_access_token=GITHUB_ACCESS_TOKEN
+
+[all:vars]
+ansible_user=ubuntu
+ansible_port=22
+ansible_ssh_private_key_file="~/.ssh/id_rsa"
