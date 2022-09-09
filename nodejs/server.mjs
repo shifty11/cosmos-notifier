@@ -35,12 +35,12 @@ export class Server {
                     const props = await cwClient.queryContractSmart(contractAddress, {list_proposals: {}});
                     res.send(props)
                 } catch (error) {
-                    console.log("Error while querying list_proposals: ", error);
+                    console.log("Error while querying list_proposals: ", error.substring(0, 200));
                     res.status(this.errorStatus(error)).send(new Error('Error while querying list_proposals: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
-                console.log("Error while connecting to rpc: ", error);
+                console.log("Error while connecting to rpc: ", error.substring(0, 200));
                 res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
@@ -58,12 +58,12 @@ export class Server {
                     const props = await cwClient.queryContractSmart(contractAddress, {proposals: {}});
                     res.send(props)
                 } catch (error) {
-                    console.log("Error while querying proposals: ", error);
+                    console.log("Error while querying proposals: ", error.substring(0, 200));
                     res.status(this.errorStatus(error)).send(new Error('Error while querying proposals: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
-                console.log("Error while connecting to rpc: ", error);
+                console.log("Error while connecting to rpc: ", error.substring(0, 200));
                 res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
@@ -82,12 +82,12 @@ export class Server {
                     const prop = await cwClient.queryContractSmart(contractAddress, {proposal: {proposal_id: Number(id)}});
                     res.send(prop)
                 } catch (error) {
-                    console.log("Error while querying proposal: ", error);
+                    console.log("Error while querying proposal: ", error.substring(0, 200));
                     res.status(this.errorStatus(error)).send(new Error('Error while querying proposal: ' + error));
                 }
                 cwClient.disconnect()
             } catch (error) {
-                console.log("Error while connecting to rpc: ", error);
+                console.log("Error while connecting to rpc: ", error.substring(0, 200));
                 res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
@@ -133,7 +133,7 @@ export class Server {
                 }
                 cwClient.disconnect()
             } catch (error) {
-                console.log("Error while connecting to rpc: ", error);
+                console.log("Error while connecting to rpc: ", error.substring(0, 200));
                 res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
@@ -156,7 +156,7 @@ export class Server {
                 }
                 cwClient.disconnect()
             } catch (error) {
-                console.log("Error while connecting to rpc: ", error);
+                console.log("Error while connecting to rpc: ", error.substring(0, 200));
                 res.status(400).send(new Error('Could not connect cosmwasm client: ' + error));
             }
         });
