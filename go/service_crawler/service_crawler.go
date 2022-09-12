@@ -58,12 +58,12 @@ func (c *Crawler) UpdateContracts() {
 		client := NewContractClient(c.apiUrl, contractAddr)
 		config, err := client.config()
 		if err != nil {
-			log.Sugar.Errorf("while getting config for contract %v: %v", contractAddr, err)
+			log.Sugar.Infof("while getting config for contract %v: %v", contractAddr, err)
 			continue
 		}
 		proposals, err := client.proposals()
 		if err != nil {
-			log.Sugar.Errorf("while getting proposals for contract %v: %v", contractAddr, err)
+			log.Sugar.Infof("while getting proposals for contract %v: %v", contractAddr, err)
 			continue
 		}
 
@@ -82,7 +82,7 @@ func (c *Crawler) UpdateContracts() {
 			if contract.ImageURL != "" {
 				err := im.downloadAndCreateThumbnail(contract.ImageURL)
 				if err != nil {
-					log.Sugar.Errorf("while downloading image for contract %v: %v", contractAddr, err)
+					log.Sugar.Infof("while downloading image for contract %v: %v", contractAddr, err)
 				} else {
 					c.contractManager.SaveThumbnailUrl(contract, im.ThumbnailUrl)
 				}
