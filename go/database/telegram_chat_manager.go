@@ -126,3 +126,31 @@ func (m *TelegramChatManager) UpdateOrCreateChat(userId int64, userName string, 
 	}
 	return entTgChat
 }
+
+type TgChatQueryResult struct {
+	ChatId int64  `json:"chat_id,omitempty"`
+	Name   string `json:"name,omitempty"`
+}
+
+func (m *TelegramChatManager) GetSubscribedIds(entContract *ent.Contract) []TgChatQueryResult {
+	var v []TgChatQueryResult
+	err := entContract.
+		QueryTelegramChats().
+		Select(telegramchat.FieldChatID, telegramchat.FieldName).
+		Scan(m.ctx, &v)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying Telegram chatIds for contract %v (%v): %v", entContract.Name, entContract.Address, err)
+	}
+	return v
+}
+
+func (m *TelegramChatManager) DeleteMultiple(chatIds []int64) {
+	log.Sugar.Debugf("Delete %v Telegram chat's", len(chatIds))
+	_, err := m.client.TelegramChat.
+		Delete().
+		Where(telegramchat.ChatIDIn(chatIds...)).
+		Exec(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Error while deleting Telegram chats: %v", err)
+	}
+}

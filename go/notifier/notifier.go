@@ -2,15 +2,17 @@ package notifier
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
 )
 
 type Notifier struct {
-	telegramApi *tgbotapi.BotAPI
+	telegramApi         *tgbotapi.BotAPI
+	telegramChatManager *database.TelegramChatManager
 }
 
-func NewNotifier(telegramToken string, telegramEndpoint string) *Notifier {
+func NewNotifier(managers *database.DbManagers, telegramToken string, telegramEndpoint string) *Notifier {
 	if telegramEndpoint == "" {
 		telegramEndpoint = tgbotapi.APIEndpoint
 	}
@@ -18,10 +20,10 @@ func NewNotifier(telegramToken string, telegramEndpoint string) *Notifier {
 	if err != nil {
 		log.Sugar.Panic(err)
 	}
-	return &Notifier{telegramApi: telegramApi}
+	return &Notifier{telegramApi: telegramApi, telegramChatManager: managers.TelegramChatManager}
 }
 
-func (n *Notifier) Notify(entProp *ent.Proposal) {
-	log.Sugar.Infof("Notifying for proposal %v", entProp.ID)
-	//TODO:	Implement
+func (n *Notifier) Notify(entContract *ent.Contract, entProp *ent.Proposal) {
+	log.Sugar.Infof("Notifying for proposal %v on %v", entProp.ProposalID, entContract.Name)
+	n.notifyTelegram(entContract, entProp)
 }

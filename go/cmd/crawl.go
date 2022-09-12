@@ -40,7 +40,7 @@ var crawlCmd = &cobra.Command{
 		}
 
 		managers := database.NewDefaultDbManagers()
-		notifier := notifier.NewNotifier(telegramToken, apiEndpoint)
+		notifier := notifier.NewNotifier(managers, telegramToken, apiEndpoint)
 		c := crawler.NewCrawler(managers, notifier, nodejsUrl, assetsPath)
 		c.UpdateContracts()
 		if cmd.Flag("repeat").Value.String() == "true" {

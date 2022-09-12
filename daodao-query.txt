@@ -1,0 +1,23 @@
+https://codesandbox.io/s/npm-playground-forked-dgehyl?file=/src/index.js
+
+add cosmwasm
+
+--------------------------
+
+
+import { CosmWasmClient } from "cosmwasm";
+
+// This is your rpc endpoint
+const rpcEndpoint = "https://rpc.cosmos.directory/juno";
+
+const contractAddr = "juno1hqr0t3scwkrmuu3554lnqzrccuevd8huxmu533gtm6s7vuzeztzqh6tuwq";
+
+async function main() {
+  const client = await CosmWasmClient.connect(rpcEndpoint);
+  const config = await client.queryContractSmart(contractAddr, { proposal: {proposal_id: 1} });
+
+  console.log(config);
+}
+
+main();
+

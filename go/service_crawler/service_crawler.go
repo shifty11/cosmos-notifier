@@ -73,7 +73,7 @@ func (c *Crawler) UpdateContracts() {
 			if proposalStatus == database.ProposalStatusChanged {
 				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
 			} else if proposalStatus == database.ProposalCreated {
-				c.notifier.Notify(dbProp)
+				c.notifier.Notify(contract, dbProp)
 			}
 		}
 
