@@ -1,0 +1,33 @@
+- name: Add Docker s GPG key for ubuntu from official site
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Verify gpg key with the fingerprint
+  apt_key:
+    id: 0EBFCD88
+    state: present
+
+- name: Configure Docker for ubuntu stable repository
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+    state: present
+    update_cache: yes
+
+- name: Install docker-ce
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+
+- name: Add "ansible_ubuntu_demo" user to "docker" group
+  user:
+    name: "{{ ansible_user }}"
+    group: "docker"
+    append: yes
+
+- name: Install docker-compose from official github repo
+  get_url:
+    url : https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x,g+x'

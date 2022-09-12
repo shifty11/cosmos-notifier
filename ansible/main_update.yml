@@ -1,5 +1,5 @@
 ---
-- name: Set up dao-dao-notifier
+- name: Update dao-dao-notifier
   hosts: daodao-notifier
   become: true
   gather_facts: false
@@ -9,6 +9,6 @@
         upgrade: dist
         update_cache: true
   roles:
-    - prepare
     - daodao_notifier_installation
+
 

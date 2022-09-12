@@ -10,8 +10,14 @@ Copy inventory file, and make your edits.
 cp samples/inventory.sample inventory
 ```
 
-##  Step 2: Run main playbook to set up a fresh project (or update)
+## Step 2: Run main playbook to set up a fresh project
 
 ```bash
 ansible-playbook -i inventory main.yml
+```
+
+## Step 3: Update
+
+```bash
+ansible-playbook -i inventory main_update.yml
 ```

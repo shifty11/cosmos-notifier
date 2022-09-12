@@ -1,0 +1,29 @@
+---
+- name: install packages
+  apt:
+    name: ufw
+    state: present
+    update_cache: yes
+
+- name: ufw already enabled
+  command: ufw status verbose
+  register: ufw_status_result
+  changed_when: False
+
+- name: open https port
+  command: ufw allow 443/tcp
+  when:
+    - not ufw_status_result.stdout is search("443/tcp.*ALLOW IN.*Anywhere")
+
+- name: open http port
+  command: ufw allow 80/tcp
+  when:
+    - not ufw_status_result.stdout is search("80/tcp.*ALLOW IN.*Anywhere")
+
+- name: enable firewall
+  shell: |
+    set -o pipefail
+    echo "y" | ufw enable
+  args:
+    executable: /bin/bash
+  when: not ufw_status_result.stdout is search("Status.* active")
