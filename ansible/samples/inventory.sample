@@ -7,6 +7,7 @@ log_name=odin-log
 log_monitor=http://159.223.5.75:3100
 
 # DaoDao Notifier
+daodao_debug=true
 daodao_sentry_dns=SENTRY_DNS
 daodao_database_url=DB_URL
 daodao_telegram_bot_token=TELEGRAM_BOT_TOKEN

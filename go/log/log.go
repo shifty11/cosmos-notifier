@@ -40,6 +40,7 @@ func init() {
 		logger, err := zap.NewProduction()
 		if os.Getenv("DEBUG") == "true" {
 			logger, err = zap.NewDevelopment()
+			logger.Sugar().Debugf("debug mode enabled")
 		}
 		if err != nil {
 			fmt.Println(err)
