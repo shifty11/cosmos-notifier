@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	imaging "github.com/disintegration/imaging"
+	"github.com/shifty11/dao-dao-notifier/log"
 	"image"
 	"io/ioutil"
 	"net/http"
@@ -42,11 +43,22 @@ func (im *ImageManager) isImageFiletype(data []byte) bool {
 	return strings.Split(filetype, "/")[0] == "image"
 }
 
+func ensureDir(path string) {
+	dirName := filepath.Dir(path)
+	if _, serr := os.Stat(dirName); serr != nil {
+		merr := os.MkdirAll(dirName, os.ModePerm)
+		if merr != nil {
+			panic(merr)
+		}
+	}
+}
+
 func (im *ImageManager) createThumbnail(data []byte) error {
 	srcImage, _, err := image.Decode(bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
+	ensureDir(im.ThumbnailPath)
 	thumb := imaging.Thumbnail(srcImage, im.Width, im.Height, imaging.Lanczos)
 	err = imaging.Save(thumb, im.ThumbnailPath)
 	if err != nil {
@@ -56,6 +68,7 @@ func (im *ImageManager) createThumbnail(data []byte) error {
 }
 
 func (im *ImageManager) downloadAndCreateThumbnail(url string) error {
+	log.Sugar.Debugf("downloading image for %v: %v", im.ContractAddress, url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return err

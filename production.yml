@@ -79,6 +79,8 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./.caddy:/root/.caddy
+      - ./webapp/Caddyfile:/etc/caddy/Caddyfile
       - /var/www/daodao-notifier:/app/build/web
       - assets:/var/www/daodao-notifier/assets
 
