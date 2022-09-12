@@ -76,7 +76,7 @@ func (server *SubscriptionServer) ToggleSubscription(ctx context.Context, req *p
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	log.Sugar.Debugf("ToggleSubscription on %v for user %v (%v)", req.ContractId, entUser.Name, entUser.UserID)
+	log.Sugar.Debugf("ToggleSubscription %v for user %v (%v)", req.ContractId, entUser.Name, entUser.UserID)
 
 	isSubscribed, err := server.subscriptionManager.ToggleSubscription(entUser, req.ChatRoomId, int(req.ContractId))
 	if err != nil {
