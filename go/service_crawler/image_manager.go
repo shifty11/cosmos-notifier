@@ -7,6 +7,7 @@ import (
 	"image"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -27,6 +28,13 @@ func NewImageManager(contractAddress string, weblocation string, imagePath strin
 		Width:           width,
 		Height:          height,
 	}
+}
+
+func (im *ImageManager) DoesExist() bool {
+	if _, err := os.Stat(im.ThumbnailPath); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 func (im *ImageManager) isImageFiletype(data []byte) bool {

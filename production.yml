@@ -50,6 +50,7 @@ services:
     working_dir: /app
     volumes:
       - ./contracts.txt:/app/contracts.txt
+      - assets:/app/assets
     env_file:
       - .env
     command: "/dao-dao-notifier crawl --repeat"
@@ -62,8 +63,6 @@ services:
   envoy:
     image: envoyproxy/envoy-dev
     container_name: daodao_notifier_envoy
-    ports:
-      - "8090:8090"
     volumes:
       - ./webapp/envoy.yaml:/etc/envoy/envoy.yaml
 
@@ -81,3 +80,7 @@ services:
       - "443:443"
     volumes:
       - /var/www/daodao-notifier:/app/build/web
+      - assets:/var/www/daodao-notifier/assets
+
+volumes:
+  assets:
