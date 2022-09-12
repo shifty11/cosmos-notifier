@@ -23,16 +23,18 @@ var startTelegramBotCmd = &cobra.Command{
 		if err != nil {
 			log.Sugar.Panic("TELEGRAM_USE_TEST_API must be set")
 		}
+		apiEndpoint := ""
+		if useTestApi {
+			apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
+		}
+
 		webAppUrl := os.Getenv("TELEGRAM_WEBAPP_URL")
 		if webAppUrl == "" {
 			log.Sugar.Panic("TELEGRAM_WEBAPP_URL must be set")
 		}
 
 		dbManagers := database.NewDefaultDbManagers()
-		apiEndpoint := ""
-		if useTestApi {
-			apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
-		}
+
 		tgClient := telegram.NewTelegramClient(dbManagers, telegramToken, apiEndpoint, webAppUrl)
 		tgClient.Start()
 	},

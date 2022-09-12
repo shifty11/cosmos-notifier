@@ -1,18 +1,15 @@
 package crawler
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
-	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -191,75 +188,4 @@ func (cc *ContractClient) proposal(proposalId int) (*types.Proposal, error) {
 	}
 
 	return &proposal, nil
-}
-
-func contracts() []string {
-	file, err := os.Open("contracts.txt")
-	if err != nil {
-		file, err = os.Open("../contracts.txt")
-		if err != nil {
-			log.Sugar.Error(err)
-		}
-	}
-	//goland:noinspection GoUnhandledErrorResult
-	defer file.Close()
-
-	sc := bufio.NewScanner(file)
-	contracts := make([]string, 0)
-
-	// Read through 'contracts' until an EOF is encountered.
-	for sc.Scan() {
-		contracts = append(contracts, sc.Text())
-	}
-
-	if err := sc.Err(); err != nil {
-		log.Sugar.Error(err)
-	}
-	return contracts
-}
-
-func updateContracts(url string, cm *database.ContractManager, pm *database.ProposalManager) {
-	log.Sugar.Info("updating contracts")
-	for _, contractAddr := range contracts() {
-		client := NewContractClient(url, contractAddr)
-		config, err := client.config()
-		if err != nil {
-			log.Sugar.Errorf("while getting config for contract %v: %v", contractAddr, err)
-			continue
-		}
-		proposals, err := client.proposals()
-		if err != nil {
-			log.Sugar.Errorf("while getting proposals for contract %v: %v", contractAddr, err)
-			continue
-		}
-
-		contract, contractStatus := cm.CreateOrUpdate(contractAddr, config)
-		for _, proposal := range proposals.Proposals {
-			dbProp, proposalStatus := pm.CreateOrUpdate(contract, &proposal)
-			if proposalStatus == database.ProposalStatusChanged {
-				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
-				//TODO: send notifications to users
-			}
-		}
-
-		if contractStatus == database.ContractCreated || contractStatus == database.ContractImageChanged {
-			im := NewImageManager(contractAddr, "../webapp/web/assets/", "images/contracts/", 100, 100)
-			if contract.ImageURL != "" {
-				err := im.downloadAndCreateThumbnail(contract.ImageURL)
-				if err != nil {
-					log.Sugar.Errorf("while downloading image for contract %v: %v", contractAddr, err)
-				} else {
-					cm.SaveThumbnailUrl(contract, im.ThumbnailUrl)
-				}
-			} else if contractStatus == database.ContractImageChanged {
-				cm.SaveThumbnailUrl(contract, "")
-				e := os.Remove(im.ThumbnailPath)
-				if e != nil {
-					log.Sugar.Errorf("while removing image for contract %v: %v", contractAddr, e)
-				}
-			}
-		}
-
-		log.Sugar.Infof("processed contract %v (%v): %v", config.Name, contractAddr, contractStatus)
-	}
 }
