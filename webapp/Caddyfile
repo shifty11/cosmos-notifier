@@ -1,0 +1,23 @@
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# Unless the file starts with a global options block, the first
+# uncommented line is always the address of your site.
+#
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace ":80" below with your
+# domain name.
+
+daodao-notifier.decrypto.online {
+        # Set this path to your site's directory.
+        root * /var/www/daodao-notifier
+        encode gzip
+
+        # Enable the static file server.
+        file_server
+
+        reverse_proxy /daodao_notifier_grpc* localhost:8090
+}
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile

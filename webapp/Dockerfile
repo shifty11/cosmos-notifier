@@ -31,6 +31,6 @@ RUN flutter build web
 #FROM nginx:1.21.1-alpine
 #COPY --from=build-env /app/build/web /usr/share/nginx/html
 
-#FROM caddy:2.5.2-alpine
-#COPY --from=build-env /app/build/web /var/www/daodao-notifier
-#COPY Caddyfile /etc/caddy/Caddyfile
+FROM caddy:2.5.2-alpine
+COPY --from=build-env /app/build/web /var/www/daodao-notifier
+COPY Caddyfile /etc/caddy/Caddyfile
