@@ -77,6 +77,7 @@ services:
         CONFIG_FILE: ${FLUTTER_CONFIG_FILE}
     container_name: daodao_notifier_webapp
     ports:
-      - "8091:80"
+      - "80:80"
+      - "443:443"
     volumes:
       - /var/www/daodao-notifier:/app/build/web

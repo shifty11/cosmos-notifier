@@ -2,7 +2,6 @@ package subscription
 
 import (
 	"context"
-	"fmt"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
@@ -31,9 +30,6 @@ func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.
 			thumbUrl := sub.ThumbnailUrl
 			if thumbUrl == "" {
 				thumbUrl = "images/logo.png"
-			} else {
-				//TODO: make this configurable
-				thumbUrl = fmt.Sprintf("https://api.decrypto.online/%v", thumbUrl)
 			}
 			subs = append(subs, &pb.Subscription{
 				Id:              sub.Id,
