@@ -15,6 +15,14 @@ import 'package:webapp/f_home/services/type/login_data.dart';
 @JS()
 external String getTelegramInitData();
 
+class AuthExpiredError implements Exception {
+  String wdExpMsg() => 'AuthExpiredError';
+}
+
+class AuthUserNotFoundError implements Exception {
+  String wdExpMsg() => 'AuthUserNotFoundError';
+}
+
 class AuthService extends AuthServiceClient with ChangeNotifier {
   static AuthService? _singleton;
 
@@ -78,29 +86,47 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
     throw Exception("Discord login information are not available");
   }
 
+  bool _isDiscordLogin() {
+    return Uri.base.queryParameters.containsKey("code");
+  }
+
+  bool _isTelegramLogin() {
+    return Uri.base.queryParameters.containsKey("hash");
+  }
+
   _login() async {
     if (cDebugMode) {
       print("AuthService: login");
     }
     try {
-      final loginData = _getDiscordLoginData();
-      var data = DiscordLoginRequest(code: loginData.code);
-      var response = await discordLogin(data);
-      jwtManager.accessToken = response.accessToken;
-      jwtManager.refreshToken = response.refreshToken;
-    } catch (e) {
-      // must be telegram login if discord login failed
-      final loginData = _getTelegramLoginData();
-      var data = TelegramLoginRequest(
-        userId: loginData.id,
-        dataStr: loginData.data,
-        username: loginData.username,
-        authDate: loginData.authDate,
-        hash: loginData.hash,
-      );
-      var response = await telegramLogin(data);
-      jwtManager.accessToken = response.accessToken;
-      jwtManager.refreshToken = response.refreshToken;
+      if (_isDiscordLogin()) {
+        final loginData = _getDiscordLoginData();
+        var data = DiscordLoginRequest(code: loginData.code);
+        var response = await discordLogin(data);
+        jwtManager.accessToken = response.accessToken;
+        jwtManager.refreshToken = response.refreshToken;
+      } else if (_isTelegramLogin()) {
+        final loginData = _getTelegramLoginData();
+        var data = TelegramLoginRequest(
+          userId: loginData.id,
+          dataStr: loginData.data,
+          username: loginData.username,
+          authDate: loginData.authDate,
+          hash: loginData.hash,
+        );
+        var response = await telegramLogin(data);
+        jwtManager.accessToken = response.accessToken;
+        jwtManager.refreshToken = response.refreshToken;
+      } else {
+        throw Exception("Login information are not available");
+      }
+    } on GrpcError catch (e) {
+      if (e.code == StatusCode.notFound && e.message == "user not found") {
+        throw AuthUserNotFoundError();
+      } else if ((e).code == StatusCode.unauthenticated && e.message == "login expired") {
+        throw AuthExpiredError();
+      }
+      rethrow;
     }
   }
 

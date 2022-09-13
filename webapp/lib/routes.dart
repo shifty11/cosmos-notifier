@@ -71,8 +71,8 @@ class MyRouter {
           return null;
         },
         expired: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
-        error: () =>
-            state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name, queryParams: {"error": "true"}),
+        userNotFound: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
+        error: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
       );
     },
   );

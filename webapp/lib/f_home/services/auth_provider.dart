@@ -41,7 +41,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       if (cDebugMode) {
         print("AuthNotifier: error -> $e");
       }
-      state = const AuthState.error();
+      if (e is AuthExpiredError) {
+        state = const AuthState.expired();
+      } else if (e is AuthUserNotFoundError) {
+        state = const AuthState.userNotFound();
+      } else {
+        state = const AuthState.error();
+      }
     }
   }
 }

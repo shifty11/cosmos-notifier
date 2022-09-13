@@ -10,5 +10,6 @@ class AuthState with _$AuthState {
   const factory AuthState.loading() = Loading;
   const factory AuthState.authorized() = Authorized;
   const factory AuthState.expired() = Expired;
+  const factory AuthState.userNotFound() = UserNotFound;
   const factory AuthState.error() = Error;
 }
