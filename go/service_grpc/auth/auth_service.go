@@ -68,24 +68,31 @@ func (s *AuthServer) isValid(dataStr string, secretKey []byte, hash string) bool
 	return resultHash == hash
 }
 
+var (
+	ErrorLoginFailed  = status.Error(codes.Unauthenticated, "login failed")
+	ErrorUserNotFound = status.Error(codes.NotFound, "user not found")
+	ErrorLoginExpired = status.Error(codes.Unauthenticated, "login expired")
+	ErrorInternal     = status.Error(codes.Internal, "internal error")
+)
+
 func (s *AuthServer) login(entUser *ent.User, username string) (*pb.LoginResponse, error) {
 	accessToken, err := s.jwtManager.GenerateToken(entUser, AccessToken)
 	if err != nil {
 		log.Sugar.Errorf("Could not generate accessToken for user %v (%v): %v", entUser.Name, entUser.ID, err)
-		return nil, status.Error(codes.Internal, "login failed")
+		return nil, ErrorLoginFailed
 	}
 
 	refreshToken, err := s.jwtManager.GenerateToken(entUser, RefreshToken)
 	if err != nil {
 		log.Sugar.Errorf("Could not generate refreshToken for user %v (%v): %v", entUser.Name, entUser.ID, err)
-		return nil, status.Error(codes.Internal, "login failed")
+		return nil, ErrorInternal
 	}
 
 	if username != entUser.Name {
 		entUser, err = s.userManager.SetName(entUser, username)
 		if err != nil {
 			log.Sugar.Errorf("Could not update username of user %v (%v): %v", entUser.Name, entUser.ID, err)
-			return nil, status.Error(codes.Unauthenticated, "login failed")
+			return nil, ErrorInternal
 		}
 	}
 
@@ -95,16 +102,16 @@ func (s *AuthServer) login(entUser *ent.User, username string) (*pb.LoginRespons
 
 func (s *AuthServer) TelegramLogin(_ context.Context, req *pb.TelegramLoginRequest) (*pb.LoginResponse, error) {
 	if !s.isValid(req.DataStr, s.secretKey1(), req.Hash) && !s.isValid(req.DataStr, s.secretKey2(), req.Hash) {
-		return nil, status.Errorf(codes.Unauthenticated, "login failed")
+		return nil, ErrorLoginFailed
 	}
 
 	if time.Now().Sub(time.Unix(req.AuthDate, 0)) > time.Hour {
-		return nil, status.Errorf(codes.Unauthenticated, "login failed")
+		return nil, ErrorLoginExpired
 	}
 
 	entUser, err := s.userManager.Get(req.UserId, user.TypeTelegram)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "cannot find user: %v", req.GetUserId())
+		return nil, ErrorUserNotFound
 	}
 
 	return s.login(entUser, req.Username)
@@ -114,13 +121,13 @@ func (s *AuthServer) DiscordLogin(_ context.Context, req *pb.DiscordLoginRequest
 	token, err := s.discordOAuth2Config.Exchange(context.Background(), req.GetCode())
 	if err != nil {
 		log.Sugar.Infof("Error exchanging code for token: %v", err)
-		return nil, status.Error(codes.Unauthenticated, "login failed")
+		return nil, ErrorLoginFailed
 	}
 
 	res, err := s.discordOAuth2Config.Client(context.Background(), token).Get("https://discord.com/api/users/@me")
 	if err != nil || res.StatusCode != 200 {
 		log.Sugar.Infof("Error getting user (%v): %v", res.StatusCode, err)
-		return nil, status.Error(codes.Unauthenticated, "login failed")
+		return nil, ErrorLoginFailed
 	}
 
 	//goland:noinspection GoUnhandledErrorResult
@@ -129,24 +136,24 @@ func (s *AuthServer) DiscordLogin(_ context.Context, req *pb.DiscordLoginRequest
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		log.Sugar.Infof("Error reading response body: %v", err)
-		return nil, status.Error(codes.Unauthenticated, "login failed")
+		return nil, ErrorInternal
 	}
 
 	var identity DiscordIdentity
 	err = json.Unmarshal(body, &identity)
 	if err != nil {
 		log.Sugar.Infof("Error unmarshalling response body: %v", err)
-		return nil, status.Error(codes.Unauthenticated, "login failed")
+		return nil, ErrorInternal
 	}
 
 	id, err := identity.ID.Int64()
 	if err != nil {
 		log.Sugar.Infof("Error converting id to int64: %v", err)
-		return nil, status.Error(codes.Unauthenticated, "login failed")
+		return nil, ErrorInternal
 	}
 	entUser, err := s.userManager.Get(id, user.TypeDiscord)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "cannot find user: %v", err)
+		return nil, ErrorUserNotFound
 	}
 
 	return s.login(entUser, identity.Username)
@@ -155,17 +162,19 @@ func (s *AuthServer) DiscordLogin(_ context.Context, req *pb.DiscordLoginRequest
 func (s *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccessTokenRequest) (*pb.RefreshAccessTokenResponse, error) {
 	claims, err := s.jwtManager.Verify(req.RefreshToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "refresh token invalid: %v", err)
+		return nil, ErrorLoginFailed
 	}
 
 	entUser, err := s.userManager.Get(claims.UserId, claims.Type)
 	if err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "cannot find user: %v", err)
+		log.Sugar.Errorf("Could not find user %v (%v): %v", claims.UserId, claims.UserId, err)
+		return nil, ErrorUserNotFound
 	}
 
 	accessToken, err := s.jwtManager.GenerateToken(entUser, AccessToken)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "cannot generate accessToken: %v", err)
+		log.Sugar.Errorf("Could not generate accessToken for user %v (%v): %v", entUser.Name, entUser.ID, err)
+		return nil, ErrorInternal
 	}
 
 	res := &pb.RefreshAccessTokenResponse{AccessToken: accessToken}
