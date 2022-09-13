@@ -256,7 +256,9 @@ class _$_CustomThemeData implements _CustomThemeData {
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$_CustomThemeDataToJson(this);
+    return _$$_CustomThemeDataToJson(
+      this,
+    );
   }
 }
 
@@ -280,23 +282,23 @@ abstract class _CustomThemeData implements CustomThemeData {
 
   @override
   @JsonKey(name: 'bg_color', fromJson: colorFromJson, toJson: colorToJson)
-  Color get bgColor => throw _privateConstructorUsedError;
+  Color get bgColor;
   @override
   @JsonKey(name: 'text_color', fromJson: colorFromJson, toJson: colorToJson)
-  Color get textColor => throw _privateConstructorUsedError;
+  Color get textColor;
   @override
   @JsonKey(name: 'hint_color', fromJson: colorFromJson, toJson: colorToJson)
-  Color get hintColor => throw _privateConstructorUsedError;
+  Color get hintColor;
   @override
   @JsonKey(name: 'link_color', fromJson: colorFromJson, toJson: colorToJson)
-  Color get linkColor => throw _privateConstructorUsedError;
+  Color get linkColor;
   @override
   @JsonKey(name: 'button_color', fromJson: colorFromJson, toJson: colorToJson)
-  Color get buttonColor => throw _privateConstructorUsedError;
+  Color get buttonColor;
   @override
   @JsonKey(
       name: 'button_text_color', fromJson: colorFromJson, toJson: colorToJson)
-  Color get buttonTextColor => throw _privateConstructorUsedError;
+  Color get buttonTextColor;
   @override
   @JsonKey(ignore: true)
   _$$_CustomThemeDataCopyWith<_$_CustomThemeData> get copyWith =>

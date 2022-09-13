@@ -22,6 +22,16 @@ const TelegramLoginRequest$json = const {
 
 /// Descriptor for `TelegramLoginRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List telegramLoginRequestDescriptor = $convert.base64Decode('ChRUZWxlZ3JhbUxvZ2luUmVxdWVzdBIWCgZ1c2VySWQYASABKANSBnVzZXJJZBIYCgdkYXRhU3RyGAIgASgJUgdkYXRhU3RyEhoKCHVzZXJuYW1lGAQgASgJUgh1c2VybmFtZRIaCghhdXRoRGF0ZRgGIAEoA1IIYXV0aERhdGUSEgoEaGFzaBgDIAEoCVIEaGFzaA==');
+@$core.Deprecated('Use discordLoginRequestDescriptor instead')
+const DiscordLoginRequest$json = const {
+  '1': 'DiscordLoginRequest',
+  '2': const [
+    const {'1': 'code', '3': 1, '4': 1, '5': 9, '10': 'code'},
+  ],
+};
+
+/// Descriptor for `DiscordLoginRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List discordLoginRequestDescriptor = $convert.base64Decode('ChNEaXNjb3JkTG9naW5SZXF1ZXN0EhIKBGNvZGUYASABKAlSBGNvZGU=');
 @$core.Deprecated('Use loginResponseDescriptor instead')
 const LoginResponse$json = const {
   '1': 'LoginResponse',

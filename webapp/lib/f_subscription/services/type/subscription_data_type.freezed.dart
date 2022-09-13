@@ -140,9 +140,9 @@ abstract class _SubscriptionData implements SubscriptionData {
       final Subscription subscription, final int index) = _$_SubscriptionData;
 
   @override
-  Subscription get subscription => throw _privateConstructorUsedError;
+  Subscription get subscription;
   @override
-  int get index => throw _privateConstructorUsedError;
+  int get index;
   @override
   @JsonKey(ignore: true)
   _$$_SubscriptionDataCopyWith<_$_SubscriptionData> get copyWith =>
@@ -333,13 +333,13 @@ abstract class _ChatroomData extends ChatroomData {
   const _ChatroomData._() : super._();
 
   @override
-  fixnum.Int64 get chatRoomId => throw _privateConstructorUsedError;
+  fixnum.Int64 get chatRoomId;
   @override
-  String get username => throw _privateConstructorUsedError;
+  String get username;
   @override
-  List<Subscription> get subscriptions => throw _privateConstructorUsedError;
+  List<Subscription> get subscriptions;
   @override
-  List<SubscriptionData> get filtered => throw _privateConstructorUsedError;
+  List<SubscriptionData> get filtered;
   @override
   @JsonKey(ignore: true)
   _$$_ChatroomDataCopyWith<_$_ChatroomData> get copyWith =>

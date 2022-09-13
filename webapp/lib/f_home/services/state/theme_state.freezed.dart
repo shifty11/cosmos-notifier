@@ -223,8 +223,8 @@ abstract class Initial extends ThemeState {
       required final ThemeData lightStyle}) = _$Initial;
   const Initial._() : super._();
 
-  ThemeData get darkStyle => throw _privateConstructorUsedError;
-  ThemeData get lightStyle => throw _privateConstructorUsedError;
+  ThemeData get darkStyle;
+  ThemeData get lightStyle;
   @JsonKey(ignore: true)
   _$$InitialCopyWith<_$Initial> get copyWith =>
       throw _privateConstructorUsedError;
@@ -365,7 +365,7 @@ abstract class Custom extends ThemeState {
   const factory Custom({required final ThemeData style}) = _$Custom;
   const Custom._() : super._();
 
-  ThemeData get style => throw _privateConstructorUsedError;
+  ThemeData get style;
   @JsonKey(ignore: true)
   _$$CustomCopyWith<_$Custom> get copyWith =>
       throw _privateConstructorUsedError;

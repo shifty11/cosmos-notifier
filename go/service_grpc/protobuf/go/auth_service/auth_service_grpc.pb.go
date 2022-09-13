@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
 	TelegramLogin(ctx context.Context, in *TelegramLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	DiscordLogin(ctx context.Context, in *DiscordLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshAccessTokenResponse, error)
 }
 
@@ -39,6 +40,15 @@ func (c *authServiceClient) TelegramLogin(ctx context.Context, in *TelegramLogin
 	return out, nil
 }
 
+func (c *authServiceClient) DiscordLogin(ctx context.Context, in *DiscordLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.AuthService/DiscordLogin", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *authServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshAccessTokenResponse, error) {
 	out := new(RefreshAccessTokenResponse)
 	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.AuthService/RefreshAccessToken", in, out, opts...)
@@ -53,6 +63,7 @@ func (c *authServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshA
 // for forward compatibility
 type AuthServiceServer interface {
 	TelegramLogin(context.Context, *TelegramLoginRequest) (*LoginResponse, error)
+	DiscordLogin(context.Context, *DiscordLoginRequest) (*LoginResponse, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*RefreshAccessTokenResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
@@ -63,6 +74,9 @@ type UnimplementedAuthServiceServer struct {
 
 func (UnimplementedAuthServiceServer) TelegramLogin(context.Context, *TelegramLoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TelegramLogin not implemented")
+}
+func (UnimplementedAuthServiceServer) DiscordLogin(context.Context, *DiscordLoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DiscordLogin not implemented")
 }
 func (UnimplementedAuthServiceServer) RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*RefreshAccessTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshAccessToken not implemented")
@@ -98,6 +112,24 @@ func _AuthService_TelegramLogin_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_DiscordLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DiscordLoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).DiscordLogin(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daodao_notifier_grpc.AuthService/DiscordLogin",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).DiscordLogin(ctx, req.(*DiscordLoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AuthService_RefreshAccessToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RefreshAccessTokenRequest)
 	if err := dec(in); err != nil {
@@ -126,6 +158,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "TelegramLogin",
 			Handler:    _AuthService_TelegramLogin_Handler,
+		},
+		{
+			MethodName: "DiscordLogin",
+			Handler:    _AuthService_DiscordLogin_Handler,
 		},
 		{
 			MethodName: "RefreshAccessToken",

@@ -7,10 +7,10 @@ part 'login_data.freezed.dart';
 
 @freezed
 @immutable
-class LoginData with _$LoginData {
-  const LoginData._();
+class TelegramLoginData with _$TelegramLoginData {
+  const TelegramLoginData._();
 
-  const factory LoginData(String dataStr) = _LoginData;
+  const factory TelegramLoginData(String dataStr) = _TelegramLoginData;
 
   bool get isValid {
     return data.isNotEmpty && id != fixnum.Int64() && authDate != fixnum.Int64() && hash.isNotEmpty;
@@ -66,5 +66,21 @@ class LoginData with _$LoginData {
   String get hash {
     final hash = _fields.where((e) => e[0] == 'hash');
     return hash.isNotEmpty ? hash.first[1] : "";
+  }
+}
+
+@freezed
+@immutable
+class DiscordLoginData with _$DiscordLoginData {
+  const DiscordLoginData._();
+
+  const factory DiscordLoginData(String dataStr) = _DiscordLoginData;
+
+  bool get isValid {
+    return dataStr.split("=").first.toLowerCase() == "code";
+  }
+
+  String get code {
+    return dataStr.split("=").last;
   }
 }

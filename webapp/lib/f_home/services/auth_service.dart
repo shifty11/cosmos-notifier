@@ -3,14 +3,14 @@ library script.js;
 
 import 'dart:async';
 
-import 'package:webapp/api/protobuf/dart/auth_service.pbgrpc.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/jwt_manager.dart';
-import 'package:webapp/f_home/services/type/login_data.dart';
 import 'package:flutter/foundation.dart';
 import 'package:grpc/grpc.dart';
 import 'package:grpc/grpc_connection_interface.dart';
 import 'package:js/js.dart';
+import 'package:webapp/api/protobuf/dart/auth_service.pbgrpc.dart';
+import 'package:webapp/config.dart';
+import 'package:webapp/f_home/services/jwt_manager.dart';
+import 'package:webapp/f_home/services/type/login_data.dart';
 
 @JS()
 external String getTelegramInitData();
@@ -52,14 +52,14 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
     return jwtManager.isRefreshTokenValid;
   }
 
-  LoginData _getLoginData() {
-    final loginData = LoginData(Uri.base.queryParameters.entries.map((e) => "${e.key}=${e.value}").join("\n"));
+  TelegramLoginData _getTelegramLoginData() {
+    final loginData = TelegramLoginData(Uri.base.queryParameters.entries.map((e) => "${e.key}=${e.value}").join("\n"));
     if (loginData.isValid) {
       return loginData;
     }
     final data = getTelegramInitData();
     if (data.isNotEmpty) {
-      final loginData = LoginData(Uri.decodeComponent(data));
+      final loginData = TelegramLoginData(Uri.decodeComponent(data));
       if (loginData.isValid) {
         return loginData;
       }
@@ -69,21 +69,39 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
     throw Exception("Login information are not available");
   }
 
+  DiscordLoginData _getDiscordLoginData() {
+    final data = Uri.base.queryParameters.entries.map((e) => "${e.key}=${e.value}").join("\n");
+    final loginData = DiscordLoginData(data);
+    if (loginData.isValid) {
+      return loginData;
+    }
+    throw Exception("Discord login information are not available");
+  }
+
   _login() async {
     if (cDebugMode) {
       print("AuthService: login");
     }
-    final loginData = _getLoginData();
-    var data = TelegramLoginRequest(
-      userId: loginData.id,
-      dataStr: loginData.data,
-      username: loginData.username,
-      authDate: loginData.authDate,
-      hash: loginData.hash,
-    );
-    var response = await telegramLogin(data);
-    jwtManager.accessToken = response.accessToken;
-    jwtManager.refreshToken = response.refreshToken;
+    try {
+      final loginData = _getDiscordLoginData();
+      var data = DiscordLoginRequest(code: loginData.code);
+      var response = await discordLogin(data);
+      jwtManager.accessToken = response.accessToken;
+      jwtManager.refreshToken = response.refreshToken;
+    } catch (e) {
+      // must be telegram login if discord login failed
+      final loginData = _getTelegramLoginData();
+      var data = TelegramLoginRequest(
+        userId: loginData.id,
+        dataStr: loginData.data,
+        username: loginData.username,
+        authDate: loginData.authDate,
+        hash: loginData.hash,
+      );
+      var response = await telegramLogin(data);
+      jwtManager.accessToken = response.accessToken;
+      jwtManager.refreshToken = response.refreshToken;
+    }
   }
 
   _logout() {

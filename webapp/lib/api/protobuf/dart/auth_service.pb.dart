@@ -113,6 +113,53 @@ class TelegramLoginRequest extends $pb.GeneratedMessage {
   void clearAuthDate() => clearField(6);
 }
 
+class DiscordLoginRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DiscordLoginRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'code')
+    ..hasRequiredFields = false
+  ;
+
+  DiscordLoginRequest._() : super();
+  factory DiscordLoginRequest({
+    $core.String? code,
+  }) {
+    final _result = create();
+    if (code != null) {
+      _result.code = code;
+    }
+    return _result;
+  }
+  factory DiscordLoginRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DiscordLoginRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DiscordLoginRequest clone() => DiscordLoginRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DiscordLoginRequest copyWith(void Function(DiscordLoginRequest) updates) => super.copyWith((message) => updates(message as DiscordLoginRequest)) as DiscordLoginRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DiscordLoginRequest create() => DiscordLoginRequest._();
+  DiscordLoginRequest createEmptyInstance() => create();
+  static $pb.PbList<DiscordLoginRequest> createRepeated() => $pb.PbList<DiscordLoginRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DiscordLoginRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DiscordLoginRequest>(create);
+  static DiscordLoginRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get code => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set code($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasCode() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCode() => clearField(1);
+}
+
 class LoginResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'LoginResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accessToken')

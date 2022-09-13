@@ -312,8 +312,8 @@ abstract class Received extends MessageState {
   factory Received({final String? info, final String? error}) = _$Received;
   Received._() : super._();
 
-  String? get info => throw _privateConstructorUsedError;
-  String? get error => throw _privateConstructorUsedError;
+  String? get info;
+  String? get error;
   @JsonKey(ignore: true)
   _$$ReceivedCopyWith<_$Received> get copyWith =>
       throw _privateConstructorUsedError;

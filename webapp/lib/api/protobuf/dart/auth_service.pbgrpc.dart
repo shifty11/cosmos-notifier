@@ -19,6 +19,11 @@ class AuthServiceClient extends $grpc.Client {
           '/daodao_notifier_grpc.AuthService/TelegramLogin',
           ($0.TelegramLoginRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $0.LoginResponse.fromBuffer(value));
+  static final _$discordLogin =
+      $grpc.ClientMethod<$0.DiscordLoginRequest, $0.LoginResponse>(
+          '/daodao_notifier_grpc.AuthService/DiscordLogin',
+          ($0.DiscordLoginRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.LoginResponse.fromBuffer(value));
   static final _$refreshAccessToken = $grpc.ClientMethod<
           $0.RefreshAccessTokenRequest, $0.RefreshAccessTokenResponse>(
       '/daodao_notifier_grpc.AuthService/RefreshAccessToken',
@@ -35,6 +40,12 @@ class AuthServiceClient extends $grpc.Client {
       $0.TelegramLoginRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$telegramLogin, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.LoginResponse> discordLogin(
+      $0.DiscordLoginRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$discordLogin, request, options: options);
   }
 
   $grpc.ResponseFuture<$0.RefreshAccessTokenResponse> refreshAccessToken(
@@ -56,6 +67,14 @@ abstract class AuthServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.TelegramLoginRequest.fromBuffer(value),
         ($0.LoginResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.DiscordLoginRequest, $0.LoginResponse>(
+        'DiscordLogin',
+        discordLogin_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.DiscordLoginRequest.fromBuffer(value),
+        ($0.LoginResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$0.RefreshAccessTokenRequest,
             $0.RefreshAccessTokenResponse>(
         'RefreshAccessToken',
@@ -72,6 +91,11 @@ abstract class AuthServiceBase extends $grpc.Service {
     return telegramLogin(call, await request);
   }
 
+  $async.Future<$0.LoginResponse> discordLogin_Pre($grpc.ServiceCall call,
+      $async.Future<$0.DiscordLoginRequest> request) async {
+    return discordLogin(call, await request);
+  }
+
   $async.Future<$0.RefreshAccessTokenResponse> refreshAccessToken_Pre(
       $grpc.ServiceCall call,
       $async.Future<$0.RefreshAccessTokenRequest> request) async {
@@ -80,6 +104,8 @@ abstract class AuthServiceBase extends $grpc.Service {
 
   $async.Future<$0.LoginResponse> telegramLogin(
       $grpc.ServiceCall call, $0.TelegramLoginRequest request);
+  $async.Future<$0.LoginResponse> discordLogin(
+      $grpc.ServiceCall call, $0.DiscordLoginRequest request);
   $async.Future<$0.RefreshAccessTokenResponse> refreshAccessToken(
       $grpc.ServiceCall call, $0.RefreshAccessTokenRequest request);
 }

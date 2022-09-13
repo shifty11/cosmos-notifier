@@ -209,7 +209,7 @@ abstract class Loaded extends SubscriptionState {
   Loaded._() : super._();
 
   @override
-  Subscription get subscription => throw _privateConstructorUsedError;
+  Subscription get subscription;
   @override
   @JsonKey(ignore: true)
   _$$LoadedCopyWith<_$Loaded> get copyWith =>

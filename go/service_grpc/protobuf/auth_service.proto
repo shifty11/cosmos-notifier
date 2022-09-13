@@ -5,6 +5,7 @@ option go_package = "go/auth_service";
 
 service AuthService {
   rpc TelegramLogin (TelegramLoginRequest) returns (LoginResponse) {}
+  rpc DiscordLogin (DiscordLoginRequest) returns (LoginResponse) {}
   rpc RefreshAccessToken (RefreshAccessTokenRequest) returns (RefreshAccessTokenResponse) {}
 }
 
@@ -14,6 +15,10 @@ message TelegramLoginRequest {
   string username = 4;
   int64 authDate = 6;
   string hash = 3;
+}
+
+message DiscordLoginRequest {
+  string code = 1;
 }
 
 message LoginResponse {
