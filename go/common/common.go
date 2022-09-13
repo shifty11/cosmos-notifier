@@ -6,18 +6,20 @@ import (
 	"strconv"
 )
 
-func GetEnvX(varname string) string {
-	value := os.Getenv(varname)
+// GetEnvX returns the value of the environment variable named by the key or panics if it is not set.
+func GetEnvX(key string) string {
+	value := os.Getenv(key)
 	if value == "" {
-		log.Sugar.Panic(varname + " must be set")
+		log.Sugar.Panic(key + " must be set")
 	}
 	return value
 }
 
-func GetEnvAsBoolX(varname string) bool {
-	value := os.Getenv(varname)
+// GetEnvAsBoolX returns the value of the environment variable named by the key as a bool and panics if it is not set.
+func GetEnvAsBoolX(key string) bool {
+	value := os.Getenv(key)
 	if value == "" {
-		log.Sugar.Panic(varname + " must be set")
+		log.Sugar.Panic(key + " must be set")
 	}
 	boolValue, err := strconv.ParseBool(value)
 	if err != nil {
