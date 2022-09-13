@@ -7,6 +7,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/auth_service"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/subscription_service"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/subscription"
+	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"net"
 	"time"
@@ -18,6 +19,7 @@ type Config struct {
 	RefreshTokenDuration time.Duration
 	JwtSecretKey         string
 	TelegramToken        string
+	DiscordOAuth2Config  *oauth2.Config
 }
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -35,7 +37,7 @@ func (s GRPCServer) Run() {
 	jwtManager := auth.NewJWTManager([]byte(s.config.JwtSecretKey), s.config.AccessTokenDuration, s.config.RefreshTokenDuration)
 	interceptor := auth.NewAuthInterceptor(jwtManager, s.dbManagers.UserManager, auth.AccessibleRoles())
 
-	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken)
+	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken, s.config.DiscordOAuth2Config)
 	subsServer := subscription.NewSubscriptionsServer(s.dbManagers.SubscriptionManager)
 
 	server := grpc.NewServer(

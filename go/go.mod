@@ -13,12 +13,14 @@ require (
 	github.com/lib/pq v1.10.6
 	github.com/microcosm-cc/bluemonday v1.0.2
 	github.com/pkg/errors v0.9.1
+	github.com/ravener/discord-oauth2 v0.0.0-20220615092331-f6a9839c223e
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.5.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/exp v0.0.0-20220722155223-a9213eeb770e
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
 	google.golang.org/grpc v1.48.0
-	google.golang.org/protobuf v1.27.1
+	google.golang.org/protobuf v1.28.0
 )
 
 require (
@@ -43,9 +45,8 @@ require (
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
 	golang.org/x/image v0.0.0-20210216034530-4410531fe030 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
-	golang.org/x/sys v0.0.0-20220317061510-51cd9980dadf // indirect
+	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
+	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220314164441-57ef72a4c106 // indirect
