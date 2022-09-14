@@ -1,10 +1,18 @@
-# dao-dao-notifier
+# DaoDao Notifier
+DaoDao Notifier is a subscription service that notifies about new governance proposals of [DaoDao's](https://daodao.zone/).
+
+STATUS: ALPHA VERSION - NOT READY FOR PRODUCTION
 
 ## Setup
 
+Full development setup
 ```bash
-docker-compose -f local-db.yml up
+cp .env.template .env   # make changes to env
+docker-compose -f dev.yml up
 ```
+You need to create a Telegram and a Discord bot and get the token. 
+You also need to get the Discord OAuth2 client id and secret.
+They are all needed in the .env file.
 
 ## Database
 
