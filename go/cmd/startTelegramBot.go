@@ -13,7 +13,7 @@ var startTelegramBotCmd = &cobra.Command{
 	Short: "Starts the telegram bot",
 	Run: func(cmd *cobra.Command, args []string) {
 		webAppUrl := common.GetEnvX("WEBAPP_URL")
-		telegramToken := common.GetEnvX("TELEGRAM_TOKEN")
+		telegramToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
 		useTestApi := common.GetEnvAsBoolX("TELEGRAM_USE_TEST_API")
 		apiEndpoint := ""
 		if useTestApi {

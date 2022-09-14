@@ -16,7 +16,7 @@ var crawlCmd = &cobra.Command{
 	Short: "Run the crawler script",
 	Run: func(cmd *cobra.Command, args []string) {
 		nodejsUrl := common.GetEnvX("NODEJS_URL")
-		telegramToken := common.GetEnvX("TELEGRAM_TOKEN")
+		telegramToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
 		useTestApi := common.GetEnvAsBoolX("TELEGRAM_USE_TEST_API")
 		assetsPath := common.GetEnvX("ASSETS_PATH")
 		apiEndpoint := ""

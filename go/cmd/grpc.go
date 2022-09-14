@@ -17,7 +17,7 @@ var grpcCmd = &cobra.Command{
 	Short: "Run gRPC server",
 	Run: func(cmd *cobra.Command, args []string) {
 		jwtSecretKey := common.GetEnvX("JWT_SECRET_KEY")
-		telegramToken := common.GetEnvX("TELEGRAM_TOKEN")
+		telegramToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
 		webAppUrl := common.GetEnvX("WEBAPP_URL")
 		discordClientId := common.GetEnvX("DISCORD_CLIENT_ID")
 		discordClientSecret := common.GetEnvX("DISCORD_CLIENT_SECRET")
