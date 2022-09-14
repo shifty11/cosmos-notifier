@@ -5,10 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 void main() {
-  final container = ProviderContainer();
-  final router = container.read(routerProvider).router;
-
   runApp(ProviderScope(child: Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+    final router = ref.read(routerProvider).router;
     final state = ref.watch(themeProvider);
     return MaterialApp.router(
       title: 'DAO DAO Notifier',

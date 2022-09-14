@@ -76,11 +76,15 @@ class DiscordLoginData with _$DiscordLoginData {
 
   const factory DiscordLoginData(String dataStr) = _DiscordLoginData;
 
+  Iterable<List<String>> get _fields {
+    return dataStr.replaceAll("&", "\n").split("\n").map((e) => e.split("=")).where((e) => e.length == 2 && e[0] == "code");
+  }
+
   bool get isValid {
-    return dataStr.split("=").first.toLowerCase() == "code";
+    return _fields.isNotEmpty;
   }
 
   String get code {
-    return dataStr.split("=").last;
+    return _fields.first[1];
   }
 }

@@ -5,6 +5,7 @@ import 'package:tuple/tuple.dart';
 import 'package:webapp/api/protobuf/dart/google/protobuf/empty.pb.dart';
 import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:webapp/config.dart';
+import 'package:webapp/f_home/services/chat_id_provider.dart';
 import 'package:webapp/f_home/services/message_provider.dart';
 import 'package:webapp/f_subscription/services/state/subscription_state.dart';
 import 'package:webapp/f_subscription/services/subscription_service.dart';
@@ -23,15 +24,7 @@ final chatroomListStateProvider = FutureProvider<List<ChatRoom>>((ref) async {
   } else {
     if (response.chatRooms.length > 1) {
       // if query params contain `chat_id` put that one first
-      final chatIdStr = Uri.base.queryParameters['chat_id'];
-      var chatId = Int64();
-      if (chatIdStr != null) {
-        try {
-          chatId = Int64.parseInt(chatIdStr);
-        } on FormatException {
-          // ignore exceptions since the query param could be anything
-        }
-      }
+      final chatId = ref.read(chatIdProvider) ?? Int64(0);
       response.chatRooms.sort(((a, b) {
         if (a.id == chatId) {
           return -1;

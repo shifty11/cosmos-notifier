@@ -1,5 +1,7 @@
+import 'package:fixnum/fixnum.dart';
 import 'package:webapp/config.dart';
 import 'package:webapp/f_home/services/auth_provider.dart';
+import 'package:webapp/f_home/services/chat_id_provider.dart';
 import 'package:webapp/f_home/services/state/auth_state.dart';
 import 'package:webapp/f_home/widgets/loading_page.dart';
 import 'package:webapp/f_login/widgets/login_page.dart';
@@ -8,12 +10,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-final routerProvider = Provider<MyRouter>((ref) => MyRouter(ref.watch(authStateValueProvider)));
+
+// chatIdProvider is needed here to read the queryParams after the first page load. Later they will be striped away.
+final routerProvider = Provider<MyRouter>((ref) => MyRouter(ref.watch(authStateValueProvider), ref.read(chatIdProvider)));
 
 class MyRouter {
   final ValueNotifier<AuthState> authStateListener;
 
-  MyRouter(this.authStateListener);
+  MyRouter(this.authStateListener, Int64? _);
 
   late final router = GoRouter(
     refreshListenable: authStateListener,
@@ -66,7 +70,7 @@ class MyRouter {
             }
           }
           if (state.subloc == rRoot.path || state.subloc == rUnauthenticated.path) {
-            return state.namedLocation(rSubscriptions.name, queryParams: {...state.queryParams}..removeWhere((key, value) => key != "chat_id"));
+            return state.namedLocation(rSubscriptions.name);
           }
           return null;
         },
