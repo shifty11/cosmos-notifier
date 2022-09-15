@@ -3,6 +3,9 @@ package database
 import (
 	"context"
 	"github.com/shifty11/dao-dao-notifier/ent"
+	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
+	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
 )
@@ -26,8 +29,8 @@ type SubscriptionManager struct {
 	ctx                   context.Context
 	userManager           *UserManager
 	contractManager       IContractManager
-	telegramChatManager   *TelegramChatManager
-	discordChannelManager *DiscordChannelManager
+	telegramChatManager   ITelegramChatManager
+	discordChannelManager IDiscordChannelManager
 }
 
 func NewSubscriptionManager(
@@ -35,7 +38,7 @@ func NewSubscriptionManager(
 	ctx context.Context,
 	userManager *UserManager,
 	contractManager IContractManager,
-	telegramChatManager *TelegramChatManager,
+	telegramChatManager ITelegramChatManager,
 	discordChannelManager *DiscordChannelManager,
 ) *SubscriptionManager {
 	return &SubscriptionManager{
@@ -48,8 +51,8 @@ func NewSubscriptionManager(
 	}
 }
 
-func getSubscriptions(contractManager IContractManager, ofUser []*ent.Contract) []*Subscription {
-	contracts := contractManager.All()
+func (m *SubscriptionManager) getSubscriptions(ofUser []*ent.Contract) []*Subscription {
+	contracts := m.contractManager.All()
 	var subs []*Subscription
 	for _, c := range contracts {
 		var subscription = Subscription{
@@ -81,7 +84,9 @@ func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 	if entUser.Type == user.TypeTelegram {
 		tgChats, err := entUser.
 			QueryTelegramChats().
+			Order(ent.Asc(telegramchat.FieldName)).
 			WithContracts().
+			Order(ent.Asc(contract.FieldName)).
 			All(m.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while querying telegram chats of user %v (%v): %v", entUser.Name, entUser.ID, err)
@@ -92,14 +97,16 @@ func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 			chats = append(chats, &ChatRoom{
 				Id:            tgChat.ChatID,
 				Name:          tgChat.Name,
-				Subscriptions: getSubscriptions(m.contractManager, tgChat.Edges.Contracts),
+				Subscriptions: m.getSubscriptions(tgChat.Edges.Contracts),
 			})
 		}
 		return chats
 	} else {
 		dChannels, err := entUser.
 			QueryDiscordChannels().
+			Order(ent.Asc(discordchannel.FieldName)).
 			WithContracts().
+			Order(ent.Asc(contract.FieldName)).
 			All(m.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while querying discord channels of user %v (%v): %v", entUser.Name, entUser.ID, err)
@@ -110,7 +117,7 @@ func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 			chats = append(chats, &ChatRoom{
 				Id:            dChannel.ChannelID,
 				Name:          dChannel.Name,
-				Subscriptions: getSubscriptions(m.contractManager, dChannel.Edges.Contracts),
+				Subscriptions: m.getSubscriptions(dChannel.Edges.Contracts),
 			})
 		}
 		return chats

@@ -9,7 +9,7 @@ import (
 )
 
 type IContractManager interface {
-	CreateOrUpdate(config *types.ContractData) (*ent.Contract, ContractStatus)
+	CreateOrUpdate(data *types.ContractData) (*ent.Contract, ContractStatus)
 	All() []*ent.Contract
 	Get(id int) (*ent.Contract, error)
 	SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract
@@ -78,6 +78,7 @@ func (m *ContractManager) CreateOrUpdate(data *types.ContractData) (*ent.Contrac
 func (m *ContractManager) All() []*ent.Contract {
 	all, err := m.client.Contract.
 		Query().
+		Order(ent.Asc(contract.FieldName)).
 		All(m.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying contracts: %v", err)

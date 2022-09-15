@@ -11,7 +11,7 @@ import (
 //goland:noinspection GoNameStartsWithPackageName
 type DiscordClient struct {
 	s                     *discordgo.Session
-	discordChannelManager *database.DiscordChannelManager
+	discordChannelManager database.IDiscordChannelManager
 	proposalManager       *database.ProposalManager
 	botToken              string
 	webAppUrl             string

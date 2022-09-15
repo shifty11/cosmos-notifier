@@ -96,8 +96,8 @@ type DbManagers struct {
 	ContractManager       IContractManager
 	ProposalManager       *ProposalManager
 	UserManager           *UserManager
-	DiscordChannelManager *DiscordChannelManager
-	TelegramChatManager   *TelegramChatManager
+	DiscordChannelManager IDiscordChannelManager
+	TelegramChatManager   ITelegramChatManager
 	SubscriptionManager   *SubscriptionManager
 }
 

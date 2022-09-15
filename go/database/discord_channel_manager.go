@@ -10,6 +10,12 @@ import (
 	"github.com/shifty11/dao-dao-notifier/log"
 )
 
+type IDiscordChannelManager interface {
+	AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error)
+	CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool)
+	Delete(userId int64, channelId int64) error
+}
+
 type DiscordChannelManager struct {
 	client          *ent.Client
 	ctx             context.Context
@@ -22,8 +28,8 @@ func NewDiscordChannelManager(client *ent.Client, ctx context.Context, contractM
 }
 
 // AddOrRemoveContract adds or removes a contract from a discord channel
-// Returns true if the contract was added, false if it was removed
-func (m *DiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId int) (bool, error) {
+// Returns true if the contract is now added
+func (m *DiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error) {
 	log.Sugar.Debugf("Adding or removing contract %d from discord channel %d", contractId, dChannelId)
 	dChannel, err := m.client.DiscordChannel.
 		Query().

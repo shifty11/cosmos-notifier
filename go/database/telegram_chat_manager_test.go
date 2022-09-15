@@ -42,19 +42,19 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 	}
 
 	c, _ := m.contractManager.CreateOrUpdate(data)
-	added, err := m.AddOrRemoveContract(dc.ChatID, c.ID)
+	hasContract, err := m.AddOrRemoveContract(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
-	if !added {
+	if !hasContract {
 		t.Fatal("Expected true, got false")
 	}
 
-	added, err = m.AddOrRemoveContract(dc.ChatID, c.ID)
+	hasContract, err = m.AddOrRemoveContract(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
-	if added {
+	if hasContract {
 		t.Fatal("Expected false, got true")
 	}
 

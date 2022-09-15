@@ -9,7 +9,7 @@ import (
 
 type Notifier struct {
 	telegramApi         *tgbotapi.BotAPI
-	telegramChatManager *database.TelegramChatManager
+	telegramChatManager database.ITelegramChatManager
 }
 
 func NewNotifier(managers *database.DbManagers, telegramToken string, telegramEndpoint string) *Notifier {

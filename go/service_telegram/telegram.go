@@ -95,7 +95,7 @@ type TelegramClient struct {
 	updateCountChannel chan UpdateCount
 
 	UserManager         *database.UserManager
-	TelegramChatManager *database.TelegramChatManager
+	TelegramChatManager database.ITelegramChatManager
 	ProposalManager     *database.ProposalManager
 
 	telegramToken    string

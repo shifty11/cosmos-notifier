@@ -10,6 +10,14 @@ import (
 	"github.com/shifty11/dao-dao-notifier/log"
 )
 
+type ITelegramChatManager interface {
+	AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error)
+	CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool)
+	GetSubscribedIds(entContract *ent.Contract) []TgChatQueryResult
+	Delete(userId int64, chatId int64) error
+	DeleteMultiple(chatIds []int64)
+}
+
 type TelegramChatManager struct {
 	client          *ent.Client
 	ctx             context.Context
@@ -21,7 +29,9 @@ func NewTelegramChatManager(client *ent.Client, ctx context.Context, contractMan
 	return &TelegramChatManager{client: client, ctx: ctx, contractManager: contractManager, userManager: userManager}
 }
 
-func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (bool, error) {
+// AddOrRemoveContract adds or removes a contract from a Telegram chat
+// Returns true if the contract is now added to the chat
+func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error) {
 	tgChat, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(tgChatId)).
