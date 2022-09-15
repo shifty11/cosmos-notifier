@@ -21,17 +21,17 @@ func NewProposalManager(client *ent.Client, ctx context.Context) *ProposalManage
 type ProposalStatus string
 
 const (
-	ProposalCreated       ProposalStatus = "created"
-	ProposalUpdated       ProposalStatus = "updated"
-	ProposalStatusChanged ProposalStatus = "status_changed"
-	ProposalNoChanges     ProposalStatus = "no_changes"
+	ProposalCreated               ProposalStatus = "created"
+	ProposalUpdated               ProposalStatus = "updated"
+	ProposalStatusChangedFromOpen ProposalStatus = "status_changed_from_open"
+	ProposalNoChanges             ProposalStatus = "no_changes"
 )
 
 // CreateOrUpdate creates a new proposal or updates an existing one
 // Status:
 // - created: proposal created
 // - updated: proposal updated
-// - status_changed: proposal went from 'open' to another state
+// - status_changed_from_open: proposal went from 'open' to another state
 // - no_changes: proposal not changed
 //
 // returns (proposal, status)
@@ -72,7 +72,7 @@ func (m *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.Propos
 				log.Sugar.Panicf("Error while updating proposal: %v", err)
 			}
 			if prop.Status == proposal.StatusOpen && updatedProp.Status != prop.Status {
-				return updatedProp, ProposalStatusChanged
+				return updatedProp, ProposalStatusChangedFromOpen
 			}
 			return updatedProp, ProposalUpdated
 		}

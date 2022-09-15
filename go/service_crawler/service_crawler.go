@@ -70,7 +70,7 @@ func (c *Crawler) UpdateContracts() {
 		contract, contractStatus := c.contractManager.CreateOrUpdate(config)
 		for _, proposal := range proposals.Proposals {
 			dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(contract, &proposal)
-			if proposalStatus == database.ProposalStatusChanged {
+			if proposalStatus == database.ProposalStatusChangedFromOpen {
 				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
 			} else if proposalStatus == database.ProposalCreated {
 				c.notifier.Notify(contract, dbProp)
