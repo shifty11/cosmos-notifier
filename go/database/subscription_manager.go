@@ -25,7 +25,7 @@ type SubscriptionManager struct {
 	client                *ent.Client
 	ctx                   context.Context
 	userManager           *UserManager
-	contractManager       *ContractManager
+	contractManager       IContractManager
 	telegramChatManager   *TelegramChatManager
 	discordChannelManager *DiscordChannelManager
 }
@@ -34,7 +34,7 @@ func NewSubscriptionManager(
 	client *ent.Client,
 	ctx context.Context,
 	userManager *UserManager,
-	contractManager *ContractManager,
+	contractManager IContractManager,
 	telegramChatManager *TelegramChatManager,
 	discordChannelManager *DiscordChannelManager,
 ) *SubscriptionManager {
@@ -48,7 +48,7 @@ func NewSubscriptionManager(
 	}
 }
 
-func getSubscriptions(contractManager *ContractManager, ofUser []*ent.Contract) []*Subscription {
+func getSubscriptions(contractManager IContractManager, ofUser []*ent.Contract) []*Subscription {
 	contracts := contractManager.All()
 	var subs []*Subscription
 	for _, c := range contracts {
@@ -71,9 +71,9 @@ func getSubscriptions(contractManager *ContractManager, ofUser []*ent.Contract) 
 
 func (m *SubscriptionManager) ToggleSubscription(entUser *ent.User, chatRoomId int64, contractId int) (bool, error) {
 	if entUser.Type == user.TypeTelegram {
-		return m.telegramChatManager.AddOrRemoveChain(chatRoomId, contractId)
+		return m.telegramChatManager.AddOrRemoveContract(chatRoomId, contractId)
 	} else {
-		return m.discordChannelManager.AddOrRemoveChain(chatRoomId, contractId)
+		return m.discordChannelManager.AddOrRemoveContract(chatRoomId, contractId)
 	}
 }
 

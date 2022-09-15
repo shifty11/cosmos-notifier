@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
@@ -12,14 +13,15 @@ import (
 type TelegramChatManager struct {
 	client          *ent.Client
 	ctx             context.Context
-	contractManager *ContractManager
+	contractManager IContractManager
+	userManager     *UserManager
 }
 
-func NewTelegramChatManager(client *ent.Client, ctx context.Context, contractManager *ContractManager) *TelegramChatManager {
-	return &TelegramChatManager{client: client, ctx: ctx, contractManager: contractManager}
+func NewTelegramChatManager(client *ent.Client, ctx context.Context, contractManager IContractManager, userManager *UserManager) *TelegramChatManager {
+	return &TelegramChatManager{client: client, ctx: ctx, contractManager: contractManager, userManager: userManager}
 }
 
-func (m *TelegramChatManager) AddOrRemoveChain(tgChatId int64, contractId int) (bool, error) {
+func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (bool, error) {
 	tgChat, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(tgChatId)).
@@ -60,51 +62,19 @@ func (m *TelegramChatManager) AddOrRemoveChain(tgChatId int64, contractId int) (
 	return !exists, nil
 }
 
-func (m *TelegramChatManager) updateOrCreateUser(userId int64, userName string) *ent.User {
-	entUser, err := m.client.User.
+func (m *TelegramChatManager) CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool) {
+	log.Sugar.Debugf("Create or update Telegram chat %s (%d) for user %s (%d)", name, tgChatId, userName, userId)
+	entUser := m.userManager.createOrUpdateUser(userId, userName, user.TypeTelegram)
+	tgChat, err := m.client.TelegramChat.
 		Query().
-		Where(user.And(
-			user.UserIDEQ(userId),
-			user.TypeEQ(user.TypeTelegram),
-		)).
-		Only(m.ctx)
-	if err != nil {
-		if ent.IsNotFound(err) {
-			entUser, err = m.client.User.
-				Create().
-				SetUserID(userId).
-				SetName(userName).
-				SetType(user.TypeTelegram).
-				Save(m.ctx)
-			if err != nil {
-				log.Sugar.Panicf("Could not create user: %v", err)
-			}
-		} else {
-			log.Sugar.Panicf("Could not find user: %v", err)
-		}
-	} else if entUser.Name != userName {
-		entUser, err = m.client.User.
-			UpdateOne(entUser).
-			SetName(userName).
-			Save(m.ctx)
-		if err != nil {
-			log.Sugar.Panicf("Could not update user: %v", err)
-		}
-	}
-	return entUser
-}
-
-func (m *TelegramChatManager) UpdateOrCreateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) *ent.TelegramChat {
-	entUser := m.updateOrCreateUser(userId, userName)
-	entTgChat, err := entUser.
-		QueryTelegramChats().
 		Where(telegramchat.ChatIDEQ(tgChatId)).
+		WithUsers().
 		Only(m.ctx)
 	if err != nil {
 		if ent.IsNotFound(err) {
-			entTgChat, err = m.client.TelegramChat.
+			tgChat, err = m.client.TelegramChat.
 				Create().
-				SetUser(entUser).
+				AddUsers(entUser).
 				SetChatID(tgChatId).
 				SetName(name).
 				SetIsGroup(isGroup).
@@ -112,19 +82,38 @@ func (m *TelegramChatManager) UpdateOrCreateChat(userId int64, userName string, 
 			if err != nil {
 				log.Sugar.Panicf("Could not create telegram chat: %v", err)
 			}
+			return tgChat, true
 		} else {
 			log.Sugar.Panicf("Could not find telegram chat: %v", err)
 		}
-	} else if entTgChat.Name != name {
-		entTgChat, err = m.client.TelegramChat.
-			UpdateOne(entTgChat).
-			SetName(name).
-			Save(m.ctx)
-		if err != nil {
-			log.Sugar.Panicf("Could not update telegram chat: %v", err)
+	} else {
+		hasUser := false
+		for _, u := range tgChat.Edges.Users {
+			if u.ID == entUser.ID {
+				hasUser = true
+				break
+			}
+		}
+		if !hasUser {
+			tgChat, err = tgChat.
+				Update().
+				AddUsers(entUser).
+				Save(m.ctx)
+			if err != nil {
+				log.Sugar.Panicf("Could not add user to telegram chat: %v", err)
+			}
+		}
+		if tgChat.Name != name {
+			tgChat, err = tgChat.
+				Update().
+				SetName(name).
+				Save(m.ctx)
+			if err != nil {
+				log.Sugar.Panicf("Could not update telegram chat: %v", err)
+			}
 		}
 	}
-	return entTgChat
+	return tgChat, false
 }
 
 type TgChatQueryResult struct {
@@ -144,13 +133,69 @@ func (m *TelegramChatManager) GetSubscribedIds(entContract *ent.Contract) []TgCh
 	return v
 }
 
+// Delete deletes a telegram chat for a user
+// If the user doesn't have any more chats, the user is deleted
+func (m *TelegramChatManager) Delete(userId int64, chatId int64) error {
+	log.Sugar.Debugf("Deleting telegram chat %d for user %d", chatId, userId)
+	telegramChat, err := m.client.TelegramChat.
+		Query().
+		Where(telegramchat.ChatID(chatId)).
+		WithUsers().
+		Only(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not find telegram chat: %v", err)
+		return err
+	}
+	var entUser *ent.User
+	for _, u := range telegramChat.Edges.Users {
+		if u.UserID == userId {
+			entUser = u
+			break
+		}
+	}
+	if entUser == nil {
+		log.Sugar.Errorf("Could not find user: %v", err)
+		return errors.New("could not find user")
+	}
+	if len(telegramChat.Edges.Users) == 1 {
+		err := m.client.TelegramChat.
+			DeleteOne(telegramChat).
+			Exec(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Could not delete telegram chat: %v", err)
+		}
+	} else {
+		_, err = m.client.TelegramChat.
+			UpdateOne(telegramChat).
+			RemoveUsers(entUser).
+			Save(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Could not remove user from telegram chat: %v", err)
+		}
+	}
+	m.userManager.deleteIfUnused(entUser)
+	return err
+}
+
 func (m *TelegramChatManager) DeleteMultiple(chatIds []int64) {
 	log.Sugar.Debugf("Delete %v Telegram chat's", len(chatIds))
-	_, err := m.client.TelegramChat.
-		Delete().
-		Where(telegramchat.ChatIDIn(chatIds...)).
-		Exec(m.ctx)
-	if err != nil {
-		log.Sugar.Errorf("Error while deleting Telegram chats: %v", err)
+
+	for _, chatId := range chatIds {
+		tgChats, err := m.client.TelegramChat.
+			Query().
+			Where(telegramchat.ChatID(chatId)).
+			WithUsers().
+			All(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Error while querying Telegram chats: %v", err)
+		}
+		for _, tgChat := range tgChats {
+			for _, u := range tgChat.Edges.Users {
+				err := m.Delete(u.UserID, chatId)
+				if err != nil {
+					log.Sugar.Errorf("Error while deleting Telegram chat: %v", err)
+				}
+			}
+		}
 	}
 }

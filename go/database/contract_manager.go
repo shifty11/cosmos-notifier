@@ -8,6 +8,13 @@ import (
 	"github.com/shifty11/dao-dao-notifier/types"
 )
 
+type IContractManager interface {
+	CreateOrUpdate(config *types.ContractData) (*ent.Contract, ContractStatus)
+	All() []*ent.Contract
+	Get(id int) (*ent.Contract, error)
+	SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract
+}
+
 type ContractManager struct {
 	client *ent.Client
 	ctx    context.Context
@@ -29,18 +36,18 @@ const (
 // CreateOrUpdate creates a new contract or updates an existing one
 //
 // returns (contract, created)
-func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.ContractData) (*ent.Contract, ContractStatus) {
+func (m *ContractManager) CreateOrUpdate(data *types.ContractData) (*ent.Contract, ContractStatus) {
 	c, err := m.client.Contract.
 		Query().
-		Where(contract.AddressEQ(contractAddr)).
+		Where(contract.AddressEQ(data.Address)).
 		First(m.ctx)
 	if err != nil && ent.IsNotFound(err) {
 		c, err = m.client.Contract.
 			Create().
-			SetAddress(contractAddr).
-			SetName(config.Name).
-			SetDescription(config.Description).
-			SetImageURL(config.ImageUrl).
+			SetAddress(data.Address).
+			SetName(data.Name).
+			SetDescription(data.Description).
+			SetImageURL(data.ImageUrl).
 			Save(m.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while creating contract: %v", err)
@@ -49,12 +56,12 @@ func (m *ContractManager) CreateOrUpdate(contractAddr string, config *types.Cont
 	} else if err != nil {
 		log.Sugar.Panicf("Error while querying contract: %v", err)
 	} else {
-		if c.Name != config.Name || c.Description != config.Description || c.ImageURL != config.ImageUrl {
+		if c.Name != data.Name || c.Description != data.Description || c.ImageURL != data.ImageUrl {
 			updated, err := m.client.Contract.
 				UpdateOne(c).
-				SetName(config.Name).
-				SetDescription(config.Description).
-				SetImageURL(config.ImageUrl).
+				SetName(data.Name).
+				SetDescription(data.Description).
+				SetImageURL(data.ImageUrl).
 				Save(m.ctx)
 			if err != nil {
 				log.Sugar.Panicf("Error while updating contract: %v", err)

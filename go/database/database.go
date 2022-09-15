@@ -93,7 +93,7 @@ func MigrateDb() error {
 }
 
 type DbManagers struct {
-	ContractManager       *ContractManager
+	ContractManager       IContractManager
 	ProposalManager       *ProposalManager
 	UserManager           *UserManager
 	DiscordChannelManager *DiscordChannelManager
@@ -110,8 +110,8 @@ func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 	contractManager := NewContractManager(client, ctx)
 	proposalManager := NewProposalManager(client, ctx)
 	userManager := NewUserManager(client, ctx)
-	discordChannelManager := NewDiscordChannelManager(client, ctx, contractManager)
-	telegramChatManager := NewTelegramChatManager(client, ctx, contractManager)
+	discordChannelManager := NewDiscordChannelManager(client, ctx, contractManager, userManager)
+	telegramChatManager := NewTelegramChatManager(client, ctx, contractManager, userManager)
 	subscriptionManager := NewSubscriptionManager(client, ctx, userManager, contractManager, telegramChatManager, discordChannelManager)
 	return &DbManagers{
 		ContractManager:       contractManager,

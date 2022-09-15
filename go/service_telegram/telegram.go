@@ -9,7 +9,7 @@ import (
 func (client TelegramClient) handleCommand(update *tgbotapi.Update) {
 	switch MessageCommand(update.Message.Command()) { // Check for non admin commands
 	case MessageCmdStart, MessageCmdSubscriptions:
-		client.handleSubscription(update)
+		client.handleStart(update)
 	}
 }
 

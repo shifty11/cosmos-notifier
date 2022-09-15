@@ -24,7 +24,7 @@ var grpcCmd = &cobra.Command{
 		var config = &grpc.Config{
 			Port:                 ":50051",
 			AccessTokenDuration:  time.Minute * 15,
-			RefreshTokenDuration: time.Hour * 24,
+			RefreshTokenDuration: time.Hour * 24 * 7,
 			JwtSecretKey:         jwtSecretKey,
 			TelegramToken:        telegramToken,
 			DiscordOAuth2Config: &oauth2.Config{

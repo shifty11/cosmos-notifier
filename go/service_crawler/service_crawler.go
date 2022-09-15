@@ -10,7 +10,7 @@ import (
 )
 
 type Crawler struct {
-	contractManager *database.ContractManager
+	contractManager database.IContractManager
 	proposalManager *database.ProposalManager
 	notifier        *notifier.Notifier
 	apiUrl          string
@@ -67,7 +67,7 @@ func (c *Crawler) UpdateContracts() {
 			continue
 		}
 
-		contract, contractStatus := c.contractManager.CreateOrUpdate(contractAddr, config)
+		contract, contractStatus := c.contractManager.CreateOrUpdate(config)
 		for _, proposal := range proposals.Proposals {
 			dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(contract, &proposal)
 			if proposalStatus == database.ProposalStatusChanged {

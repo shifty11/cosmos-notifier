@@ -11,19 +11,19 @@ const subscriptionsMsg = `🔔 *Subscriptions*
 Select the DAO's that you want to follow. You will receive notifications about new governance proposals.
 `
 
-func (client TelegramClient) handleSubscription(update *tgbotapi.Update) {
+func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 	userId := getUserIdX(update)
 	userName := getUserName(update)
 	chatId := getChatIdX(update)
 	chatName := getChatName(update)
 	isGroup := isGroupX(update)
 
-	client.TelegramChatManager.UpdateOrCreateChat(userId, userName, chatId, chatName, isGroup)
+	client.TelegramChatManager.CreateOrUpdateChat(userId, userName, chatId, chatName, isGroup)
 
 	if update.Message != nil && update.Message.Chat != nil && update.Message.Chat.Type == "group" {
-		log.Sugar.Debugf("Send subscriptions to group '%v' #%v", update.Message.Chat.Title, chatId)
+		log.Sugar.Debugf("Send start to group '%v' #%v", update.Message.Chat.Title, chatId)
 	} else {
-		log.Sugar.Debugf("Send subscriptions to user #%v", chatId)
+		log.Sugar.Debugf("Send start to user #%v", chatId)
 	}
 
 	var buttons [][]Button
