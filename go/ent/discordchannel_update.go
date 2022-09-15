@@ -55,23 +55,19 @@ func (dcu *DiscordChannelUpdate) SetName(s string) *DiscordChannelUpdate {
 	return dcu
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (dcu *DiscordChannelUpdate) SetUserID(id int) *DiscordChannelUpdate {
-	dcu.mutation.SetUserID(id)
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (dcu *DiscordChannelUpdate) AddUserIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.AddUserIDs(ids...)
 	return dcu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (dcu *DiscordChannelUpdate) SetNillableUserID(id *int) *DiscordChannelUpdate {
-	if id != nil {
-		dcu = dcu.SetUserID(*id)
+// AddUsers adds the "users" edges to the User entity.
+func (dcu *DiscordChannelUpdate) AddUsers(u ...*User) *DiscordChannelUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return dcu
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (dcu *DiscordChannelUpdate) SetUser(u *User) *DiscordChannelUpdate {
-	return dcu.SetUserID(u.ID)
+	return dcu.AddUserIDs(ids...)
 }
 
 // AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
@@ -94,10 +90,25 @@ func (dcu *DiscordChannelUpdate) Mutation() *DiscordChannelMutation {
 	return dcu.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (dcu *DiscordChannelUpdate) ClearUser() *DiscordChannelUpdate {
-	dcu.mutation.ClearUser()
+// ClearUsers clears all "users" edges to the User entity.
+func (dcu *DiscordChannelUpdate) ClearUsers() *DiscordChannelUpdate {
+	dcu.mutation.ClearUsers()
 	return dcu
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (dcu *DiscordChannelUpdate) RemoveUserIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.RemoveUserIDs(ids...)
+	return dcu
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (dcu *DiscordChannelUpdate) RemoveUsers(u ...*User) *DiscordChannelUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return dcu.RemoveUserIDs(ids...)
 }
 
 // ClearContracts clears all "contracts" edges to the Contract entity.
@@ -230,12 +241,12 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Column: discordchannel.FieldName,
 		})
 	}
-	if dcu.mutation.UserCleared() {
+	if dcu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   discordchannel.UserTable,
-			Columns: []string{discordchannel.UserColumn},
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -246,12 +257,31 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := dcu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := dcu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !dcu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   discordchannel.UserTable,
-			Columns: []string{discordchannel.UserColumn},
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -363,23 +393,19 @@ func (dcuo *DiscordChannelUpdateOne) SetName(s string) *DiscordChannelUpdateOne 
 	return dcuo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (dcuo *DiscordChannelUpdateOne) SetUserID(id int) *DiscordChannelUpdateOne {
-	dcuo.mutation.SetUserID(id)
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (dcuo *DiscordChannelUpdateOne) AddUserIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.AddUserIDs(ids...)
 	return dcuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (dcuo *DiscordChannelUpdateOne) SetNillableUserID(id *int) *DiscordChannelUpdateOne {
-	if id != nil {
-		dcuo = dcuo.SetUserID(*id)
+// AddUsers adds the "users" edges to the User entity.
+func (dcuo *DiscordChannelUpdateOne) AddUsers(u ...*User) *DiscordChannelUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return dcuo
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (dcuo *DiscordChannelUpdateOne) SetUser(u *User) *DiscordChannelUpdateOne {
-	return dcuo.SetUserID(u.ID)
+	return dcuo.AddUserIDs(ids...)
 }
 
 // AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
@@ -402,10 +428,25 @@ func (dcuo *DiscordChannelUpdateOne) Mutation() *DiscordChannelMutation {
 	return dcuo.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (dcuo *DiscordChannelUpdateOne) ClearUser() *DiscordChannelUpdateOne {
-	dcuo.mutation.ClearUser()
+// ClearUsers clears all "users" edges to the User entity.
+func (dcuo *DiscordChannelUpdateOne) ClearUsers() *DiscordChannelUpdateOne {
+	dcuo.mutation.ClearUsers()
 	return dcuo
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (dcuo *DiscordChannelUpdateOne) RemoveUserIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.RemoveUserIDs(ids...)
+	return dcuo
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (dcuo *DiscordChannelUpdateOne) RemoveUsers(u ...*User) *DiscordChannelUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return dcuo.RemoveUserIDs(ids...)
 }
 
 // ClearContracts clears all "contracts" edges to the Contract entity.
@@ -568,12 +609,12 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Column: discordchannel.FieldName,
 		})
 	}
-	if dcuo.mutation.UserCleared() {
+	if dcuo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   discordchannel.UserTable,
-			Columns: []string{discordchannel.UserColumn},
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -584,12 +625,31 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := dcuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := dcuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !dcuo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   discordchannel.UserTable,
-			Columns: []string{discordchannel.UserColumn},
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

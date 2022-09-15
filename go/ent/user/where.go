@@ -502,7 +502,7 @@ func HasTelegramChats() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TelegramChatsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TelegramChatsTable, TelegramChatsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -514,7 +514,7 @@ func HasTelegramChatsWith(preds ...predicate.TelegramChat) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(TelegramChatsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, TelegramChatsTable, TelegramChatsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -530,7 +530,7 @@ func HasDiscordChannels() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DiscordChannelsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, DiscordChannelsTable, DiscordChannelsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -542,7 +542,7 @@ func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DiscordChannelsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, DiscordChannelsTable, DiscordChannelsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -79,7 +79,7 @@ func (uq *UserQuery) QueryTelegramChats() *TelegramChatQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.TelegramChatsTable, user.TelegramChatsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.TelegramChatsTable, user.TelegramChatsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -101,7 +101,7 @@ func (uq *UserQuery) QueryDiscordChannels() *DiscordChannelQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.DiscordChannelsTable, user.DiscordChannelsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.DiscordChannelsTable, user.DiscordChannelsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -416,60 +416,108 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	}
 
 	if query := uq.withTelegramChats; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.TelegramChats = []*TelegramChat{}
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*User)
+		nids := make(map[int]map[*User]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.TelegramChats = []*TelegramChat{}
 		}
-		query.withFKs = true
-		query.Where(predicate.TelegramChat(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.TelegramChatsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(user.TelegramChatsTable)
+			s.Join(joinT).On(s.C(telegramchat.FieldID), joinT.C(user.TelegramChatsPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(user.TelegramChatsPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(user.TelegramChatsPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.telegram_chat_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "telegram_chat_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "telegram_chat_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
 			}
-			node.Edges.TelegramChats = append(node.Edges.TelegramChats, n)
+			for kn := range nodes {
+				kn.Edges.TelegramChats = append(kn.Edges.TelegramChats, n)
+			}
 		}
 	}
 
 	if query := uq.withDiscordChannels; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.DiscordChannels = []*DiscordChannel{}
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*User)
+		nids := make(map[int]map[*User]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.DiscordChannels = []*DiscordChannel{}
 		}
-		query.withFKs = true
-		query.Where(predicate.DiscordChannel(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.DiscordChannelsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(user.DiscordChannelsTable)
+			s.Join(joinT).On(s.C(discordchannel.FieldID), joinT.C(user.DiscordChannelsPrimaryKey[0]))
+			s.Where(sql.InValues(joinT.C(user.DiscordChannelsPrimaryKey[1]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(user.DiscordChannelsPrimaryKey[1]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.discord_channel_user
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "discord_channel_user" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "discord_channel_user" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
 			}
-			node.Edges.DiscordChannels = append(node.Edges.DiscordChannels, n)
+			for kn := range nodes {
+				kn.Edges.DiscordChannels = append(kn.Edges.DiscordChannels, n)
+			}
 		}
 	}
 

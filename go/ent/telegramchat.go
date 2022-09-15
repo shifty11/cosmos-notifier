@@ -9,7 +9,6 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
 )
 
 // TelegramChat is the model entity for the TelegramChat schema.
@@ -29,14 +28,13 @@ type TelegramChat struct {
 	IsGroup bool `json:"is_group,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TelegramChatQuery when eager-loading is set.
-	Edges              TelegramChatEdges `json:"edges"`
-	telegram_chat_user *int
+	Edges TelegramChatEdges `json:"edges"`
 }
 
 // TelegramChatEdges holds the relations/edges for other nodes in the graph.
 type TelegramChatEdges struct {
-	// User holds the value of the user edge.
-	User *User `json:"user,omitempty"`
+	// Users holds the value of the users edge.
+	Users []*User `json:"users,omitempty"`
 	// Contracts holds the value of the contracts edge.
 	Contracts []*Contract `json:"contracts,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -44,18 +42,13 @@ type TelegramChatEdges struct {
 	loadedTypes [2]bool
 }
 
-// UserOrErr returns the User value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TelegramChatEdges) UserOrErr() (*User, error) {
+// UsersOrErr returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e TelegramChatEdges) UsersOrErr() ([]*User, error) {
 	if e.loadedTypes[0] {
-		if e.User == nil {
-			// The edge user was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: user.Label}
-		}
-		return e.User, nil
+		return e.Users, nil
 	}
-	return nil, &NotLoadedError{edge: "user"}
+	return nil, &NotLoadedError{edge: "users"}
 }
 
 // ContractsOrErr returns the Contracts value or an error if the edge
@@ -80,8 +73,6 @@ func (*TelegramChat) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullString)
 		case telegramchat.FieldCreateTime, telegramchat.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
-		case telegramchat.ForeignKeys[0]: // telegram_chat_user
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type TelegramChat", columns[i])
 		}
@@ -133,21 +124,14 @@ func (tc *TelegramChat) assignValues(columns []string, values []interface{}) err
 			} else if value.Valid {
 				tc.IsGroup = value.Bool
 			}
-		case telegramchat.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field telegram_chat_user", value)
-			} else if value.Valid {
-				tc.telegram_chat_user = new(int)
-				*tc.telegram_chat_user = int(value.Int64)
-			}
 		}
 	}
 	return nil
 }
 
-// QueryUser queries the "user" edge of the TelegramChat entity.
-func (tc *TelegramChat) QueryUser() *UserQuery {
-	return (&TelegramChatClient{config: tc.config}).QueryUser(tc)
+// QueryUsers queries the "users" edge of the TelegramChat entity.
+func (tc *TelegramChat) QueryUsers() *UserQuery {
+	return (&TelegramChatClient{config: tc.config}).QueryUsers(tc)
 }
 
 // QueryContracts queries the "contracts" edge of the TelegramChat entity.

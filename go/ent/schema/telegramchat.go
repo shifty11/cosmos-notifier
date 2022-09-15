@@ -32,8 +32,8 @@ func (TelegramChat) Fields() []ent.Field {
 // Edges of the TelegramChat.
 func (TelegramChat) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("user", User.Type).
-			Unique(),
+		edge.To("users", User.Type).
+			Required(),
 		edge.To("contracts", Contract.Type),
 	}
 }

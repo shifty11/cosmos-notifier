@@ -32,8 +32,8 @@ func (DiscordChannel) Fields() []ent.Field {
 // Edges of the DiscordChannel.
 func (DiscordChannel) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("user", User.Type).
-			Unique(),
+		edge.To("users", User.Type).
+			Required(),
 		edge.To("contracts", Contract.Type),
 	}
 }

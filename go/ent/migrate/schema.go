@@ -40,21 +40,12 @@ var (
 		{Name: "channel_id", Type: field.TypeInt64, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
-		{Name: "discord_channel_user", Type: field.TypeInt, Nullable: true},
 	}
 	// DiscordChannelsTable holds the schema information for the "discord_channels" table.
 	DiscordChannelsTable = &schema.Table{
 		Name:       "discord_channels",
 		Columns:    DiscordChannelsColumns,
 		PrimaryKey: []*schema.Column{DiscordChannelsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "discord_channels_users_user",
-				Columns:    []*schema.Column{DiscordChannelsColumns[6]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// ProposalsColumns holds the columns for the "proposals" table.
 	ProposalsColumns = []*schema.Column{
@@ -90,21 +81,12 @@ var (
 		{Name: "chat_id", Type: field.TypeInt64, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "is_group", Type: field.TypeBool},
-		{Name: "telegram_chat_user", Type: field.TypeInt, Nullable: true},
 	}
 	// TelegramChatsTable holds the schema information for the "telegram_chats" table.
 	TelegramChatsTable = &schema.Table{
 		Name:       "telegram_chats",
 		Columns:    TelegramChatsColumns,
 		PrimaryKey: []*schema.Column{TelegramChatsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "telegram_chats_users_user",
-				Columns:    []*schema.Column{TelegramChatsColumns[6]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -120,6 +102,31 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// DiscordChannelUsersColumns holds the columns for the "discord_channel_users" table.
+	DiscordChannelUsersColumns = []*schema.Column{
+		{Name: "discord_channel_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// DiscordChannelUsersTable holds the schema information for the "discord_channel_users" table.
+	DiscordChannelUsersTable = &schema.Table{
+		Name:       "discord_channel_users",
+		Columns:    DiscordChannelUsersColumns,
+		PrimaryKey: []*schema.Column{DiscordChannelUsersColumns[0], DiscordChannelUsersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "discord_channel_users_discord_channel_id",
+				Columns:    []*schema.Column{DiscordChannelUsersColumns[0]},
+				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "discord_channel_users_user_id",
+				Columns:    []*schema.Column{DiscordChannelUsersColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// DiscordChannelContractsColumns holds the columns for the "discord_channel_contracts" table.
 	DiscordChannelContractsColumns = []*schema.Column{
@@ -142,6 +149,31 @@ var (
 				Symbol:     "discord_channel_contracts_contract_id",
 				Columns:    []*schema.Column{DiscordChannelContractsColumns[1]},
 				RefColumns: []*schema.Column{ContractsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// TelegramChatUsersColumns holds the columns for the "telegram_chat_users" table.
+	TelegramChatUsersColumns = []*schema.Column{
+		{Name: "telegram_chat_id", Type: field.TypeInt},
+		{Name: "user_id", Type: field.TypeInt},
+	}
+	// TelegramChatUsersTable holds the schema information for the "telegram_chat_users" table.
+	TelegramChatUsersTable = &schema.Table{
+		Name:       "telegram_chat_users",
+		Columns:    TelegramChatUsersColumns,
+		PrimaryKey: []*schema.Column{TelegramChatUsersColumns[0], TelegramChatUsersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "telegram_chat_users_telegram_chat_id",
+				Columns:    []*schema.Column{TelegramChatUsersColumns[0]},
+				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "telegram_chat_users_user_id",
+				Columns:    []*schema.Column{TelegramChatUsersColumns[1]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -178,17 +210,21 @@ var (
 		ProposalsTable,
 		TelegramChatsTable,
 		UsersTable,
+		DiscordChannelUsersTable,
 		DiscordChannelContractsTable,
+		TelegramChatUsersTable,
 		TelegramChatContractsTable,
 	}
 )
 
 func init() {
-	DiscordChannelsTable.ForeignKeys[0].RefTable = UsersTable
 	ProposalsTable.ForeignKeys[0].RefTable = ContractsTable
-	TelegramChatsTable.ForeignKeys[0].RefTable = UsersTable
+	DiscordChannelUsersTable.ForeignKeys[0].RefTable = DiscordChannelsTable
+	DiscordChannelUsersTable.ForeignKeys[1].RefTable = UsersTable
 	DiscordChannelContractsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
 	DiscordChannelContractsTable.ForeignKeys[1].RefTable = ContractsTable
+	TelegramChatUsersTable.ForeignKeys[0].RefTable = TelegramChatsTable
+	TelegramChatUsersTable.ForeignKeys[1].RefTable = UsersTable
 	TelegramChatContractsTable.ForeignKeys[0].RefTable = TelegramChatsTable
 	TelegramChatContractsTable.ForeignKeys[1].RefTable = ContractsTable
 }

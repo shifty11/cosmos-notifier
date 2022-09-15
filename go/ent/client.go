@@ -374,15 +374,15 @@ func (c *DiscordChannelClient) GetX(ctx context.Context, id int) *DiscordChannel
 	return obj
 }
 
-// QueryUser queries the user edge of a DiscordChannel.
-func (c *DiscordChannelClient) QueryUser(dc *DiscordChannel) *UserQuery {
+// QueryUsers queries the users edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryUsers(dc *DiscordChannel) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, discordchannel.UserTable, discordchannel.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.UsersTable, discordchannel.UsersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
 		return fromV, nil
@@ -602,15 +602,15 @@ func (c *TelegramChatClient) GetX(ctx context.Context, id int) *TelegramChat {
 	return obj
 }
 
-// QueryUser queries the user edge of a TelegramChat.
-func (c *TelegramChatClient) QueryUser(tc *TelegramChat) *UserQuery {
+// QueryUsers queries the users edge of a TelegramChat.
+func (c *TelegramChatClient) QueryUsers(tc *TelegramChat) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, telegramchat.UserTable, telegramchat.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.UsersTable, telegramchat.UsersPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
 		return fromV, nil
@@ -732,7 +732,7 @@ func (c *UserClient) QueryTelegramChats(u *User) *TelegramChatQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.TelegramChatsTable, user.TelegramChatsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.TelegramChatsTable, user.TelegramChatsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -748,7 +748,7 @@ func (c *UserClient) QueryDiscordChannels(u *User) *DiscordChannelQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, true, user.DiscordChannelsTable, user.DiscordChannelsColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, user.DiscordChannelsTable, user.DiscordChannelsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil

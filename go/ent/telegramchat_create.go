@@ -68,23 +68,19 @@ func (tcc *TelegramChatCreate) SetIsGroup(b bool) *TelegramChatCreate {
 	return tcc
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (tcc *TelegramChatCreate) SetUserID(id int) *TelegramChatCreate {
-	tcc.mutation.SetUserID(id)
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (tcc *TelegramChatCreate) AddUserIDs(ids ...int) *TelegramChatCreate {
+	tcc.mutation.AddUserIDs(ids...)
 	return tcc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tcc *TelegramChatCreate) SetNillableUserID(id *int) *TelegramChatCreate {
-	if id != nil {
-		tcc = tcc.SetUserID(*id)
+// AddUsers adds the "users" edges to the User entity.
+func (tcc *TelegramChatCreate) AddUsers(u ...*User) *TelegramChatCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return tcc
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (tcc *TelegramChatCreate) SetUser(u *User) *TelegramChatCreate {
-	return tcc.SetUserID(u.ID)
+	return tcc.AddUserIDs(ids...)
 }
 
 // AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
@@ -206,6 +202,9 @@ func (tcc *TelegramChatCreate) check() error {
 	if _, ok := tcc.mutation.IsGroup(); !ok {
 		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "TelegramChat.is_group"`)}
 	}
+	if len(tcc.mutation.UsersIDs()) == 0 {
+		return &ValidationError{Name: "users", err: errors.New(`ent: missing required edge "TelegramChat.users"`)}
+	}
 	return nil
 }
 
@@ -273,12 +272,12 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 		})
 		_node.IsGroup = value
 	}
-	if nodes := tcc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := tcc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   telegramchat.UserTable,
-			Columns: []string{telegramchat.UserColumn},
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -290,7 +289,6 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.telegram_chat_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tcc.mutation.ContractsIDs(); len(nodes) > 0 {

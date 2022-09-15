@@ -27,9 +27,8 @@ type TelegramChatQuery struct {
 	fields     []string
 	predicates []predicate.TelegramChat
 	// eager-loading edges.
-	withUser      *UserQuery
+	withUsers     *UserQuery
 	withContracts *ContractQuery
-	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,8 +65,8 @@ func (tcq *TelegramChatQuery) Order(o ...OrderFunc) *TelegramChatQuery {
 	return tcq
 }
 
-// QueryUser chains the current query on the "user" edge.
-func (tcq *TelegramChatQuery) QueryUser() *UserQuery {
+// QueryUsers chains the current query on the "users" edge.
+func (tcq *TelegramChatQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: tcq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tcq.prepareQuery(ctx); err != nil {
@@ -80,7 +79,7 @@ func (tcq *TelegramChatQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, telegramchat.UserTable, telegramchat.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.UsersTable, telegramchat.UsersPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -291,7 +290,7 @@ func (tcq *TelegramChatQuery) Clone() *TelegramChatQuery {
 		offset:        tcq.offset,
 		order:         append([]OrderFunc{}, tcq.order...),
 		predicates:    append([]predicate.TelegramChat{}, tcq.predicates...),
-		withUser:      tcq.withUser.Clone(),
+		withUsers:     tcq.withUsers.Clone(),
 		withContracts: tcq.withContracts.Clone(),
 		// clone intermediate query.
 		sql:    tcq.sql.Clone(),
@@ -300,14 +299,14 @@ func (tcq *TelegramChatQuery) Clone() *TelegramChatQuery {
 	}
 }
 
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (tcq *TelegramChatQuery) WithUser(opts ...func(*UserQuery)) *TelegramChatQuery {
+// WithUsers tells the query-builder to eager-load the nodes that are connected to
+// the "users" edge. The optional arguments are used to configure the query builder of the edge.
+func (tcq *TelegramChatQuery) WithUsers(opts ...func(*UserQuery)) *TelegramChatQuery {
 	query := &UserQuery{config: tcq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	tcq.withUser = query
+	tcq.withUsers = query
 	return tcq
 }
 
@@ -391,19 +390,12 @@ func (tcq *TelegramChatQuery) prepareQuery(ctx context.Context) error {
 func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*TelegramChat, error) {
 	var (
 		nodes       = []*TelegramChat{}
-		withFKs     = tcq.withFKs
 		_spec       = tcq.querySpec()
 		loadedTypes = [2]bool{
-			tcq.withUser != nil,
+			tcq.withUsers != nil,
 			tcq.withContracts != nil,
 		}
 	)
-	if tcq.withUser != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, telegramchat.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*TelegramChat).scanValues(nil, columns)
 	}
@@ -423,31 +415,55 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 		return nodes, nil
 	}
 
-	if query := tcq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*TelegramChat)
-		for i := range nodes {
-			if nodes[i].telegram_chat_user == nil {
-				continue
-			}
-			fk := *nodes[i].telegram_chat_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+	if query := tcq.withUsers; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*TelegramChat)
+		nids := make(map[int]map[*TelegramChat]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Users = []*User{}
 		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(telegramchat.UsersTable)
+			s.Join(joinT).On(s.C(user.FieldID), joinT.C(telegramchat.UsersPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(telegramchat.UsersPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(telegramchat.UsersPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TelegramChat]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "telegram_chat_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
+			for kn := range nodes {
+				kn.Edges.Users = append(kn.Edges.Users, n)
 			}
 		}
 	}

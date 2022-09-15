@@ -28,20 +28,16 @@ const (
 	EdgeDiscordChannels = "discord_channels"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// TelegramChatsTable is the table that holds the telegram_chats relation/edge.
-	TelegramChatsTable = "telegram_chats"
+	// TelegramChatsTable is the table that holds the telegram_chats relation/edge. The primary key declared below.
+	TelegramChatsTable = "telegram_chat_users"
 	// TelegramChatsInverseTable is the table name for the TelegramChat entity.
 	// It exists in this package in order to avoid circular dependency with the "telegramchat" package.
 	TelegramChatsInverseTable = "telegram_chats"
-	// TelegramChatsColumn is the table column denoting the telegram_chats relation/edge.
-	TelegramChatsColumn = "telegram_chat_user"
-	// DiscordChannelsTable is the table that holds the discord_channels relation/edge.
-	DiscordChannelsTable = "discord_channels"
+	// DiscordChannelsTable is the table that holds the discord_channels relation/edge. The primary key declared below.
+	DiscordChannelsTable = "discord_channel_users"
 	// DiscordChannelsInverseTable is the table name for the DiscordChannel entity.
 	// It exists in this package in order to avoid circular dependency with the "discordchannel" package.
 	DiscordChannelsInverseTable = "discord_channels"
-	// DiscordChannelsColumn is the table column denoting the discord_channels relation/edge.
-	DiscordChannelsColumn = "discord_channel_user"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -53,6 +49,15 @@ var Columns = []string{
 	FieldName,
 	FieldType,
 }
+
+var (
+	// TelegramChatsPrimaryKey and TelegramChatsColumn2 are the table columns denoting the
+	// primary key for the telegram_chats relation (M2M).
+	TelegramChatsPrimaryKey = []string{"telegram_chat_id", "user_id"}
+	// DiscordChannelsPrimaryKey and DiscordChannelsColumn2 are the table columns denoting the
+	// primary key for the discord_channels relation (M2M).
+	DiscordChannelsPrimaryKey = []string{"discord_channel_id", "user_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

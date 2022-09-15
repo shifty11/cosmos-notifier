@@ -27,9 +27,8 @@ type DiscordChannelQuery struct {
 	fields     []string
 	predicates []predicate.DiscordChannel
 	// eager-loading edges.
-	withUser      *UserQuery
+	withUsers     *UserQuery
 	withContracts *ContractQuery
-	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,8 +65,8 @@ func (dcq *DiscordChannelQuery) Order(o ...OrderFunc) *DiscordChannelQuery {
 	return dcq
 }
 
-// QueryUser chains the current query on the "user" edge.
-func (dcq *DiscordChannelQuery) QueryUser() *UserQuery {
+// QueryUsers chains the current query on the "users" edge.
+func (dcq *DiscordChannelQuery) QueryUsers() *UserQuery {
 	query := &UserQuery{config: dcq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dcq.prepareQuery(ctx); err != nil {
@@ -80,7 +79,7 @@ func (dcq *DiscordChannelQuery) QueryUser() *UserQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, discordchannel.UserTable, discordchannel.UserColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.UsersTable, discordchannel.UsersPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
 		return fromU, nil
@@ -291,7 +290,7 @@ func (dcq *DiscordChannelQuery) Clone() *DiscordChannelQuery {
 		offset:        dcq.offset,
 		order:         append([]OrderFunc{}, dcq.order...),
 		predicates:    append([]predicate.DiscordChannel{}, dcq.predicates...),
-		withUser:      dcq.withUser.Clone(),
+		withUsers:     dcq.withUsers.Clone(),
 		withContracts: dcq.withContracts.Clone(),
 		// clone intermediate query.
 		sql:    dcq.sql.Clone(),
@@ -300,14 +299,14 @@ func (dcq *DiscordChannelQuery) Clone() *DiscordChannelQuery {
 	}
 }
 
-// WithUser tells the query-builder to eager-load the nodes that are connected to
-// the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (dcq *DiscordChannelQuery) WithUser(opts ...func(*UserQuery)) *DiscordChannelQuery {
+// WithUsers tells the query-builder to eager-load the nodes that are connected to
+// the "users" edge. The optional arguments are used to configure the query builder of the edge.
+func (dcq *DiscordChannelQuery) WithUsers(opts ...func(*UserQuery)) *DiscordChannelQuery {
 	query := &UserQuery{config: dcq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	dcq.withUser = query
+	dcq.withUsers = query
 	return dcq
 }
 
@@ -391,19 +390,12 @@ func (dcq *DiscordChannelQuery) prepareQuery(ctx context.Context) error {
 func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*DiscordChannel, error) {
 	var (
 		nodes       = []*DiscordChannel{}
-		withFKs     = dcq.withFKs
 		_spec       = dcq.querySpec()
 		loadedTypes = [2]bool{
-			dcq.withUser != nil,
+			dcq.withUsers != nil,
 			dcq.withContracts != nil,
 		}
 	)
-	if dcq.withUser != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, discordchannel.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		return (*DiscordChannel).scanValues(nil, columns)
 	}
@@ -423,31 +415,55 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		return nodes, nil
 	}
 
-	if query := dcq.withUser; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*DiscordChannel)
-		for i := range nodes {
-			if nodes[i].discord_channel_user == nil {
-				continue
-			}
-			fk := *nodes[i].discord_channel_user
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
+	if query := dcq.withUsers; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*DiscordChannel)
+		nids := make(map[int]map[*DiscordChannel]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Users = []*User{}
 		}
-		query.Where(user.IDIn(ids...))
-		neighbors, err := query.All(ctx)
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(discordchannel.UsersTable)
+			s.Join(joinT).On(s.C(user.FieldID), joinT.C(discordchannel.UsersPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(discordchannel.UsersPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(discordchannel.UsersPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*DiscordChannel]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
+			nodes, ok := nids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "discord_channel_user" returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
 			}
-			for i := range nodes {
-				nodes[i].Edges.User = n
+			for kn := range nodes {
+				kn.Edges.Users = append(kn.Edges.Users, n)
 			}
 		}
 	}

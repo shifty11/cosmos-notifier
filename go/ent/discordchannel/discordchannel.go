@@ -21,19 +21,17 @@ const (
 	FieldName = "name"
 	// FieldIsGroup holds the string denoting the is_group field in the database.
 	FieldIsGroup = "is_group"
-	// EdgeUser holds the string denoting the user edge name in mutations.
-	EdgeUser = "user"
+	// EdgeUsers holds the string denoting the users edge name in mutations.
+	EdgeUsers = "users"
 	// EdgeContracts holds the string denoting the contracts edge name in mutations.
 	EdgeContracts = "contracts"
 	// Table holds the table name of the discordchannel in the database.
 	Table = "discord_channels"
-	// UserTable is the table that holds the user relation/edge.
-	UserTable = "discord_channels"
-	// UserInverseTable is the table name for the User entity.
+	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
+	UsersTable = "discord_channel_users"
+	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
-	UserInverseTable = "users"
-	// UserColumn is the table column denoting the user relation/edge.
-	UserColumn = "discord_channel_user"
+	UsersInverseTable = "users"
 	// ContractsTable is the table that holds the contracts relation/edge. The primary key declared below.
 	ContractsTable = "discord_channel_contracts"
 	// ContractsInverseTable is the table name for the Contract entity.
@@ -51,13 +49,10 @@ var Columns = []string{
 	FieldIsGroup,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "discord_channels"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"discord_channel_user",
-}
-
 var (
+	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
+	// primary key for the users relation (M2M).
+	UsersPrimaryKey = []string{"discord_channel_id", "user_id"}
 	// ContractsPrimaryKey and ContractsColumn2 are the table columns denoting the
 	// primary key for the contracts relation (M2M).
 	ContractsPrimaryKey = []string{"discord_channel_id", "contract_id"}
@@ -67,11 +62,6 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}

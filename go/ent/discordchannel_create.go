@@ -68,23 +68,19 @@ func (dcc *DiscordChannelCreate) SetIsGroup(b bool) *DiscordChannelCreate {
 	return dcc
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (dcc *DiscordChannelCreate) SetUserID(id int) *DiscordChannelCreate {
-	dcc.mutation.SetUserID(id)
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (dcc *DiscordChannelCreate) AddUserIDs(ids ...int) *DiscordChannelCreate {
+	dcc.mutation.AddUserIDs(ids...)
 	return dcc
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (dcc *DiscordChannelCreate) SetNillableUserID(id *int) *DiscordChannelCreate {
-	if id != nil {
-		dcc = dcc.SetUserID(*id)
+// AddUsers adds the "users" edges to the User entity.
+func (dcc *DiscordChannelCreate) AddUsers(u ...*User) *DiscordChannelCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return dcc
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (dcc *DiscordChannelCreate) SetUser(u *User) *DiscordChannelCreate {
-	return dcc.SetUserID(u.ID)
+	return dcc.AddUserIDs(ids...)
 }
 
 // AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
@@ -206,6 +202,9 @@ func (dcc *DiscordChannelCreate) check() error {
 	if _, ok := dcc.mutation.IsGroup(); !ok {
 		return &ValidationError{Name: "is_group", err: errors.New(`ent: missing required field "DiscordChannel.is_group"`)}
 	}
+	if len(dcc.mutation.UsersIDs()) == 0 {
+		return &ValidationError{Name: "users", err: errors.New(`ent: missing required edge "DiscordChannel.users"`)}
+	}
 	return nil
 }
 
@@ -273,12 +272,12 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 		})
 		_node.IsGroup = value
 	}
-	if nodes := dcc.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := dcc.mutation.UsersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   discordchannel.UserTable,
-			Columns: []string{discordchannel.UserColumn},
+			Table:   discordchannel.UsersTable,
+			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -290,7 +289,6 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.discord_channel_user = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := dcc.mutation.ContractsIDs(); len(nodes) > 0 {

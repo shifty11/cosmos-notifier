@@ -55,23 +55,19 @@ func (tcu *TelegramChatUpdate) SetName(s string) *TelegramChatUpdate {
 	return tcu
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (tcu *TelegramChatUpdate) SetUserID(id int) *TelegramChatUpdate {
-	tcu.mutation.SetUserID(id)
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (tcu *TelegramChatUpdate) AddUserIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.AddUserIDs(ids...)
 	return tcu
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tcu *TelegramChatUpdate) SetNillableUserID(id *int) *TelegramChatUpdate {
-	if id != nil {
-		tcu = tcu.SetUserID(*id)
+// AddUsers adds the "users" edges to the User entity.
+func (tcu *TelegramChatUpdate) AddUsers(u ...*User) *TelegramChatUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return tcu
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (tcu *TelegramChatUpdate) SetUser(u *User) *TelegramChatUpdate {
-	return tcu.SetUserID(u.ID)
+	return tcu.AddUserIDs(ids...)
 }
 
 // AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
@@ -94,10 +90,25 @@ func (tcu *TelegramChatUpdate) Mutation() *TelegramChatMutation {
 	return tcu.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (tcu *TelegramChatUpdate) ClearUser() *TelegramChatUpdate {
-	tcu.mutation.ClearUser()
+// ClearUsers clears all "users" edges to the User entity.
+func (tcu *TelegramChatUpdate) ClearUsers() *TelegramChatUpdate {
+	tcu.mutation.ClearUsers()
 	return tcu
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (tcu *TelegramChatUpdate) RemoveUserIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.RemoveUserIDs(ids...)
+	return tcu
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (tcu *TelegramChatUpdate) RemoveUsers(u ...*User) *TelegramChatUpdate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tcu.RemoveUserIDs(ids...)
 }
 
 // ClearContracts clears all "contracts" edges to the Contract entity.
@@ -230,12 +241,12 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: telegramchat.FieldName,
 		})
 	}
-	if tcu.mutation.UserCleared() {
+	if tcu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   telegramchat.UserTable,
-			Columns: []string{telegramchat.UserColumn},
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -246,12 +257,31 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tcu.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := tcu.mutation.RemovedUsersIDs(); len(nodes) > 0 && !tcu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   telegramchat.UserTable,
-			Columns: []string{telegramchat.UserColumn},
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -363,23 +393,19 @@ func (tcuo *TelegramChatUpdateOne) SetName(s string) *TelegramChatUpdateOne {
 	return tcuo
 }
 
-// SetUserID sets the "user" edge to the User entity by ID.
-func (tcuo *TelegramChatUpdateOne) SetUserID(id int) *TelegramChatUpdateOne {
-	tcuo.mutation.SetUserID(id)
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (tcuo *TelegramChatUpdateOne) AddUserIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.AddUserIDs(ids...)
 	return tcuo
 }
 
-// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
-func (tcuo *TelegramChatUpdateOne) SetNillableUserID(id *int) *TelegramChatUpdateOne {
-	if id != nil {
-		tcuo = tcuo.SetUserID(*id)
+// AddUsers adds the "users" edges to the User entity.
+func (tcuo *TelegramChatUpdateOne) AddUsers(u ...*User) *TelegramChatUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
 	}
-	return tcuo
-}
-
-// SetUser sets the "user" edge to the User entity.
-func (tcuo *TelegramChatUpdateOne) SetUser(u *User) *TelegramChatUpdateOne {
-	return tcuo.SetUserID(u.ID)
+	return tcuo.AddUserIDs(ids...)
 }
 
 // AddContractIDs adds the "contracts" edge to the Contract entity by IDs.
@@ -402,10 +428,25 @@ func (tcuo *TelegramChatUpdateOne) Mutation() *TelegramChatMutation {
 	return tcuo.mutation
 }
 
-// ClearUser clears the "user" edge to the User entity.
-func (tcuo *TelegramChatUpdateOne) ClearUser() *TelegramChatUpdateOne {
-	tcuo.mutation.ClearUser()
+// ClearUsers clears all "users" edges to the User entity.
+func (tcuo *TelegramChatUpdateOne) ClearUsers() *TelegramChatUpdateOne {
+	tcuo.mutation.ClearUsers()
 	return tcuo
+}
+
+// RemoveUserIDs removes the "users" edge to User entities by IDs.
+func (tcuo *TelegramChatUpdateOne) RemoveUserIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.RemoveUserIDs(ids...)
+	return tcuo
+}
+
+// RemoveUsers removes "users" edges to User entities.
+func (tcuo *TelegramChatUpdateOne) RemoveUsers(u ...*User) *TelegramChatUpdateOne {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return tcuo.RemoveUserIDs(ids...)
 }
 
 // ClearContracts clears all "contracts" edges to the Contract entity.
@@ -568,12 +609,12 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Column: telegramchat.FieldName,
 		})
 	}
-	if tcuo.mutation.UserCleared() {
+	if tcuo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   telegramchat.UserTable,
-			Columns: []string{telegramchat.UserColumn},
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -584,12 +625,31 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tcuo.mutation.UserIDs(); len(nodes) > 0 {
+	if nodes := tcuo.mutation.RemovedUsersIDs(); len(nodes) > 0 && !tcuo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   telegramchat.UserTable,
-			Columns: []string{telegramchat.UserColumn},
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.UsersTable,
+			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
