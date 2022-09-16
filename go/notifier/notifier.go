@@ -1,29 +1,40 @@
 package notifier
 
 import (
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
 )
 
 type Notifier struct {
-	telegramApi         *tgbotapi.BotAPI
-	telegramChatManager database.ITelegramChatManager
+	telegramNotifier *TelegramNotifier
+	discordNotifier  *DiscordNotifier
 }
 
-func NewNotifier(managers *database.DbManagers, telegramToken string, telegramEndpoint string) *Notifier {
-	if telegramEndpoint == "" {
-		telegramEndpoint = tgbotapi.APIEndpoint
+func NewNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string, discordBotToken string) *Notifier {
+	return &Notifier{
+		telegramNotifier: NewTelegramNotifier(managers, telegramBotToken, telegramEndpoint),
+		discordNotifier:  NewDiscordNotifier(managers, discordBotToken),
 	}
-	telegramApi, err := tgbotapi.NewBotAPIWithAPIEndpoint(telegramToken, telegramEndpoint)
-	if err != nil {
-		log.Sugar.Panic(err)
-	}
-	return &Notifier{telegramApi: telegramApi, telegramChatManager: managers.TelegramChatManager}
 }
 
 func (n *Notifier) Notify(entContract *ent.Contract, entProp *ent.Proposal) {
 	log.Sugar.Infof("Notifying for proposal %v on %v", entProp.ProposalID, entContract.Name)
-	n.notifyTelegram(entContract, entProp)
+	n.telegramNotifier.Notify(entContract, entProp)
+	n.discordNotifier.Notify(entContract, entProp)
+}
+
+func chunks(text string, limit int) []string {
+	if len(text) <= limit {
+		return []string{text}
+	}
+	var result []string
+	for len(text) > 0 {
+		if len(text) < limit {
+			limit = len(text)
+		}
+		result = append(result, text[:limit])
+		text = text[limit:]
+	}
+	return result
 }

@@ -47,7 +47,7 @@ func (cc *ContractClient) config() (*types.ContractData, error) {
 		if resp.StatusCode == http.StatusNotAcceptable {
 			return cc.configV1(jsonData)
 		}
-		log.Sugar.Errorf("error querying /get_config (%v): %v", resp.StatusCode, resp.Body)
+		log.Sugar.Errorf("error querying /get_config: %v", resp.StatusCode)
 		return nil, errors.New("error querying /get_config")
 	}
 
@@ -69,7 +69,7 @@ func (cc *ContractClient) configV1(jsonData []byte) (*types.ContractData, error)
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		log.Sugar.Errorf("error querying /config (%v): %v", resp.StatusCode, resp.Body)
+		log.Sugar.Errorf("error querying /config: %v", resp.StatusCode)
 		return nil, errors.New("error querying /config")
 	}
 
@@ -105,7 +105,7 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 			}
 			return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
 		}
-		log.Sugar.Errorf("error querying /list_proposals (%v): %v", resp.StatusCode, resp.Body)
+		log.Sugar.Errorf("error querying /list_proposals: %v", resp.StatusCode)
 		return nil, errors.New("error querying /list_proposals")
 	}
 
@@ -132,7 +132,7 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 
 		var propsList = propsV1.ToProposalList()
 		if len(propsList.Proposals) == 0 || propsList.Proposals[0].Status == "" {
-			return nil, errors.New(fmt.Sprintf("could not decode proposals of contract %v: %v", cc.ContractAddress, resp.Body))
+			return nil, errors.New(fmt.Sprintf("could not decode proposals of contract %v", cc.ContractAddress))
 		}
 		return propsList, nil
 	}
@@ -148,7 +148,7 @@ func (cc *ContractClient) proposalModules(jsonData []byte) []string {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		log.Sugar.Errorf("error querying /proposal_modules (%v): %v", resp.StatusCode, resp.Body)
+		log.Sugar.Errorf("error querying /proposal_modules: %v", resp.StatusCode)
 		return nil
 	}
 
@@ -176,7 +176,7 @@ func (cc *ContractClient) proposal(proposalId int) (*types.Proposal, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		log.Sugar.Errorf("error querying /proposal (%v): %v", resp.StatusCode, resp.Body)
+		log.Sugar.Errorf("error querying /proposal: %v", resp.StatusCode)
 		return nil, errors.New("error querying /proposal")
 	}
 

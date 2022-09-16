@@ -4,6 +4,7 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"golang.org/x/exp/slices"
@@ -18,24 +19,50 @@ var forbiddenErrors = []string{
 	"Bad Request: chat not found",
 }
 
-func shouldDeleteUser(err error) bool {
+type TelegramNotifier struct {
+	telegramApi         *tgbotapi.BotAPI
+	telegramChatManager database.ITelegramChatManager
+}
+
+func NewTelegramNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string) *TelegramNotifier {
+	if telegramEndpoint == "" {
+		telegramEndpoint = tgbotapi.APIEndpoint
+	}
+	telegramApi, err := tgbotapi.NewBotAPIWithAPIEndpoint(telegramBotToken, telegramEndpoint)
+	if err != nil {
+		log.Sugar.Panicf("Cannot create telegram bot: %v", err)
+	}
+	return &TelegramNotifier{
+		telegramApi:         telegramApi,
+		telegramChatManager: managers.TelegramChatManager,
+	}
+}
+
+func (n *TelegramNotifier) shouldDeleteUser(err error) bool {
 	if err != nil {
 		return slices.Contains(forbiddenErrors, err.Error())
 	}
 	return false
 }
 
-func (n *Notifier) notifyTelegram(entContract *ent.Contract, entProp *ent.Proposal) {
+func (n *TelegramNotifier) Notify(entContract *ent.Contract, entProp *ent.Proposal) {
 	p := bluemonday.StripTagsPolicy()
 
+	var textMsgs []string
 	text := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>",
 		entContract.Name,
 		entProp.ProposalID,
 		p.Sanitize(entProp.Title),
 		p.Sanitize(entProp.Description),
 	)
-	if len(text) > 4096 {
-		text = text[:4088] + "</i> ..."
+	if len(text) <= 4096 {
+		textMsgs = append(textMsgs, text)
+	} else {
+		textMsgs = append(textMsgs, text[:4092]+"</i>")
+		text = text[:len(text)-1] // remove the last character which is a *
+		for _, chunk := range chunks(text[4092:], 4089) {
+			textMsgs = append(textMsgs, fmt.Sprintf("<i>%v</i>", chunk))
+		}
 	}
 
 	var errIds []int64
@@ -47,7 +74,7 @@ func (n *Notifier) notifyTelegram(entContract *ent.Contract, entProp *ent.Propos
 
 		_, err := n.telegramApi.Send(msg)
 		if err != nil {
-			if shouldDeleteUser(err) {
+			if n.shouldDeleteUser(err) {
 				errIds = append(errIds, tg.ChatId)
 			} else {
 				log.Sugar.Errorf("Error sending telegram message to %v (%v): %v", tg.Name, tg.ChatId, err)

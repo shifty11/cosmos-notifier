@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
@@ -12,9 +13,11 @@ import (
 type IDiscordChannelManager interface {
 	AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error)
 	CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool)
-	Delete(userId int64, channelId int64)
+	Delete(userId int64, channelId int64) error
 	GetChannelUsers(channelId int64) []*ent.User
 	CountSubscriptions(channelId int64) int
+	GetSubscribedIds(entContract *ent.Contract) []DiscordChannelQueryResult
+	DeleteMultiple(channelIds []int64)
 }
 
 type DiscordChannelManager struct {
@@ -130,7 +133,7 @@ func (m *DiscordChannelManager) CreateOrUpdateChannel(userId int64, userName str
 
 // Delete deletes a discord channel for a user
 // If the user doesn't have any more channels, the user is deleted
-func (m *DiscordChannelManager) Delete(userId int64, channelId int64) {
+func (m *DiscordChannelManager) Delete(userId int64, channelId int64) error {
 	log.Sugar.Debugf("Deleting discord channel %d for user %d", channelId, userId)
 	discordChannel, err := m.client.DiscordChannel.
 		Query().
@@ -139,7 +142,7 @@ func (m *DiscordChannelManager) Delete(userId int64, channelId int64) {
 		Only(m.ctx)
 	if err != nil {
 		log.Sugar.Errorf("Could not find discord channel: %v", err)
-		return
+		return err
 	}
 	var entUser *ent.User
 	for _, u := range discordChannel.Edges.Users {
@@ -150,7 +153,7 @@ func (m *DiscordChannelManager) Delete(userId int64, channelId int64) {
 	}
 	if entUser == nil {
 		log.Sugar.Errorf("Could not find user: %v", err)
-		return
+		return errors.New("could not find user")
 	}
 	if len(discordChannel.Edges.Users) == 1 {
 		err := m.client.DiscordChannel.
@@ -169,6 +172,30 @@ func (m *DiscordChannelManager) Delete(userId int64, channelId int64) {
 		}
 	}
 	m.userManager.deleteIfUnused(entUser)
+	return err
+}
+
+func (m *DiscordChannelManager) DeleteMultiple(channelIds []int64) {
+	log.Sugar.Debugf("Delete %v discord channels", len(channelIds))
+
+	for _, channelId := range channelIds {
+		discordChannels, err := m.client.DiscordChannel.
+			Query().
+			Where(discordchannel.ChannelID(channelId)).
+			WithUsers().
+			All(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Error while querying discord channels: %v", err)
+		}
+		for _, channel := range discordChannels {
+			for _, u := range channel.Edges.Users {
+				err := m.Delete(u.UserID, channelId)
+				if err != nil {
+					log.Sugar.Errorf("Error while deleting discord channels: %v", err)
+				}
+			}
+		}
+	}
 }
 
 func (m *DiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
@@ -193,4 +220,21 @@ func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
 		log.Sugar.Errorf("Could not count subscriptions for discord channel: %v", err)
 	}
 	return count
+}
+
+type DiscordChannelQueryResult struct {
+	ChannelId int64  `json:"channel_id"`
+	Name      string `json:"name"`
+}
+
+func (m *DiscordChannelManager) GetSubscribedIds(entContract *ent.Contract) []DiscordChannelQueryResult {
+	var v []DiscordChannelQueryResult
+	err := entContract.
+		QueryDiscordChannels().
+		Select(discordchannel.FieldChannelID, discordchannel.FieldName).
+		Scan(m.ctx, &v)
+	if err != nil {
+		log.Sugar.Panicf("Could not get discord channels for contract %v (%v): %v", entContract.Name, entContract.Address, err)
+	}
+	return v
 }
