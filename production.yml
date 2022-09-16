@@ -33,6 +33,17 @@ services:
       db-migration:
         condition: service_completed_successfully
 
+  discord:
+    build: go
+    container_name: daodao_notifier_discord
+    working_dir: /app
+    env_file:
+      - .env
+    command: "/dao-dao-notifier start-discord-bot"
+    depends_on:
+      db-migration:
+        condition: service_completed_successfully
+
   grpc:
     build: go
     container_name: daodao_notifier_grpc
