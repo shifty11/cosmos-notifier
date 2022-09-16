@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"errors"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
@@ -13,7 +12,9 @@ import (
 type IDiscordChannelManager interface {
 	AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error)
 	CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool)
-	Delete(userId int64, channelId int64) error
+	Delete(userId int64, channelId int64)
+	GetChannelUsers(channelId int64) []*ent.User
+	CountSubscriptions(channelId int64) int
 }
 
 type DiscordChannelManager struct {
@@ -129,7 +130,7 @@ func (m *DiscordChannelManager) CreateOrUpdateChannel(userId int64, userName str
 
 // Delete deletes a discord channel for a user
 // If the user doesn't have any more channels, the user is deleted
-func (m *DiscordChannelManager) Delete(userId int64, channelId int64) error {
+func (m *DiscordChannelManager) Delete(userId int64, channelId int64) {
 	log.Sugar.Debugf("Deleting discord channel %d for user %d", channelId, userId)
 	discordChannel, err := m.client.DiscordChannel.
 		Query().
@@ -138,7 +139,7 @@ func (m *DiscordChannelManager) Delete(userId int64, channelId int64) error {
 		Only(m.ctx)
 	if err != nil {
 		log.Sugar.Errorf("Could not find discord channel: %v", err)
-		return err
+		return
 	}
 	var entUser *ent.User
 	for _, u := range discordChannel.Edges.Users {
@@ -149,7 +150,7 @@ func (m *DiscordChannelManager) Delete(userId int64, channelId int64) error {
 	}
 	if entUser == nil {
 		log.Sugar.Errorf("Could not find user: %v", err)
-		return errors.New("could not find user")
+		return
 	}
 	if len(discordChannel.Edges.Users) == 1 {
 		err := m.client.DiscordChannel.
@@ -168,5 +169,28 @@ func (m *DiscordChannelManager) Delete(userId int64, channelId int64) error {
 		}
 	}
 	m.userManager.deleteIfUnused(entUser)
-	return err
+}
+
+func (m *DiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
+	users, err := m.client.DiscordChannel.
+		Query().
+		Where(discordchannel.ChannelID(channelId)).
+		QueryUsers().
+		All(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not get users for discord channel: %v", err)
+	}
+	return users
+}
+
+func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
+	count, err := m.client.DiscordChannel.
+		Query().
+		Where(discordchannel.ChannelID(channelId)).
+		QueryContracts().
+		Count(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not count subscriptions for discord channel: %v", err)
+	}
+	return count
 }

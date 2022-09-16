@@ -14,14 +14,16 @@ type DiscordClient struct {
 	discordChannelManager database.IDiscordChannelManager
 	proposalManager       *database.ProposalManager
 	botToken              string
+	clientId              string
 	webAppUrl             string
 }
 
-func NewDiscordClient(managers *database.DbManagers, botToken string, webAppUrl string) *DiscordClient {
+func NewDiscordClient(managers *database.DbManagers, botToken string, clientId string, webAppUrl string) *DiscordClient {
 	return &DiscordClient{
 		discordChannelManager: managers.DiscordChannelManager,
 		proposalManager:       managers.ProposalManager,
 		botToken:              botToken,
+		clientId:              clientId,
 		webAppUrl:             webAppUrl,
 	}
 }

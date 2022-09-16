@@ -13,11 +13,12 @@ var startDiscordBotCmd = &cobra.Command{
 	Short: "Starts the discord bot",
 	Run: func(cmd *cobra.Command, args []string) {
 		webAppUrl := common.GetEnvX("WEBAPP_URL")
-		discordToken := common.GetEnvX("DISCORD_BOT_TOKEN")
+		discordBotToken := common.GetEnvX("DISCORD_BOT_TOKEN")
+		discordClientId := common.GetEnvX("DISCORD_CLIENT_ID")
 
 		dbManagers := database.NewDefaultDbManagers()
 
-		discordClient := discord.NewDiscordClient(dbManagers, discordToken, webAppUrl)
+		discordClient := discord.NewDiscordClient(dbManagers, discordBotToken, discordClientId, webAppUrl)
 		discordClient.Start()
 	},
 }

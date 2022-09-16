@@ -57,7 +57,15 @@ func (m *mockDiscordChannelManager) CreateOrUpdateChannel(userId int64, userName
 	panic("implement me")
 }
 
-func (m *mockDiscordChannelManager) Delete(userId int64, channelId int64) error {
+func (m *mockDiscordChannelManager) Delete(userId int64, channelId int64) {
+	panic("implement me")
+}
+
+func (m *mockDiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
+	panic("implement me")
+}
+
+func (m *mockDiscordChannelManager) CountSubscriptions(channelId int64) int {
 	panic("implement me")
 }
 

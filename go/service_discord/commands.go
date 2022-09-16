@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"net/url"
 )
 
 var (
@@ -33,19 +34,44 @@ var (
 			channelName := getChannelName(s, i)
 			isGroup := isGroup(i)
 
-			chatIdQueryParam := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("chat_id=%v", channelId)))
-			// TODO: create redirect url from WEBAPP_URL
-			url := "https://discord.com/oauth2/authorize?client_id=1018913065644867677&redirect_uri=http%3A%2F%2Flocalhost%3A40001&response_type=code&scope=identify&state=" + chatIdQueryParam
-			// TODO: check if user has permissions in this channel
-			_, created := dc.discordChannelManager.CreateOrUpdateChannel(userId, userName, channelId, channelName, isGroup)
-			text := "Go to " +
-				fmt.Sprintf("[DaoDao Notifier](%v)", url) +
-				" to change your subscriptions.\n" +
-				"You will then receive notifications about new proposals."
-			if created {
-				text = "Bot started.\n\n" + text
+			state := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("chat_id=%v", channelId)))
+			params := url.Values{}
+			params.Add("client_id", dc.clientId)
+			params.Add("redirect_uri", dc.webAppUrl)
+			params.Add("response_type", "code")
+			params.Add("scope", "identify")
+			params.Add("state", state)
+			redirectUrl := fmt.Sprintf("https://discord.com/oauth2/authorize?%v", params.Encode())
+			dc.discordChannelManager.CreateOrUpdateChannel(userId, userName, channelId, channelName, isGroup)
+			users := dc.discordChannelManager.GetChannelUsers(channelId)
+			cntSubs := dc.discordChannelManager.CountSubscriptions(channelId)
+
+			adminText := ""
+			for _, user := range users {
+				adminText += fmt.Sprintf("- `%v`\n", user.Name)
+			}
+
+			text := ""
+			if isGroup {
+				text = fmt.Sprintf(":rocket: DaoDao Notifier started.\n\n") +
+					fmt.Sprintf("Bot admins in this channel:\n%v\n", adminText) +
+					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
+					fmt.Sprintf("Go to **[DaoDao Notifier](%v)** to change subscriptions for this channel.\n\n", redirectUrl) +
+					"**How does it work?**\n" +
+					"- You subscribe this channel to a DAO (ex: [rawdao](https://www.rawdao.zone/vote))\n" +
+					"- A member of this DAO creates a governance proposal\n" +
+					"- A notification that a new proposal is up for voting is sent to this channel\n\n" +
+					"To register another user as admin he has to send the command `/start` to the bot.\n" +
+					"To stop the bot send the command `/stop`."
 			} else {
-				text = "Bot already started.\n\n" + text
+				text = fmt.Sprintf(":rocket: DaoDao Notifier started.\n\n") +
+					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
+					fmt.Sprintf("Go to **[DaoDao Notifier](%v)** to change your subscriptions.\n\n", redirectUrl) +
+					"**How does it work?**\n" +
+					"- You subscribe to a DAO (ex: [rawdao](https://www.rawdao.zone/vote))\n" +
+					"- A member of this DAO creates a governance proposal\n" +
+					"- A notification that a new proposal is up for voting is sent to you\n\n" +
+					"To stop the bot send the command `/stop`."
 			}
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -68,7 +94,7 @@ var (
 			channelId := getChannelId(i)
 
 			dc.discordChannelManager.Delete(userId, channelId)
-			text := "Bot stopped. Send /start to start it again."
+			text := ":sleeping: Bot stopped. Send `/start` to start it again."
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
