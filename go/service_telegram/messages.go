@@ -43,7 +43,7 @@ func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 func (client TelegramClient) getSubscriptionButtonRow(update *tgbotapi.Update) []Button {
 	var buttonRow []Button
 	button := NewButton("🌐 Subscriptions")
-	button.LoginURL = &tgbotapi.LoginURL{URL: fmt.Sprintf("%v?chat_id=%v", client.webAppUrl, getChatIdX(update)), RequestWriteAccess: true}
+	button.LoginURL = &tgbotapi.LoginURL{URL: fmt.Sprintf("%v?chat-id=%v", client.webAppUrl, getChatIdX(update)), RequestWriteAccess: true}
 	buttonRow = append(buttonRow, button)
 	return buttonRow
 }

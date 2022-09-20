@@ -34,7 +34,7 @@ var (
 			channelName := getChannelName(s, i)
 			isGroup := isGroup(i)
 
-			state := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("chat_id=%v", channelId)))
+			state := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("chat-id=%v", channelId)))
 			params := url.Values{}
 			params.Add("client_id", dc.clientId)
 			params.Add("redirect_uri", dc.webAppUrl)
@@ -93,6 +93,7 @@ var (
 			userId := getUserIdX(i)
 			channelId := getChannelId(i)
 
+			//goland:noinspection GoUnhandledErrorResult
 			dc.discordChannelManager.Delete(userId, channelId)
 			text := ":sleeping: Bot stopped. Send `/start` to start it again."
 
