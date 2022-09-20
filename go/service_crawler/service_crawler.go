@@ -67,7 +67,7 @@ func (c *Crawler) UpdateContracts() {
 				}
 			} else if oldImageUrl != updatedContract.ImageURL {
 				c.contractManager.SaveThumbnailUrl(updatedContract, "")
-				e := os.Remove(im.ThumbnailPath)
+				e := os.RemoveAll(im.ThumbnailPath)
 				if e != nil {
 					log.Sugar.Errorf("while removing image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, e)
 				}
