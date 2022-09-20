@@ -9,6 +9,8 @@ option go_package = "go/subscription_service";
 service SubscriptionService {
   rpc GetSubscriptions (google.protobuf.Empty) returns (GetSubscriptionsResponse) {}
   rpc ToggleSubscription (ToggleSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
+  rpc AddDao (AddDaoRequest) returns (stream AddDaoResponse) {}
+  rpc DeleteDao (DeleteDaoRequest) returns (google.protobuf.Empty) {}
 }
 
 message Subscription {
@@ -41,4 +43,24 @@ message ToggleSubscriptionRequest {
 
 message ToggleSubscriptionResponse {
   bool isSubscribed = 1;
+}
+
+message AddDaoRequest {
+  string contractAddress = 1;
+}
+
+message AddDaoResponse {
+  enum Status {
+    ADDED = 0;
+    ALREADY_ADDED = 1;
+    IS_ADDING = 2;
+    FAILED = 3;
+  }
+  Status status = 1;
+  string name = 2;
+  string contractAddress = 3;
+}
+
+message DeleteDaoRequest {
+  int64 contractId = 1;
 }

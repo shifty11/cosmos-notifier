@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"golang.org/x/exp/slices"
@@ -52,14 +53,16 @@ func (interceptor *AuthInterceptor) Stream() grpc.StreamServerInterceptor {
 	) error {
 		debugInfo := "--> stream interceptor: " + info.FullMethod
 
-		_, err := interceptor.authorize(stream.Context(), info.FullMethod)
+		ctx, err := interceptor.authorize(stream.Context(), info.FullMethod)
 		if err != nil {
 			log.Sugar.Debug(debugInfo + " access denied!")
 			return err
 		}
+		wrapped := grpcmiddleware.WrapServerStream(stream)
+		wrapped.WrappedContext = ctx
 		log.Sugar.Debug(debugInfo)
 
-		return handler(srv, stream)
+		return handler(srv, wrapped)
 	}
 }
 

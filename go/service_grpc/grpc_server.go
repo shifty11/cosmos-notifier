@@ -3,6 +3,7 @@ package grpc
 import (
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/log"
+	crawler "github.com/shifty11/dao-dao-notifier/service_crawler"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/auth"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/auth_service"
 	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/subscription_service"
@@ -24,12 +25,13 @@ type Config struct {
 
 //goland:noinspection GoNameStartsWithPackageName
 type GRPCServer struct {
-	dbManagers *database.DbManagers
-	config     *Config
+	dbManagers    *database.DbManagers
+	config        *Config
+	crawlerClient *crawler.Crawler
 }
 
-func NewGRPCServer(dbManagers *database.DbManagers, config *Config) *GRPCServer {
-	return &GRPCServer{dbManagers: dbManagers, config: config}
+func NewGRPCServer(dbManagers *database.DbManagers, config *Config, crawlerClient *crawler.Crawler) *GRPCServer {
+	return &GRPCServer{dbManagers: dbManagers, config: config, crawlerClient: crawlerClient}
 }
 
 func (s GRPCServer) Run() {
@@ -38,7 +40,7 @@ func (s GRPCServer) Run() {
 	interceptor := auth.NewAuthInterceptor(jwtManager, s.dbManagers.UserManager, auth.AccessibleRoles())
 
 	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken, s.config.DiscordOAuth2Config)
-	subsServer := subscription.NewSubscriptionsServer(s.dbManagers.SubscriptionManager)
+	subsServer := subscription.NewSubscriptionsServer(s.dbManagers, s.crawlerClient)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),

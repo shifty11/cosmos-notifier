@@ -10,10 +10,10 @@ import (
 
 type Role string
 
-const (
-	Unauthenticated Role = "Unauthenticated"
-	User            Role = "User"
-	Admin           Role = "Admin"
+var (
+	Unauthenticated Role = "unauthenticated"
+	User                 = Role(user.RoleUser.String())
+	Admin                = Role(user.RoleAdmin.String())
 )
 
 type TokenType string
@@ -34,6 +34,8 @@ func AccessibleRoles() map[string][]Role {
 		authService + "RefreshAccessToken": {Unauthenticated, User, Admin},
 		subsService + "GetSubscriptions":   {User, Admin},
 		subsService + "ToggleSubscription": {User, Admin},
+		subsService + "AddDao":             {User},
+		subsService + "DeleteDao":          {Admin},
 	}
 }
 
@@ -70,7 +72,7 @@ func (manager *JWTManager) GenerateToken(entUser *ent.User, tokenType TokenType)
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
-		Role: User,
+		Role: Role(entUser.Role.String()),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
