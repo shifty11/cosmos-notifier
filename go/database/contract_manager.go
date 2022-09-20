@@ -9,10 +9,13 @@ import (
 )
 
 type IContractManager interface {
+	Create(data *types.ContractData) (*ent.Contract, error)
 	CreateOrUpdate(data *types.ContractData) (*ent.Contract, ContractStatus)
 	All() []*ent.Contract
 	Get(id int) (*ent.Contract, error)
 	SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract
+	ByAddress(contractAddress string) (*ent.Contract, error)
+	Delete(id int) error
 }
 
 type ContractManager struct {
@@ -32,6 +35,17 @@ const (
 	ContractImageChanged ContractStatus = "image_changed"
 	ContractNoChanges    ContractStatus = "no_changes"
 )
+
+func (m *ContractManager) Create(data *types.ContractData) (*ent.Contract, error) {
+	c, err := m.client.Contract.
+		Create().
+		SetAddress(data.Address).
+		SetName(data.Name).
+		SetDescription(data.Description).
+		SetImageURL(data.ImageUrl).
+		Save(m.ctx)
+	return c, err
+}
 
 // CreateOrUpdate creates a new contract or updates an existing one
 //
@@ -102,4 +116,17 @@ func (m *ContractManager) SaveThumbnailUrl(entContract *ent.Contract, url string
 		log.Sugar.Panicf("Error while updating contract: %v", err)
 	}
 	return updated
+}
+
+func (m *ContractManager) ByAddress(contractAddress string) (*ent.Contract, error) {
+	return m.client.Contract.
+		Query().
+		Where(contract.AddressEQ(contractAddress)).
+		Only(m.ctx)
+}
+
+func (m *ContractManager) Delete(id int) error {
+	return m.client.Contract.
+		DeleteOneID(id).
+		Exec(m.ctx)
 }

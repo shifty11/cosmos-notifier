@@ -8,7 +8,9 @@ import (
 )
 
 func newTestProposalManager(t *testing.T) *ProposalManager {
-	return NewProposalManager(testClient(t), context.Background())
+	manager := NewProposalManager(testClient(t), context.Background())
+	t.Cleanup(func() { closeTestClient(manager.client) })
+	return manager
 }
 
 func TestProposalManager_CreateOrUpdate(t *testing.T) {
@@ -100,6 +102,4 @@ func TestProposalManager_CreateOrUpdate(t *testing.T) {
 		}
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }

@@ -2,12 +2,17 @@ package database
 
 import (
 	"context"
+	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/types"
 	"testing"
+	"time"
 )
 
 func newTestContractManager(t *testing.T) *ContractManager {
-	return NewContractManager(testClient(t), context.Background())
+	manager := NewContractManager(testClient(t), context.Background())
+	t.Cleanup(func() { closeTestClient(manager.client) })
+	return manager
 }
 
 func TestContractManager_All(t *testing.T) {
@@ -51,9 +56,6 @@ func TestContractManager_All(t *testing.T) {
 	if contracts[0].ThumbnailURL != thumbnailUrl {
 		t.Errorf("Expected thumbnail url %s, got %s", thumbnailUrl, contracts[0].ThumbnailURL)
 	}
-
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestContractManager_Get(t *testing.T) {
@@ -97,9 +99,6 @@ func TestContractManager_Get(t *testing.T) {
 	if c.ThumbnailURL != thumbnailUrl {
 		t.Errorf("Expected thumbnail url %s, got %s", thumbnailUrl, c.ThumbnailURL)
 	}
-
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestContractManager_CreateOrUpdate(t *testing.T) {
@@ -171,9 +170,6 @@ func TestContractManager_CreateOrUpdate(t *testing.T) {
 	if contract.ImageURL != "https://updated.com" {
 		t.Errorf("Expected image url %s, got %s", "https://updated.com", contract.ImageURL)
 	}
-
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestContractManager_SaveThumbnailUrl(t *testing.T) {
@@ -197,7 +193,153 @@ func TestContractManager_SaveThumbnailUrl(t *testing.T) {
 	if contract.ThumbnailURL != "https://updated.com" {
 		t.Errorf("Expected thumbnail url %s, got %s", "https://updated.com", contract.ThumbnailURL)
 	}
+}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
+func TestContractManager_ByAddress(t *testing.T) {
+	m := newTestContractManager(t)
+
+	name := "test"
+	description := "description"
+	address := "0x123"
+	imageUrl := "https://image.com"
+	thumbnailUrl := "https://test.com"
+
+	m.client.Contract.
+		Create().
+		SetName(name).
+		SetDescription(description).
+		SetAddress(address).
+		SetImageURL(imageUrl).
+		SetThumbnailURL(thumbnailUrl).
+		SaveX(m.ctx)
+
+	c, err := m.ByAddress(address)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if c.Name != name {
+		t.Errorf("Expected name %s, got %s", name, c.Name)
+	}
+	if c.Description != description {
+		t.Errorf("Expected description %s, got %s", description, c.Description)
+	}
+	if c.Address != address {
+		t.Errorf("Expected address %s, got %s", address, c.Address)
+	}
+	if c.ImageURL != imageUrl {
+		t.Errorf("Expected image url %s, got %s", imageUrl, c.ImageURL)
+	}
+	if c.ThumbnailURL != thumbnailUrl {
+		t.Errorf("Expected thumbnail url %s, got %s", thumbnailUrl, c.ThumbnailURL)
+	}
+}
+
+func TestContractManager_ByAddress_NotFound(t *testing.T) {
+	m := newTestContractManager(t)
+
+	_, err := m.ByAddress("0x123")
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+}
+
+func TestContractManager_Delete(t *testing.T) {
+	m := newTestContractManager(t)
+	name := "test"
+	description := "description"
+	address := "0x123"
+	imageUrl := "https://image.com"
+	thumbnailUrl := "https://test.com"
+
+	contract := m.client.Contract.
+		Create().
+		SetName(name).
+		SetDescription(description).
+		SetAddress(address).
+		SetImageURL(imageUrl).
+		SetThumbnailURL(thumbnailUrl).
+		SaveX(m.ctx)
+	m.client.Proposal.
+		Create().
+		SetContract(contract).
+		SetDescription("test").
+		SetTitle("test").
+		SetProposalID(1).
+		SetExpiresAt(time.Now()).
+		SetStatus(proposal.StatusOpen).
+		SaveX(m.ctx)
+	u := m.client.User.
+		Create().
+		SetUserID(1).
+		SetName("test").
+		SetType(user.TypeDiscord).
+		SetRole(user.RoleUser).
+		SaveX(m.ctx)
+	m.client.DiscordChannel.
+		Create().
+		AddContracts(contract).
+		AddUsers(u).
+		SetName("test").
+		SetChannelID(1).
+		SetIsGroup(false).
+		SaveX(m.ctx)
+
+	dc := m.client.DiscordChannel.Query().WithContracts().FirstX(m.ctx)
+	if len(dc.Edges.Contracts) != 1 {
+		t.Errorf("Expected 1 contract, got %d", len(dc.Edges.Contracts))
+	}
+
+	err := m.Delete(contract.ID)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	dc = m.client.DiscordChannel.Query().WithContracts().FirstX(m.ctx)
+	if len(dc.Edges.Contracts) != 0 {
+		t.Errorf("Expected no contracts, got %d", len(dc.Edges.Contracts))
+	}
+
+	cnt := m.client.Proposal.Query().CountX(m.ctx)
+	if cnt != 0 {
+		t.Errorf("Expected no proposals, got %d", cnt)
+	}
+}
+
+func TestContractManager_Delete_NotFound(t *testing.T) {
+	m := newTestContractManager(t)
+	err := m.Delete(1)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+}
+
+func TestContractManager_Create(t *testing.T) {
+	m := newTestContractManager(t)
+	data := &types.ContractData{
+		Name:        "test",
+		Description: "description",
+		Address:     "0x123",
+		ImageUrl:    "https://image.com",
+	}
+	contract, err := m.Create(data)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+	if contract.Name != data.Name {
+		t.Errorf("Expected name %s, got %s", data.Name, contract.Name)
+	}
+	if contract.Description != data.Description {
+		t.Errorf("Expected description %s, got %s", data.Description, contract.Description)
+	}
+	if contract.Address != data.Address {
+		t.Errorf("Expected address %s, got %s", data.Address, contract.Address)
+	}
+	if contract.ImageURL != data.ImageUrl {
+		t.Errorf("Expected image url %s, got %s", data.ImageUrl, contract.ImageURL)
+	}
+
+	_, err = m.Create(data)
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
 }

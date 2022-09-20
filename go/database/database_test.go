@@ -16,3 +16,8 @@ func testClient(t *testing.T) *ent.Client {
 	client := enttest.Open(t, "sqlite3", filename, opts...)
 	return client
 }
+
+func closeTestClient(client *ent.Client) {
+	//goland:noinspection GoUnhandledErrorResult
+	defer client.Close()
+}

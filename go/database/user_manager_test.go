@@ -2,12 +2,15 @@ package database
 
 import (
 	"context"
+	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"testing"
 )
 
 func newTestUserManager(t *testing.T) *UserManager {
-	return NewUserManager(testClient(t), context.Background())
+	manager := NewUserManager(testClient(t), context.Background())
+	t.Cleanup(func() { closeTestClient(manager.client) })
+	return manager
 }
 
 func TestUserManager_CreateOrUpdateUser(t *testing.T) {
@@ -53,5 +56,26 @@ func TestUserManager_DeleteIfUnused(t *testing.T) {
 	m.deleteIfUnused(u)
 	if m.client.User.Query().CountX(m.ctx) != 0 {
 		t.Fatal("Expected 0, got 1")
+	}
+}
+
+func TestUserManager_SetRole(t *testing.T) {
+	m := newTestUserManager(t)
+	_, err := m.SetRole("non existent", user.RoleAdmin)
+	if !ent.IsNotFound(err) {
+		t.Fatalf("Expected not found error, got %s", err)
+	}
+
+	u := m.createOrUpdateUser(1, "username", user.TypeDiscord)
+	if u.Role != user.RoleUser {
+		t.Fatalf("Expected user, got %s", u.Role)
+	}
+
+	u, err = m.SetRole(u.Name, user.RoleAdmin)
+	if err != nil {
+		t.Fatalf("Expected nil, got %s", err)
+	}
+	if u.Role != user.RoleAdmin {
+		t.Fatalf("Expected admin, got %s", u.Role)
 	}
 }

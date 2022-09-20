@@ -9,7 +9,9 @@ import (
 )
 
 func newTestTelegramChatManager(t *testing.T) *TelegramChatManager {
-	return NewTelegramChatManager(testClient(t), context.Background(), newTestContractManager(t), newTestUserManager(t))
+	manager := NewTelegramChatManager(testClient(t), context.Background(), newTestContractManager(t), newTestUserManager(t))
+	t.Cleanup(func() { closeTestClient(manager.client) })
+	return manager
 }
 
 func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
@@ -58,8 +60,6 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 		t.Fatal("Expected false, got true")
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {
@@ -104,8 +104,6 @@ func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {
 		t.Fatal("Expected false, got true")
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
@@ -172,8 +170,6 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 		t.Fatalf("Expected test2, got %s", ids[1].Name)
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestTelegramChatManager_Delete(t *testing.T) {
@@ -229,8 +225,6 @@ func TestTelegramChatManager_Delete(t *testing.T) {
 		t.Fatalf("Expected 0, got %d", cnt)
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestTelegramChatManager_DeleteMultiple(t *testing.T) {
@@ -257,6 +251,4 @@ func TestTelegramChatManager_DeleteMultiple(t *testing.T) {
 		t.Fatalf("Expected 0, got %d", cnt)
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }

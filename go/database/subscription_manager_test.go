@@ -10,7 +10,7 @@ import (
 )
 
 func newTestSubscriptionManager(t *testing.T) *SubscriptionManager {
-	return NewSubscriptionManager(
+	manager := NewSubscriptionManager(
 		testClient(t),
 		context.Background(),
 		newTestUserManager(t),
@@ -18,6 +18,8 @@ func newTestSubscriptionManager(t *testing.T) *SubscriptionManager {
 		newTestTelegramChatManager(t),
 		newTestDiscordChannelManager(t),
 	)
+	t.Cleanup(func() { closeTestClient(manager.client) })
+	return manager
 }
 
 var compStringTg = ""
@@ -98,8 +100,6 @@ func TestSubscriptionManager_ToggleSubscription(t *testing.T) {
 		t.Error("Wrong function called")
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestSubscriptionManager_getSubscriptions(t *testing.T) {
@@ -149,8 +149,6 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 		t.Error("Expected notify to be false")
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }
 
 func TestSubscriptionManager_GetSubscriptions(t *testing.T) {
@@ -240,6 +238,4 @@ func TestSubscriptionManager_GetSubscriptions(t *testing.T) {
 		t.Errorf("Expected %v, got %v and %v", false, c1s1.Notify, c1s2.Notify)
 	}
 
-	//goland:noinspection GoUnhandledErrorResult
-	defer m.client.Close()
 }

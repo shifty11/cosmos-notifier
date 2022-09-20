@@ -26,9 +26,30 @@ func (m *UserManager) Get(userId int64, userType user.Type) (*ent.User, error) {
 		Only(m.ctx)
 }
 
+func (m *UserManager) GetAdmins() ([]*ent.User, error) {
+	return m.client.User.
+		Query().
+		Where(user.RoleEQ(user.RoleAdmin)).
+		All(m.ctx)
+}
+
 func (m *UserManager) SetName(entUser *ent.User, name string) (*ent.User, error) {
 	return entUser.Update().
 		SetName(name).
+		Save(m.ctx)
+}
+
+func (m *UserManager) SetRole(name string, role user.Role) (*ent.User, error) {
+	entUser, err := m.client.User.
+		Query().
+		Where(user.NameEQ(name)).
+		Only(m.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return entUser.
+		Update().
+		SetRole(role).
 		Save(m.ctx)
 }
 
