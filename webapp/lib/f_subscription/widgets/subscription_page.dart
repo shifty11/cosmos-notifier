@@ -99,13 +99,22 @@ class SubscriptionPage extends StatelessWidget {
                           children: [
                             const SizedBox(width: sidePadding),
                             CircleAvatar(
-                              child: ClipOval(
+                              backgroundColor: Colors.transparent,
+                              child: subscription.thumbnailUrl.isNotEmpty ? ClipOval(
                                 child: Image.asset(
                                   subscription.thumbnailUrl,
                                   width: 40,
                                   height: 40,
                                 ),
-                              ),
+                              ) : Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 5,
+                                    color: Colors.black,
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                              )
                             ),
                             const SizedBox(width: 10),
                             Expanded(
