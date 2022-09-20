@@ -138,6 +138,7 @@ func (server *SubscriptionServer) AddDao(req *pb.AddDaoRequest, stream pb.Subscr
 			log.Sugar.Errorf("error while adding dao: %v", req.ContractAddress)
 		}
 		waitc <- contract
+		close(waitc)
 	}()
 
 	contract = <-waitc
