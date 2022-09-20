@@ -76,3 +76,47 @@ const ToggleSubscriptionResponse$json = const {
 
 /// Descriptor for `ToggleSubscriptionResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List toggleSubscriptionResponseDescriptor = $convert.base64Decode('ChpUb2dnbGVTdWJzY3JpcHRpb25SZXNwb25zZRIiCgxpc1N1YnNjcmliZWQYASABKAhSDGlzU3Vic2NyaWJlZA==');
+@$core.Deprecated('Use addDaoRequestDescriptor instead')
+const AddDaoRequest$json = const {
+  '1': 'AddDaoRequest',
+  '2': const [
+    const {'1': 'contractAddress', '3': 1, '4': 1, '5': 9, '10': 'contractAddress'},
+  ],
+};
+
+/// Descriptor for `AddDaoRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addDaoRequestDescriptor = $convert.base64Decode('Cg1BZGREYW9SZXF1ZXN0EigKD2NvbnRyYWN0QWRkcmVzcxgBIAEoCVIPY29udHJhY3RBZGRyZXNz');
+@$core.Deprecated('Use addDaoResponseDescriptor instead')
+const AddDaoResponse$json = const {
+  '1': 'AddDaoResponse',
+  '2': const [
+    const {'1': 'status', '3': 1, '4': 1, '5': 14, '6': '.daodao_notifier_grpc.AddDaoResponse.Status', '10': 'status'},
+    const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
+    const {'1': 'contractAddress', '3': 3, '4': 1, '5': 9, '10': 'contractAddress'},
+  ],
+  '4': const [AddDaoResponse_Status$json],
+};
+
+@$core.Deprecated('Use addDaoResponseDescriptor instead')
+const AddDaoResponse_Status$json = const {
+  '1': 'Status',
+  '2': const [
+    const {'1': 'ADDED', '2': 0},
+    const {'1': 'ALREADY_ADDED', '2': 1},
+    const {'1': 'IS_ADDING', '2': 2},
+    const {'1': 'FAILED', '2': 3},
+  ],
+};
+
+/// Descriptor for `AddDaoResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List addDaoResponseDescriptor = $convert.base64Decode('Cg5BZGREYW9SZXNwb25zZRJDCgZzdGF0dXMYASABKA4yKy5kYW9kYW9fbm90aWZpZXJfZ3JwYy5BZGREYW9SZXNwb25zZS5TdGF0dXNSBnN0YXR1cxISCgRuYW1lGAIgASgJUgRuYW1lEigKD2NvbnRyYWN0QWRkcmVzcxgDIAEoCVIPY29udHJhY3RBZGRyZXNzIkEKBlN0YXR1cxIJCgVBRERFRBAAEhEKDUFMUkVBRFlfQURERUQQARINCglJU19BRERJTkcQAhIKCgZGQUlMRUQQAw==');
+@$core.Deprecated('Use deleteDaoRequestDescriptor instead')
+const DeleteDaoRequest$json = const {
+  '1': 'DeleteDaoRequest',
+  '2': const [
+    const {'1': 'contractId', '3': 1, '4': 1, '5': 3, '10': 'contractId'},
+  ],
+};
+
+/// Descriptor for `DeleteDaoRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List deleteDaoRequestDescriptor = $convert.base64Decode('ChBEZWxldGVEYW9SZXF1ZXN0Eh4KCmNvbnRyYWN0SWQYASABKANSCmNvbnRyYWN0SWQ=');

@@ -51,9 +51,9 @@ class BottomNavigationBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!jwtManager.isAdmin) {
+    // if (!jwtManager.isAdmin) {
       return const SizedBox.shrink();
-    }
+    // }
     return BottomNavigationBar(
         onTap: (index) => goTo(context, index),
         currentIndex: getIndex(context),

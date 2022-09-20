@@ -349,3 +349,172 @@ class ToggleSubscriptionResponse extends $pb.GeneratedMessage {
   void clearIsSubscribed() => clearField(1);
 }
 
+class AddDaoRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddDaoRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress', protoName: 'contractAddress')
+    ..hasRequiredFields = false
+  ;
+
+  AddDaoRequest._() : super();
+  factory AddDaoRequest({
+    $core.String? contractAddress,
+  }) {
+    final _result = create();
+    if (contractAddress != null) {
+      _result.contractAddress = contractAddress;
+    }
+    return _result;
+  }
+  factory AddDaoRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddDaoRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddDaoRequest clone() => AddDaoRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddDaoRequest copyWith(void Function(AddDaoRequest) updates) => super.copyWith((message) => updates(message as AddDaoRequest)) as AddDaoRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddDaoRequest create() => AddDaoRequest._();
+  AddDaoRequest createEmptyInstance() => create();
+  static $pb.PbList<AddDaoRequest> createRepeated() => $pb.PbList<AddDaoRequest>();
+  @$core.pragma('dart2js:noInline')
+  static AddDaoRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddDaoRequest>(create);
+  static AddDaoRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get contractAddress => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set contractAddress($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasContractAddress() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearContractAddress() => clearField(1);
+}
+
+class AddDaoResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddDaoResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..e<AddDaoResponse_Status>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OE, defaultOrMaker: AddDaoResponse_Status.ADDED, valueOf: AddDaoResponse_Status.valueOf, enumValues: AddDaoResponse_Status.values)
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress', protoName: 'contractAddress')
+    ..hasRequiredFields = false
+  ;
+
+  AddDaoResponse._() : super();
+  factory AddDaoResponse({
+    AddDaoResponse_Status? status,
+    $core.String? name,
+    $core.String? contractAddress,
+  }) {
+    final _result = create();
+    if (status != null) {
+      _result.status = status;
+    }
+    if (name != null) {
+      _result.name = name;
+    }
+    if (contractAddress != null) {
+      _result.contractAddress = contractAddress;
+    }
+    return _result;
+  }
+  factory AddDaoResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory AddDaoResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  AddDaoResponse clone() => AddDaoResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  AddDaoResponse copyWith(void Function(AddDaoResponse) updates) => super.copyWith((message) => updates(message as AddDaoResponse)) as AddDaoResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AddDaoResponse create() => AddDaoResponse._();
+  AddDaoResponse createEmptyInstance() => create();
+  static $pb.PbList<AddDaoResponse> createRepeated() => $pb.PbList<AddDaoResponse>();
+  @$core.pragma('dart2js:noInline')
+  static AddDaoResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddDaoResponse>(create);
+  static AddDaoResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  AddDaoResponse_Status get status => $_getN(0);
+  @$pb.TagNumber(1)
+  set status(AddDaoResponse_Status v) { setField(1, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get name => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set name($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasName() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearName() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get contractAddress => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set contractAddress($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasContractAddress() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearContractAddress() => clearField(3);
+}
+
+class DeleteDaoRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DeleteDaoRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractId', protoName: 'contractId')
+    ..hasRequiredFields = false
+  ;
+
+  DeleteDaoRequest._() : super();
+  factory DeleteDaoRequest({
+    $fixnum.Int64? contractId,
+  }) {
+    final _result = create();
+    if (contractId != null) {
+      _result.contractId = contractId;
+    }
+    return _result;
+  }
+  factory DeleteDaoRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory DeleteDaoRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  DeleteDaoRequest clone() => DeleteDaoRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  DeleteDaoRequest copyWith(void Function(DeleteDaoRequest) updates) => super.copyWith((message) => updates(message as DeleteDaoRequest)) as DeleteDaoRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static DeleteDaoRequest create() => DeleteDaoRequest._();
+  DeleteDaoRequest createEmptyInstance() => create();
+  static $pb.PbList<DeleteDaoRequest> createRepeated() => $pb.PbList<DeleteDaoRequest>();
+  @$core.pragma('dart2js:noInline')
+  static DeleteDaoRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeleteDaoRequest>(create);
+  static DeleteDaoRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get contractId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set contractId($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasContractId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearContractId() => clearField(1);
+}
+

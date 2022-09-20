@@ -1,84 +1,132 @@
 import 'package:fixnum/fixnum.dart' as fixnum;
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tuple/tuple.dart';
+import 'package:protobuf/protobuf.dart';
 import 'package:webapp/api/protobuf/dart/google/protobuf/empty.pb.dart';
 import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:webapp/config.dart';
 import 'package:webapp/f_home/services/chat_id_provider.dart';
 import 'package:webapp/f_home/services/message_provider.dart';
-import 'package:webapp/f_subscription/services/state/subscription_state.dart';
+import 'package:webapp/f_subscription/services/state/subscription_list_state.dart';
 import 'package:webapp/f_subscription/services/subscription_service.dart';
 import 'package:webapp/f_subscription/services/type/subscription_data_type.dart';
 
 final subscriptionProvider = Provider<SubscriptionService>((ref) => subsService);
 
-final chatroomListStateProvider = FutureProvider<List<ChatRoom>>((ref) async {
-  final subsService = ref.read(subscriptionProvider);
-  final response = await subsService.getSubscriptions(Empty());
-
-  final selectedChatRoom = ref.read(chatRoomProvider.notifier).state;
-  if (selectedChatRoom != null) {
-    // if chat room was selected before, select it again
-    ref.read(chatRoomProvider.notifier).state = response.chatRooms.where((c) => c.id == selectedChatRoom.id).first;
-  } else {
-    if (response.chatRooms.length > 1) {
-      // if query params contain `chat_id` put that one first
-      final chatId = ref.read(chatIdProvider) ?? Int64(0);
-      response.chatRooms.sort(((a, b) {
-        if (a.id == chatId) {
-          return -1;
-        }
-        if (b.id == chatId) {
-          return 1;
-        }
-        return a.name.compareTo(b.name);
-      }));
-    }
-    ref.read(chatRoomProvider.notifier).state = response.chatRooms.first;
-  }
-  return response.chatRooms;
+final chatroomListStateProvider = StateNotifierProvider<SubscriptionListNotifier, SubscriptionListState>((ref) {
+  return SubscriptionListNotifier(ref);
 });
 
-final subscriptionStateProvider = StateNotifierProvider.family<SubscriptionNotifier, SubscriptionState, Tuple2<fixnum.Int64, int>>(
-  (ref, tuple) {
-    final chatRoom = ref.watch(chatroomListStateProvider).value!.firstWhere((c) => c.id == tuple.item1);
-    final subscription = chatRoom.subscriptions[tuple.item2];
-    return SubscriptionNotifier(ref, subscription, chatRoom.id);
-  },
-);
-
-class SubscriptionNotifier extends StateNotifier<SubscriptionState> {
-  final Subscription _subscription;
-  final fixnum.Int64 _chatRoomId;
+class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
   final StateNotifierProviderRef _ref;
+  List<ChatRoom> _chatRooms = [];
 
-  SubscriptionNotifier(this._ref, this._subscription, this._chatRoomId) : super(SubscriptionState.loaded(subscription: _subscription));
+  late final SubscriptionService _subsService;
 
-  Future<void> toggleSubscription() async {
+  SubscriptionListNotifier(this._ref) : super(SubscriptionListState.loading()) {
+    _subsService = _ref.read(subscriptionProvider);
+    _loadSubscriptions();
+  }
+
+  Future<void> _loadSubscriptions() async {
     try {
-      final subsService = _ref.read(subscriptionProvider);
-      final response =
-          await subsService.toggleSubscription(ToggleSubscriptionRequest(chatRoomId: _chatRoomId, contractId: _subscription.id));
-      _subscription.isSubscribed = response.isSubscribed;
-      state = SubscriptionState.loaded(subscription: _subscription);
+      final response = await _subsService.getSubscriptions(Empty());
+      _chatRooms = response.chatRooms;
+      state = SubscriptionListState.data(chatRooms: _chatRooms);
     } catch (e) {
       _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
+    }
+  }
+
+  _updateSubscription(Int64 chatRoomId, Subscription subscription) {
+    final chatRoom = _chatRooms.firstWhere((element) => element.id == chatRoomId);
+    final index = chatRoom.subscriptions.indexWhere((element) => element.id == subscription.id);
+    chatRoom.subscriptions[index] = subscription;
+
+    state = SubscriptionListState.data(chatRooms: _chatRooms);
+  }
+
+  _removeSubscriptions(Int64 id) {
+    for (var chatRoom in _chatRooms) {
+      chatRoom.subscriptions.removeWhere((element) => element.id == id);
+    }
+
+    state = SubscriptionListState.data(chatRooms: _chatRooms);
+  }
+
+  Future<void> toggleSubscription(chatRoomId, Int64 subscriptionId) async {
+    try {
+      final response = await _subsService.toggleSubscription(ToggleSubscriptionRequest(chatRoomId: chatRoomId, contractId: subscriptionId));
+      final sub = _chatRooms.firstWhere((c) => c.id == chatRoomId).subscriptions.firstWhere(((s) => s.id == subscriptionId)).deepCopy();
+      sub.isSubscribed = response.isSubscribed;
+      _updateSubscription(chatRoomId, sub);
+    } catch (e) {
+      _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
+    }
+  }
+
+  Future<void> deleteDao(Int64 contractId, String name) async {
+    try {
+      await _subsService.deleteDao(DeleteDaoRequest(contractId: contractId));
+      _removeSubscriptions(contractId);
+      _ref.read(messageProvider.notifier).sendMsg(info: "DAO $name deleted");
+    } catch (e) {
+      _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
+    }
+  }
+
+  Future<void> addDao(String contractAddress) async {
+    final msgProvider = _ref.read(messageProvider.notifier);
+    try {
+      final stream = _subsService.addDao(AddDaoRequest(contractAddress: contractAddress));
+      stream.listen(
+        (resp) {
+          switch (resp.status) {
+            case AddDaoResponse_Status.ADDED:
+              msgProvider.sendMsg(info: "DAO ${resp.name} added 🚀");
+              _loadSubscriptions();
+              break;
+            case AddDaoResponse_Status.ALREADY_ADDED:
+              msgProvider.sendMsg(info: "DAO has already been added");
+              break;
+            case AddDaoResponse_Status.IS_ADDING:
+              msgProvider.sendMsg(info: "DAO is being added... this can take a minute 😴");
+              break;
+            case AddDaoResponse_Status.FAILED:
+              msgProvider.sendMsg(error: "Could not add DAO! 😭\nProbably because the contract address is invalid");
+              break;
+          }
+        },
+        onError: (e) => msgProvider.sendMsg(error: e.toString()),
+        onDone: () => print("done"),
+        cancelOnError: true,
+      );
+    } catch (e) {
+      msgProvider.sendMsg(error: e.toString());
     }
   }
 }
 
 final searchSubsProvider = StateProvider((ref) => "");
 
-final chatRoomProvider = StateProvider<ChatRoom?>((ref) => null);
+final selectedChatRoomProvider = StateProvider<ChatRoom?>((ref) {
+  final chatRooms = ref.watch(chatroomListStateProvider);
+  return chatRooms.maybeWhen(
+    data: (chatRooms) {
+      final chatId = ref.read(chatIdProvider) ?? Int64(0);
+      return chatRooms.firstWhere((element) => element.id == chatId, orElse: () => chatRooms.first);
+    },
+    orElse: () => null,
+  );
+});
 
 final searchedSubsProvider = Provider<ChatroomData>((ref) {
   final search = ref.watch(searchSubsProvider);
-  final chatRoom = ref.watch(chatRoomProvider);
+  final chatRoom = ref.watch(selectedChatRoomProvider);
   final subs = ref.watch(chatroomListStateProvider);
   return subs.whenOrNull(data: (chatRooms) {
         for (var cr in chatRooms) {
-          if (cr == chatRoom || chatRoom == null) {
+          if (cr.id == chatRoom?.id || chatRoom == null) {
             if (search.isEmpty) {
               return ChatroomData(
                 cr.id,

@@ -24,3 +24,22 @@ class ChatRoom_Type extends $pb.ProtobufEnum {
   const ChatRoom_Type._($core.int v, $core.String n) : super(v, n);
 }
 
+class AddDaoResponse_Status extends $pb.ProtobufEnum {
+  static const AddDaoResponse_Status ADDED = AddDaoResponse_Status._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADDED');
+  static const AddDaoResponse_Status ALREADY_ADDED = AddDaoResponse_Status._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ALREADY_ADDED');
+  static const AddDaoResponse_Status IS_ADDING = AddDaoResponse_Status._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'IS_ADDING');
+  static const AddDaoResponse_Status FAILED = AddDaoResponse_Status._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FAILED');
+
+  static const $core.List<AddDaoResponse_Status> values = <AddDaoResponse_Status> [
+    ADDED,
+    ALREADY_ADDED,
+    IS_ADDING,
+    FAILED,
+  ];
+
+  static final $core.Map<$core.int, AddDaoResponse_Status> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static AddDaoResponse_Status? valueOf($core.int value) => _byValue[value];
+
+  const AddDaoResponse_Status._($core.int v, $core.String n) : super(v, n);
+}
+

@@ -21,6 +21,20 @@ extension ColorBrightness on Color {
 
     return hslLight.toColor();
   }
+
+  Color intensify(BuildContext context, [double amount = .1]) {
+    if (Styles.isDarkTheme(context)) {
+      return lighten(amount);
+    }
+    return darken(amount);
+  }
+
+  Color intensifyBg(BuildContext context, [double amount = .1]) {
+    if (Styles.isDarkTheme(context)) {
+      return darken(amount);
+    }
+    return lighten(amount);
+  }
 }
 
 class Styles {
@@ -45,6 +59,10 @@ class Styles {
     return _defaultTheme(bgColor, bgColorLight, textColor, textColorHint, primaryColor);
   }
 
+  static isDarkTheme(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
+  }
+
   static ThemeData _defaultTheme(Color bgColor, Color bgColorLight, Color textColor, Color textColorHint, Color primaryColor) {
     const borderColor = Colors.grey;
     return ThemeData(
@@ -59,7 +77,7 @@ class Styles {
       toggleableActiveColor: primaryColor,
       inputDecorationTheme: InputDecorationTheme(
         labelStyle: TextStyle(color: textColor),
-        hintStyle: TextStyle(color: textColorHint),
+        hintStyle: const TextStyle(color: borderColor),
         iconColor: borderColor,
         enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: borderColor))
       ),
@@ -85,6 +103,12 @@ class Styles {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           primary: borderColor, // Button color
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          primary: primaryColor, // Button color
+          onPrimary: textColor, // Text color
         ),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
