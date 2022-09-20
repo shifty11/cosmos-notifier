@@ -29,7 +29,10 @@ func NewCrawler(managers *database.DbManagers, notifier *notifier.Notifier, apiU
 
 func (c *Crawler) UpdateContracts() {
 	log.Sugar.Info("updating contracts")
-	for _, oldContract := range c.contractManager.All() {
+
+	contracts := c.contractManager.All()
+	var cntSuccess, cntFails = 0, len(contracts)
+	for _, oldContract := range contracts {
 		client := NewContractClient(c.apiUrl, oldContract.Address)
 		config, err := client.config()
 		if err != nil {
@@ -70,9 +73,12 @@ func (c *Crawler) UpdateContracts() {
 				}
 			}
 		}
-
+		cntSuccess++
+		cntFails--
 		log.Sugar.Infof("processed contract %v (%v)", config.Name, updatedContract.Address)
 	}
+
+	log.Sugar.Infof("processed %v contracts, success: %v failed: %v", len(contracts), cntSuccess, cntFails)
 }
 
 func (c *Crawler) AddContract(contractAddr string) (*ent.Contract, error) {
