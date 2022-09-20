@@ -22,6 +22,8 @@ const (
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.
 	FieldType = "type"
+	// FieldRole holds the string denoting the role field in the database.
+	FieldRole = "role"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
 	EdgeTelegramChats = "telegram_chats"
 	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
@@ -48,6 +50,7 @@ var Columns = []string{
 	FieldUserID,
 	FieldName,
 	FieldType,
+	FieldRole,
 }
 
 var (
@@ -98,5 +101,31 @@ func TypeValidator(_type Type) error {
 		return nil
 	default:
 		return fmt.Errorf("user: invalid enum value for type field: %q", _type)
+	}
+}
+
+// Role defines the type for the "role" enum field.
+type Role string
+
+// RoleUser is the default value of the Role enum.
+const DefaultRole = RoleUser
+
+// Role values.
+const (
+	RoleUser  Role = "user"
+	RoleAdmin Role = "admin"
+)
+
+func (r Role) String() string {
+	return string(r)
+}
+
+// RoleValidator is a validator for the "role" field enum values. It is called by the builders before save.
+func RoleValidator(r Role) error {
+	switch r {
+	case RoleUser, RoleAdmin:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for role field: %q", r)
 	}
 }

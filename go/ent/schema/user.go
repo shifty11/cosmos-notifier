@@ -26,6 +26,9 @@ func (User) Fields() []ent.Field {
 		field.Enum("type").
 			Values("telegram", "discord").
 			Immutable(),
+		field.Enum("role").
+			Values("user", "admin").
+			Default("user"),
 	}
 }
 

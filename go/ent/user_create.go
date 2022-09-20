@@ -68,6 +68,20 @@ func (uc *UserCreate) SetType(u user.Type) *UserCreate {
 	return uc
 }
 
+// SetRole sets the "role" field.
+func (uc *UserCreate) SetRole(u user.Role) *UserCreate {
+	uc.mutation.SetRole(u)
+	return uc
+}
+
+// SetNillableRole sets the "role" field if the given value is not nil.
+func (uc *UserCreate) SetNillableRole(u *user.Role) *UserCreate {
+	if u != nil {
+		uc.SetRole(*u)
+	}
+	return uc
+}
+
 // AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
 func (uc *UserCreate) AddTelegramChatIDs(ids ...int) *UserCreate {
 	uc.mutation.AddTelegramChatIDs(ids...)
@@ -183,6 +197,10 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultUpdateTime()
 		uc.mutation.SetUpdateTime(v)
 	}
+	if _, ok := uc.mutation.Role(); !ok {
+		v := user.DefaultRole
+		uc.mutation.SetRole(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -205,6 +223,14 @@ func (uc *UserCreate) check() error {
 	if v, ok := uc.mutation.GetType(); ok {
 		if err := user.TypeValidator(v); err != nil {
 			return &ValidationError{Name: "type", err: fmt.Errorf(`ent: validator failed for field "User.type": %w`, err)}
+		}
+	}
+	if _, ok := uc.mutation.Role(); !ok {
+		return &ValidationError{Name: "role", err: errors.New(`ent: missing required field "User.role"`)}
+	}
+	if v, ok := uc.mutation.Role(); ok {
+		if err := user.RoleValidator(v); err != nil {
+			return &ValidationError{Name: "role", err: fmt.Errorf(`ent: validator failed for field "User.role": %w`, err)}
 		}
 	}
 	return nil
@@ -273,6 +299,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldType,
 		})
 		_node.Type = value
+	}
+	if value, ok := uc.mutation.Role(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldRole,
+		})
+		_node.Role = value
 	}
 	if nodes := uc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
