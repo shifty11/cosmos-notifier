@@ -19,13 +19,15 @@ type ImageManager struct {
 	ThumbnailUrl    string
 	Width           int
 	Height          int
+	Name            string
 }
 
-func NewImageManager(contractAddress string, weblocation string, imagePath string, width int, height int) *ImageManager {
+func NewImageManager(contractAddress string, name string, weblocation string, imagePath string, width int, height int) *ImageManager {
 	return &ImageManager{
 		ThumbnailPath:   filepath.Join(weblocation, imagePath, contractAddress+".png"),
 		ThumbnailUrl:    filepath.Join(imagePath, contractAddress+".png"),
 		ContractAddress: contractAddress,
+		Name:            name,
 		Width:           width,
 		Height:          height,
 	}
@@ -68,7 +70,7 @@ func (im *ImageManager) createThumbnail(data []byte) error {
 }
 
 func (im *ImageManager) downloadAndCreateThumbnail(url string) error {
-	log.Sugar.Debugf("downloading image for %v: %v", im.ContractAddress, url)
+	log.Sugar.Debugf("downloading image for %v (%v): %v", im.Name, im.ContractAddress, url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return err

@@ -17,7 +17,7 @@ func TestProposalManager_CreateOrUpdate(t *testing.T) {
 	m := newTestProposalManager(t)
 	cm := newTestContractManager(t)
 
-	c, _ := cm.CreateOrUpdate(&types.ContractData{
+	c, _ := cm.Create(&types.ContractData{
 		Address:     "0x123",
 		Name:        "name",
 		Description: "description",

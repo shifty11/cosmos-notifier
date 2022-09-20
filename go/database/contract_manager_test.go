@@ -101,7 +101,7 @@ func TestContractManager_Get(t *testing.T) {
 	}
 }
 
-func TestContractManager_CreateOrUpdate(t *testing.T) {
+func TestContractManager_Update(t *testing.T) {
 	m := newTestContractManager(t)
 	name := "test"
 	description := "description"
@@ -115,58 +115,31 @@ func TestContractManager_CreateOrUpdate(t *testing.T) {
 		ImageUrl:    imageUrl,
 	}
 
-	contract, status := m.CreateOrUpdate(data)
-	if status != ContractCreated {
-		t.Errorf("Expected status %s, got %s", ContractCreated, status)
-	}
-	if contract.Name != name {
-		t.Errorf("Expected name %s, got %s", name, contract.Name)
-	}
-	if contract.Description != description {
-		t.Errorf("Expected description %s, got %s", description, contract.Description)
-	}
-	if contract.Address != address {
-		t.Errorf("Expected address %s, got %s", address, contract.Address)
-	}
-	if contract.ImageURL != imageUrl {
-		t.Errorf("Expected image url %s, got %s", imageUrl, contract.ImageURL)
-	}
-	if contract.ThumbnailURL != "" {
-		t.Errorf("Expected thumbnail url %s, got %s", "", contract.ThumbnailURL)
+	contract, err := m.Create(data)
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
 	}
 
 	updatedTime := contract.UpdateTime
-	contract, status = m.CreateOrUpdate(data)
-	if status != ContractNoChanges {
-		t.Errorf("Expected status %s, got %s", ContractNoChanges, status)
-	}
+	contract = m.Update(contract, data)
 	if contract.UpdateTime.Unix() != updatedTime.Unix() {
 		t.Errorf("Expected update time %v, got %v", updatedTime.Unix(), contract.UpdateTime.Unix())
 	}
 
 	data.Name = "updated"
-	contract, status = m.CreateOrUpdate(data)
-	if status != ContractUpdated {
-		t.Errorf("Expected status %s, got %s", ContractUpdated, status)
-	}
+	contract = m.Update(contract, data)
 	if contract.Name != "updated" {
 		t.Errorf("Expected name %s, got %s", "updated", contract.Name)
 	}
 
 	data.Description = "updated"
-	contract, status = m.CreateOrUpdate(data)
-	if status != ContractUpdated {
-		t.Errorf("Expected status %s, got %s", ContractUpdated, status)
-	}
+	contract = m.Update(contract, data)
 	if contract.Description != "updated" {
 		t.Errorf("Expected description %s, got %s", "updated", contract.Description)
 	}
 
 	data.ImageUrl = "https://updated.com"
-	contract, status = m.CreateOrUpdate(data)
-	if status != ContractImageChanged {
-		t.Errorf("Expected status %s, got %s", ContractImageChanged, status)
-	}
+	contract = m.Update(contract, data)
 	if contract.ImageURL != "https://updated.com" {
 		t.Errorf("Expected image url %s, got %s", "https://updated.com", contract.ImageURL)
 	}

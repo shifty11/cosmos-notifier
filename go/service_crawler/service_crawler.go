@@ -1,9 +1,9 @@
 package crawler
 
 import (
-	"bufio"
 	"github.com/robfig/cron/v3"
 	"github.com/shifty11/dao-dao-notifier/database"
+	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/notifier"
 	"os"
@@ -27,76 +27,87 @@ func NewCrawler(managers *database.DbManagers, notifier *notifier.Notifier, apiU
 	}
 }
 
-func (c *Crawler) contracts() []string {
-	file, err := os.Open("contracts.txt")
-	if err != nil {
-		file, err = os.Open("../contracts.txt")
-		if err != nil {
-			log.Sugar.Error(err)
-		}
-	}
-	//goland:noinspection GoUnhandledErrorResult
-	defer file.Close()
-
-	sc := bufio.NewScanner(file)
-	contracts := make([]string, 0)
-
-	// Read through 'contracts' until an EOF is encountered.
-	for sc.Scan() {
-		contracts = append(contracts, sc.Text())
-	}
-
-	if err := sc.Err(); err != nil {
-		log.Sugar.Error(err)
-	}
-	return contracts
-}
-
 func (c *Crawler) UpdateContracts() {
 	log.Sugar.Info("updating contracts")
-	for _, contractAddr := range c.contracts() {
-		client := NewContractClient(c.apiUrl, contractAddr)
+	for _, oldContract := range c.contractManager.All() {
+		client := NewContractClient(c.apiUrl, oldContract.Address)
 		config, err := client.config()
 		if err != nil {
-			log.Sugar.Infof("while getting config for contract %v: %v", contractAddr, err)
+			log.Sugar.Debugf("error while getting config for contract %v (%v): %v", oldContract.Name, oldContract.Address, err)
 			continue
 		}
 		proposals, err := client.proposals()
 		if err != nil {
-			log.Sugar.Infof("while getting proposals for contract %v: %v", contractAddr, err)
+			log.Sugar.Debugf("error while getting proposals for contract %v (%v): %v", oldContract.Name, oldContract.Address, err)
 			continue
 		}
 
-		contract, contractStatus := c.contractManager.CreateOrUpdate(config)
+		oldImageUrl := oldContract.ImageURL
+		updatedContract := c.contractManager.Update(oldContract, config)
 		for _, proposal := range proposals.Proposals {
-			dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(contract, &proposal)
+			dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(updatedContract, &proposal)
 			if proposalStatus == database.ProposalStatusChangedFromOpen {
 				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
 			} else if proposalStatus == database.ProposalCreated {
-				c.notifier.Notify(contract, dbProp)
+				c.notifier.Notify(updatedContract, dbProp)
 			}
 		}
 
-		im := NewImageManager(contractAddr, c.assetsPath, "images/contracts/", 100, 100)
-		if contractStatus == database.ContractCreated || contractStatus == database.ContractImageChanged || !im.DoesExist() {
-			if contract.ImageURL != "" {
-				err := im.downloadAndCreateThumbnail(contract.ImageURL)
+		im := NewImageManager(updatedContract.Address, updatedContract.Name, c.assetsPath, "images/contracts/", 100, 100)
+		if oldImageUrl != updatedContract.ImageURL || !im.DoesExist() {
+			if updatedContract.ImageURL != "" {
+				err := im.downloadAndCreateThumbnail(updatedContract.ImageURL)
 				if err != nil {
-					log.Sugar.Infof("while downloading image for contract %v: %v", contractAddr, err)
+					log.Sugar.Infof("while downloading image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, err)
 				} else {
-					c.contractManager.SaveThumbnailUrl(contract, im.ThumbnailUrl)
+					c.contractManager.SaveThumbnailUrl(updatedContract, im.ThumbnailUrl)
 				}
-			} else if contractStatus == database.ContractImageChanged {
-				c.contractManager.SaveThumbnailUrl(contract, "")
+			} else if oldImageUrl != updatedContract.ImageURL {
+				c.contractManager.SaveThumbnailUrl(updatedContract, "")
 				e := os.Remove(im.ThumbnailPath)
 				if e != nil {
-					log.Sugar.Errorf("while removing image for contract %v: %v", contractAddr, e)
+					log.Sugar.Errorf("while removing image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, e)
 				}
 			}
 		}
 
-		log.Sugar.Infof("processed contract %v (%v): %v", config.Name, contractAddr, contractStatus)
+		log.Sugar.Infof("processed contract %v (%v)", config.Name, updatedContract.Address)
 	}
+}
+
+func (c *Crawler) AddContract(contractAddr string) (*ent.Contract, error) {
+	client := NewContractClient(c.apiUrl, contractAddr)
+	config, err := client.config()
+	if err != nil {
+		return nil, err
+	}
+	proposals, err := client.proposals()
+	if err != nil {
+		return nil, err
+	}
+
+	contract, err := c.contractManager.Create(config)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, proposal := range proposals.Proposals {
+		c.proposalManager.CreateOrUpdate(contract, &proposal)
+	}
+
+	im := NewImageManager(contractAddr, contract.Name, c.assetsPath, "images/contracts/", 100, 100)
+	err = im.downloadAndCreateThumbnail(contract.ImageURL)
+	if err != nil {
+		log.Sugar.Infof("while downloading image for contract %v: %v", contractAddr, err)
+	} else {
+		c.contractManager.SaveThumbnailUrl(contract, im.ThumbnailUrl)
+	}
+
+	return contract, nil
+}
+
+func (c *Crawler) ByAddress(contractAddr string) (*ent.Contract, error) {
+	return c.contractManager.ByAddress(contractAddr)
 }
 
 func (c *Crawler) ScheduleCrawl() {

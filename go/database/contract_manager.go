@@ -10,7 +10,7 @@ import (
 
 type IContractManager interface {
 	Create(data *types.ContractData) (*ent.Contract, error)
-	CreateOrUpdate(data *types.ContractData) (*ent.Contract, ContractStatus)
+	Update(c *ent.Contract, data *types.ContractData) *ent.Contract
 	All() []*ent.Contract
 	Get(id int) (*ent.Contract, error)
 	SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract
@@ -29,13 +29,6 @@ func NewContractManager(client *ent.Client, ctx context.Context) *ContractManage
 
 type ContractStatus string
 
-const (
-	ContractCreated      ContractStatus = "created"
-	ContractUpdated      ContractStatus = "updated"
-	ContractImageChanged ContractStatus = "image_changed"
-	ContractNoChanges    ContractStatus = "no_changes"
-)
-
 func (m *ContractManager) Create(data *types.ContractData) (*ent.Contract, error) {
 	c, err := m.client.Contract.
 		Create().
@@ -47,46 +40,22 @@ func (m *ContractManager) Create(data *types.ContractData) (*ent.Contract, error
 	return c, err
 }
 
-// CreateOrUpdate creates a new contract or updates an existing one
-//
+// Update creates a new contract or updates an existing one
 // returns (contract, created)
-func (m *ContractManager) CreateOrUpdate(data *types.ContractData) (*ent.Contract, ContractStatus) {
-	c, err := m.client.Contract.
-		Query().
-		Where(contract.AddressEQ(data.Address)).
-		First(m.ctx)
-	if err != nil && ent.IsNotFound(err) {
-		c, err = m.client.Contract.
-			Create().
-			SetAddress(data.Address).
+func (m *ContractManager) Update(c *ent.Contract, data *types.ContractData) *ent.Contract {
+	if c.Name != data.Name || c.Description != data.Description || c.ImageURL != data.ImageUrl {
+		updated, err := m.client.Contract.
+			UpdateOne(c).
 			SetName(data.Name).
 			SetDescription(data.Description).
 			SetImageURL(data.ImageUrl).
 			Save(m.ctx)
 		if err != nil {
-			log.Sugar.Panicf("Error while creating contract: %v", err)
+			log.Sugar.Panicf("Error while updating contract: %v", err)
 		}
-		return c, ContractCreated
-	} else if err != nil {
-		log.Sugar.Panicf("Error while querying contract: %v", err)
-	} else {
-		if c.Name != data.Name || c.Description != data.Description || c.ImageURL != data.ImageUrl {
-			updated, err := m.client.Contract.
-				UpdateOne(c).
-				SetName(data.Name).
-				SetDescription(data.Description).
-				SetImageURL(data.ImageUrl).
-				Save(m.ctx)
-			if err != nil {
-				log.Sugar.Panicf("Error while updating contract: %v", err)
-			}
-			if c.ImageURL != updated.ImageURL {
-				return updated, ContractImageChanged
-			}
-			return updated, ContractUpdated
-		}
+		return updated
 	}
-	return c, ContractNoChanges
+	return c
 }
 
 func (m *ContractManager) All() []*ent.Contract {

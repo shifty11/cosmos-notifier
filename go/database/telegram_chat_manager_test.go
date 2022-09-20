@@ -43,7 +43,7 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 		ImageUrl:    "https://image.com",
 	}
 
-	c, _ := m.contractManager.CreateOrUpdate(data)
+	c, _ := m.contractManager.Create(data)
 	hasContract, err := m.AddOrRemoveContract(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
@@ -116,7 +116,7 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 		ImageUrl:    "https://image.com",
 	}
 
-	c1, _ := m.contractManager.CreateOrUpdate(data)
+	c1, _ := m.contractManager.Create(data)
 
 	u := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
 

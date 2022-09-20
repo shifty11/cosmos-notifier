@@ -117,8 +117,8 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 		Description: "desc2",
 		ImageUrl:    "url2",
 	}
-	c2, _ := m.contractManager.CreateOrUpdate(data2)
-	c1, _ := m.contractManager.CreateOrUpdate(data1)
+	c2, _ := m.contractManager.Create(data2)
+	c1, _ := m.contractManager.Create(data1)
 
 	subscriptions := m.getSubscriptions([]*ent.Contract{c1})
 	if len(subscriptions) != 2 {
@@ -166,8 +166,8 @@ func TestSubscriptionManager_GetSubscriptions(t *testing.T) {
 		Description: "desc2",
 		ImageUrl:    "url2",
 	}
-	c2, _ := m.contractManager.CreateOrUpdate(data2)
-	c1, _ := m.contractManager.CreateOrUpdate(data1)
+	c2, _ := m.contractManager.Create(data2)
+	c1, _ := m.contractManager.Create(data1)
 
 	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
 	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 11, "chat1", false)
