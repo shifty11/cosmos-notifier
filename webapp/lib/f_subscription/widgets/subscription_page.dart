@@ -218,12 +218,12 @@ class SubscriptionPage extends StatelessWidget {
       builder: (_) {
         var addressController = TextEditingController();
         return AlertDialog(
-          title: const Text('Add DAODAO'),
+          title: const Text('Add DAO'),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text("Enter the Juno address of the DAODAO you want to add"),
+                const Text("Enter the Juno address of the DAO you want to add"),
                 const SizedBox(height: 15),
                 TextFormField(
                   controller: addressController,
@@ -269,7 +269,7 @@ class SubscriptionPage extends StatelessWidget {
           // ref.read(chatroomListStateProvider.notifier).addChatRoom();
           showAddDaoDialog(context);
         },
-        child: const Text("Add DAODAO"),
+        child: const Text("Add DAO"),
       ),
     );
   }
