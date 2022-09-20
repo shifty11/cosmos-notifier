@@ -34,15 +34,11 @@ func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.
 	for _, chatRoom := range subscriptions {
 		var subs []*pb.Subscription
 		for _, sub := range chatRoom.Subscriptions {
-			thumbUrl := sub.ThumbnailUrl
-			if thumbUrl == "" {
-				thumbUrl = "images/logo.png"
-			}
 			subs = append(subs, &pb.Subscription{
 				Id:              sub.Id,
 				Name:            sub.Name,
 				IsSubscribed:    sub.Notify,
-				ThumbnailUrl:    thumbUrl,
+				ThumbnailUrl:    sub.ThumbnailUrl,
 				ContractAddress: sub.ContractAddress,
 			})
 		}
