@@ -14,9 +14,14 @@ const contractAddr = "juno1hqr0t3scwkrmuu3554lnqzrccuevd8huxmu533gtm6s7vuzeztzqh
 
 async function main() {
   const client = await CosmWasmClient.connect(rpcEndpoint);
-  const config = await client.queryContractSmart(contractAddr, { proposal: {proposal_id: 1} });
+  console.log("client connected");
 
-  console.log(config);
+  try {
+    const config = await client.queryContractSmart(contractAddr, { list_proposals: {} });
+    console.log(config);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 main();
