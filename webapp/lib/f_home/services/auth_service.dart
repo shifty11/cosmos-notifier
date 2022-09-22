@@ -36,6 +36,11 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
   AuthService._internal(ClientChannelBase channel, Iterable<ClientInterceptor> interceptors, this.jwtManager, this.refreshBeforeExpDuration)
       : super(channel, interceptors: interceptors);
 
+  bool get hasLoginData => _isTelegramLogin() || _isDiscordLogin();
+
+  // Authenticate using query params for Telegram/Discord login
+  // It they are not available try to authenticate with previous saved JWT refresh token
+  // If authentication not successful an error will be thrown
   init() async {
     if (canRefreshAccessToken) {
       try {
@@ -50,6 +55,23 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
       await _login();
     }
     _scheduleRefreshAccessToken();
+  }
+
+  // Try to authenticate without login.
+  // This works just in case there is already a JWT in local storage.
+  Future<bool> backgroundInit() async {
+    try {
+      if (isAuthenticated) {
+        _scheduleRefreshAccessToken();
+      } else if (canRefreshAccessToken) {
+        await _refreshAccessToken();
+        if (isAuthenticated) {
+          _scheduleRefreshAccessToken();
+        }
+      }
+      // ignore: empty_catches
+    } catch (e) {}
+    return isAuthenticated;
   }
 
   bool get isAuthenticated {

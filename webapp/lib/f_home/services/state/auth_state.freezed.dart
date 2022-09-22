@@ -18,8 +18,9 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$AuthState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() authorized,
+    required TResult Function(bool redirect) authorized,
     required TResult Function() expired,
     required TResult Function() userNotFound,
     required TResult Function() error,
@@ -27,8 +28,9 @@ mixin _$AuthState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -36,8 +38,9 @@ mixin _$AuthState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -46,6 +49,7 @@ mixin _$AuthState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
     required TResult Function(Loading value) loading,
     required TResult Function(Authorized value) authorized,
     required TResult Function(Expired value) expired,
@@ -55,6 +59,7 @@ mixin _$AuthState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -64,6 +69,7 @@ mixin _$AuthState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -87,6 +93,139 @@ class _$AuthStateCopyWithImpl<$Res> implements $AuthStateCopyWith<$Res> {
   final AuthState _value;
   // ignore: unused_field
   final $Res Function(AuthState) _then;
+}
+
+/// @nodoc
+abstract class _$$InitialCopyWith<$Res> {
+  factory _$$InitialCopyWith(_$Initial value, $Res Function(_$Initial) then) =
+      __$$InitialCopyWithImpl<$Res>;
+}
+
+/// @nodoc
+class __$$InitialCopyWithImpl<$Res> extends _$AuthStateCopyWithImpl<$Res>
+    implements _$$InitialCopyWith<$Res> {
+  __$$InitialCopyWithImpl(_$Initial _value, $Res Function(_$Initial) _then)
+      : super(_value, (v) => _then(v as _$Initial));
+
+  @override
+  _$Initial get _value => super._value as _$Initial;
+}
+
+/// @nodoc
+
+class _$Initial extends Initial with DiagnosticableTreeMixin {
+  const _$Initial() : super._();
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'AuthState.initial()';
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty('type', 'AuthState.initial'));
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType && other is _$Initial);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(bool redirect) authorized,
+    required TResult Function() expired,
+    required TResult Function() userNotFound,
+    required TResult Function() error,
+  }) {
+    return initial();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(bool redirect)? authorized,
+    TResult Function()? expired,
+    TResult Function()? userNotFound,
+    TResult Function()? error,
+  }) {
+    return initial?.call();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(bool redirect)? authorized,
+    TResult Function()? expired,
+    TResult Function()? userNotFound,
+    TResult Function()? error,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial();
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
+    required TResult Function(Loading value) loading,
+    required TResult Function(Authorized value) authorized,
+    required TResult Function(Expired value) expired,
+    required TResult Function(UserNotFound value) userNotFound,
+    required TResult Function(Error value) error,
+  }) {
+    return initial(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
+    TResult Function(Loading value)? loading,
+    TResult Function(Authorized value)? authorized,
+    TResult Function(Expired value)? expired,
+    TResult Function(UserNotFound value)? userNotFound,
+    TResult Function(Error value)? error,
+  }) {
+    return initial?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
+    TResult Function(Loading value)? loading,
+    TResult Function(Authorized value)? authorized,
+    TResult Function(Expired value)? expired,
+    TResult Function(UserNotFound value)? userNotFound,
+    TResult Function(Error value)? error,
+    required TResult orElse(),
+  }) {
+    if (initial != null) {
+      return initial(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class Initial extends AuthState {
+  const factory Initial() = _$Initial;
+  const Initial._() : super._();
 }
 
 /// @nodoc
@@ -133,8 +272,9 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() authorized,
+    required TResult Function(bool redirect) authorized,
     required TResult Function() expired,
     required TResult Function() userNotFound,
     required TResult Function() error,
@@ -145,8 +285,9 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -157,8 +298,9 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -173,6 +315,7 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
     required TResult Function(Loading value) loading,
     required TResult Function(Authorized value) authorized,
     required TResult Function(Expired value) expired,
@@ -185,6 +328,7 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -197,6 +341,7 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -221,6 +366,7 @@ abstract class _$$AuthorizedCopyWith<$Res> {
   factory _$$AuthorizedCopyWith(
           _$Authorized value, $Res Function(_$Authorized) then) =
       __$$AuthorizedCopyWithImpl<$Res>;
+  $Res call({bool redirect});
 }
 
 /// @nodoc
@@ -232,69 +378,97 @@ class __$$AuthorizedCopyWithImpl<$Res> extends _$AuthStateCopyWithImpl<$Res>
 
   @override
   _$Authorized get _value => super._value as _$Authorized;
+
+  @override
+  $Res call({
+    Object? redirect = freezed,
+  }) {
+    return _then(_$Authorized(
+      redirect == freezed
+          ? _value.redirect
+          : redirect // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$Authorized extends Authorized with DiagnosticableTreeMixin {
-  const _$Authorized() : super._();
+  const _$Authorized(this.redirect) : super._();
+
+  @override
+  final bool redirect;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'AuthState.authorized()';
+    return 'AuthState.authorized(redirect: $redirect)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty('type', 'AuthState.authorized'));
+    properties
+      ..add(DiagnosticsProperty('type', 'AuthState.authorized'))
+      ..add(DiagnosticsProperty('redirect', redirect));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Authorized);
+        (other.runtimeType == runtimeType &&
+            other is _$Authorized &&
+            const DeepCollectionEquality().equals(other.redirect, redirect));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(redirect));
+
+  @JsonKey(ignore: true)
+  @override
+  _$$AuthorizedCopyWith<_$Authorized> get copyWith =>
+      __$$AuthorizedCopyWithImpl<_$Authorized>(this, _$identity);
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() authorized,
+    required TResult Function(bool redirect) authorized,
     required TResult Function() expired,
     required TResult Function() userNotFound,
     required TResult Function() error,
   }) {
-    return authorized();
+    return authorized(redirect);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
   }) {
-    return authorized?.call();
+    return authorized?.call(redirect);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
     required TResult orElse(),
   }) {
     if (authorized != null) {
-      return authorized();
+      return authorized(redirect);
     }
     return orElse();
   }
@@ -302,6 +476,7 @@ class _$Authorized extends Authorized with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
     required TResult Function(Loading value) loading,
     required TResult Function(Authorized value) authorized,
     required TResult Function(Expired value) expired,
@@ -314,6 +489,7 @@ class _$Authorized extends Authorized with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -326,6 +502,7 @@ class _$Authorized extends Authorized with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -341,8 +518,13 @@ class _$Authorized extends Authorized with DiagnosticableTreeMixin {
 }
 
 abstract class Authorized extends AuthState {
-  const factory Authorized() = _$Authorized;
+  const factory Authorized(final bool redirect) = _$Authorized;
   const Authorized._() : super._();
+
+  bool get redirect;
+  @JsonKey(ignore: true)
+  _$$AuthorizedCopyWith<_$Authorized> get copyWith =>
+      throw _privateConstructorUsedError;
 }
 
 /// @nodoc
@@ -389,8 +571,9 @@ class _$Expired extends Expired with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() authorized,
+    required TResult Function(bool redirect) authorized,
     required TResult Function() expired,
     required TResult Function() userNotFound,
     required TResult Function() error,
@@ -401,8 +584,9 @@ class _$Expired extends Expired with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -413,8 +597,9 @@ class _$Expired extends Expired with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -429,6 +614,7 @@ class _$Expired extends Expired with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
     required TResult Function(Loading value) loading,
     required TResult Function(Authorized value) authorized,
     required TResult Function(Expired value) expired,
@@ -441,6 +627,7 @@ class _$Expired extends Expired with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -453,6 +640,7 @@ class _$Expired extends Expired with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -518,8 +706,9 @@ class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() authorized,
+    required TResult Function(bool redirect) authorized,
     required TResult Function() expired,
     required TResult Function() userNotFound,
     required TResult Function() error,
@@ -530,8 +719,9 @@ class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -542,8 +732,9 @@ class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -558,6 +749,7 @@ class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
     required TResult Function(Loading value) loading,
     required TResult Function(Authorized value) authorized,
     required TResult Function(Expired value) expired,
@@ -570,6 +762,7 @@ class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -582,6 +775,7 @@ class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -645,8 +839,9 @@ class _$Error extends Error with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
+    required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function() authorized,
+    required TResult Function(bool redirect) authorized,
     required TResult Function() expired,
     required TResult Function() userNotFound,
     required TResult Function() error,
@@ -657,8 +852,9 @@ class _$Error extends Error with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -669,8 +865,9 @@ class _$Error extends Error with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function()? authorized,
+    TResult Function(bool redirect)? authorized,
     TResult Function()? expired,
     TResult Function()? userNotFound,
     TResult Function()? error,
@@ -685,6 +882,7 @@ class _$Error extends Error with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult map<TResult extends Object?>({
+    required TResult Function(Initial value) initial,
     required TResult Function(Loading value) loading,
     required TResult Function(Authorized value) authorized,
     required TResult Function(Expired value) expired,
@@ -697,6 +895,7 @@ class _$Error extends Error with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,
@@ -709,6 +908,7 @@ class _$Error extends Error with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>({
+    TResult Function(Initial value)? initial,
     TResult Function(Loading value)? loading,
     TResult Function(Authorized value)? authorized,
     TResult Function(Expired value)? expired,

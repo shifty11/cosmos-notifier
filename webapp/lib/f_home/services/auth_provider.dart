@@ -1,7 +1,7 @@
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/state/auth_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:webapp/config.dart';
+import 'package:webapp/f_home/services/state/auth_state.dart';
 
 import 'auth_service.dart';
 
@@ -23,20 +23,29 @@ final authStateValueProvider = Provider<ValueNotifier<AuthState>>((ref) {
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService _authService;
 
-  AuthNotifier(this._authService) : super(const AuthState.loading()) {
-    login();
-    _authService.addListener(() {
-      if (!_authService.isAuthenticated) {
-        state = const AuthState.expired();
-      }
-    });
+  AuthNotifier(this._authService) : super(const AuthState.initial()) {
+    if (_authService.hasLoginData) {
+      state = const AuthState.loading();
+      login();
+      _authService.addListener(() {
+        if (!_authService.isAuthenticated) {
+          state = const AuthState.expired();
+        }
+      });
+    } else {
+      _authService.backgroundInit().then((isAuthenticated) {
+        if (isAuthenticated) {
+          state = const AuthState.authorized(false);
+        }
+      });
+    }
   }
 
   Future<void> login() async {
     try {
       state = const AuthState.loading();
       await _authService.init();
-      state = const AuthState.authorized();
+      state = const AuthState.authorized(true);
     } catch (e) {
       if (cDebugMode) {
         print("AuthNotifier: error -> $e");

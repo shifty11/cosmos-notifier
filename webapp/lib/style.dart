@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:webapp/f_home/services/type/custom_theme_data.dart';
 import 'package:webapp/f_home/widgets/transition_builder_widget.dart';
-import 'package:flutter/material.dart';
 
 extension ColorBrightness on Color {
   Color darken([double amount = .1]) {
@@ -16,8 +16,7 @@ extension ColorBrightness on Color {
     assert(amount >= 0 && amount <= 1);
 
     final hsl = HSLColor.fromColor(this);
-    final hslLight =
-    hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
+    final hslLight = hsl.withLightness((hsl.lightness + amount).clamp(0.0, 1.0));
 
     return hslLight.toColor();
   }
@@ -44,11 +43,12 @@ class Styles {
 
   static ThemeData customTheme(CustomThemeData themeParams, bool isDarkTheme) {
     return _defaultTheme(
-        themeParams.bgColor,
-        isDarkTheme ? themeParams.bgColor.lighten() : themeParams.bgColor.darken(),
-        themeParams.textColor,
-        themeParams.hintColor,
-        themeParams.buttonColor,
+      isDarkTheme,
+      themeParams.bgColor,
+      isDarkTheme ? themeParams.bgColor.lighten() : themeParams.bgColor.darken(),
+      themeParams.textColor,
+      themeParams.hintColor,
+      themeParams.buttonColor,
     );
   }
 
@@ -58,16 +58,18 @@ class Styles {
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final textColorHint = isDarkTheme ? const Color(0xff7d8b99) : Colors.black;
     const primaryColor = Color(0xff50a8eb);
-    return _defaultTheme(bgColor, bgColorLight, textColor, textColorHint, primaryColor);
+    return _defaultTheme(isDarkTheme, bgColor, bgColorLight, textColor, textColorHint, primaryColor);
   }
 
   static isDarkTheme(BuildContext context) {
     return Theme.of(context).brightness == Brightness.dark;
   }
 
-  static ThemeData _defaultTheme(Color bgColor, Color bgColorLight, Color textColor, Color textColorHint, Color primaryColor) {
+  static ThemeData _defaultTheme(
+      bool isDarkTheme, Color bgColor, Color bgColorLight, Color textColor, Color textColorHint, Color primaryColor) {
     const borderColor = Colors.grey;
     return ThemeData(
+      brightness: isDarkTheme ? Brightness.dark : Brightness.light,
       fontFamily: "Montserrat",
       primaryColor: primaryColor,
       primarySwatch: createMaterialColor(primaryColor),
@@ -78,11 +80,10 @@ class Styles {
       unselectedWidgetColor: borderColor,
       toggleableActiveColor: primaryColor,
       inputDecorationTheme: InputDecorationTheme(
-        labelStyle: TextStyle(color: textColor),
-        hintStyle: const TextStyle(color: borderColor),
-        iconColor: borderColor,
-        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: borderColor))
-      ),
+          labelStyle: TextStyle(color: textColor),
+          hintStyle: const TextStyle(color: borderColor),
+          iconColor: borderColor,
+          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: borderColor))),
       dialogBackgroundColor: bgColor,
       textTheme: TextTheme(
         headline1: const TextStyle().copyWith(fontSize: 64),
@@ -104,7 +105,8 @@ class Styles {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          primary: borderColor, // Button color
+          primary: primaryColor, // Button color
+          side: BorderSide(color: primaryColor),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
