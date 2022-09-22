@@ -33,5 +33,4 @@ RUN flutter build web
 
 FROM caddy:2.5.2-alpine
 COPY --from=build-env /app/build/web /var/www/daodao-notifier
-COPY --from=build-env /app/build/web/assets /var/www/daodao-notifier/assets
 COPY Caddyfile /etc/caddy/Caddyfile
