@@ -213,7 +213,7 @@ func (m *DiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
 func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
 	count, err := m.client.DiscordChannel.
 		Query().
-		Where(discordchannel.ChannelID(channelId)).
+		Where(discordchannel.ChannelIDEQ(channelId)).
 		QueryContracts().
 		Count(m.ctx)
 	if err != nil {

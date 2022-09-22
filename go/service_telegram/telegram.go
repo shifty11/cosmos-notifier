@@ -6,13 +6,6 @@ import (
 	"github.com/shifty11/dao-dao-notifier/log"
 )
 
-func (client TelegramClient) handleCommand(update *tgbotapi.Update) {
-	switch MessageCommand(update.Message.Command()) { // Check for non admin commands
-	case MessageCmdStart, MessageCmdSubscriptions:
-		client.handleStart(update)
-	}
-}
-
 // groups -> just admins and creators can interact with the bot
 // private -> everything is allowed
 func (client TelegramClient) isInteractionAllowed(update *tgbotapi.Update) bool {

@@ -6,13 +6,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type MessageCommand string
-
-const (
-	MessageCmdStart         MessageCommand = "start"
-	MessageCmdSubscriptions MessageCommand = "subscriptions"
-)
-
 type Button struct {
 	Text     string
 	LoginURL *tgbotapi.LoginURL

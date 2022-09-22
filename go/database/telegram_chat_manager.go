@@ -16,6 +16,8 @@ type ITelegramChatManager interface {
 	GetSubscribedIds(entContract *ent.Contract) []TgChatQueryResult
 	Delete(userId int64, chatId int64) error
 	DeleteMultiple(chatIds []int64)
+	CountSubscriptions(chatId int64) int
+	GetChatUsers(chatId int64) []*ent.User
 }
 
 type TelegramChatManager struct {
@@ -208,4 +210,28 @@ func (m *TelegramChatManager) DeleteMultiple(chatIds []int64) {
 			}
 		}
 	}
+}
+
+func (m *TelegramChatManager) CountSubscriptions(chatId int64) int {
+	count, err := m.client.TelegramChat.
+		Query().
+		Where(telegramchat.ChatIDEQ(chatId)).
+		QueryContracts().
+		Count(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not count subscriptions for telegram chat: %v", err)
+	}
+	return count
+}
+
+func (m *TelegramChatManager) GetChatUsers(chatId int64) []*ent.User {
+	users, err := m.client.TelegramChat.
+		Query().
+		Where(telegramchat.ChatIDEQ(chatId)).
+		QueryUsers().
+		All(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not get users for telegram chat: %v", err)
+	}
+	return users
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/log"
 	"os"
 	"os/signal"
+	"syscall"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -87,6 +88,6 @@ func (dc DiscordClient) Start() {
 	dc.addCommands()
 
 	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
+	signal.Notify(stop, syscall.SIGINT)
 	<-stop
 }

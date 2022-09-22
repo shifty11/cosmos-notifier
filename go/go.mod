@@ -42,6 +42,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/hcl/v2 v2.10.0 // indirect
+	github.com/icza/gog v0.0.0-20220909135443-35d926f98ec3 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

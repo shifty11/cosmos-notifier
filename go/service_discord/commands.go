@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/icza/gog"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"net/url"
 )
@@ -43,18 +44,16 @@ var (
 			params.Add("state", state)
 			redirectUrl := fmt.Sprintf("https://discord.com/oauth2/authorize?%v", params.Encode())
 			dc.discordChannelManager.CreateOrUpdateChannel(userId, userName, channelId, channelName, isGroup)
-			users := dc.discordChannelManager.GetChannelUsers(channelId)
 			cntSubs := dc.discordChannelManager.CountSubscriptions(channelId)
-
-			adminText := ""
-			for _, user := range users {
-				adminText += fmt.Sprintf("- `%v`\n", user.Name)
-			}
 
 			text := ""
 			if isGroup {
+				adminText := ""
+				for _, user := range dc.discordChannelManager.GetChannelUsers(channelId) {
+					adminText += fmt.Sprintf("- `%v`\n", user.Name)
+				}
 				text = fmt.Sprintf(":rocket: DaoDao Notifier started.\n\n") +
-					fmt.Sprintf("Bot admins in this channel:\n%v\n", adminText) +
+					fmt.Sprintf(":police_officer: Bot admins in this channel:\n%v\n", adminText) +
 					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
 					fmt.Sprintf("Go to **[DaoDao Notifier](%v)** to change subscriptions for this channel.\n\n", redirectUrl) +
 					"**How does it work?**\n" +
@@ -74,6 +73,8 @@ var (
 					"To stop the bot send the command `/stop`."
 			}
 
+			log.Sugar.Debugf("Send start to %v %v (%v)", gog.If(isGroup, "group", "user"), channelName, channelId)
+
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
@@ -92,10 +93,14 @@ var (
 
 			userId := getUserIdX(i)
 			channelId := getChannelId(i)
+			channelName := getChannelName(s, i)
+			isGroup := isGroup(i)
 
 			//goland:noinspection GoUnhandledErrorResult
 			dc.discordChannelManager.Delete(userId, channelId)
 			text := ":sleeping: Bot stopped. Send `/start` to start it again."
+
+			log.Sugar.Debugf("Send stop to %v %v (%v)", gog.If(isGroup, "group", "user"), channelName, channelId)
 
 			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
