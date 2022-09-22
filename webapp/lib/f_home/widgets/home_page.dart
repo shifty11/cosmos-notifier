@@ -46,7 +46,7 @@ class HomePage extends StatelessWidget {
               backgroundColor: Styles.isDarkTheme(context) ? Colors.white : Colors.black,
               child: ClipOval(
                 child: Image.asset(
-                  "logo.png",
+                  "images/logo.png",
                   width: 340,
                   height: 340,
                 ),
