@@ -30,7 +30,41 @@ class SubscriptionPage extends StatelessWidget {
     return 4;
   }
 
-  Widget buildSliderForAdmins({required Subscription subscription, required WidgetRef ref, required Widget child}) {
+  void showConfirmDeleteDaoDialog(BuildContext context, Subscription subscription) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: const Text('Delete DAO?'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Are you sure you want to delete ${subscription.name}?"),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: Styles.dangerBgColor, onPrimary: Styles.dangerTextColor),
+                onPressed: () {
+                  ref.read(chatroomListStateProvider.notifier).deleteDao(subscription.id, subscription.name);
+                },
+                child: const Text('Delete'),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget buildSliderForAdmins({required BuildContext context, required Subscription subscription, required WidgetRef ref, required Widget child}) {
     if (!jwtManager.isAdmin) {
       return child;
     }
@@ -40,10 +74,10 @@ class SubscriptionPage extends StatelessWidget {
         children: [
           SlidableAction(
             onPressed: (_) {
-              ref.read(chatroomListStateProvider.notifier).deleteDao(subscription.id, subscription.name);
+              showConfirmDeleteDaoDialog(context, subscription);
             },
-            backgroundColor: const Color(0xFFFE4A49),
-            foregroundColor: Colors.white,
+            backgroundColor: Styles.dangerBgColor,
+            foregroundColor: Styles.dangerTextColor,
             icon: Icons.delete,
             label: 'Delete',
           ),
@@ -76,6 +110,7 @@ class SubscriptionPage extends StatelessWidget {
                   final subscription = subData.subscription;
                   const double sidePadding = 12;
                   return buildSliderForAdmins(
+                    context: context,
                     subscription: subscription,
                     ref: ref,
                     child: Container(
@@ -241,7 +276,7 @@ class SubscriptionPage extends StatelessWidget {
               child: const Text('Cancel'),
             ),
             Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              return TextButton(
+              return ElevatedButton(
                 onPressed: () {
                   var address = addressController.text;
                   ref.read(chatroomListStateProvider.notifier).addDao(address);
