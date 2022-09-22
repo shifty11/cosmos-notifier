@@ -64,7 +64,8 @@ class SubscriptionPage extends StatelessWidget {
     );
   }
 
-  Widget buildSliderForAdmins({required BuildContext context, required Subscription subscription, required WidgetRef ref, required Widget child}) {
+  Widget buildSliderForAdmins(
+      {required BuildContext context, required Subscription subscription, required WidgetRef ref, required Widget child}) {
     if (!jwtManager.isAdmin) {
       return child;
     }
@@ -134,23 +135,24 @@ class SubscriptionPage extends StatelessWidget {
                           children: [
                             const SizedBox(width: sidePadding),
                             CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              child: subscription.thumbnailUrl.isNotEmpty ? ClipOval(
-                                child: Image.asset(
-                                  subscription.thumbnailUrl,
-                                  width: 40,
-                                  height: 40,
-                                ),
-                              ) : Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    width: 5,
-                                    color: Colors.black,
-                                  ),
-                                  shape: BoxShape.circle,
-                                ),
-                              )
-                            ),
+                                backgroundColor: Colors.transparent,
+                                child: subscription.thumbnailUrl.isNotEmpty
+                                    ? ClipOval(
+                                        child: Image.asset(
+                                          subscription.thumbnailUrl,
+                                          width: 40,
+                                          height: 40,
+                                        ),
+                                      )
+                                    : Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            width: 5,
+                                            color: Colors.black,
+                                          ),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      )),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Column(
@@ -309,6 +311,20 @@ class SubscriptionPage extends StatelessWidget {
     );
   }
 
+  Widget descriptionWidget(BuildContext context) {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      // final state = ref.watch(selectedChatRoomProvider);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text("Select the DAO's that you want to follow. You will receive notifications about new governance proposals."),
+          // const SizedBox(height: 10),
+          // Text("Active subscriptions: ${state?.subscriptions.where((s) => s.isSubscribed).length ?? "-"}"),
+        ],
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -326,7 +342,7 @@ class SubscriptionPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   chatDropdownWidget(context),
                   const SizedBox(height: 10),
-                  const Text("Select the DAO's that you want to follow. You will receive notifications about new governance proposals."),
+                  descriptionWidget(context),
                   const SizedBox(height: 20),
                   searchWidget(context),
                   const SizedBox(height: 20),
