@@ -1,3 +1,3 @@
 import 'package:flutter/foundation.dart';
 
-const uri = kReleaseMode ? 'https://daodao-notifier.decrypto.online' : 'http://localhost:8090';
+const uri = kReleaseMode ? 'https://daodao-notifier.decrypto.online' : 'http://test.mydomain.com:8090';

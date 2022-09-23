@@ -12,12 +12,14 @@ class TelegramLoginData with _$TelegramLoginData {
 
   const factory TelegramLoginData(String dataStr) = _TelegramLoginData;
 
+  static const _fieldNames = ["id", "auth_date", "first_name", "last_name", "username", "auth_date", "hash"];
+
   bool get isValid {
     return data.isNotEmpty && id != fixnum.Int64() && authDate != fixnum.Int64() && hash.isNotEmpty;
   }
 
   Iterable<List<String>> get _fields {
-    return dataStr.replaceAll("&", "\n").split("\n").map((e) => e.split("=")).where((e) => e.length == 2 && e[0] != "chat_id");
+    return dataStr.replaceAll("&", "\n").split("\n").map((e) => e.split("=")).where((e) => e.length == 2 && _fieldNames.contains(e[0]));
   }
 
   String get _user {

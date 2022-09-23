@@ -5,7 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// A [Provider] that returns chat-id if it is present as a query parameter.
 final chatIdProvider = StateProvider<Int64?>((ref) {
-  final chatIdStr = Uri.base.queryParameters.entries.firstWhere((e) => e.key == "chat-id", orElse: () => const MapEntry("chat-id", "")).value;
+  final chatIdStr = Uri.base.queryParameters.entries
+      .firstWhere((e) => e.key == "chat-id" || e.key == "chat_id", orElse: () => const MapEntry("chat-id", ""))
+      .value;
   if (chatIdStr.isNotEmpty) {
     try {
       final chatId = Int64.parseInt(chatIdStr);
