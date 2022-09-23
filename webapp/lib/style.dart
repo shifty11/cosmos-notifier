@@ -74,7 +74,6 @@ class Styles {
       useMaterial3: true,
       primaryColor: primaryColor,
       primarySwatch: createMaterialColor(primaryColor),
-      // hoverColor: primaryColor.withOpacity(0.3),
       iconTheme: const IconThemeData(color: borderColor),
       scaffoldBackgroundColor: bgColor,
       canvasColor: bgColor,
@@ -105,11 +104,19 @@ class Styles {
         bodyColor: textColor,
         displayColor: textColor,
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          primary: textColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        ),
+      ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          primary: primaryColor, // Button color
-          side: BorderSide(color: primaryColor),
-        ),
+            primary: primaryColor,
+            side: BorderSide(color: primaryColor),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            )),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

@@ -17,14 +17,16 @@ class FooterWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-              padding: const EdgeInsets.all(0),
-              onPressed: () async => await launchUrl(tgContactUrl),
-              icon: const Icon(Icons.telegram, size: iconSize)),
+            padding: const EdgeInsets.all(0),
+            onPressed: () async => await launchUrl(tgContactUrl),
+            icon: const Icon(Icons.telegram, size: iconSize),
+          ),
           const SizedBox(width: spaceBetween),
           IconButton(
-              padding: const EdgeInsets.all(0),
-              onPressed: () async => await launchUrl(discordContactUrl),
-              icon: const Icon(Icons.discord, size: iconSize)),
+            padding: const EdgeInsets.all(0),
+            onPressed: () async => await launchUrl(discordContactUrl),
+            icon: const Icon(Icons.discord, size: iconSize),
+          ),
           const SizedBox(width: spaceBetween),
           IconButton(
             padding: const EdgeInsets.all(0),
