@@ -40,6 +40,7 @@ class Styles {
   static const selectCardBorderWidth = 1.5;
   static const dangerBgColor = Color(0xFFFE4A49);
   static const dangerTextColor = Colors.white;
+  static const sidePadding = 40.0;
 
   static ThemeData customTheme(CustomThemeData themeParams, bool isDarkTheme) {
     return _defaultTheme(

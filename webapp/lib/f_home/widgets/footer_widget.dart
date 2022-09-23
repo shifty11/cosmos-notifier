@@ -11,36 +11,41 @@ class FooterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20, bottom: 30),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            padding: const EdgeInsets.all(0),
-            onPressed: () async => await launchUrl(tgContactUrl),
-            icon: const Icon(Icons.telegram, size: iconSize),
-          ),
-          const SizedBox(width: spaceBetween),
-          IconButton(
-            padding: const EdgeInsets.all(0),
-            onPressed: () async => await launchUrl(discordContactUrl),
-            icon: const Icon(Icons.discord, size: iconSize),
-          ),
-          const SizedBox(width: spaceBetween),
-          IconButton(
-            padding: const EdgeInsets.all(0),
-            onPressed: () async => await launchUrl(twitterUrl),
-            icon: const FaIcon(FontAwesomeIcons.twitter, size: iconSize),
-          ),
-          const SizedBox(width: spaceBetween),
-          IconButton(
-            padding: const EdgeInsets.all(0),
-            onPressed: () async => await launchUrl(githubUrl),
-            icon: const FaIcon(FontAwesomeIcons.github, size: iconSize),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        ConstrainedBox(constraints: const BoxConstraints(maxHeight: 10), child: const SizedBox()),
+        const Divider(),
+        ConstrainedBox(constraints: const BoxConstraints(maxHeight: 10), child: const SizedBox()),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            IconButton(
+              padding: const EdgeInsets.all(0),
+              onPressed: () async => await launchUrl(tgContactUrl),
+              icon: const Icon(Icons.telegram, size: iconSize),
+            ),
+            const SizedBox(width: spaceBetween),
+            IconButton(
+              padding: const EdgeInsets.all(0),
+              onPressed: () async => await launchUrl(discordContactUrl),
+              icon: const Icon(Icons.discord, size: iconSize),
+            ),
+            const SizedBox(width: spaceBetween),
+            IconButton(
+              padding: const EdgeInsets.all(0),
+              onPressed: () async => await launchUrl(twitterUrl),
+              icon: const FaIcon(FontAwesomeIcons.twitter, size: iconSize),
+            ),
+            const SizedBox(width: spaceBetween),
+            IconButton(
+              padding: const EdgeInsets.all(0),
+              onPressed: () async => await launchUrl(githubUrl),
+              icon: const FaIcon(FontAwesomeIcons.github, size: iconSize),
+            ),
+          ],
+        ),
+        ConstrainedBox(constraints: const BoxConstraints(maxHeight: 20), child: const SizedBox()),
+      ],
     );
   }
 }

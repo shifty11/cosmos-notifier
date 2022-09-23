@@ -89,107 +89,104 @@ class SubscriptionPage extends StatelessWidget {
   }
 
   Widget subscriptionList() {
-    return Expanded(
-      flex: 0,
-      child: Consumer(
-        builder: (BuildContext context, WidgetRef ref, Widget? child) {
-          final state = ref.watch(chatroomListStateProvider);
-          return state.when(
-            loading: () => const Center(child: CircularProgressIndicator()),
-            data: (chatRooms) {
-              return GridView.builder(
-                shrinkWrap: true,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: getCrossAxisCount(context),
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  mainAxisExtent: 60,
-                ),
-                itemCount: ref.watch(searchedSubsProvider).filtered.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final chatRoomId = ref.read(selectedChatRoomProvider)?.id ?? Int64(0);
-                  final subData = ref.watch(searchedSubsProvider).filtered[index];
-                  final subscription = subData.subscription;
-                  const double sidePadding = 12;
-                  return buildSliderForAdmins(
-                    context: context,
-                    subscription: subscription,
-                    ref: ref,
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            width: Styles.selectCardBorderWidth,
-                            color: Theme.of(context).inputDecorationTheme.enabledBorder!.borderSide.color,
-                          ),
-                          borderRadius: const BorderRadius.all(Radius.circular(5))),
-                      child: InkWell(
-                        hoverColor: Theme.of(context).primaryColor.intensifyBg(context, 0.2),
-                        onTap: () {
-                          FocusScopeNode currentFocus = FocusScope.of(context);
-                          if (!currentFocus.hasPrimaryFocus) {
-                            currentFocus.focusedChild?.unfocus();
-                          }
-                          ref.read(chatroomListStateProvider.notifier).toggleSubscription(chatRoomId, subData.subscription.id);
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const SizedBox(width: sidePadding),
-                            CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                child: subscription.thumbnailUrl.isNotEmpty
-                                    ? ClipOval(
-                                        child: Image.asset(
-                                          subscription.thumbnailUrl,
-                                          width: 40,
-                                          height: 40,
-                                        ),
-                                      )
-                                    : Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            width: 5,
-                                            color: Colors.black,
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                      )),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    subscription.name,
-                                    style: const TextStyle(fontSize: 20),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
-                                    style: TextStyle(fontSize: 12, color: Theme.of(context).inputDecorationTheme.hintStyle!.color),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            subscription.isSubscribed
-                                ? Padding(
-                                    padding: const EdgeInsets.only(right: sidePadding),
-                                    child: Icon(Icons.check_circle_rounded, color: Theme.of(context).primaryColor, size: 24),
-                                  )
-                                : const SizedBox(width: sidePadding),
-                          ],
+    return Consumer(
+      builder: (BuildContext context, WidgetRef ref, Widget? child) {
+        final state = ref.watch(chatroomListStateProvider);
+        return state.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          data: (chatRooms) {
+            return GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: getCrossAxisCount(context),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                mainAxisExtent: 60,
+              ),
+              itemCount: ref.watch(searchedSubsProvider).filtered.length,
+              itemBuilder: (BuildContext context, int index) {
+                final chatRoomId = ref.read(selectedChatRoomProvider)?.id ?? Int64(0);
+                final subData = ref.watch(searchedSubsProvider).filtered[index];
+                final subscription = subData.subscription;
+                const double sidePadding = 12;
+                return buildSliderForAdmins(
+                  context: context,
+                  subscription: subscription,
+                  ref: ref,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                          width: Styles.selectCardBorderWidth,
+                          color: Theme.of(context).inputDecorationTheme.enabledBorder!.borderSide.color,
                         ),
+                        borderRadius: const BorderRadius.all(Radius.circular(5))),
+                    child: InkWell(
+                      hoverColor: Theme.of(context).primaryColor.intensifyBg(context, 0.2),
+                      onTap: () {
+                        FocusScopeNode currentFocus = FocusScope.of(context);
+                        if (!currentFocus.hasPrimaryFocus) {
+                          currentFocus.focusedChild?.unfocus();
+                        }
+                        ref.read(chatroomListStateProvider.notifier).toggleSubscription(chatRoomId, subData.subscription.id);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const SizedBox(width: sidePadding),
+                          CircleAvatar(
+                              backgroundColor: Colors.transparent,
+                              child: subscription.thumbnailUrl.isNotEmpty
+                                  ? ClipOval(
+                                      child: Image.asset(
+                                        subscription.thumbnailUrl,
+                                        width: 40,
+                                        height: 40,
+                                      ),
+                                    )
+                                  : Container(
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 5,
+                                          color: Colors.black,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    )),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  subscription.name,
+                                  style: const TextStyle(fontSize: 20),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
+                                  style: TextStyle(fontSize: 12, color: Theme.of(context).inputDecorationTheme.hintStyle!.color),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                          subscription.isSubscribed
+                              ? Padding(
+                                  padding: const EdgeInsets.only(right: sidePadding),
+                                  child: Icon(Icons.check_circle_rounded, color: Theme.of(context).primaryColor, size: 24),
+                                )
+                              : const SizedBox(width: sidePadding),
+                        ],
                       ),
                     ),
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -342,7 +339,7 @@ class SubscriptionPage extends StatelessWidget {
             provider: messageProvider,
             child: Container(
               width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.all(40),
+              padding: const EdgeInsets.only(top: 40, left: Styles.sidePadding, right: Styles.sidePadding),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -356,11 +353,10 @@ class SubscriptionPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   searchWidget(context),
                   const SizedBox(height: 20),
-                  subscriptionList(),
+                  Expanded(child: subscriptionList()),
                   const SizedBox(height: 20),
                   addDaoButton(context),
-                  const Spacer(),
-                  const FooterWidget(),
+                  const Flexible(flex: 0, child: FooterWidget()),
                 ],
               ),
             ),

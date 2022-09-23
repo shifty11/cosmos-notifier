@@ -10,39 +10,89 @@ import 'package:webapp/style.dart';
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  Widget botButtons()  {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ElevatedButton.icon(
-          onPressed: () async => await launchUrl(tgBotUrl),
-          icon: const Icon(Icons.telegram),
-          label: const Text("Telegram"),
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(180, 50),
-            primary: const Color(0xFF54A9E9),
-            onPrimary: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(32.0),
-            ),
+  bool _isSmall(BuildContext context) {
+    return MediaQuery.of(context).size.height <= 750;
+  }
+
+  Widget logo(BuildContext context) {
+    final isSmall = _isSmall(context);
+    final fontSize = isSmall ? 13.0 : Theme.of(context).textTheme.headline3!.fontSize;
+    return Stack(children: [
+      CircleAvatar(
+        radius: isSmall ? 90 : 180,
+        backgroundColor: Styles.isDarkTheme(context) ? Colors.white : Colors.black,
+        child: ClipOval(
+          child: Image.asset(
+            "images/dove_square.png",
+            width: isSmall ? 170 : 340,
+            height: isSmall ? 170 : 340,
           ),
         ),
-        const SizedBox(width: 20),
-        ElevatedButton.icon(
-          onPressed: () async => await launchUrl(discordBotUrl),
-          icon: const Icon(Icons.discord),
-          label: const Text("Discord"),
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(180, 50),
-            primary: const Color(0xFF6C89E0),
-            onPrimary: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(32.0),
-            ),
+      ),
+      Positioned(
+        top: isSmall ? 30 : 70,
+        child: SizedBox(
+          width: isSmall ? 180 : 360,
+          child: Center(
+              child: Column(
+            children: [
+              Text("DAO DAO", style: Theme.of(context).textTheme.headline3?.copyWith(fontSize: fontSize, fontFamily: "Alienated")),
+              Text("Notifier", style: Theme.of(context).textTheme.headline3!.copyWith(fontSize: fontSize, fontFamily: "Alien Robot")),
+            ],
+          )),
+        ),
+      ),
+    ]);
+  }
+
+  _rowOrColumn(BuildContext context) {
+    return MediaQuery.of(context).size.width <= 400 ? Row : Column;
+  }
+
+  _createButtons(double buttonWith, double spaceBetween) {
+    return [
+      ElevatedButton.icon(
+        onPressed: () async => await launchUrl(tgBotUrl),
+        icon: const Icon(Icons.telegram),
+        label: const Text("Telegram"),
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size(buttonWith, 50),
+          primary: const Color(0xFF54A9E9),
+          onPrimary: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32.0),
           ),
         ),
-      ],
-    );
+      ),
+      SizedBox(width: spaceBetween, height: spaceBetween),
+      ElevatedButton.icon(
+        onPressed: () async => await launchUrl(discordBotUrl),
+        icon: const Icon(Icons.discord),
+        label: const Text("Discord"),
+        style: ElevatedButton.styleFrom(
+          minimumSize: Size(buttonWith, 50),
+          primary: const Color(0xFF6C89E0),
+          onPrimary: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32.0),
+          ),
+        ),
+      ),
+    ];
+  }
+
+  Widget botButtons(BuildContext context) {
+    const buttonWith = 180.0;
+    const spaceBetween = 20.0;
+    return MediaQuery.of(context).size.width <= 2 * buttonWith + spaceBetween + 2 * Styles.sidePadding
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _createButtons(buttonWith, spaceBetween),
+          )
+        : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _createButtons(buttonWith, spaceBetween),
+          );
   }
 
   Widget subscriptionButton() {
@@ -68,54 +118,34 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isSmall = _isSmall(context);
     return Scaffold(
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 50),
-          Stack(children: [
-            CircleAvatar(
-              radius: 180,
-              backgroundColor: Styles.isDarkTheme(context) ? Colors.white : Colors.black,
-              child: ClipOval(
-                child: Image.asset(
-                  "images/dove_square.png",
-                  width: 340,
-                  height: 340,
-                ),
-              ),
-            ),
-            Positioned(
-              top: 70,
-              child: SizedBox(
-                width: 360,
-                child: Center(child: Column(
-                  children: [
-                    Text("DAO DAO", style: Theme.of(context).textTheme.headline3?.copyWith(fontFamily: "Alienated")),
-                    Text("Notifier", style: Theme.of(context).textTheme.headline3!.copyWith(fontFamily: "Alien Robot")),
-                  ],
-                )),
-              ),
-            ),
-          ]),
-          const Spacer(flex: 2),
-          Flexible(
-            flex: 0,
-            child: Text("Get notified about DAO DAO governance proposals",
-                textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline5),
-          ),
-          const SizedBox(height: 10),
-          Flexible(
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Styles.sidePadding),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(height: isSmall ? 20 : 50),
+            logo(context),
+            const Spacer(flex: 2),
+            Flexible(
               flex: 0,
-              child:
-                  Text("Now available on Telegram and Discord", textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)),
-          const SizedBox(height: 40),
-          botButtons(),
-          const SizedBox(height: 40),
-          subscriptionButton(),
-          const Spacer(flex: 4),
-          const FooterWidget(),
-        ],
+              child: Text("Get notified about DAO DAO governance proposals",
+                  textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline5),
+            ),
+            const SizedBox(height: 10),
+            Flexible(
+                flex: 0,
+                child: Text("Now available on Telegram and Discord",
+                    textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)),
+            const Spacer(flex: 1),
+            botButtons(context),
+            const Spacer(flex: 1),
+            subscriptionButton(),
+            const Spacer(flex: 4),
+            const FooterWidget(),
+          ],
+        ),
       ),
     );
   }
