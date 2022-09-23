@@ -61,7 +61,7 @@ services:
     working_dir: /app
     volumes:
       - ./contracts.txt:/app/contracts.txt
-      - contract_images:/app/assets/images
+      - contract_images:/app/assets/images/contracts
     env_file:
       - .env
     command: "/dao-dao-notifier crawl --repeat"
@@ -92,7 +92,7 @@ services:
     volumes:
       - caddy_data:/data
       - /var/www/daodao-notifier:/app/build/web
-      - contract_images:/var/www/daodao-notifier/assets/images
+      - contract_images:/var/www/daodao-notifier/assets/images/contracts
 
 volumes:
   contract_images:

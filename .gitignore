@@ -3,7 +3,7 @@
 */node_modules
 
 .env
-.end.prod
+/.env.prod
 prod.env
 
 ansible/inventory
