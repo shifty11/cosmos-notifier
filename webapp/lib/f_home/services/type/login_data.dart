@@ -12,7 +12,7 @@ class TelegramLoginData with _$TelegramLoginData {
 
   const factory TelegramLoginData(String dataStr) = _TelegramLoginData;
 
-  static const _fieldNames = ["id", "auth_date", "first_name", "last_name", "username", "auth_date", "hash"];
+  static const _fieldNames = ["id", "auth_date", "first_name", "last_name", "username", "photo_url", "auth_date", "hash"];
 
   bool get isValid {
     return data.isNotEmpty && id != fixnum.Int64() && authDate != fixnum.Int64() && hash.isNotEmpty;
