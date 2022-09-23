@@ -4,12 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webapp/config.dart';
 import 'package:webapp/f_home/services/auth_provider.dart';
+import 'package:webapp/f_home/widgets/footer_widget.dart';
 import 'package:webapp/style.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  Widget subscriptions() {
+  Widget subscriptionButton() {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
       final auth = ref.watch(authProvider);
       if (auth.isAuthenticated || auth.canRefreshAccessToken) {
@@ -46,23 +47,25 @@ class HomePage extends StatelessWidget {
               backgroundColor: Styles.isDarkTheme(context) ? Colors.white : Colors.black,
               child: ClipOval(
                 child: Image.asset(
-                  "images/dove.png",
+                  "images/dove_square.png",
                   width: 340,
                   height: 340,
                 ),
               ),
             ),
             Positioned(
-                bottom: 40,
+                top: 70,
                 child: SizedBox(width: 360, child: Center(child: Text("DAO DAO Notifier", style: Theme.of(context).textTheme.headline3)))),
           ]),
-          const Spacer(),
+          const Spacer(flex: 2),
           Flexible(
+            flex: 0,
             child: Text("Get notified about DAO DAO governance proposals",
                 textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline5),
           ),
           const SizedBox(height: 10),
           Flexible(
+              flex: 0,
               child:
                   Text("Now available on Telegram and Discord", textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)),
           const SizedBox(height: 40),
@@ -98,7 +101,9 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          subscriptions(),
+          subscriptionButton(),
+          const Spacer(flex: 4),
+          const FooterWidget(),
         ],
       ),
     );

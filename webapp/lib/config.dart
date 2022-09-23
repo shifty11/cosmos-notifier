@@ -30,3 +30,8 @@ const bool cDebugMode = true;
 
 final tgBotUrl = Uri.parse('https://t.me/DaoDaoNotifierBot');
 final discordBotUrl = Uri.parse('https://discord.com/api/oauth2/authorize?client_id=1020361762622689330&permissions=2048&redirect_uri=https%3A%2F%2Fdaodao-notifier.decrypto.online&response_type=code&scope=bot%20identify');
+
+final tgContactUrl = Uri.parse('https://t.me/rapha_decrypto');
+final discordContactUrl = Uri.parse('https://discord.com/users/228978159440232453');
+final githubUrl = Uri.parse('https://github.com/shifty11/dao-dao-notifier');
+final twitterUrl = Uri.parse('https://twitter.com/Rapha90');

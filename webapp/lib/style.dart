@@ -73,6 +73,7 @@ class Styles {
       fontFamily: "Montserrat",
       primaryColor: primaryColor,
       primarySwatch: createMaterialColor(primaryColor),
+      hoverColor: primaryColor.withOpacity(0.3),
       iconTheme: const IconThemeData(color: borderColor),
       scaffoldBackgroundColor: bgColor,
       canvasColor: bgColor,
