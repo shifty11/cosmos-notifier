@@ -26,5 +26,5 @@
 - name: Run containers
   become_user: daodao
   shell:
-    cmd: "docker-compose -f production.yml up --build -d"
+    cmd: "docker-compose -f production.yml up --build --no-deps -d --force-recreate"
     chdir: /etc/daodao/dao-dao-notifier
