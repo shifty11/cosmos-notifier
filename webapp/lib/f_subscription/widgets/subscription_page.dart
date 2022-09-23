@@ -1,9 +1,8 @@
-import 'dart:html';
-
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_messages/riverpod_messages.dart';
 import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
@@ -226,8 +225,7 @@ class SubscriptionPage extends StatelessWidget {
             onChanged: (ChatRoom? newValue) {
               ref.watch(selectedChatRoomProvider.notifier).state = newValue;
               ref.read(chatIdProvider.notifier).state = newValue?.id ?? ref.read(chatIdProvider.notifier).state;
-              final uri = Uri.parse(Uri.base.origin).replace(queryParameters: {'chat-id': newValue?.id.toString() ?? ""});
-              window.history.pushState(null, "", uri.toString());
+              context.pushNamed(rSubscriptions.name, queryParams: {'chat-id': newValue?.id.toString() ?? ""});
             },
             items: chatRooms.map<DropdownMenuItem<ChatRoom>>((ChatRoom chatRoom) {
               return DropdownMenuItem<ChatRoom>(
