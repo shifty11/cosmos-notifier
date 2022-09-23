@@ -69,12 +69,13 @@ class MyRouter {
       return authStateListener.value.when(
         initial: () => null,
         loading: () => state.subloc != rLoading.path ? state.namedLocation(rLoading.name) : null,
-        authorized: (redirect) {
-          if (redirect && (state.subloc == rRoot.path || state.subloc == rLoading.path || state.subloc == rUnauthenticated.path)) {
+        authenticated: (redirect) {
+          if (redirect && (state.subloc == rLoading.path || state.subloc == rUnauthenticated.path)) {
             return state.namedLocation(rSubscriptions.name);
           }
           return null;
         },
+        unauthenticated: () => state.subloc != rRoot.path ? state.namedLocation(rRoot.name) : null,
         expired: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
         userNotFound: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
         error: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),

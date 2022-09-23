@@ -12,7 +12,7 @@ final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>(
 );
 
 final authStateValueProvider = Provider<ValueNotifier<AuthState>>((ref) {
-  final notifier = ValueNotifier<AuthState>(const AuthState.loading());
+  final notifier = ValueNotifier<AuthState>(ref.read(authStateProvider.notifier).state);
   ref.listen(authStateProvider, (_, next) {
     notifier.value = next as AuthState;
     notifier.notifyListeners();
@@ -25,7 +25,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._authService) : super(const AuthState.initial()) {
     if (_authService.hasLoginData) {
-      state = const AuthState.loading();
       login();
       _authService.addListener(() {
         if (!_authService.isAuthenticated) {
@@ -33,9 +32,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       });
     } else {
+      state = const AuthState.unauthenticated();
       _authService.backgroundInit().then((isAuthenticated) {
         if (isAuthenticated) {
-          state = const AuthState.authorized(false);
+          state = const AuthState.authenticated(false);
         }
       });
     }
@@ -45,7 +45,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = const AuthState.loading();
       await _authService.init();
-      state = const AuthState.authorized(true);
+      state = const AuthState.authenticated(true);
     } catch (e) {
       if (cDebugMode) {
         print("AuthNotifier: error -> $e");
