@@ -89,6 +89,7 @@ class SubscriptionPage extends StatelessWidget {
 
   Widget subscriptionList() {
     return Expanded(
+      flex: 0,
       child: Consumer(
         builder: (BuildContext context, WidgetRef ref, Widget? child) {
           final state = ref.watch(chatroomListStateProvider);
@@ -323,6 +324,10 @@ class SubscriptionPage extends StatelessWidget {
     });
   }
 
+  Widget header(BuildContext context) {
+    return TextButton.icon(onPressed: () => context.pushNamed(rRoot.name), icon: const Icon(Icons.home), label: const Text("Home"));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -336,6 +341,8 @@ class SubscriptionPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  header(context),
+                  const Divider(),
                   Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
                   const SizedBox(height: 10),
                   chatDropdownWidget(context),
