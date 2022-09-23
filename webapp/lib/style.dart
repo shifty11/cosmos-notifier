@@ -71,9 +71,10 @@ class Styles {
     return ThemeData(
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
       fontFamily: "Montserrat",
+      useMaterial3: true,
       primaryColor: primaryColor,
       primarySwatch: createMaterialColor(primaryColor),
-      hoverColor: primaryColor.withOpacity(0.3),
+      // hoverColor: primaryColor.withOpacity(0.3),
       iconTheme: const IconThemeData(color: borderColor),
       scaffoldBackgroundColor: bgColor,
       canvasColor: bgColor,

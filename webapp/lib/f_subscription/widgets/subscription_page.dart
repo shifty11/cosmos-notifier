@@ -295,12 +295,12 @@ class SubscriptionPage extends StatelessWidget {
 
   Widget addDaoButton(BuildContext context) {
     return Center(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
+      child: OutlinedButton(
+        style: OutlinedButton.styleFrom(
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5)),
           ),
-          minimumSize: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? const Size(double.infinity, 40) : const Size(200, 40),
+          minimumSize: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? const Size(double.infinity, 50) : const Size(200, 50),
         ),
         onPressed: () {
           // ref.read(chatroomListStateProvider.notifier).addChatRoom();
@@ -326,7 +326,14 @@ class SubscriptionPage extends StatelessWidget {
   }
 
   Widget header(BuildContext context) {
-    return TextButton.icon(onPressed: () => context.pushNamed(rRoot.name), icon: const Icon(Icons.home), label: const Text("Home"));
+    return TextButton.icon(
+      onPressed: () => context.pushNamed(rRoot.name),
+      icon: const Icon(Icons.home),
+      label: const Text("Home"),
+      style: TextButton.styleFrom(
+        primary: Theme.of(context).disabledColor,
+      ),
+    );
   }
 
   @override

@@ -10,15 +10,47 @@ import 'package:webapp/style.dart';
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
+  Widget botButtons()  {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () async => await launchUrl(tgBotUrl),
+          icon: const Icon(Icons.telegram),
+          label: const Text("Telegram"),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(180, 50),
+            primary: const Color(0xFF54A9E9),
+            onPrimary: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+          ),
+        ),
+        const SizedBox(width: 20),
+        ElevatedButton.icon(
+          onPressed: () async => await launchUrl(discordBotUrl),
+          icon: const Icon(Icons.discord),
+          label: const Text("Discord"),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(180, 50),
+            primary: const Color(0xFF6C89E0),
+            onPrimary: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget subscriptionButton() {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
       final auth = ref.watch(authProvider);
       if (auth.isAuthenticated || auth.canRefreshAccessToken) {
         return Column(
           children: [
-            const SizedBox(
-              height: 40,
-            ),
             OutlinedButton.icon(
               onPressed: () => GoRouter.of(context).go(rSubscriptions.path),
               icon: const Icon(Icons.notifications),
@@ -78,38 +110,8 @@ class HomePage extends StatelessWidget {
               child:
                   Text("Now available on Telegram and Discord", textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)),
           const SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () async => await launchUrl(tgBotUrl),
-                icon: const Icon(Icons.telegram),
-                label: const Text("Telegram"),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(180, 50),
-                  primary: const Color(0xFF54A9E9),
-                  onPrimary: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              ElevatedButton.icon(
-                onPressed: () async => await launchUrl(discordBotUrl),
-                icon: const Icon(Icons.discord),
-                label: const Text("Discord"),
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(180, 50),
-                  primary: const Color(0xFF6C89E0),
-                  onPrimary: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(32.0),
-                  ),
-                ),
-              ),
-            ],
-          ),
+          botButtons(),
+          const SizedBox(height: 40),
           subscriptionButton(),
           const Spacer(flex: 4),
           const FooterWidget(),
