@@ -54,8 +54,17 @@ class HomePage extends StatelessWidget {
               ),
             ),
             Positioned(
-                top: 70,
-                child: SizedBox(width: 360, child: Center(child: Text("DAO DAO Notifier", style: Theme.of(context).textTheme.headline3)))),
+              top: 70,
+              child: SizedBox(
+                width: 360,
+                child: Center(child: Column(
+                  children: [
+                    Text("DAO DAO", style: Theme.of(context).textTheme.headline3?.copyWith(fontFamily: "Alienated")),
+                    Text("Notifier", style: Theme.of(context).textTheme.headline3!.copyWith(fontFamily: "Alien Robot")),
+                  ],
+                )),
+              ),
+            ),
           ]),
           const Spacer(flex: 2),
           Flexible(

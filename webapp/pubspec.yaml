@@ -107,3 +107,10 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  fonts:
+    - family: Alienated
+      fonts:
+        - asset: web/fonts/Alienated.ttf
+    - family: Alien Robot
+      fonts:
+        - asset: web/fonts/AlienRobot.ttf
