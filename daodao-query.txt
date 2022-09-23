@@ -26,3 +26,35 @@ async function main() {
 
 main();
 
+
+
+------------------------------------
+// ION DAO
+
+import { CosmWasmClient } from "cosmwasm";
+
+// This is your rpc endpoint
+const rpcEndpoint = "https://rpc.cosmos.directory/osmosis";
+
+const contractAddr = "osmo1k8re7jwz6rnnwrktnejdwkwnncte7ek7gt29gvnl3sdrg9mtnqkse6nmqm";
+
+async function main() {
+  const client = await CosmWasmClient.connect(rpcEndpoint);
+  console.log("client connected");
+
+  try {
+    const config = await client.queryContractSmart(contractAddr, { get_config: {} });
+    console.log(config);
+  } catch (error) {
+    console.error(error);
+  }
+
+  try {
+    const config = await client.queryContractSmart(contractAddr, { proposals: {query: {everything: {}}} });
+    console.log(config);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+main();
