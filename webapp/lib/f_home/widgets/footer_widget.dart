@@ -11,11 +11,13 @@ class FooterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.of(context).size.height < 400) {
+      return Container();
+    }
     return Column(
       children: [
-        ConstrainedBox(constraints: const BoxConstraints(maxHeight: 10), child: const SizedBox()),
+        const SizedBox(height: 10),
         const Divider(),
-        ConstrainedBox(constraints: const BoxConstraints(maxHeight: 10), child: const SizedBox()),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
