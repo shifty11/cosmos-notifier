@@ -46,7 +46,7 @@ class FooterWidget extends StatelessWidget {
             ),
           ],
         ),
-        ConstrainedBox(constraints: const BoxConstraints(maxHeight: 20), child: const SizedBox()),
+        const SizedBox(height: 10),
       ],
     );
   }
