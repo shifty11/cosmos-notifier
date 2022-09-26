@@ -54,7 +54,7 @@ class Styles {
   }
 
   static ThemeData defaultTheme(bool isDarkTheme) {
-    final bgColor = isDarkTheme ? const Color(0xff1d2733) : Colors.white;
+    final bgColor = isDarkTheme ? const Color(0xff1d2733) : Colors.white.darken(0.025);
     final bgColorLight = isDarkTheme ? bgColor.lighten() : Colors.white.darken();
     final textColor = isDarkTheme ? Colors.white : Colors.black;
     final textColorHint = isDarkTheme ? const Color(0xff7d8b99) : Colors.black;
