@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,29 +12,37 @@ import 'package:webapp/style.dart';
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
 
-  bool _isSmall(BuildContext context) {
-    return MediaQuery.of(context).size.height <= 750;
+  // returns a value between 120 und 360 depending on height and width of screen
+  double _getSize(BuildContext context) {
+    const maxSize = 360;
+    return max(
+        [
+          MediaQuery.of(context).size.width - (450 - maxSize),
+          MediaQuery.of(context).size.height - (700 - maxSize),
+          360.0,
+        ].reduce(min),
+        120);
   }
 
   Widget logo(BuildContext context) {
-    final isSmall = _isSmall(context);
-    final fontSize = isSmall ? 13.0 : Theme.of(context).textTheme.headline3!.fontSize;
+    final size = _getSize(context);
+    final double fontSize = size / 360 * (Theme.of(context).textTheme.headline3!.fontSize ?? 1);
     return Stack(children: [
       CircleAvatar(
-        radius: isSmall ? 90 : 180,
+        radius: size / 2,
         backgroundColor: Styles.isDarkTheme(context) ? Colors.white : Colors.black,
         child: ClipOval(
           child: Image.asset(
             "images/dove_square.png",
-            width: isSmall ? 170 : 340,
-            height: isSmall ? 170 : 340,
+            width: size - (20 * (size / 360)),
+            height: size - (20 * (size / 360)),
           ),
         ),
       ),
       Positioned(
-        top: isSmall ? 30 : 70,
+        top: size / 36 * 7,
         child: SizedBox(
-          width: isSmall ? 180 : 360,
+          width: size,
           child: Center(
               child: Column(
             children: [
@@ -45,54 +55,41 @@ class HomePage extends StatelessWidget {
     ]);
   }
 
-  _rowOrColumn(BuildContext context) {
-    return MediaQuery.of(context).size.width <= 400 ? Row : Column;
-  }
-
-  _createButtons(double buttonWith, double spaceBetween) {
-    return [
-      ElevatedButton.icon(
-        onPressed: () async => await launchUrl(tgBotUrl),
-        icon: const Icon(Icons.telegram),
-        label: const Text("Telegram"),
-        style: ElevatedButton.styleFrom(
-          minimumSize: Size(buttonWith, 50),
-          primary: const Color(0xFF54A9E9),
-          onPrimary: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32.0),
-          ),
-        ),
-      ),
-      SizedBox(width: spaceBetween, height: spaceBetween),
-      ElevatedButton.icon(
-        onPressed: () async => await launchUrl(discordBotUrl),
-        icon: const Icon(Icons.discord),
-        label: const Text("Discord"),
-        style: ElevatedButton.styleFrom(
-          minimumSize: Size(buttonWith, 50),
-          primary: const Color(0xFF6C89E0),
-          onPrimary: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32.0),
-          ),
-        ),
-      ),
-    ];
-  }
-
   Widget botButtons(BuildContext context) {
-    const buttonWith = 180.0;
+    const buttonWith = 170.0;
     const spaceBetween = 20.0;
-    return MediaQuery.of(context).size.width <= 2 * buttonWith + spaceBetween + 2 * Styles.sidePadding
-        ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: _createButtons(buttonWith, spaceBetween),
-          )
-        : Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: _createButtons(buttonWith, spaceBetween),
-          );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton.icon(
+          onPressed: () async => await launchUrl(tgBotUrl),
+          icon: const Icon(Icons.telegram),
+          label: const Text("Telegram"),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(buttonWith, 50),
+            primary: const Color(0xFF54A9E9),
+            onPrimary: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+          ),
+        ),
+        const SizedBox(width: spaceBetween, height: spaceBetween),
+        ElevatedButton.icon(
+          onPressed: () async => await launchUrl(discordBotUrl),
+          icon: const Icon(Icons.discord),
+          label: const Text("Discord"),
+          style: ElevatedButton.styleFrom(
+            minimumSize: const Size(buttonWith, 50),
+            primary: const Color(0xFF6C89E0),
+            onPrimary: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(32.0),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget subscriptionButton() {
@@ -118,15 +115,14 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isSmall = _isSmall(context);
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: Styles.sidePadding),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: isSmall ? 20 : 50),
-            logo(context),
+            const Spacer(flex: 2),
+            MediaQuery.of(context).size.height >= 400 ? logo(context) : Container(),
             const Spacer(flex: 2),
             Flexible(
               flex: 0,
@@ -143,7 +139,7 @@ class HomePage extends StatelessWidget {
             const Spacer(flex: 1),
             subscriptionButton(),
             const Spacer(flex: 4),
-            const FooterWidget(),
+            const Flexible(flex: 0, child: FooterWidget()),
           ],
         ),
       ),
