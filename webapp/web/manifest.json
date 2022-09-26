@@ -1,6 +1,6 @@
 {
-    "name": "webapp",
-    "short_name": "webapp",
+    "name": "DAO DAO Notifier",
+    "short_name": "DAO DAO Notifier",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
