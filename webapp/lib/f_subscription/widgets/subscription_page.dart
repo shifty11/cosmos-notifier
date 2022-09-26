@@ -343,6 +343,8 @@ class SubscriptionPage extends StatelessWidget {
       children: [
         Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
         Tooltip(
+            triggerMode: TooltipTriggerMode.tap,
+            showDuration: const Duration(seconds: 5),
             message: "Select the DAO's that you want to follow. "
                 "You will receive notifications about new governance proposals.",
             child: Icon(Icons.info, size: 20, color: Theme.of(context).disabledColor)),
@@ -365,6 +367,7 @@ class SubscriptionPage extends StatelessWidget {
                 children: [
                   header(context),
                   const Divider(),
+                  const SizedBox(height: 10),
                   title(context),
                   const SizedBox(height: 20),
                   searchWidget(context),
