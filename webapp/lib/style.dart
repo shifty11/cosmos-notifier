@@ -125,6 +125,9 @@ class Styles {
           onPrimary: textColor, // Text color
         ),
       ),
+      dialogTheme: DialogTheme(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.linux: NoAnimationTransitionsBuilder(),

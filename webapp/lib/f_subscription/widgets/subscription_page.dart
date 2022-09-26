@@ -54,6 +54,7 @@ class SubscriptionPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(primary: Styles.dangerBgColor, onPrimary: Styles.dangerTextColor),
                 onPressed: () {
                   ref.read(chatroomListStateProvider.notifier).deleteDao(subscription.id, subscription.name);
+                  Navigator.pop(context);
                 },
                 child: const Text('Delete'),
               );
