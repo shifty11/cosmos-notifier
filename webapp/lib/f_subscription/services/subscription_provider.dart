@@ -98,7 +98,7 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
           }
         },
         onError: (e) => msgProvider.sendMsg(error: e.toString()),
-        onDone: () => print("done"),
+        onDone: () {},
         cancelOnError: true,
       );
     } catch (e) {

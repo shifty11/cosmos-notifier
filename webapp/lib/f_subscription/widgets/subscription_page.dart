@@ -240,35 +240,46 @@ class SubscriptionPage extends StatelessWidget {
     });
   }
 
-  Widget settingsRow(BuildContext context) {
-    return Row(
-      children: [
-        chatDropdownWidget(context),
-      ],
-    );
-  }
-
   void showAddDaoDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) {
         var addressController = TextEditingController();
+        var formKey = GlobalKey<FormState>();
         return AlertDialog(
           title: const Text('Add DAO'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("Enter the Juno address of the DAO you want to add"),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Contract Address',
-                    hintText: 'juno1z3zqgz7t0hcu2fx4wusuyjq0gc2m33la8l64saunfz7vmqwa2d5sz6jnep',
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Enter the Juno address of the DAO you want to add"),
+                  const SizedBox(height: 15),
+                  TextFormField(
+                    controller: addressController,
+                    validator: (String? text) {
+                      if (text == null) {
+                        return null;
+                      }
+                      if (text.isEmpty) {
+                        return "Address cannot be empty";
+                      }
+                      if (!text.toLowerCase().startsWith("juno")) {
+                        return "Address must start with juno";
+                      }
+                      if (text.length != 63) {
+                        return "Address must be 63 characters long";
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      labelText: 'Contract Address',
+                      hintText: 'juno1z3zqgz7t0hcu2fx4wusuyjq0gc2m33la8l64saunfz7vmqwa2d5sz6jnep',
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           actions: [
@@ -279,9 +290,11 @@ class SubscriptionPage extends StatelessWidget {
             Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
               return ElevatedButton(
                 onPressed: () {
-                  var address = addressController.text;
-                  ref.read(chatroomListStateProvider.notifier).addDao(address);
-                  Navigator.pop(context);
+                  if (formKey.currentState!.validate()) {
+                    var address = addressController.text.toLowerCase();
+                    ref.read(chatroomListStateProvider.notifier).addDao(address);
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text('Add'),
               );
@@ -299,26 +312,11 @@ class SubscriptionPage extends StatelessWidget {
           minimumSize: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? const Size(double.infinity, 50) : const Size(200, 50),
         ),
         onPressed: () {
-          // ref.read(chatroomListStateProvider.notifier).addChatRoom();
           showAddDaoDialog(context);
         },
         child: const Text("Add DAO"),
       ),
     );
-  }
-
-  Widget descriptionWidget(BuildContext context) {
-    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-      // final state = ref.watch(selectedChatRoomProvider);
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text("Select the DAO's that you want to follow. You will receive notifications about new governance proposals."),
-          // const SizedBox(height: 10),
-          // Text("Active subscriptions: ${state?.subscriptions.where((s) => s.isSubscribed).length ?? "-"}"),
-        ],
-      );
-    });
   }
 
   Widget header(BuildContext context) {
