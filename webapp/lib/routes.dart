@@ -7,7 +7,6 @@ import 'package:webapp/f_home/services/auth_provider.dart';
 import 'package:webapp/f_home/services/chat_id_provider.dart';
 import 'package:webapp/f_home/services/state/auth_state.dart';
 import 'package:webapp/f_home/widgets/loading_page.dart';
-import 'package:webapp/f_login/widgets/login_page.dart';
 import 'package:webapp/f_subscription/widgets/subscription_page.dart';
 
 import 'f_home/widgets/home_page.dart';
@@ -42,14 +41,6 @@ class MyRouter {
         ),
       ),
       GoRoute(
-        name: rUnauthenticated.name,
-        path: rUnauthenticated.path,
-        pageBuilder: (context, state) => MaterialPage<void>(
-          key: state.pageKey,
-          child: const LoginPage(),
-        ),
-      ),
-      GoRoute(
         name: rSubscriptions.name,
         path: rSubscriptions.path,
         pageBuilder: (context, state) => MaterialPage<void>(
@@ -70,15 +61,18 @@ class MyRouter {
         initial: () => null,
         loading: () => state.subloc != rLoading.path ? state.namedLocation(rLoading.name) : null,
         authenticated: (redirect) {
-          if (redirect && (state.subloc == rLoading.path || state.subloc == rUnauthenticated.path)) {
+          if (redirect && (state.subloc == rLoading.path || state.subloc == rLogin.path)) {
             return state.namedLocation(rSubscriptions.name);
           }
           return null;
         },
-        unauthenticated: () => state.subloc != rRoot.path ? state.namedLocation(rRoot.name) : null,
-        expired: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
-        userNotFound: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
-        error: () => state.subloc == rUnauthenticated.path ? null : state.namedLocation(rUnauthenticated.name),
+        unauthenticated: () {
+          if (state.subloc != rRoot.path && state.subloc != rLogin.path) {
+            return state.namedLocation(rRoot.name);
+          }
+          return null;
+        },
+        error: (err) => state.subloc == rRoot.path ? null : state.namedLocation(rRoot.name),
       );
     },
   );

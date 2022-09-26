@@ -22,9 +22,7 @@ mixin _$AuthState {
     required TResult Function() loading,
     required TResult Function(bool redirect) authenticated,
     required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
+    required TResult Function(Exception error) error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -33,9 +31,7 @@ mixin _$AuthState {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -44,9 +40,7 @@ mixin _$AuthState {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -56,8 +50,6 @@ mixin _$AuthState {
     required TResult Function(Loading value) loading,
     required TResult Function(Authenticated value) authenticated,
     required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
     required TResult Function(Error value) error,
   }) =>
       throw _privateConstructorUsedError;
@@ -67,8 +59,6 @@ mixin _$AuthState {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
   }) =>
       throw _privateConstructorUsedError;
@@ -78,8 +68,6 @@ mixin _$AuthState {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
     required TResult orElse(),
   }) =>
@@ -149,9 +137,7 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     required TResult Function() loading,
     required TResult Function(bool redirect) authenticated,
     required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
+    required TResult Function(Exception error) error,
   }) {
     return initial();
   }
@@ -163,9 +149,7 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
   }) {
     return initial?.call();
   }
@@ -177,9 +161,7 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -195,8 +177,6 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     required TResult Function(Loading value) loading,
     required TResult Function(Authenticated value) authenticated,
     required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
     required TResult Function(Error value) error,
   }) {
     return initial(this);
@@ -209,8 +189,6 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
   }) {
     return initial?.call(this);
@@ -223,8 +201,6 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
     required TResult orElse(),
   }) {
@@ -288,9 +264,7 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
     required TResult Function() loading,
     required TResult Function(bool redirect) authenticated,
     required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
+    required TResult Function(Exception error) error,
   }) {
     return loading();
   }
@@ -302,9 +276,7 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
   }) {
     return loading?.call();
   }
@@ -316,9 +288,7 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -334,8 +304,6 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
     required TResult Function(Loading value) loading,
     required TResult Function(Authenticated value) authenticated,
     required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
     required TResult Function(Error value) error,
   }) {
     return loading(this);
@@ -348,8 +316,6 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
   }) {
     return loading?.call(this);
@@ -362,8 +328,6 @@ class _$Loading extends Loading with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
     required TResult orElse(),
   }) {
@@ -455,9 +419,7 @@ class _$Authenticated extends Authenticated with DiagnosticableTreeMixin {
     required TResult Function() loading,
     required TResult Function(bool redirect) authenticated,
     required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
+    required TResult Function(Exception error) error,
   }) {
     return authenticated(redirect);
   }
@@ -469,9 +431,7 @@ class _$Authenticated extends Authenticated with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
   }) {
     return authenticated?.call(redirect);
   }
@@ -483,9 +443,7 @@ class _$Authenticated extends Authenticated with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
     required TResult orElse(),
   }) {
     if (authenticated != null) {
@@ -501,8 +459,6 @@ class _$Authenticated extends Authenticated with DiagnosticableTreeMixin {
     required TResult Function(Loading value) loading,
     required TResult Function(Authenticated value) authenticated,
     required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
     required TResult Function(Error value) error,
   }) {
     return authenticated(this);
@@ -515,8 +471,6 @@ class _$Authenticated extends Authenticated with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
   }) {
     return authenticated?.call(this);
@@ -529,8 +483,6 @@ class _$Authenticated extends Authenticated with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
     required TResult orElse(),
   }) {
@@ -602,9 +554,7 @@ class _$Unauthenticated extends Unauthenticated with DiagnosticableTreeMixin {
     required TResult Function() loading,
     required TResult Function(bool redirect) authenticated,
     required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
+    required TResult Function(Exception error) error,
   }) {
     return unauthenticated();
   }
@@ -616,9 +566,7 @@ class _$Unauthenticated extends Unauthenticated with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
   }) {
     return unauthenticated?.call();
   }
@@ -630,9 +578,7 @@ class _$Unauthenticated extends Unauthenticated with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
     required TResult orElse(),
   }) {
     if (unauthenticated != null) {
@@ -648,8 +594,6 @@ class _$Unauthenticated extends Unauthenticated with DiagnosticableTreeMixin {
     required TResult Function(Loading value) loading,
     required TResult Function(Authenticated value) authenticated,
     required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
     required TResult Function(Error value) error,
   }) {
     return unauthenticated(this);
@@ -662,8 +606,6 @@ class _$Unauthenticated extends Unauthenticated with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
   }) {
     return unauthenticated?.call(this);
@@ -676,8 +618,6 @@ class _$Unauthenticated extends Unauthenticated with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
     required TResult orElse(),
   }) {
@@ -694,289 +634,10 @@ abstract class Unauthenticated extends AuthState {
 }
 
 /// @nodoc
-abstract class _$$ExpiredCopyWith<$Res> {
-  factory _$$ExpiredCopyWith(_$Expired value, $Res Function(_$Expired) then) =
-      __$$ExpiredCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$ExpiredCopyWithImpl<$Res> extends _$AuthStateCopyWithImpl<$Res>
-    implements _$$ExpiredCopyWith<$Res> {
-  __$$ExpiredCopyWithImpl(_$Expired _value, $Res Function(_$Expired) _then)
-      : super(_value, (v) => _then(v as _$Expired));
-
-  @override
-  _$Expired get _value => super._value as _$Expired;
-}
-
-/// @nodoc
-
-class _$Expired extends Expired with DiagnosticableTreeMixin {
-  const _$Expired() : super._();
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'AuthState.expired()';
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty('type', 'AuthState.expired'));
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Expired);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(bool redirect) authenticated,
-    required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
-  }) {
-    return expired();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(bool redirect)? authenticated,
-    TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
-  }) {
-    return expired?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(bool redirect)? authenticated,
-    TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
-    required TResult orElse(),
-  }) {
-    if (expired != null) {
-      return expired();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Initial value) initial,
-    required TResult Function(Loading value) loading,
-    required TResult Function(Authenticated value) authenticated,
-    required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
-    required TResult Function(Error value) error,
-  }) {
-    return expired(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Loading value)? loading,
-    TResult Function(Authenticated value)? authenticated,
-    TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
-    TResult Function(Error value)? error,
-  }) {
-    return expired?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Loading value)? loading,
-    TResult Function(Authenticated value)? authenticated,
-    TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
-    TResult Function(Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (expired != null) {
-      return expired(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class Expired extends AuthState {
-  const factory Expired() = _$Expired;
-  const Expired._() : super._();
-}
-
-/// @nodoc
-abstract class _$$UserNotFoundCopyWith<$Res> {
-  factory _$$UserNotFoundCopyWith(
-          _$UserNotFound value, $Res Function(_$UserNotFound) then) =
-      __$$UserNotFoundCopyWithImpl<$Res>;
-}
-
-/// @nodoc
-class __$$UserNotFoundCopyWithImpl<$Res> extends _$AuthStateCopyWithImpl<$Res>
-    implements _$$UserNotFoundCopyWith<$Res> {
-  __$$UserNotFoundCopyWithImpl(
-      _$UserNotFound _value, $Res Function(_$UserNotFound) _then)
-      : super(_value, (v) => _then(v as _$UserNotFound));
-
-  @override
-  _$UserNotFound get _value => super._value as _$UserNotFound;
-}
-
-/// @nodoc
-
-class _$UserNotFound extends UserNotFound with DiagnosticableTreeMixin {
-  const _$UserNotFound() : super._();
-
-  @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'AuthState.userNotFound()';
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty('type', 'AuthState.userNotFound'));
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$UserNotFound);
-  }
-
-  @override
-  int get hashCode => runtimeType.hashCode;
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function() initial,
-    required TResult Function() loading,
-    required TResult Function(bool redirect) authenticated,
-    required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
-  }) {
-    return userNotFound();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(bool redirect)? authenticated,
-    TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
-  }) {
-    return userNotFound?.call();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function()? loading,
-    TResult Function(bool redirect)? authenticated,
-    TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
-    required TResult orElse(),
-  }) {
-    if (userNotFound != null) {
-      return userNotFound();
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(Initial value) initial,
-    required TResult Function(Loading value) loading,
-    required TResult Function(Authenticated value) authenticated,
-    required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
-    required TResult Function(Error value) error,
-  }) {
-    return userNotFound(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Loading value)? loading,
-    TResult Function(Authenticated value)? authenticated,
-    TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
-    TResult Function(Error value)? error,
-  }) {
-    return userNotFound?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Loading value)? loading,
-    TResult Function(Authenticated value)? authenticated,
-    TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
-    TResult Function(Error value)? error,
-    required TResult orElse(),
-  }) {
-    if (userNotFound != null) {
-      return userNotFound(this);
-    }
-    return orElse();
-  }
-}
-
-abstract class UserNotFound extends AuthState {
-  const factory UserNotFound() = _$UserNotFound;
-  const UserNotFound._() : super._();
-}
-
-/// @nodoc
 abstract class _$$ErrorCopyWith<$Res> {
   factory _$$ErrorCopyWith(_$Error value, $Res Function(_$Error) then) =
       __$$ErrorCopyWithImpl<$Res>;
+  $Res call({Exception error});
 }
 
 /// @nodoc
@@ -987,32 +648,57 @@ class __$$ErrorCopyWithImpl<$Res> extends _$AuthStateCopyWithImpl<$Res>
 
   @override
   _$Error get _value => super._value as _$Error;
+
+  @override
+  $Res call({
+    Object? error = freezed,
+  }) {
+    return _then(_$Error(
+      error == freezed
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as Exception,
+    ));
+  }
 }
 
 /// @nodoc
 
 class _$Error extends Error with DiagnosticableTreeMixin {
-  const _$Error() : super._();
+  const _$Error(this.error) : super._();
+
+  @override
+  final Exception error;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'AuthState.error()';
+    return 'AuthState.error(error: $error)';
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty('type', 'AuthState.error'));
+    properties
+      ..add(DiagnosticsProperty('type', 'AuthState.error'))
+      ..add(DiagnosticsProperty('error', error));
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is _$Error);
+        (other.runtimeType == runtimeType &&
+            other is _$Error &&
+            const DeepCollectionEquality().equals(other.error, error));
   }
 
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode =>
+      Object.hash(runtimeType, const DeepCollectionEquality().hash(error));
+
+  @JsonKey(ignore: true)
+  @override
+  _$$ErrorCopyWith<_$Error> get copyWith =>
+      __$$ErrorCopyWithImpl<_$Error>(this, _$identity);
 
   @override
   @optionalTypeArgs
@@ -1021,11 +707,9 @@ class _$Error extends Error with DiagnosticableTreeMixin {
     required TResult Function() loading,
     required TResult Function(bool redirect) authenticated,
     required TResult Function() unauthenticated,
-    required TResult Function() expired,
-    required TResult Function() userNotFound,
-    required TResult Function() error,
+    required TResult Function(Exception error) error,
   }) {
-    return error();
+    return error(this.error);
   }
 
   @override
@@ -1035,11 +719,9 @@ class _$Error extends Error with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
   }) {
-    return error?.call();
+    return error?.call(this.error);
   }
 
   @override
@@ -1049,13 +731,11 @@ class _$Error extends Error with DiagnosticableTreeMixin {
     TResult Function()? loading,
     TResult Function(bool redirect)? authenticated,
     TResult Function()? unauthenticated,
-    TResult Function()? expired,
-    TResult Function()? userNotFound,
-    TResult Function()? error,
+    TResult Function(Exception error)? error,
     required TResult orElse(),
   }) {
     if (error != null) {
-      return error();
+      return error(this.error);
     }
     return orElse();
   }
@@ -1067,8 +747,6 @@ class _$Error extends Error with DiagnosticableTreeMixin {
     required TResult Function(Loading value) loading,
     required TResult Function(Authenticated value) authenticated,
     required TResult Function(Unauthenticated value) unauthenticated,
-    required TResult Function(Expired value) expired,
-    required TResult Function(UserNotFound value) userNotFound,
     required TResult Function(Error value) error,
   }) {
     return error(this);
@@ -1081,8 +759,6 @@ class _$Error extends Error with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
   }) {
     return error?.call(this);
@@ -1095,8 +771,6 @@ class _$Error extends Error with DiagnosticableTreeMixin {
     TResult Function(Loading value)? loading,
     TResult Function(Authenticated value)? authenticated,
     TResult Function(Unauthenticated value)? unauthenticated,
-    TResult Function(Expired value)? expired,
-    TResult Function(UserNotFound value)? userNotFound,
     TResult Function(Error value)? error,
     required TResult orElse(),
   }) {
@@ -1108,6 +782,10 @@ class _$Error extends Error with DiagnosticableTreeMixin {
 }
 
 abstract class Error extends AuthState {
-  const factory Error() = _$Error;
+  const factory Error(final Exception error) = _$Error;
   const Error._() : super._();
+
+  Exception get error;
+  @JsonKey(ignore: true)
+  _$$ErrorCopyWith<_$Error> get copyWith => throw _privateConstructorUsedError;
 }

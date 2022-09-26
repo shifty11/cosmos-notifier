@@ -23,13 +23,13 @@ class RouteData {
 
 const rRoot = RouteData("root", "/");
 const rLoading = RouteData("loading", "/loading");
-const rUnauthenticated = RouteData("unauthenticated", "/login");
+const rLogin = RouteData("login", "/login");
 const rSubscriptions = RouteData("subscriptions", "/subscriptions");
 
 const bool cDebugMode = true;
 
 final tgBotUrl = Uri.parse('https://t.me/DaoDaoNotifierBot');
-final discordBotUrl = Uri.parse('https://discord.com/api/oauth2/authorize?client_id=1020361762622689330&permissions=2048&redirect_uri=https%3A%2F%2Fdaodao-notifier.decrypto.online&response_type=code&scope=bot%20identify');
+final discordBotUrl = Uri.parse('https://discord.com/api/oauth2/authorize?client_id=1020361762622689330&redirect_uri=https%3A%2F%2Fdaodao-notifier.decrypto.online&response_type=code&scope=identify');
 
 final tgContactUrl = Uri.parse('https://t.me/rapha_decrypto');
 final discordContactUrl = Uri.parse('https://discord.com/users/228978159440232453');

@@ -1,59 +1,16 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webapp/config.dart';
 import 'package:webapp/f_home/services/auth_provider.dart';
-import 'package:webapp/f_home/widgets/footer_widget.dart';
+import 'package:webapp/f_home/services/auth_service.dart';
+import 'package:webapp/f_home/widgets/subwidgets/footer_widget.dart';
+import 'package:webapp/f_home/widgets/subwidgets/logo_widget.dart';
 import 'package:webapp/style.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
-
-  // returns a value between 120 und 360 depending on height and width of screen
-  double _getSize(BuildContext context) {
-    const maxSize = 360;
-    return max(
-        [
-          MediaQuery.of(context).size.width - (450 - maxSize),
-          MediaQuery.of(context).size.height - (700 - maxSize),
-          360.0,
-        ].reduce(min),
-        120);
-  }
-
-  Widget logo(BuildContext context) {
-    final size = _getSize(context);
-    final double fontSize = size / 360 * (Theme.of(context).textTheme.headline3!.fontSize ?? 1);
-    return Stack(children: [
-      CircleAvatar(
-        radius: size / 2,
-        backgroundColor: Styles.isDarkTheme(context) ? Colors.white : Colors.black,
-        child: ClipOval(
-          child: Image.asset(
-            "images/dove_square.png",
-            width: size - (20 * (size / 360)),
-            height: size - (20 * (size / 360)),
-          ),
-        ),
-      ),
-      Positioned(
-        top: size / 36 * 7,
-        child: SizedBox(
-          width: size,
-          child: Center(
-              child: Column(
-            children: [
-              Text("DAO DAO", style: Theme.of(context).textTheme.headline3?.copyWith(fontSize: fontSize, fontFamily: "Alienated")),
-              Text("Notifier", style: Theme.of(context).textTheme.headline3!.copyWith(fontSize: fontSize, fontFamily: "Alien Robot")),
-            ],
-          )),
-        ),
-      ),
-    ]);
-  }
+  const HomePage({Key? key, errorCode}) : super(key: key);
 
   Widget botButtons(BuildContext context) {
     const buttonWith = 170.0;
@@ -113,6 +70,42 @@ class HomePage extends StatelessWidget {
     });
   }
 
+  Widget errorMsg() {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      final state = ref.watch(authStateValueProvider);
+      return state.value.whenOrNull(
+            error: (err) {
+              var text = "Unknown error.\nPlease login again.";
+              if (err is AuthExpiredError) {
+                text = "Your session has expired.\nPlease login again.";
+              }
+              if (err is AuthUserNotFoundError) {
+                text = "User was not found.\nUse the Telegram or Discord bot to register.";
+              }
+              return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Styles.dangerBgColor,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                      text,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headline5?.copyWith(color: Styles.dangerTextColor)));
+            },
+          ) ??
+          Container();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -122,7 +115,7 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(flex: 2),
-            MediaQuery.of(context).size.height >= 400 ? logo(context) : Container(),
+            MediaQuery.of(context).size.height >= 400 ? const LogoWidget() : Container(),
             const Spacer(flex: 2),
             Flexible(
               flex: 0,
@@ -138,6 +131,7 @@ class HomePage extends StatelessWidget {
             botButtons(context),
             const Spacer(flex: 1),
             subscriptionButton(),
+            errorMsg(),
             const Spacer(flex: 4),
             const Flexible(flex: 0, child: FooterWidget()),
           ],

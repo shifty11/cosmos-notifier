@@ -8,8 +8,8 @@ import 'package:riverpod_messages/riverpod_messages.dart';
 import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:webapp/config.dart';
 import 'package:webapp/f_home/services/message_provider.dart';
-import 'package:webapp/f_home/widgets/bottom_navigation_bar_widget.dart';
-import 'package:webapp/f_home/widgets/footer_widget.dart';
+import 'package:webapp/f_home/widgets/subwidgets/bottom_navigation_bar_widget.dart';
+import 'package:webapp/f_home/widgets/subwidgets/footer_widget.dart';
 import 'package:webapp/f_subscription/services/subscription_provider.dart';
 import 'package:webapp/style.dart';
 
