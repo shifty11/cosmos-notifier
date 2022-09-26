@@ -5,13 +5,13 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_messages/riverpod_messages.dart';
-import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/message_provider.dart';
-import 'package:webapp/f_home/widgets/subwidgets/bottom_navigation_bar_widget.dart';
-import 'package:webapp/f_home/widgets/subwidgets/footer_widget.dart';
-import 'package:webapp/f_subscription/services/subscription_provider.dart';
-import 'package:webapp/style.dart';
+import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pb.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/message_provider.dart';
+import 'package:dao_dao_notifier/f_home/widgets/subwidgets/bottom_navigation_bar_widget.dart';
+import 'package:dao_dao_notifier/f_home/widgets/subwidgets/footer_widget.dart';
+import 'package:dao_dao_notifier/f_subscription/services/subscription_provider.dart';
+import 'package:dao_dao_notifier/style.dart';
 
 import '../../f_home/services/chat_id_provider.dart';
 

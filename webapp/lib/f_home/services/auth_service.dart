@@ -7,10 +7,10 @@ import 'package:flutter/foundation.dart';
 import 'package:grpc/grpc.dart';
 import 'package:grpc/grpc_connection_interface.dart';
 import 'package:js/js.dart';
-import 'package:webapp/api/protobuf/dart/auth_service.pbgrpc.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/jwt_manager.dart';
-import 'package:webapp/f_home/services/type/login_data.dart';
+import 'package:dao_dao_notifier/api/protobuf/dart/auth_service.pbgrpc.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/jwt_manager.dart';
+import 'package:dao_dao_notifier/f_home/services/type/login_data.dart';
 
 @JS()
 external String getTelegramInitData();

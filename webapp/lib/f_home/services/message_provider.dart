@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/jwt_manager.dart';
-import 'package:webapp/f_home/services/state/message_state.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/jwt_manager.dart';
+import 'package:dao_dao_notifier/f_home/services/state/message_state.dart';
 
 final messageProvider = StateNotifierProvider<MessageNotifier, MessageState>((ref) => MessageNotifier(ref, jwtManager));
 

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/state/auth_state.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/state/auth_state.dart';
 
 import 'auth_service.dart';
 

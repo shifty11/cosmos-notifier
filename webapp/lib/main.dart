@@ -1,5 +1,5 @@
-import 'package:webapp/f_home/services/theme_provider.dart';
-import 'package:webapp/routes.dart';
+import 'package:dao_dao_notifier/f_home/services/theme_provider.dart';
+import 'package:dao_dao_notifier/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';

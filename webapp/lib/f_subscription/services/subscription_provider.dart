@@ -2,14 +2,14 @@ import 'package:fixnum/fixnum.dart' as fixnum;
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:protobuf/protobuf.dart';
-import 'package:webapp/api/protobuf/dart/google/protobuf/empty.pb.dart';
-import 'package:webapp/api/protobuf/dart/subscription_service.pb.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/chat_id_provider.dart';
-import 'package:webapp/f_home/services/message_provider.dart';
-import 'package:webapp/f_subscription/services/state/subscription_list_state.dart';
-import 'package:webapp/f_subscription/services/subscription_service.dart';
-import 'package:webapp/f_subscription/services/type/subscription_data_type.dart';
+import 'package:dao_dao_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
+import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pb.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/chat_id_provider.dart';
+import 'package:dao_dao_notifier/f_home/services/message_provider.dart';
+import 'package:dao_dao_notifier/f_subscription/services/state/subscription_list_state.dart';
+import 'package:dao_dao_notifier/f_subscription/services/subscription_service.dart';
+import 'package:dao_dao_notifier/f_subscription/services/type/subscription_data_type.dart';
 
 final subscriptionProvider = Provider<SubscriptionService>((ref) => subsService);
 

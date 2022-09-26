@@ -1,9 +1,9 @@
 import 'package:grpc/grpc_web.dart';
-import 'package:webapp/env.dart';
-import 'package:webapp/f_home/services/auth_interceptor.dart';
-import 'package:webapp/f_home/services/auth_service.dart';
-import 'package:webapp/f_home/services/jwt_manager.dart';
-import 'package:webapp/f_subscription/services/subscription_service.dart';
+import 'package:dao_dao_notifier/env.dart';
+import 'package:dao_dao_notifier/f_home/services/auth_interceptor.dart';
+import 'package:dao_dao_notifier/f_home/services/auth_service.dart';
+import 'package:dao_dao_notifier/f_home/services/jwt_manager.dart';
+import 'package:dao_dao_notifier/f_subscription/services/subscription_service.dart';
 
 const refreshBeforeExpDuration = Duration(seconds: 10 * 60);
 

@@ -1,4 +1,4 @@
-import 'package:webapp/api/protobuf/dart/subscription_service.pbgrpc.dart';
+import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pbgrpc.dart';
 import 'package:grpc/grpc.dart';
 import 'package:grpc/grpc_connection_interface.dart';
 

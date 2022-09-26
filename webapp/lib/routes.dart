@@ -2,12 +2,12 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/auth_provider.dart';
-import 'package:webapp/f_home/services/chat_id_provider.dart';
-import 'package:webapp/f_home/services/state/auth_state.dart';
-import 'package:webapp/f_home/widgets/loading_page.dart';
-import 'package:webapp/f_subscription/widgets/subscription_page.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/auth_provider.dart';
+import 'package:dao_dao_notifier/f_home/services/chat_id_provider.dart';
+import 'package:dao_dao_notifier/f_home/services/state/auth_state.dart';
+import 'package:dao_dao_notifier/f_home/widgets/loading_page.dart';
+import 'package:dao_dao_notifier/f_subscription/widgets/subscription_page.dart';
 
 import 'f_home/widgets/home_page.dart';
 

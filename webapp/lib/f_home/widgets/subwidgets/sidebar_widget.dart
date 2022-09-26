@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:webapp/config.dart';
+import 'package:dao_dao_notifier/config.dart';
 
 class SidebarWidget extends StatelessWidget {
   final double sideBarWith = 300;

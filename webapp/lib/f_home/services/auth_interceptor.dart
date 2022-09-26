@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:webapp/config.dart';
-import 'package:webapp/f_home/services/jwt_manager.dart';
+import 'package:dao_dao_notifier/config.dart';
+import 'package:dao_dao_notifier/f_home/services/jwt_manager.dart';
 import 'package:grpc/grpc.dart';
 
 class AuthInterceptor extends ClientInterceptor {

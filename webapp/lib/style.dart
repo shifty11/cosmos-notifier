@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webapp/f_home/services/type/custom_theme_data.dart';
-import 'package:webapp/f_home/widgets/subwidgets/transition_builder_widget.dart';
+import 'package:dao_dao_notifier/f_home/services/type/custom_theme_data.dart';
+import 'package:dao_dao_notifier/f_home/widgets/subwidgets/transition_builder_widget.dart';
 
 extension ColorBrightness on Color {
   Color darken([double amount = .1]) {

@@ -1,4 +1,4 @@
-import 'package:webapp/api/protobuf/dart/subscription_service.pbgrpc.dart';
+import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pbgrpc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:fixnum/fixnum.dart' as fixnum;
 
