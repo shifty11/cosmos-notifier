@@ -215,23 +215,25 @@ class SubscriptionPage extends StatelessWidget {
           if (chatRooms.length == 1) {
             return Text(chatRooms.first.name);
           }
-          return DropdownButton<ChatRoom>(
-            value: ref.watch(selectedChatRoomProvider),
-            icon: const Padding(
-              padding: EdgeInsets.only(left: 4.0),
-              child: Icon(Icons.chat, size: 20),
+          return DropdownButtonHideUnderline(
+            child: DropdownButton<ChatRoom>(
+              value: ref.watch(selectedChatRoomProvider),
+              icon: const Padding(
+                padding: EdgeInsets.only(left: 4.0),
+                child: Icon(Icons.person, size: 20),
+              ),
+              onChanged: (ChatRoom? newValue) {
+                ref.watch(selectedChatRoomProvider.notifier).state = newValue;
+                ref.read(chatIdProvider.notifier).state = newValue?.id ?? ref.read(chatIdProvider.notifier).state;
+                context.pushNamed(rSubscriptions.name, queryParams: {'chat-id': newValue?.id.toString() ?? ""});
+              },
+              items: chatRooms.map<DropdownMenuItem<ChatRoom>>((ChatRoom chatRoom) {
+                return DropdownMenuItem<ChatRoom>(
+                  value: chatRoom,
+                  child: Text(chatRoom.name),
+                );
+              }).toList(),
             ),
-            onChanged: (ChatRoom? newValue) {
-              ref.watch(selectedChatRoomProvider.notifier).state = newValue;
-              ref.read(chatIdProvider.notifier).state = newValue?.id ?? ref.read(chatIdProvider.notifier).state;
-              context.pushNamed(rSubscriptions.name, queryParams: {'chat-id': newValue?.id.toString() ?? ""});
-            },
-            items: chatRooms.map<DropdownMenuItem<ChatRoom>>((ChatRoom chatRoom) {
-              return DropdownMenuItem<ChatRoom>(
-                value: chatRoom,
-                child: Text(chatRoom.name),
-              );
-            }).toList(),
           );
         },
       );
@@ -320,13 +322,31 @@ class SubscriptionPage extends StatelessWidget {
   }
 
   Widget header(BuildContext context) {
-    return TextButton.icon(
-      onPressed: () => context.pushNamed(rRoot.name),
-      icon: const Icon(Icons.home),
-      label: const Text("Home"),
-      style: TextButton.styleFrom(
-        primary: Theme.of(context).disabledColor,
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        TextButton.icon(
+          onPressed: () => context.pushNamed(rRoot.name),
+          icon: const Icon(Icons.home),
+          label: const Text("Home"),
+          style: TextButton.styleFrom(
+            primary: Theme.of(context).disabledColor,
+          ),
+        ),
+        chatDropdownWidget(context),
+      ],
+    );
+  }
+
+  Widget title(BuildContext context) {
+    return Row(
+      children: [
+        Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
+        Tooltip(
+            message: "Select the DAO's that you want to follow. "
+                "You will receive notifications about new governance proposals.",
+            child: Icon(Icons.info, size: 20, color: Theme.of(context).disabledColor)),
+      ],
     );
   }
 
@@ -345,11 +365,7 @@ class SubscriptionPage extends StatelessWidget {
                 children: [
                   header(context),
                   const Divider(),
-                  Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
-                  const SizedBox(height: 10),
-                  chatDropdownWidget(context),
-                  const SizedBox(height: 10),
-                  descriptionWidget(context),
+                  title(context),
                   const SizedBox(height: 20),
                   searchWidget(context),
                   const SizedBox(height: 20),
