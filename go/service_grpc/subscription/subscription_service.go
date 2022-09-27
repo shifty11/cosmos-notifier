@@ -40,6 +40,11 @@ func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.
 				IsSubscribed:    sub.Notify,
 				ThumbnailUrl:    sub.ThumbnailUrl,
 				ContractAddress: sub.ContractAddress,
+				Stats: &pb.SubscriptionStats{
+					Total:    int32(sub.Stats.Total),
+					Telegram: int32(sub.Stats.Telegram),
+					Discord:  int32(sub.Stats.Discord),
+				},
 			})
 		}
 		roomType := pb.ChatRoom_TELEGRAM
@@ -66,6 +71,9 @@ func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *empty
 	log.Sugar.Debugf("GetSubscriptions for user %v (%v)", entUser.Name, entUser.UserID)
 
 	subs := server.subscriptionManager.GetSubscriptions(entUser)
+	if entUser.Role == user.RoleAdmin {
+		server.subscriptionManager.CollectStats(subs)
+	}
 	chatRooms := convertSubscriptionToProtobuf(entUser, subs)
 
 	var res = &pb.GetSubscriptionsResponse{ChatRooms: chatRooms}

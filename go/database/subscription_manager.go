@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
@@ -10,12 +11,19 @@ import (
 	"github.com/shifty11/dao-dao-notifier/log"
 )
 
+type SubscriptionStats struct {
+	Total    int
+	Telegram int
+	Discord  int
+}
+
 type Subscription struct {
 	Id              int64
 	Name            string
 	Notify          bool
 	ThumbnailUrl    string
 	ContractAddress string
+	Stats           SubscriptionStats
 }
 
 type ChatRoom struct {
@@ -121,5 +129,56 @@ func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 			})
 		}
 		return chats
+	}
+}
+
+// CollectStats takes a list of ChatRoom and fills the stats for each subscription
+func (m *SubscriptionManager) CollectStats(chats []*ChatRoom) {
+	type stats []struct {
+		ID  int
+		Cnt int
+	}
+	var tgStats = stats{}
+	err := m.client.Contract.
+		Query().
+		GroupBy(contract.FieldID).
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(contract.TelegramChatsTable)
+			s.Join(t).On(s.C(contract.FieldID), t.C(contract.TelegramChatsPrimaryKey[1]))
+			return sql.As(sql.Count(t.C(contract.TelegramChatsPrimaryKey[1])), "cnt")
+		}).
+		Scan(m.ctx, &tgStats)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting tgStats: %v", err)
+	}
+
+	var dStats = stats{}
+	err = m.client.Contract.
+		Query().
+		GroupBy(contract.FieldID).
+		Aggregate(func(s *sql.Selector) string {
+			t := sql.Table(contract.DiscordChannelsTable)
+			s.Join(t).On(s.C(contract.FieldID), t.C(contract.DiscordChannelsPrimaryKey[1]))
+			return sql.As(sql.Count(t.C(contract.DiscordChannelsPrimaryKey[1])), "cnt")
+		}).
+		Scan(m.ctx, &dStats)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting dStats: %v", err)
+	}
+
+	for _, chat := range chats {
+		for _, sub := range chat.Subscriptions {
+			for _, s := range tgStats {
+				if s.ID == int(sub.Id) {
+					sub.Stats.Telegram = s.Cnt
+				}
+			}
+			for _, s := range dStats {
+				if s.ID == int(sub.Id) {
+					sub.Stats.Discord = s.Cnt
+				}
+			}
+			sub.Stats.Total = sub.Stats.Telegram + sub.Stats.Discord
+		}
 	}
 }

@@ -64,7 +64,7 @@ func (x ChatRoom_Type) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ChatRoom_Type.Descriptor instead.
 func (ChatRoom_Type) EnumDescriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{1, 0}
+	return file_subscription_service_proto_rawDescGZIP(), []int{2, 0}
 }
 
 type AddDaoResponse_Status int32
@@ -116,7 +116,70 @@ func (x AddDaoResponse_Status) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AddDaoResponse_Status.Descriptor instead.
 func (AddDaoResponse_Status) EnumDescriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{6, 0}
+	return file_subscription_service_proto_rawDescGZIP(), []int{7, 0}
+}
+
+type SubscriptionStats struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Total    int32 `protobuf:"varint,1,opt,name=total,proto3" json:"total,omitempty"`
+	Telegram int32 `protobuf:"varint,2,opt,name=telegram,proto3" json:"telegram,omitempty"`
+	Discord  int32 `protobuf:"varint,3,opt,name=discord,proto3" json:"discord,omitempty"`
+}
+
+func (x *SubscriptionStats) Reset() {
+	*x = SubscriptionStats{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_subscription_service_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *SubscriptionStats) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SubscriptionStats) ProtoMessage() {}
+
+func (x *SubscriptionStats) ProtoReflect() protoreflect.Message {
+	mi := &file_subscription_service_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SubscriptionStats.ProtoReflect.Descriptor instead.
+func (*SubscriptionStats) Descriptor() ([]byte, []int) {
+	return file_subscription_service_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *SubscriptionStats) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *SubscriptionStats) GetTelegram() int32 {
+	if x != nil {
+		return x.Telegram
+	}
+	return 0
+}
+
+func (x *SubscriptionStats) GetDiscord() int32 {
+	if x != nil {
+		return x.Discord
+	}
+	return 0
 }
 
 type Subscription struct {
@@ -124,17 +187,18 @@ type Subscription struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id              int64  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name            string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	IsSubscribed    bool   `protobuf:"varint,3,opt,name=is_subscribed,json=isSubscribed,proto3" json:"is_subscribed,omitempty"`
-	ThumbnailUrl    string `protobuf:"bytes,4,opt,name=thumbnail_url,json=thumbnailUrl,proto3" json:"thumbnail_url,omitempty"`
-	ContractAddress string `protobuf:"bytes,5,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
+	Id              int64              `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name            string             `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	IsSubscribed    bool               `protobuf:"varint,3,opt,name=is_subscribed,json=isSubscribed,proto3" json:"is_subscribed,omitempty"`
+	ThumbnailUrl    string             `protobuf:"bytes,4,opt,name=thumbnail_url,json=thumbnailUrl,proto3" json:"thumbnail_url,omitempty"`
+	ContractAddress string             `protobuf:"bytes,5,opt,name=contract_address,json=contractAddress,proto3" json:"contract_address,omitempty"`
+	Stats           *SubscriptionStats `protobuf:"bytes,6,opt,name=stats,proto3" json:"stats,omitempty"`
 }
 
 func (x *Subscription) Reset() {
 	*x = Subscription{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[0]
+		mi := &file_subscription_service_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -147,7 +211,7 @@ func (x *Subscription) String() string {
 func (*Subscription) ProtoMessage() {}
 
 func (x *Subscription) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[0]
+	mi := &file_subscription_service_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +224,7 @@ func (x *Subscription) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Subscription.ProtoReflect.Descriptor instead.
 func (*Subscription) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{0}
+	return file_subscription_service_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Subscription) GetId() int64 {
@@ -198,6 +262,13 @@ func (x *Subscription) GetContractAddress() string {
 	return ""
 }
 
+func (x *Subscription) GetStats() *SubscriptionStats {
+	if x != nil {
+		return x.Stats
+	}
+	return nil
+}
+
 type ChatRoom struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -212,7 +283,7 @@ type ChatRoom struct {
 func (x *ChatRoom) Reset() {
 	*x = ChatRoom{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[1]
+		mi := &file_subscription_service_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -225,7 +296,7 @@ func (x *ChatRoom) String() string {
 func (*ChatRoom) ProtoMessage() {}
 
 func (x *ChatRoom) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[1]
+	mi := &file_subscription_service_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -238,7 +309,7 @@ func (x *ChatRoom) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ChatRoom.ProtoReflect.Descriptor instead.
 func (*ChatRoom) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{1}
+	return file_subscription_service_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *ChatRoom) GetId() int64 {
@@ -280,7 +351,7 @@ type GetSubscriptionsResponse struct {
 func (x *GetSubscriptionsResponse) Reset() {
 	*x = GetSubscriptionsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[2]
+		mi := &file_subscription_service_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -293,7 +364,7 @@ func (x *GetSubscriptionsResponse) String() string {
 func (*GetSubscriptionsResponse) ProtoMessage() {}
 
 func (x *GetSubscriptionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[2]
+	mi := &file_subscription_service_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -306,7 +377,7 @@ func (x *GetSubscriptionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSubscriptionsResponse.ProtoReflect.Descriptor instead.
 func (*GetSubscriptionsResponse) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{2}
+	return file_subscription_service_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *GetSubscriptionsResponse) GetChatRooms() []*ChatRoom {
@@ -328,7 +399,7 @@ type ToggleSubscriptionRequest struct {
 func (x *ToggleSubscriptionRequest) Reset() {
 	*x = ToggleSubscriptionRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[3]
+		mi := &file_subscription_service_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -341,7 +412,7 @@ func (x *ToggleSubscriptionRequest) String() string {
 func (*ToggleSubscriptionRequest) ProtoMessage() {}
 
 func (x *ToggleSubscriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[3]
+	mi := &file_subscription_service_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -354,7 +425,7 @@ func (x *ToggleSubscriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleSubscriptionRequest.ProtoReflect.Descriptor instead.
 func (*ToggleSubscriptionRequest) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{3}
+	return file_subscription_service_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ToggleSubscriptionRequest) GetChatRoomId() int64 {
@@ -382,7 +453,7 @@ type ToggleSubscriptionResponse struct {
 func (x *ToggleSubscriptionResponse) Reset() {
 	*x = ToggleSubscriptionResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[4]
+		mi := &file_subscription_service_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -395,7 +466,7 @@ func (x *ToggleSubscriptionResponse) String() string {
 func (*ToggleSubscriptionResponse) ProtoMessage() {}
 
 func (x *ToggleSubscriptionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[4]
+	mi := &file_subscription_service_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -408,7 +479,7 @@ func (x *ToggleSubscriptionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleSubscriptionResponse.ProtoReflect.Descriptor instead.
 func (*ToggleSubscriptionResponse) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{4}
+	return file_subscription_service_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ToggleSubscriptionResponse) GetIsSubscribed() bool {
@@ -429,7 +500,7 @@ type AddDaoRequest struct {
 func (x *AddDaoRequest) Reset() {
 	*x = AddDaoRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[5]
+		mi := &file_subscription_service_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -442,7 +513,7 @@ func (x *AddDaoRequest) String() string {
 func (*AddDaoRequest) ProtoMessage() {}
 
 func (x *AddDaoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[5]
+	mi := &file_subscription_service_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -455,7 +526,7 @@ func (x *AddDaoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddDaoRequest.ProtoReflect.Descriptor instead.
 func (*AddDaoRequest) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{5}
+	return file_subscription_service_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AddDaoRequest) GetContractAddress() string {
@@ -478,7 +549,7 @@ type AddDaoResponse struct {
 func (x *AddDaoResponse) Reset() {
 	*x = AddDaoResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[6]
+		mi := &file_subscription_service_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -491,7 +562,7 @@ func (x *AddDaoResponse) String() string {
 func (*AddDaoResponse) ProtoMessage() {}
 
 func (x *AddDaoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[6]
+	mi := &file_subscription_service_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -504,7 +575,7 @@ func (x *AddDaoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AddDaoResponse.ProtoReflect.Descriptor instead.
 func (*AddDaoResponse) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{6}
+	return file_subscription_service_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *AddDaoResponse) GetStatus() AddDaoResponse_Status {
@@ -539,7 +610,7 @@ type DeleteDaoRequest struct {
 func (x *DeleteDaoRequest) Reset() {
 	*x = DeleteDaoRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_subscription_service_proto_msgTypes[7]
+		mi := &file_subscription_service_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -552,7 +623,7 @@ func (x *DeleteDaoRequest) String() string {
 func (*DeleteDaoRequest) ProtoMessage() {}
 
 func (x *DeleteDaoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_subscription_service_proto_msgTypes[7]
+	mi := &file_subscription_service_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -565,7 +636,7 @@ func (x *DeleteDaoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDaoRequest.ProtoReflect.Descriptor instead.
 func (*DeleteDaoRequest) Descriptor() ([]byte, []int) {
-	return file_subscription_service_proto_rawDescGZIP(), []int{7}
+	return file_subscription_service_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *DeleteDaoRequest) GetContractId() int64 {
@@ -583,17 +654,27 @@ var file_subscription_service_proto_rawDesc = []byte{
 	0x6f, 0x64, 0x61, 0x6f, 0x5f, 0x6e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x5f, 0x67, 0x72,
 	0x70, 0x63, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f,
 	0x62, 0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22,
-	0xa7, 0x01, 0x0a, 0x0c, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e,
-	0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64,
-	0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x12, 0x23, 0x0a, 0x0d, 0x69, 0x73, 0x5f, 0x73, 0x75, 0x62, 0x73, 0x63,
-	0x72, 0x69, 0x62, 0x65, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0c, 0x69, 0x73, 0x53,
-	0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x64, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x68, 0x75,
-	0x6d, 0x62, 0x6e, 0x61, 0x69, 0x6c, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x0c, 0x74, 0x68, 0x75, 0x6d, 0x62, 0x6e, 0x61, 0x69, 0x6c, 0x55, 0x72, 0x6c, 0x12, 0x29,
-	0x0a, 0x10, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x5f, 0x61, 0x64, 0x64, 0x72, 0x65,
-	0x73, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61,
-	0x63, 0x74, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x22, 0xd4, 0x01, 0x0a, 0x08, 0x43, 0x68,
+	0x5f, 0x0a, 0x11, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x53,
+	0x74, 0x61, 0x74, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x05, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x12, 0x1a, 0x0a, 0x08, 0x74, 0x65,
+	0x6c, 0x65, 0x67, 0x72, 0x61, 0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x74, 0x65,
+	0x6c, 0x65, 0x67, 0x72, 0x61, 0x6d, 0x12, 0x18, 0x0a, 0x07, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x72,
+	0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x64, 0x69, 0x73, 0x63, 0x6f, 0x72, 0x64,
+	0x22, 0xe6, 0x01, 0x0a, 0x0c, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f,
+	0x6e, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69,
+	0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x23, 0x0a, 0x0d, 0x69, 0x73, 0x5f, 0x73, 0x75, 0x62, 0x73,
+	0x63, 0x72, 0x69, 0x62, 0x65, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0c, 0x69, 0x73,
+	0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x64, 0x12, 0x23, 0x0a, 0x0d, 0x74, 0x68,
+	0x75, 0x6d, 0x62, 0x6e, 0x61, 0x69, 0x6c, 0x5f, 0x75, 0x72, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0c, 0x74, 0x68, 0x75, 0x6d, 0x62, 0x6e, 0x61, 0x69, 0x6c, 0x55, 0x72, 0x6c, 0x12,
+	0x29, 0x0a, 0x10, 0x63, 0x6f, 0x6e, 0x74, 0x72, 0x61, 0x63, 0x74, 0x5f, 0x61, 0x64, 0x64, 0x72,
+	0x65, 0x73, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0f, 0x63, 0x6f, 0x6e, 0x74, 0x72,
+	0x61, 0x63, 0x74, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x12, 0x3d, 0x0a, 0x05, 0x73, 0x74,
+	0x61, 0x74, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x27, 0x2e, 0x64, 0x61, 0x6f, 0x64,
+	0x61, 0x6f, 0x5f, 0x6e, 0x6f, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x5f, 0x67, 0x72, 0x70, 0x63,
+	0x2e, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x70, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61,
+	0x74, 0x73, 0x52, 0x05, 0x73, 0x74, 0x61, 0x74, 0x73, 0x22, 0xd4, 0x01, 0x0a, 0x08, 0x43, 0x68,
 	0x61, 0x74, 0x52, 0x6f, 0x6f, 0x6d, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
 	0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x37, 0x0a, 0x04, 0x54, 0x59,
@@ -686,38 +767,40 @@ func file_subscription_service_proto_rawDescGZIP() []byte {
 }
 
 var file_subscription_service_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_subscription_service_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_subscription_service_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_subscription_service_proto_goTypes = []interface{}{
 	(ChatRoom_Type)(0),                 // 0: daodao_notifier_grpc.ChatRoom.Type
 	(AddDaoResponse_Status)(0),         // 1: daodao_notifier_grpc.AddDaoResponse.Status
-	(*Subscription)(nil),               // 2: daodao_notifier_grpc.Subscription
-	(*ChatRoom)(nil),                   // 3: daodao_notifier_grpc.ChatRoom
-	(*GetSubscriptionsResponse)(nil),   // 4: daodao_notifier_grpc.GetSubscriptionsResponse
-	(*ToggleSubscriptionRequest)(nil),  // 5: daodao_notifier_grpc.ToggleSubscriptionRequest
-	(*ToggleSubscriptionResponse)(nil), // 6: daodao_notifier_grpc.ToggleSubscriptionResponse
-	(*AddDaoRequest)(nil),              // 7: daodao_notifier_grpc.AddDaoRequest
-	(*AddDaoResponse)(nil),             // 8: daodao_notifier_grpc.AddDaoResponse
-	(*DeleteDaoRequest)(nil),           // 9: daodao_notifier_grpc.DeleteDaoRequest
-	(*emptypb.Empty)(nil),              // 10: google.protobuf.Empty
+	(*SubscriptionStats)(nil),          // 2: daodao_notifier_grpc.SubscriptionStats
+	(*Subscription)(nil),               // 3: daodao_notifier_grpc.Subscription
+	(*ChatRoom)(nil),                   // 4: daodao_notifier_grpc.ChatRoom
+	(*GetSubscriptionsResponse)(nil),   // 5: daodao_notifier_grpc.GetSubscriptionsResponse
+	(*ToggleSubscriptionRequest)(nil),  // 6: daodao_notifier_grpc.ToggleSubscriptionRequest
+	(*ToggleSubscriptionResponse)(nil), // 7: daodao_notifier_grpc.ToggleSubscriptionResponse
+	(*AddDaoRequest)(nil),              // 8: daodao_notifier_grpc.AddDaoRequest
+	(*AddDaoResponse)(nil),             // 9: daodao_notifier_grpc.AddDaoResponse
+	(*DeleteDaoRequest)(nil),           // 10: daodao_notifier_grpc.DeleteDaoRequest
+	(*emptypb.Empty)(nil),              // 11: google.protobuf.Empty
 }
 var file_subscription_service_proto_depIdxs = []int32{
-	0,  // 0: daodao_notifier_grpc.ChatRoom.TYPE:type_name -> daodao_notifier_grpc.ChatRoom.Type
-	2,  // 1: daodao_notifier_grpc.ChatRoom.subscriptions:type_name -> daodao_notifier_grpc.Subscription
-	3,  // 2: daodao_notifier_grpc.GetSubscriptionsResponse.chat_rooms:type_name -> daodao_notifier_grpc.ChatRoom
-	1,  // 3: daodao_notifier_grpc.AddDaoResponse.status:type_name -> daodao_notifier_grpc.AddDaoResponse.Status
-	10, // 4: daodao_notifier_grpc.SubscriptionService.GetSubscriptions:input_type -> google.protobuf.Empty
-	5,  // 5: daodao_notifier_grpc.SubscriptionService.ToggleSubscription:input_type -> daodao_notifier_grpc.ToggleSubscriptionRequest
-	7,  // 6: daodao_notifier_grpc.SubscriptionService.AddDao:input_type -> daodao_notifier_grpc.AddDaoRequest
-	9,  // 7: daodao_notifier_grpc.SubscriptionService.DeleteDao:input_type -> daodao_notifier_grpc.DeleteDaoRequest
-	4,  // 8: daodao_notifier_grpc.SubscriptionService.GetSubscriptions:output_type -> daodao_notifier_grpc.GetSubscriptionsResponse
-	6,  // 9: daodao_notifier_grpc.SubscriptionService.ToggleSubscription:output_type -> daodao_notifier_grpc.ToggleSubscriptionResponse
-	8,  // 10: daodao_notifier_grpc.SubscriptionService.AddDao:output_type -> daodao_notifier_grpc.AddDaoResponse
-	10, // 11: daodao_notifier_grpc.SubscriptionService.DeleteDao:output_type -> google.protobuf.Empty
-	8,  // [8:12] is the sub-list for method output_type
-	4,  // [4:8] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	2,  // 0: daodao_notifier_grpc.Subscription.stats:type_name -> daodao_notifier_grpc.SubscriptionStats
+	0,  // 1: daodao_notifier_grpc.ChatRoom.TYPE:type_name -> daodao_notifier_grpc.ChatRoom.Type
+	3,  // 2: daodao_notifier_grpc.ChatRoom.subscriptions:type_name -> daodao_notifier_grpc.Subscription
+	4,  // 3: daodao_notifier_grpc.GetSubscriptionsResponse.chat_rooms:type_name -> daodao_notifier_grpc.ChatRoom
+	1,  // 4: daodao_notifier_grpc.AddDaoResponse.status:type_name -> daodao_notifier_grpc.AddDaoResponse.Status
+	11, // 5: daodao_notifier_grpc.SubscriptionService.GetSubscriptions:input_type -> google.protobuf.Empty
+	6,  // 6: daodao_notifier_grpc.SubscriptionService.ToggleSubscription:input_type -> daodao_notifier_grpc.ToggleSubscriptionRequest
+	8,  // 7: daodao_notifier_grpc.SubscriptionService.AddDao:input_type -> daodao_notifier_grpc.AddDaoRequest
+	10, // 8: daodao_notifier_grpc.SubscriptionService.DeleteDao:input_type -> daodao_notifier_grpc.DeleteDaoRequest
+	5,  // 9: daodao_notifier_grpc.SubscriptionService.GetSubscriptions:output_type -> daodao_notifier_grpc.GetSubscriptionsResponse
+	7,  // 10: daodao_notifier_grpc.SubscriptionService.ToggleSubscription:output_type -> daodao_notifier_grpc.ToggleSubscriptionResponse
+	9,  // 11: daodao_notifier_grpc.SubscriptionService.AddDao:output_type -> daodao_notifier_grpc.AddDaoResponse
+	11, // 12: daodao_notifier_grpc.SubscriptionService.DeleteDao:output_type -> google.protobuf.Empty
+	9,  // [9:13] is the sub-list for method output_type
+	5,  // [5:9] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_subscription_service_proto_init() }
@@ -727,7 +810,7 @@ func file_subscription_service_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_subscription_service_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Subscription); i {
+			switch v := v.(*SubscriptionStats); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -739,7 +822,7 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ChatRoom); i {
+			switch v := v.(*Subscription); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -751,7 +834,7 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetSubscriptionsResponse); i {
+			switch v := v.(*ChatRoom); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -763,7 +846,7 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ToggleSubscriptionRequest); i {
+			switch v := v.(*GetSubscriptionsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -775,7 +858,7 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ToggleSubscriptionResponse); i {
+			switch v := v.(*ToggleSubscriptionRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -787,7 +870,7 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddDaoRequest); i {
+			switch v := v.(*ToggleSubscriptionResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -799,7 +882,7 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AddDaoResponse); i {
+			switch v := v.(*AddDaoRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -811,6 +894,18 @@ func file_subscription_service_proto_init() {
 			}
 		}
 		file_subscription_service_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AddDaoResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_subscription_service_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*DeleteDaoRequest); i {
 			case 0:
 				return &v.state
@@ -829,7 +924,7 @@ func file_subscription_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_subscription_service_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   8,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
