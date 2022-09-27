@@ -66,7 +66,7 @@ func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 	msg.DisableWebPagePreview = true
 	_, err := client.api.Send(msg)
 	if err != nil {
-		log.Sugar.Errorf("Error while sending login button for user #%v: %v", chatId, err)
+		log.Sugar.Errorf("Error while sending /start response for user %v (%v): %v", chatName, chatId, err)
 	}
 }
 
@@ -99,6 +99,6 @@ func (client TelegramClient) handleStop(update *tgbotapi.Update) {
 	msg.DisableWebPagePreview = true
 	_, err := client.api.Send(msg)
 	if err != nil {
-		log.Sugar.Errorf("Error while sending login button for user #%v: %v", chatId, err)
+		log.Sugar.Errorf("Error while sending /stop response for user %v (%v): %v", chatName, chatId, err)
 	}
 }
