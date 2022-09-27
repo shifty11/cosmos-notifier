@@ -1,7 +1,3 @@
-import 'package:fixnum/fixnum.dart' as fixnum;
-import 'package:fixnum/fixnum.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:protobuf/protobuf.dart';
 import 'package:dao_dao_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
 import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:dao_dao_notifier/config.dart';
@@ -10,6 +6,10 @@ import 'package:dao_dao_notifier/f_home/services/message_provider.dart';
 import 'package:dao_dao_notifier/f_subscription/services/state/subscription_list_state.dart';
 import 'package:dao_dao_notifier/f_subscription/services/subscription_service.dart';
 import 'package:dao_dao_notifier/f_subscription/services/type/subscription_data_type.dart';
+import 'package:fixnum/fixnum.dart' as fixnum;
+import 'package:fixnum/fixnum.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:protobuf/protobuf.dart';
 
 final subscriptionProvider = Provider<SubscriptionService>((ref) => subsService);
 
@@ -60,6 +60,9 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
       final sub = _chatRooms.firstWhere((c) => c.id == chatRoomId).subscriptions.firstWhere(((s) => s.id == subscriptionId)).deepCopy();
       sub.isSubscribed = response.isSubscribed;
       _updateSubscription(chatRoomId, sub);
+      if (jwtManager.isAdmin) {
+        _loadSubscriptions(); // to update statistics
+      }
     } catch (e) {
       _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
     }

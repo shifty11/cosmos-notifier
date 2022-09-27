@@ -1,10 +1,4 @@
-import 'package:fixnum/fixnum.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:go_router/go_router.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-import 'package:riverpod_messages/riverpod_messages.dart';
+import 'package:badges/badges.dart';
 import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:dao_dao_notifier/config.dart';
 import 'package:dao_dao_notifier/f_home/services/message_provider.dart';
@@ -12,6 +6,13 @@ import 'package:dao_dao_notifier/f_home/widgets/subwidgets/bottom_navigation_bar
 import 'package:dao_dao_notifier/f_home/widgets/subwidgets/footer_widget.dart';
 import 'package:dao_dao_notifier/f_subscription/services/subscription_provider.dart';
 import 'package:dao_dao_notifier/style.dart';
+import 'package:fixnum/fixnum.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
+import 'package:responsive_framework/responsive_framework.dart';
+import 'package:riverpod_messages/riverpod_messages.dart';
 
 import '../../f_home/services/chat_id_provider.dart';
 
@@ -65,7 +66,7 @@ class SubscriptionPage extends StatelessWidget {
     );
   }
 
-  Widget buildSliderForAdmins(
+  Widget _buildSliderForAdmins(
       {required BuildContext context, required Subscription subscription, required WidgetRef ref, required Widget child}) {
     if (!jwtManager.isAdmin) {
       return child;
@@ -86,6 +87,58 @@ class SubscriptionPage extends StatelessWidget {
         ],
       ),
       child: child,
+    );
+  }
+
+  Widget _subscriptionSecondLine(BuildContext context, Subscription subscription) {
+    var text = Text(
+      "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
+      style: TextStyle(fontSize: 12, color: Theme.of(context).inputDecorationTheme.hintStyle!.color),
+      overflow: TextOverflow.ellipsis,
+    );
+    if (!jwtManager.isAdmin) {
+      return text;
+    }
+    return Row(
+      children: [
+        text,
+        const Spacer(),
+        Tooltip(
+          message: "Subscribed Telegram chats",
+          child: Badge(
+            toAnimate: false,
+            badgeColor: Styles.telegramColor.withOpacity(0.5),
+            badgeContent: Text(
+              "${subscription.stats.telegram}",
+              style: const TextStyle(fontSize: 12, color: Colors.white),
+            ),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Tooltip(
+          message: "Subscribed Discord channels",
+          child: Badge(
+            toAnimate: false,
+            badgeColor: Styles.discordColor.withOpacity(0.5),
+            badgeContent: Text(
+              "${subscription.stats.discord}",
+              style: const TextStyle(fontSize: 12, color: Colors.white),
+            ),
+          ),
+        ),
+        const SizedBox(width: 3),
+        Tooltip(
+          message: "Total subscriptions",
+          child: Badge(
+            toAnimate: false,
+            badgeColor: Colors.black.withOpacity(0.5),
+            badgeContent: Text(
+              "${subscription.stats.total}",
+              style: const TextStyle(fontSize: 12, color: Colors.white),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -110,7 +163,8 @@ class SubscriptionPage extends StatelessWidget {
                 final subData = ref.watch(searchedSubsProvider).filtered[index];
                 final subscription = subData.subscription;
                 const double sidePadding = 12;
-                return buildSliderForAdmins(
+                const double checkMarkSize = 24;
+                return _buildSliderForAdmins(
                   context: context,
                   subscription: subscription,
                   ref: ref,
@@ -164,20 +218,16 @@ class SubscriptionPage extends StatelessWidget {
                                   style: const TextStyle(fontSize: 20),
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                Text(
-                                  "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
-                                  style: TextStyle(fontSize: 12, color: Theme.of(context).inputDecorationTheme.hintStyle!.color),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                                _subscriptionSecondLine(context, subscription),
                               ],
                             ),
                           ),
                           subscription.isSubscribed
                               ? Padding(
                                   padding: const EdgeInsets.only(right: sidePadding),
-                                  child: Icon(Icons.check_circle_rounded, color: Theme.of(context).primaryColor, size: 24),
+                                  child: Icon(Icons.check_circle_rounded, color: Theme.of(context).primaryColor, size: checkMarkSize),
                                 )
-                              : const SizedBox(width: sidePadding),
+                              : const SizedBox(width: sidePadding + checkMarkSize),
                         ],
                       ),
                     ),

@@ -8,6 +8,18 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use subscriptionStatsDescriptor instead')
+const SubscriptionStats$json = const {
+  '1': 'SubscriptionStats',
+  '2': const [
+    const {'1': 'total', '3': 1, '4': 1, '5': 5, '10': 'total'},
+    const {'1': 'telegram', '3': 2, '4': 1, '5': 5, '10': 'telegram'},
+    const {'1': 'discord', '3': 3, '4': 1, '5': 5, '10': 'discord'},
+  ],
+};
+
+/// Descriptor for `SubscriptionStats`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List subscriptionStatsDescriptor = $convert.base64Decode('ChFTdWJzY3JpcHRpb25TdGF0cxIUCgV0b3RhbBgBIAEoBVIFdG90YWwSGgoIdGVsZWdyYW0YAiABKAVSCHRlbGVncmFtEhgKB2Rpc2NvcmQYAyABKAVSB2Rpc2NvcmQ=');
 @$core.Deprecated('Use subscriptionDescriptor instead')
 const Subscription$json = const {
   '1': 'Subscription',
@@ -17,11 +29,12 @@ const Subscription$json = const {
     const {'1': 'is_subscribed', '3': 3, '4': 1, '5': 8, '10': 'isSubscribed'},
     const {'1': 'thumbnail_url', '3': 4, '4': 1, '5': 9, '10': 'thumbnailUrl'},
     const {'1': 'contract_address', '3': 5, '4': 1, '5': 9, '10': 'contractAddress'},
+    const {'1': 'stats', '3': 6, '4': 1, '5': 11, '6': '.daodao_notifier_grpc.SubscriptionStats', '10': 'stats'},
   ],
 };
 
 /// Descriptor for `Subscription`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscriptionDescriptor = $convert.base64Decode('CgxTdWJzY3JpcHRpb24SDgoCaWQYASABKANSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSIwoNaXNfc3Vic2NyaWJlZBgDIAEoCFIMaXNTdWJzY3JpYmVkEiMKDXRodW1ibmFpbF91cmwYBCABKAlSDHRodW1ibmFpbFVybBIpChBjb250cmFjdF9hZGRyZXNzGAUgASgJUg9jb250cmFjdEFkZHJlc3M=');
+final $typed_data.Uint8List subscriptionDescriptor = $convert.base64Decode('CgxTdWJzY3JpcHRpb24SDgoCaWQYASABKANSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSIwoNaXNfc3Vic2NyaWJlZBgDIAEoCFIMaXNTdWJzY3JpYmVkEiMKDXRodW1ibmFpbF91cmwYBCABKAlSDHRodW1ibmFpbFVybBIpChBjb250cmFjdF9hZGRyZXNzGAUgASgJUg9jb250cmFjdEFkZHJlc3MSPQoFc3RhdHMYBiABKAsyJy5kYW9kYW9fbm90aWZpZXJfZ3JwYy5TdWJzY3JpcHRpb25TdGF0c1IFc3RhdHM=');
 @$core.Deprecated('Use chatRoomDescriptor instead')
 const ChatRoom$json = const {
   '1': 'ChatRoom',

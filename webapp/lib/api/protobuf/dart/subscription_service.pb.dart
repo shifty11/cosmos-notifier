@@ -14,6 +14,81 @@ import 'subscription_service.pbenum.dart';
 
 export 'subscription_service.pbenum.dart';
 
+class SubscriptionStats extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SubscriptionStats', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'total', $pb.PbFieldType.O3)
+    ..a<$core.int>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegram', $pb.PbFieldType.O3)
+    ..a<$core.int>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discord', $pb.PbFieldType.O3)
+    ..hasRequiredFields = false
+  ;
+
+  SubscriptionStats._() : super();
+  factory SubscriptionStats({
+    $core.int? total,
+    $core.int? telegram,
+    $core.int? discord,
+  }) {
+    final _result = create();
+    if (total != null) {
+      _result.total = total;
+    }
+    if (telegram != null) {
+      _result.telegram = telegram;
+    }
+    if (discord != null) {
+      _result.discord = discord;
+    }
+    return _result;
+  }
+  factory SubscriptionStats.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SubscriptionStats.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SubscriptionStats clone() => SubscriptionStats()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SubscriptionStats copyWith(void Function(SubscriptionStats) updates) => super.copyWith((message) => updates(message as SubscriptionStats)) as SubscriptionStats; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SubscriptionStats create() => SubscriptionStats._();
+  SubscriptionStats createEmptyInstance() => create();
+  static $pb.PbList<SubscriptionStats> createRepeated() => $pb.PbList<SubscriptionStats>();
+  @$core.pragma('dart2js:noInline')
+  static SubscriptionStats getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SubscriptionStats>(create);
+  static SubscriptionStats? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get total => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set total($core.int v) { $_setSignedInt32(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTotal() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTotal() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get telegram => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set telegram($core.int v) { $_setSignedInt32(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasTelegram() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTelegram() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get discord => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set discord($core.int v) { $_setSignedInt32(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasDiscord() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDiscord() => clearField(3);
+}
+
 class Subscription extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Subscription', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
@@ -21,6 +96,7 @@ class Subscription extends $pb.GeneratedMessage {
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSubscribed')
     ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'thumbnailUrl')
     ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress')
+    ..aOM<SubscriptionStats>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: SubscriptionStats.create)
     ..hasRequiredFields = false
   ;
 
@@ -31,6 +107,7 @@ class Subscription extends $pb.GeneratedMessage {
     $core.bool? isSubscribed,
     $core.String? thumbnailUrl,
     $core.String? contractAddress,
+    SubscriptionStats? stats,
   }) {
     final _result = create();
     if (id != null) {
@@ -47,6 +124,9 @@ class Subscription extends $pb.GeneratedMessage {
     }
     if (contractAddress != null) {
       _result.contractAddress = contractAddress;
+    }
+    if (stats != null) {
+      _result.stats = stats;
     }
     return _result;
   }
@@ -115,6 +195,17 @@ class Subscription extends $pb.GeneratedMessage {
   $core.bool hasContractAddress() => $_has(4);
   @$pb.TagNumber(5)
   void clearContractAddress() => clearField(5);
+
+  @$pb.TagNumber(6)
+  SubscriptionStats get stats => $_getN(5);
+  @$pb.TagNumber(6)
+  set stats(SubscriptionStats v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasStats() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearStats() => clearField(6);
+  @$pb.TagNumber(6)
+  SubscriptionStats ensureStats() => $_ensure(5);
 }
 
 class ChatRoom extends $pb.GeneratedMessage {

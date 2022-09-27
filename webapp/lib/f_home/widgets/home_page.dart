@@ -24,7 +24,7 @@ class HomePage extends StatelessWidget {
           label: const Text("Telegram"),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(buttonWith, 50),
-            primary: const Color(0xFF54A9E9),
+            primary: Styles.telegramColor,
             onPrimary: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(32.0),
@@ -38,7 +38,7 @@ class HomePage extends StatelessWidget {
           label: const Text("Discord"),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(buttonWith, 50),
-            primary: const Color(0xFF6C89E0),
+            primary: Styles.discordColor,
             onPrimary: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(32.0),

@@ -37,10 +37,13 @@ extension ColorBrightness on Color {
 }
 
 class Styles {
+  static const sidePadding = 40.0;
   static const selectCardBorderWidth = 1.5;
+
   static const dangerBgColor = Color(0xFFFE4A49);
   static const dangerTextColor = Colors.white;
-  static const sidePadding = 40.0;
+  static const telegramColor = Color(0xFF54A9E9);
+  static const discordColor = Color(0xFF6C89E0);
 
   static ThemeData customTheme(CustomThemeData themeParams, bool isDarkTheme) {
     return _defaultTheme(
