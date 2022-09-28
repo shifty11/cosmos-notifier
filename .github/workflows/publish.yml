@@ -37,7 +37,7 @@ jobs:
         with:
           context: go/
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}-go
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push nodejs Docker image
@@ -45,7 +45,7 @@ jobs:
         with:
           context: nodejs/
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}-nodejs
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push flutter Docker image
@@ -53,7 +53,6 @@ jobs:
         with:
           context: webapp/
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}-webapp
           labels: ${{ steps.meta.outputs.labels }}
-        env:
-          FLUTTER_CONFIG_FILE: lib/env.dart
+          build-args: CONFIG_FILE=lib/env.dart
