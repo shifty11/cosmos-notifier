@@ -37,7 +37,7 @@ jobs:
         with:
           context: go/
           push: true
-          tags: ghcr.io/shifty11/dao-dao-notifier-go:latest
+          tags: ${{ env.REGISTRY }}/dao-dao-notifier-go:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push nodejs Docker image
@@ -45,7 +45,7 @@ jobs:
         with:
           context: nodejs/
           push: true
-          tags: ghcr.io/shifty11/dao-dao-notifier-nodejs:latest
+          tags: ${{ env.REGISTRY }}/dao-dao-notifier-nodejs:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push flutter Docker image
@@ -53,6 +53,6 @@ jobs:
         with:
           context: webapp/
           push: true
-          tags: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
+          tags: ${{ env.REGISTRY }}/dao-dao-notifier-webapp:latest
           labels: ${{ steps.meta.outputs.labels }}
           build-args: CONFIG_FILE=lib/env.dart
