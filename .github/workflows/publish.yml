@@ -70,7 +70,7 @@ jobs:
       - name: Deploy to swarm
         uses: sagebind/docker-swarm-deploy-action@v2
         with:
-          remote_host: ssh://user@myswarm.com
+          remote_host: ssh://ubuntu@swarmy.decrypto.online
           ssh_private_key: ${{ secrets.SWARMY_SSH_PRIVATE_KEY }}
           ssh_public_key: ${{ secrets.SWARMY_SSH_PUBLIC_KEY }}
           args: stack deploy --compose-file swarm-production.yml daodao-notifier
