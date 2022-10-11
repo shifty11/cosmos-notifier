@@ -70,7 +70,7 @@ jobs:
       - name: Deploy to swarm
         uses: wshihadeh/docker-deployment-action@v1
         with:
-          remote_docker_host: ssh://ubuntu@188.166.38.235
+          remote_docker_host: ubuntu@188.166.38.235
           ssh_private_key: ${{ secrets.SWARMY_SSH_PRIVATE_KEY }}
           ssh_public_key: ${{ secrets.SWARMY_SSH_PUBLIC_KEY }}
           deployment_mode: docker-swarm
