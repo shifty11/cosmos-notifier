@@ -1,0 +1,109 @@
+version: '3.9'
+
+services:
+  nodejs:
+    image: ghcr.io/shifty11/dao-dao-notifier-nodejs:latest
+    working_dir: /usr/src/app
+    volumes:
+      - /usr/app/node_modules
+    command: npm run start
+    healthcheck:
+      test: curl --fail http://localhost:8081 || exit 1
+      interval: 10s
+      retries: 3
+      timeout: 10s
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  telegram:
+    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    working_dir: /app
+    secrets:
+      - daodao-notifier-env
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier start-telegram-bot"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  discord:
+    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    working_dir: /app
+    secrets:
+      - daodao-notifier-env
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier start-discord-bot"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  grpc:
+    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    working_dir: /app
+    secrets:
+      - daodao-notifier-env
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier migrate && /dao-dao-notifier grpc"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  crawler:
+    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    working_dir: /app
+    volumes:
+      - contract_images:/app/assets/images/contracts
+    secrets:
+      - daodao-notifier-env
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier crawl --repeat"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  envoy:
+    image: ghcr.io/shifty11/dao-dao-notifier-envoy:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  webapp:
+    image: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
+    volumes:
+      - caddy_data:/data
+      - /var/www/daodao-notifier:/app/build/web
+      - contract_images:/var/www/daodao-notifier/assets/images/contracts
+    networks:
+      - caddy
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  whoami:
+    image: jwilder/whoami
+    networks:
+      - caddy
+    deploy:
+      labels:
+        caddy: daodao-notifier.decrypto.online
+        caddy.reverse_proxy: "webapp:80"
+      placement:
+        constraints:
+          - node.role != manager
+
+volumes:
+  contract_images:
+  caddy_data:
+
+networks:
+  caddy:
+    external: true
+
+secrets:
+  daodao-notifier-env:
+    external: true

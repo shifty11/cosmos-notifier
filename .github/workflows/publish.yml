@@ -32,37 +32,45 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push go Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: go/
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-go:latest
-          labels: ${{ steps.meta.outputs.labels }}
+#      - name: Build and push go Docker image
+#        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+#        with:
+#          context: go/
+#          push: true
+#          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-go:latest
+#          labels: ${{ steps.meta.outputs.labels }}
+#
+#      - name: Build and push nodejs Docker image
+#        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+#        with:
+#          context: nodejs/
+#          push: true
+#          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-nodejs:latest
+#          labels: ${{ steps.meta.outputs.labels }}
+#
+#      - name: Build and push envoy Docker image
+#        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+#        with:
+#          context: webapp/
+#          file: webapp/envoy.Dockerfile
+#          push: true
+#          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-envoy:latest
+#          labels: ${{ steps.meta.outputs.labels }}
+#
+#      - name: Build and push flutter Docker image
+#        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+#        with:
+#          context: webapp/
+#          file: webapp/flutter.Dockerfile
+#          push: true
+#          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-webapp:latest
+#          labels: ${{ steps.meta.outputs.labels }}
+#          build-args: CONFIG_FILE=lib/env.dart
 
-      - name: Build and push nodejs Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      - name: Deploy to swarm
+        uses: sagebind/docker-swarm-deploy-action@v2
         with:
-          context: nodejs/
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-nodejs:latest
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Build and push envoy Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: webapp/
-          file: webapp/envoy.Dockerfile
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-envoy:latest
-          labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Build and push flutter Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-        with:
-          context: webapp/
-          file: webapp/flutter.Dockerfile
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-webapp:latest
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: CONFIG_FILE=lib/env.dart
+          remote_host: ssh://user@myswarm.com
+          ssh_private_key: ${{ secrets.SWARMY_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.SWARMY_SSH_PUBLIC_KEY }}
+          args: stack deploy --compose-file swarm-production.yml daodao-notifier
