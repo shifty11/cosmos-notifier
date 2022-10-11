@@ -68,9 +68,14 @@ jobs:
 #          build-args: CONFIG_FILE=lib/env.dart
 
       - name: Deploy to swarm
-        uses: sagebind/docker-swarm-deploy-action@v2
+        uses: wshihadeh/docker-deployment-action@v1
         with:
-          remote_host: ssh://ubuntu@188.166.38.235
+          remote_docker_host: ssh://ubuntu@188.166.38.235
           ssh_private_key: ${{ secrets.SWARMY_SSH_PRIVATE_KEY }}
           ssh_public_key: ${{ secrets.SWARMY_SSH_PUBLIC_KEY }}
-          args: stack deploy --compose-file swarm-production.yml daodao-notifier
+          deployment_mode: docker-swarm
+          copy_stack_file: true
+          deploy_path: /home/ubuntu
+          stack_file_name: swarm-production.yml
+          keep_files: 5
+          args: daodao-notifier
