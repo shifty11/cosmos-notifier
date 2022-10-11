@@ -100,7 +100,7 @@ services:
       - .env
     build:
       context: webapp
-      dockerfile: Dockerfile
+      dockerfile: flutter.Dockerfile
       args:
         CONFIG_FILE: ${FLUTTER_CONFIG_FILE}
     container_name: daodao_notifier_webapp

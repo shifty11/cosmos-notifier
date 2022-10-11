@@ -72,7 +72,9 @@ services:
         condition: service_completed_successfully
 
   envoy:
-    image: envoyproxy/envoy-dev
+    build:
+      context: webapp
+      dockerfile: envoy.Dockerfile
     container_name: daodao_notifier_envoy
     volumes:
       - ./webapp/envoy.yaml:/etc/envoy/envoy.yaml
