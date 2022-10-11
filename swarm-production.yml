@@ -62,6 +62,7 @@ services:
       placement:
         constraints:
           - node.role != manager
+          - node.labels.host == daodao-notifier
 
   envoy:
     image: ghcr.io/shifty11/dao-dao-notifier-envoy:latest
@@ -73,7 +74,6 @@ services:
   webapp:
     image: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
     volumes:
-      - caddy_data:/data
       - /var/www/daodao-notifier:/app/build/web
       - contract_images:/var/www/daodao-notifier/assets/images/contracts
     networks:
@@ -83,6 +83,7 @@ services:
       placement:
         constraints:
           - node.role != manager
+          - node.labels.host == daodao-notifier
 
   whoami:
     image: jwilder/whoami
@@ -98,7 +99,6 @@ services:
 
 volumes:
   contract_images:
-  caddy_data:
 
 networks:
   caddy:
