@@ -76,6 +76,6 @@ jobs:
           deployment_mode: docker-swarm
           copy_stack_file: true
           deploy_path: /home/ubuntu
-          stack_file_name: swarm-production.yml
+          stack_file_name: swarm-prod-daodao-notifier.yml
           keep_files: 5
           args: daodao-notifier
