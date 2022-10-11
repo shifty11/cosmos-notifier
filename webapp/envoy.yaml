@@ -58,6 +58,5 @@ static_resources:
               - endpoint:
                   address:
                     socket_address:
-#                      address: 0.0.0.0
-                      address: daodao_notifier_grpc
+                      address: grpc
                       port_value: 50051
