@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final chatIdProvider = StateProvider<Int64?>((ref) {
   // chat_id comes from telegram login
   final chatIdStr = Uri.base.queryParameters.entries
-      .firstWhere((e) => e.key == "chat_id", orElse: () => const MapEntry("", ""))
+      .firstWhere((e) => e.key == "chat-id", orElse: () => const MapEntry("", ""))
       .value;
   if (chatIdStr.isNotEmpty) {
     try {
