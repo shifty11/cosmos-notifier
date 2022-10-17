@@ -1,4 +1,4 @@
-package crawler
+package common
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	imaging "github.com/disintegration/imaging"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"image"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,22 +14,33 @@ import (
 )
 
 type ImageManager struct {
-	ContractAddress string
-	ThumbnailPath   string
-	ThumbnailUrl    string
-	Width           int
-	Height          int
-	Name            string
+	Name          string
+	Description   string
+	ThumbnailPath string
+	ThumbnailUrl  string
+	DownloadUrl   string
+	Width         int
+	Height        int
 }
 
-func NewImageManager(contractAddress string, name string, weblocation string, imagePath string, width int, height int) *ImageManager {
+func isSVG(url string) bool {
+	split := strings.Split(url, ".")
+	return split[len(split)-1] == "svg"
+}
+
+func NewImageManager(name string, description string, url string, weblocation string, imagePath string, width int, height int) *ImageManager {
+	extension := ".png"
+	if isSVG(url) {
+		extension = ".svg"
+	}
 	return &ImageManager{
-		ThumbnailPath:   filepath.Join(weblocation, imagePath, contractAddress+".png"),
-		ThumbnailUrl:    filepath.Join(imagePath, contractAddress+".png"),
-		ContractAddress: contractAddress,
-		Name:            name,
-		Width:           width,
-		Height:          height,
+		Name:          name,
+		Description:   description,
+		ThumbnailPath: filepath.Join(weblocation, imagePath, name+extension),
+		ThumbnailUrl:  filepath.Join(imagePath, name+extension),
+		DownloadUrl:   url,
+		Width:         width,
+		Height:        height,
 	}
 }
 
@@ -69,18 +80,35 @@ func (im *ImageManager) createThumbnail(data []byte) error {
 	return nil
 }
 
-func (im *ImageManager) downloadAndCreateThumbnail(url string) error {
-	log.Sugar.Debugf("downloading image for %v (%v): %v", im.Name, im.ContractAddress, url)
-	resp, err := http.Get(url)
+func (im *ImageManager) saveAsSVG(data []byte) error {
+	ensureDir(im.ThumbnailPath)
+	file, err := os.Create(im.ThumbnailPath)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write(data)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (im *ImageManager) DownloadAndCreateThumbnail() error {
+	log.Sugar.Debugf("downloading image for %v (%v): %v", im.Description, im.Name, im.DownloadUrl)
+	resp, err := http.Get(im.DownloadUrl)
 	if err != nil {
 		return err
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer resp.Body.Close()
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
+	}
+
+	if isSVG(im.DownloadUrl) {
+		return im.saveAsSVG(data)
 	}
 
 	if im.isImageFiletype(data) {

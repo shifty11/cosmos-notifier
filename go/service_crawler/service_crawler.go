@@ -2,6 +2,7 @@ package crawler
 
 import (
 	"github.com/robfig/cron/v3"
+	"github.com/shifty11/dao-dao-notifier/common"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
@@ -56,10 +57,18 @@ func (c *Crawler) UpdateContracts() {
 			}
 		}
 
-		im := NewImageManager(updatedContract.Address, updatedContract.Name, c.assetsPath, "images/contracts/", 100, 100)
+		im := common.NewImageManager(
+			updatedContract.Address,
+			updatedContract.Name,
+			updatedContract.ImageURL,
+			c.assetsPath,
+			"images/contracts/",
+			100,
+			100,
+		)
 		if oldImageUrl != updatedContract.ImageURL || !im.DoesExist() {
 			if updatedContract.ImageURL != "" {
-				err := im.downloadAndCreateThumbnail(updatedContract.ImageURL)
+				err := im.DownloadAndCreateThumbnail()
 				if err != nil {
 					log.Sugar.Infof("while downloading image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, err)
 				} else {
@@ -101,8 +110,16 @@ func (c *Crawler) AddContract(contractAddr string) (*ent.Contract, error) {
 		c.proposalManager.CreateOrUpdate(contract, &proposal)
 	}
 
-	im := NewImageManager(contractAddr, contract.Name, c.assetsPath, "images/contracts/", 100, 100)
-	err = im.downloadAndCreateThumbnail(contract.ImageURL)
+	im := common.NewImageManager(
+		contractAddr,
+		contract.Name,
+		contract.ImageURL,
+		c.assetsPath,
+		"images/contracts/",
+		100,
+		100,
+	)
+	err = im.DownloadAndCreateThumbnail()
 	if err != nil {
 		log.Sugar.Infof("while downloading image for contract %v: %v", contractAddr, err)
 	} else {
