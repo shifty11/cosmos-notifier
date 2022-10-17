@@ -36,6 +36,7 @@ const (
 //
 // returns (proposal, status)
 func (m *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.Proposal) (*ent.Proposal, ProposalStatus) {
+	log.Sugar.Debugf("CreateOrUpdate proposal %v of contract %v", propData.Id, c.Name)
 	prop, err := m.client.Proposal.
 		Query().
 		Where(

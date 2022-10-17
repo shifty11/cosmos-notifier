@@ -2,8 +2,10 @@ package chain_crawler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/shifty11/dao-dao-notifier/common"
 	"github.com/shifty11/dao-dao-notifier/database"
+	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
 	"net/http"
@@ -11,14 +13,20 @@ import (
 )
 
 type ChainCrawler struct {
-	client       *http.Client
-	chainManager *database.ChainManager
-	assetsPath   string
+	client               *http.Client
+	chainManager         *database.ChainManager
+	chainProposalManager *database.ChainProposalManager
+	assetsPath           string
 }
 
 func NewChainCrawler(dbManagers *database.DbManagers, assetsPath string) *ChainCrawler {
 	var client = &http.Client{Timeout: 10 * time.Second}
-	return &ChainCrawler{client: client, chainManager: dbManagers.ChainManager, assetsPath: assetsPath}
+	return &ChainCrawler{
+		client:               client,
+		chainManager:         dbManagers.ChainManager,
+		chainProposalManager: dbManagers.ChainProposalManager,
+		assetsPath:           assetsPath,
+	}
 }
 
 func (cc *ChainCrawler) getJson(url string, target interface{}) error {
@@ -75,7 +83,22 @@ func (cc *ChainCrawler) AddOrUpdateChains() {
 		}
 		if !found && chain.NetworkType == "mainnet" {
 			thumbnailUrl := cc.downloadImage(&chain)
-			cc.chainManager.Create(&chain, thumbnailUrl)
+			entChain := cc.chainManager.Create(&chain, thumbnailUrl)
+			cc.AddProposals(entChain)
 		}
+	}
+}
+
+func (cc *ChainCrawler) AddProposals(entChain *ent.Chain) {
+	var resp types.ChainProposalsResponse
+	url := fmt.Sprintf("https://rest.cosmos.directory/%v/cosmos/gov/v1beta1/proposals", entChain.Name)
+	err := cc.getJson(url, &resp)
+	if err != nil {
+		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
+		return
+	}
+
+	for _, proposal := range resp.Proposals {
+		cc.chainProposalManager.CreateOrUpdate(entChain, &proposal)
 	}
 }
