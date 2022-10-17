@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
+	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
@@ -28,12 +30,1756 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeChain          = "Chain"
+	TypeChainProposal  = "ChainProposal"
 	TypeContract       = "Contract"
 	TypeDiscordChannel = "DiscordChannel"
 	TypeProposal       = "Proposal"
 	TypeTelegramChat   = "TelegramChat"
 	TypeUser           = "User"
 )
+
+// ChainMutation represents an operation that mutates the Chain nodes in the graph.
+type ChainMutation struct {
+	config
+	op                      Op
+	typ                     string
+	id                      *int
+	create_time             *time.Time
+	update_time             *time.Time
+	chain_id                *string
+	name                    *string
+	pretty_name             *string
+	is_enabled              *bool
+	image_url               *string
+	thumbnail_url           *string
+	clearedFields           map[string]struct{}
+	chain_proposals         map[int]struct{}
+	removedchain_proposals  map[int]struct{}
+	clearedchain_proposals  bool
+	telegram_chats          map[int]struct{}
+	removedtelegram_chats   map[int]struct{}
+	clearedtelegram_chats   bool
+	discord_channels        map[int]struct{}
+	removeddiscord_channels map[int]struct{}
+	cleareddiscord_channels bool
+	done                    bool
+	oldValue                func(context.Context) (*Chain, error)
+	predicates              []predicate.Chain
+}
+
+var _ ent.Mutation = (*ChainMutation)(nil)
+
+// chainOption allows management of the mutation configuration using functional options.
+type chainOption func(*ChainMutation)
+
+// newChainMutation creates new mutation for the Chain entity.
+func newChainMutation(c config, op Op, opts ...chainOption) *ChainMutation {
+	m := &ChainMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeChain,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withChainID sets the ID field of the mutation.
+func withChainID(id int) chainOption {
+	return func(m *ChainMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Chain
+		)
+		m.oldValue = func(ctx context.Context) (*Chain, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Chain.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withChain sets the old Chain of the mutation.
+func withChain(node *Chain) chainOption {
+	return func(m *ChainMutation) {
+		m.oldValue = func(context.Context) (*Chain, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ChainMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ChainMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ChainMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ChainMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Chain.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *ChainMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *ChainMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *ChainMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *ChainMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *ChainMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *ChainMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetChainID sets the "chain_id" field.
+func (m *ChainMutation) SetChainID(s string) {
+	m.chain_id = &s
+}
+
+// ChainID returns the value of the "chain_id" field in the mutation.
+func (m *ChainMutation) ChainID() (r string, exists bool) {
+	v := m.chain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChainID returns the old "chain_id" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldChainID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChainID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChainID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChainID: %w", err)
+	}
+	return oldValue.ChainID, nil
+}
+
+// ResetChainID resets all changes to the "chain_id" field.
+func (m *ChainMutation) ResetChainID() {
+	m.chain_id = nil
+}
+
+// SetName sets the "name" field.
+func (m *ChainMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *ChainMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *ChainMutation) ResetName() {
+	m.name = nil
+}
+
+// SetPrettyName sets the "pretty_name" field.
+func (m *ChainMutation) SetPrettyName(s string) {
+	m.pretty_name = &s
+}
+
+// PrettyName returns the value of the "pretty_name" field in the mutation.
+func (m *ChainMutation) PrettyName() (r string, exists bool) {
+	v := m.pretty_name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPrettyName returns the old "pretty_name" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldPrettyName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPrettyName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPrettyName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPrettyName: %w", err)
+	}
+	return oldValue.PrettyName, nil
+}
+
+// ResetPrettyName resets all changes to the "pretty_name" field.
+func (m *ChainMutation) ResetPrettyName() {
+	m.pretty_name = nil
+}
+
+// SetIsEnabled sets the "is_enabled" field.
+func (m *ChainMutation) SetIsEnabled(b bool) {
+	m.is_enabled = &b
+}
+
+// IsEnabled returns the value of the "is_enabled" field in the mutation.
+func (m *ChainMutation) IsEnabled() (r bool, exists bool) {
+	v := m.is_enabled
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsEnabled returns the old "is_enabled" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldIsEnabled(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsEnabled is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsEnabled requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsEnabled: %w", err)
+	}
+	return oldValue.IsEnabled, nil
+}
+
+// ResetIsEnabled resets all changes to the "is_enabled" field.
+func (m *ChainMutation) ResetIsEnabled() {
+	m.is_enabled = nil
+}
+
+// SetImageURL sets the "image_url" field.
+func (m *ChainMutation) SetImageURL(s string) {
+	m.image_url = &s
+}
+
+// ImageURL returns the value of the "image_url" field in the mutation.
+func (m *ChainMutation) ImageURL() (r string, exists bool) {
+	v := m.image_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageURL returns the old "image_url" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldImageURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
+	}
+	return oldValue.ImageURL, nil
+}
+
+// ResetImageURL resets all changes to the "image_url" field.
+func (m *ChainMutation) ResetImageURL() {
+	m.image_url = nil
+}
+
+// SetThumbnailURL sets the "thumbnail_url" field.
+func (m *ChainMutation) SetThumbnailURL(s string) {
+	m.thumbnail_url = &s
+}
+
+// ThumbnailURL returns the value of the "thumbnail_url" field in the mutation.
+func (m *ChainMutation) ThumbnailURL() (r string, exists bool) {
+	v := m.thumbnail_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldThumbnailURL returns the old "thumbnail_url" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldThumbnailURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldThumbnailURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldThumbnailURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldThumbnailURL: %w", err)
+	}
+	return oldValue.ThumbnailURL, nil
+}
+
+// ResetThumbnailURL resets all changes to the "thumbnail_url" field.
+func (m *ChainMutation) ResetThumbnailURL() {
+	m.thumbnail_url = nil
+}
+
+// AddChainProposalIDs adds the "chain_proposals" edge to the ChainProposal entity by ids.
+func (m *ChainMutation) AddChainProposalIDs(ids ...int) {
+	if m.chain_proposals == nil {
+		m.chain_proposals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.chain_proposals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChainProposals clears the "chain_proposals" edge to the ChainProposal entity.
+func (m *ChainMutation) ClearChainProposals() {
+	m.clearedchain_proposals = true
+}
+
+// ChainProposalsCleared reports if the "chain_proposals" edge to the ChainProposal entity was cleared.
+func (m *ChainMutation) ChainProposalsCleared() bool {
+	return m.clearedchain_proposals
+}
+
+// RemoveChainProposalIDs removes the "chain_proposals" edge to the ChainProposal entity by IDs.
+func (m *ChainMutation) RemoveChainProposalIDs(ids ...int) {
+	if m.removedchain_proposals == nil {
+		m.removedchain_proposals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.chain_proposals, ids[i])
+		m.removedchain_proposals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChainProposals returns the removed IDs of the "chain_proposals" edge to the ChainProposal entity.
+func (m *ChainMutation) RemovedChainProposalsIDs() (ids []int) {
+	for id := range m.removedchain_proposals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChainProposalsIDs returns the "chain_proposals" edge IDs in the mutation.
+func (m *ChainMutation) ChainProposalsIDs() (ids []int) {
+	for id := range m.chain_proposals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChainProposals resets all changes to the "chain_proposals" edge.
+func (m *ChainMutation) ResetChainProposals() {
+	m.chain_proposals = nil
+	m.clearedchain_proposals = false
+	m.removedchain_proposals = nil
+}
+
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
+func (m *ChainMutation) AddTelegramChatIDs(ids ...int) {
+	if m.telegram_chats == nil {
+		m.telegram_chats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.telegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTelegramChats clears the "telegram_chats" edge to the TelegramChat entity.
+func (m *ChainMutation) ClearTelegramChats() {
+	m.clearedtelegram_chats = true
+}
+
+// TelegramChatsCleared reports if the "telegram_chats" edge to the TelegramChat entity was cleared.
+func (m *ChainMutation) TelegramChatsCleared() bool {
+	return m.clearedtelegram_chats
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (m *ChainMutation) RemoveTelegramChatIDs(ids ...int) {
+	if m.removedtelegram_chats == nil {
+		m.removedtelegram_chats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.telegram_chats, ids[i])
+		m.removedtelegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTelegramChats returns the removed IDs of the "telegram_chats" edge to the TelegramChat entity.
+func (m *ChainMutation) RemovedTelegramChatsIDs() (ids []int) {
+	for id := range m.removedtelegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TelegramChatsIDs returns the "telegram_chats" edge IDs in the mutation.
+func (m *ChainMutation) TelegramChatsIDs() (ids []int) {
+	for id := range m.telegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTelegramChats resets all changes to the "telegram_chats" edge.
+func (m *ChainMutation) ResetTelegramChats() {
+	m.telegram_chats = nil
+	m.clearedtelegram_chats = false
+	m.removedtelegram_chats = nil
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by ids.
+func (m *ChainMutation) AddDiscordChannelIDs(ids ...int) {
+	if m.discord_channels == nil {
+		m.discord_channels = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.discord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscordChannels clears the "discord_channels" edge to the DiscordChannel entity.
+func (m *ChainMutation) ClearDiscordChannels() {
+	m.cleareddiscord_channels = true
+}
+
+// DiscordChannelsCleared reports if the "discord_channels" edge to the DiscordChannel entity was cleared.
+func (m *ChainMutation) DiscordChannelsCleared() bool {
+	return m.cleareddiscord_channels
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (m *ChainMutation) RemoveDiscordChannelIDs(ids ...int) {
+	if m.removeddiscord_channels == nil {
+		m.removeddiscord_channels = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.discord_channels, ids[i])
+		m.removeddiscord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscordChannels returns the removed IDs of the "discord_channels" edge to the DiscordChannel entity.
+func (m *ChainMutation) RemovedDiscordChannelsIDs() (ids []int) {
+	for id := range m.removeddiscord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscordChannelsIDs returns the "discord_channels" edge IDs in the mutation.
+func (m *ChainMutation) DiscordChannelsIDs() (ids []int) {
+	for id := range m.discord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscordChannels resets all changes to the "discord_channels" edge.
+func (m *ChainMutation) ResetDiscordChannels() {
+	m.discord_channels = nil
+	m.cleareddiscord_channels = false
+	m.removeddiscord_channels = nil
+}
+
+// Where appends a list predicates to the ChainMutation builder.
+func (m *ChainMutation) Where(ps ...predicate.Chain) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *ChainMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (Chain).
+func (m *ChainMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ChainMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.create_time != nil {
+		fields = append(fields, chain.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, chain.FieldUpdateTime)
+	}
+	if m.chain_id != nil {
+		fields = append(fields, chain.FieldChainID)
+	}
+	if m.name != nil {
+		fields = append(fields, chain.FieldName)
+	}
+	if m.pretty_name != nil {
+		fields = append(fields, chain.FieldPrettyName)
+	}
+	if m.is_enabled != nil {
+		fields = append(fields, chain.FieldIsEnabled)
+	}
+	if m.image_url != nil {
+		fields = append(fields, chain.FieldImageURL)
+	}
+	if m.thumbnail_url != nil {
+		fields = append(fields, chain.FieldThumbnailURL)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ChainMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case chain.FieldCreateTime:
+		return m.CreateTime()
+	case chain.FieldUpdateTime:
+		return m.UpdateTime()
+	case chain.FieldChainID:
+		return m.ChainID()
+	case chain.FieldName:
+		return m.Name()
+	case chain.FieldPrettyName:
+		return m.PrettyName()
+	case chain.FieldIsEnabled:
+		return m.IsEnabled()
+	case chain.FieldImageURL:
+		return m.ImageURL()
+	case chain.FieldThumbnailURL:
+		return m.ThumbnailURL()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case chain.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case chain.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case chain.FieldChainID:
+		return m.OldChainID(ctx)
+	case chain.FieldName:
+		return m.OldName(ctx)
+	case chain.FieldPrettyName:
+		return m.OldPrettyName(ctx)
+	case chain.FieldIsEnabled:
+		return m.OldIsEnabled(ctx)
+	case chain.FieldImageURL:
+		return m.OldImageURL(ctx)
+	case chain.FieldThumbnailURL:
+		return m.OldThumbnailURL(ctx)
+	}
+	return nil, fmt.Errorf("unknown Chain field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChainMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case chain.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case chain.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case chain.FieldChainID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChainID(v)
+		return nil
+	case chain.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case chain.FieldPrettyName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPrettyName(v)
+		return nil
+	case chain.FieldIsEnabled:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsEnabled(v)
+		return nil
+	case chain.FieldImageURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageURL(v)
+		return nil
+	case chain.FieldThumbnailURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetThumbnailURL(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Chain field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ChainMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ChainMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChainMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Chain numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ChainMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ChainMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ChainMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Chain nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ChainMutation) ResetField(name string) error {
+	switch name {
+	case chain.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case chain.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case chain.FieldChainID:
+		m.ResetChainID()
+		return nil
+	case chain.FieldName:
+		m.ResetName()
+		return nil
+	case chain.FieldPrettyName:
+		m.ResetPrettyName()
+		return nil
+	case chain.FieldIsEnabled:
+		m.ResetIsEnabled()
+		return nil
+	case chain.FieldImageURL:
+		m.ResetImageURL()
+		return nil
+	case chain.FieldThumbnailURL:
+		m.ResetThumbnailURL()
+		return nil
+	}
+	return fmt.Errorf("unknown Chain field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ChainMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.chain_proposals != nil {
+		edges = append(edges, chain.EdgeChainProposals)
+	}
+	if m.telegram_chats != nil {
+		edges = append(edges, chain.EdgeTelegramChats)
+	}
+	if m.discord_channels != nil {
+		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ChainMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case chain.EdgeChainProposals:
+		ids := make([]ent.Value, 0, len(m.chain_proposals))
+		for id := range m.chain_proposals {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.telegram_chats))
+		for id := range m.telegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.discord_channels))
+		for id := range m.discord_channels {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ChainMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.removedchain_proposals != nil {
+		edges = append(edges, chain.EdgeChainProposals)
+	}
+	if m.removedtelegram_chats != nil {
+		edges = append(edges, chain.EdgeTelegramChats)
+	}
+	if m.removeddiscord_channels != nil {
+		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case chain.EdgeChainProposals:
+		ids := make([]ent.Value, 0, len(m.removedchain_proposals))
+		for id := range m.removedchain_proposals {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.removedtelegram_chats))
+		for id := range m.removedtelegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case chain.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.removeddiscord_channels))
+		for id := range m.removeddiscord_channels {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ChainMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedchain_proposals {
+		edges = append(edges, chain.EdgeChainProposals)
+	}
+	if m.clearedtelegram_chats {
+		edges = append(edges, chain.EdgeTelegramChats)
+	}
+	if m.cleareddiscord_channels {
+		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ChainMutation) EdgeCleared(name string) bool {
+	switch name {
+	case chain.EdgeChainProposals:
+		return m.clearedchain_proposals
+	case chain.EdgeTelegramChats:
+		return m.clearedtelegram_chats
+	case chain.EdgeDiscordChannels:
+		return m.cleareddiscord_channels
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ChainMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown Chain unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ChainMutation) ResetEdge(name string) error {
+	switch name {
+	case chain.EdgeChainProposals:
+		m.ResetChainProposals()
+		return nil
+	case chain.EdgeTelegramChats:
+		m.ResetTelegramChats()
+		return nil
+	case chain.EdgeDiscordChannels:
+		m.ResetDiscordChannels()
+		return nil
+	}
+	return fmt.Errorf("unknown Chain edge %s", name)
+}
+
+// ChainProposalMutation represents an operation that mutates the ChainProposal nodes in the graph.
+type ChainProposalMutation struct {
+	config
+	op                Op
+	typ               string
+	id                *int
+	create_time       *time.Time
+	update_time       *time.Time
+	proposal_id       *int
+	addproposal_id    *int
+	title             *string
+	description       *string
+	voting_start_time *time.Time
+	voting_end_time   *time.Time
+	status            *chainproposal.Status
+	clearedFields     map[string]struct{}
+	chain             *int
+	clearedchain      bool
+	done              bool
+	oldValue          func(context.Context) (*ChainProposal, error)
+	predicates        []predicate.ChainProposal
+}
+
+var _ ent.Mutation = (*ChainProposalMutation)(nil)
+
+// chainproposalOption allows management of the mutation configuration using functional options.
+type chainproposalOption func(*ChainProposalMutation)
+
+// newChainProposalMutation creates new mutation for the ChainProposal entity.
+func newChainProposalMutation(c config, op Op, opts ...chainproposalOption) *ChainProposalMutation {
+	m := &ChainProposalMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeChainProposal,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withChainProposalID sets the ID field of the mutation.
+func withChainProposalID(id int) chainproposalOption {
+	return func(m *ChainProposalMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *ChainProposal
+		)
+		m.oldValue = func(ctx context.Context) (*ChainProposal, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().ChainProposal.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withChainProposal sets the old ChainProposal of the mutation.
+func withChainProposal(node *ChainProposal) chainproposalOption {
+	return func(m *ChainProposalMutation) {
+		m.oldValue = func(context.Context) (*ChainProposal, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m ChainProposalMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m ChainProposalMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *ChainProposalMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *ChainProposalMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().ChainProposal.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *ChainProposalMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *ChainProposalMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *ChainProposalMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *ChainProposalMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *ChainProposalMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *ChainProposalMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetProposalID sets the "proposal_id" field.
+func (m *ChainProposalMutation) SetProposalID(i int) {
+	m.proposal_id = &i
+	m.addproposal_id = nil
+}
+
+// ProposalID returns the value of the "proposal_id" field in the mutation.
+func (m *ChainProposalMutation) ProposalID() (r int, exists bool) {
+	v := m.proposal_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldProposalID returns the old "proposal_id" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldProposalID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldProposalID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldProposalID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldProposalID: %w", err)
+	}
+	return oldValue.ProposalID, nil
+}
+
+// AddProposalID adds i to the "proposal_id" field.
+func (m *ChainProposalMutation) AddProposalID(i int) {
+	if m.addproposal_id != nil {
+		*m.addproposal_id += i
+	} else {
+		m.addproposal_id = &i
+	}
+}
+
+// AddedProposalID returns the value that was added to the "proposal_id" field in this mutation.
+func (m *ChainProposalMutation) AddedProposalID() (r int, exists bool) {
+	v := m.addproposal_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetProposalID resets all changes to the "proposal_id" field.
+func (m *ChainProposalMutation) ResetProposalID() {
+	m.proposal_id = nil
+	m.addproposal_id = nil
+}
+
+// SetTitle sets the "title" field.
+func (m *ChainProposalMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *ChainProposalMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *ChainProposalMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetDescription sets the "description" field.
+func (m *ChainProposalMutation) SetDescription(s string) {
+	m.description = &s
+}
+
+// Description returns the value of the "description" field in the mutation.
+func (m *ChainProposalMutation) Description() (r string, exists bool) {
+	v := m.description
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDescription returns the old "description" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldDescription(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDescription is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDescription requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDescription: %w", err)
+	}
+	return oldValue.Description, nil
+}
+
+// ResetDescription resets all changes to the "description" field.
+func (m *ChainProposalMutation) ResetDescription() {
+	m.description = nil
+}
+
+// SetVotingStartTime sets the "voting_start_time" field.
+func (m *ChainProposalMutation) SetVotingStartTime(t time.Time) {
+	m.voting_start_time = &t
+}
+
+// VotingStartTime returns the value of the "voting_start_time" field in the mutation.
+func (m *ChainProposalMutation) VotingStartTime() (r time.Time, exists bool) {
+	v := m.voting_start_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVotingStartTime returns the old "voting_start_time" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldVotingStartTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVotingStartTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVotingStartTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVotingStartTime: %w", err)
+	}
+	return oldValue.VotingStartTime, nil
+}
+
+// ResetVotingStartTime resets all changes to the "voting_start_time" field.
+func (m *ChainProposalMutation) ResetVotingStartTime() {
+	m.voting_start_time = nil
+}
+
+// SetVotingEndTime sets the "voting_end_time" field.
+func (m *ChainProposalMutation) SetVotingEndTime(t time.Time) {
+	m.voting_end_time = &t
+}
+
+// VotingEndTime returns the value of the "voting_end_time" field in the mutation.
+func (m *ChainProposalMutation) VotingEndTime() (r time.Time, exists bool) {
+	v := m.voting_end_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldVotingEndTime returns the old "voting_end_time" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldVotingEndTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldVotingEndTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldVotingEndTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldVotingEndTime: %w", err)
+	}
+	return oldValue.VotingEndTime, nil
+}
+
+// ResetVotingEndTime resets all changes to the "voting_end_time" field.
+func (m *ChainProposalMutation) ResetVotingEndTime() {
+	m.voting_end_time = nil
+}
+
+// SetStatus sets the "status" field.
+func (m *ChainProposalMutation) SetStatus(c chainproposal.Status) {
+	m.status = &c
+}
+
+// Status returns the value of the "status" field in the mutation.
+func (m *ChainProposalMutation) Status() (r chainproposal.Status, exists bool) {
+	v := m.status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStatus returns the old "status" field's value of the ChainProposal entity.
+// If the ChainProposal object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainProposalMutation) OldStatus(ctx context.Context) (v chainproposal.Status, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStatus: %w", err)
+	}
+	return oldValue.Status, nil
+}
+
+// ResetStatus resets all changes to the "status" field.
+func (m *ChainProposalMutation) ResetStatus() {
+	m.status = nil
+}
+
+// SetChainID sets the "chain" edge to the Chain entity by id.
+func (m *ChainProposalMutation) SetChainID(id int) {
+	m.chain = &id
+}
+
+// ClearChain clears the "chain" edge to the Chain entity.
+func (m *ChainProposalMutation) ClearChain() {
+	m.clearedchain = true
+}
+
+// ChainCleared reports if the "chain" edge to the Chain entity was cleared.
+func (m *ChainProposalMutation) ChainCleared() bool {
+	return m.clearedchain
+}
+
+// ChainID returns the "chain" edge ID in the mutation.
+func (m *ChainProposalMutation) ChainID() (id int, exists bool) {
+	if m.chain != nil {
+		return *m.chain, true
+	}
+	return
+}
+
+// ChainIDs returns the "chain" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChainID instead. It exists only for internal usage by the builders.
+func (m *ChainProposalMutation) ChainIDs() (ids []int) {
+	if id := m.chain; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChain resets all changes to the "chain" edge.
+func (m *ChainProposalMutation) ResetChain() {
+	m.chain = nil
+	m.clearedchain = false
+}
+
+// Where appends a list predicates to the ChainProposalMutation builder.
+func (m *ChainProposalMutation) Where(ps ...predicate.ChainProposal) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *ChainProposalMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (ChainProposal).
+func (m *ChainProposalMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *ChainProposalMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m.create_time != nil {
+		fields = append(fields, chainproposal.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, chainproposal.FieldUpdateTime)
+	}
+	if m.proposal_id != nil {
+		fields = append(fields, chainproposal.FieldProposalID)
+	}
+	if m.title != nil {
+		fields = append(fields, chainproposal.FieldTitle)
+	}
+	if m.description != nil {
+		fields = append(fields, chainproposal.FieldDescription)
+	}
+	if m.voting_start_time != nil {
+		fields = append(fields, chainproposal.FieldVotingStartTime)
+	}
+	if m.voting_end_time != nil {
+		fields = append(fields, chainproposal.FieldVotingEndTime)
+	}
+	if m.status != nil {
+		fields = append(fields, chainproposal.FieldStatus)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *ChainProposalMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case chainproposal.FieldCreateTime:
+		return m.CreateTime()
+	case chainproposal.FieldUpdateTime:
+		return m.UpdateTime()
+	case chainproposal.FieldProposalID:
+		return m.ProposalID()
+	case chainproposal.FieldTitle:
+		return m.Title()
+	case chainproposal.FieldDescription:
+		return m.Description()
+	case chainproposal.FieldVotingStartTime:
+		return m.VotingStartTime()
+	case chainproposal.FieldVotingEndTime:
+		return m.VotingEndTime()
+	case chainproposal.FieldStatus:
+		return m.Status()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *ChainProposalMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case chainproposal.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case chainproposal.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case chainproposal.FieldProposalID:
+		return m.OldProposalID(ctx)
+	case chainproposal.FieldTitle:
+		return m.OldTitle(ctx)
+	case chainproposal.FieldDescription:
+		return m.OldDescription(ctx)
+	case chainproposal.FieldVotingStartTime:
+		return m.OldVotingStartTime(ctx)
+	case chainproposal.FieldVotingEndTime:
+		return m.OldVotingEndTime(ctx)
+	case chainproposal.FieldStatus:
+		return m.OldStatus(ctx)
+	}
+	return nil, fmt.Errorf("unknown ChainProposal field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChainProposalMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case chainproposal.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case chainproposal.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case chainproposal.FieldProposalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetProposalID(v)
+		return nil
+	case chainproposal.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case chainproposal.FieldDescription:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDescription(v)
+		return nil
+	case chainproposal.FieldVotingStartTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVotingStartTime(v)
+		return nil
+	case chainproposal.FieldVotingEndTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetVotingEndTime(v)
+		return nil
+	case chainproposal.FieldStatus:
+		v, ok := value.(chainproposal.Status)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStatus(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ChainProposal field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *ChainProposalMutation) AddedFields() []string {
+	var fields []string
+	if m.addproposal_id != nil {
+		fields = append(fields, chainproposal.FieldProposalID)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *ChainProposalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case chainproposal.FieldProposalID:
+		return m.AddedProposalID()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *ChainProposalMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case chainproposal.FieldProposalID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddProposalID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown ChainProposal numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *ChainProposalMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *ChainProposalMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *ChainProposalMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown ChainProposal nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *ChainProposalMutation) ResetField(name string) error {
+	switch name {
+	case chainproposal.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case chainproposal.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case chainproposal.FieldProposalID:
+		m.ResetProposalID()
+		return nil
+	case chainproposal.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case chainproposal.FieldDescription:
+		m.ResetDescription()
+		return nil
+	case chainproposal.FieldVotingStartTime:
+		m.ResetVotingStartTime()
+		return nil
+	case chainproposal.FieldVotingEndTime:
+		m.ResetVotingEndTime()
+		return nil
+	case chainproposal.FieldStatus:
+		m.ResetStatus()
+		return nil
+	}
+	return fmt.Errorf("unknown ChainProposal field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *ChainProposalMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.chain != nil {
+		edges = append(edges, chainproposal.EdgeChain)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *ChainProposalMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case chainproposal.EdgeChain:
+		if id := m.chain; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *ChainProposalMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *ChainProposalMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *ChainProposalMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedchain {
+		edges = append(edges, chainproposal.EdgeChain)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *ChainProposalMutation) EdgeCleared(name string) bool {
+	switch name {
+	case chainproposal.EdgeChain:
+		return m.clearedchain
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *ChainProposalMutation) ClearEdge(name string) error {
+	switch name {
+	case chainproposal.EdgeChain:
+		m.ClearChain()
+		return nil
+	}
+	return fmt.Errorf("unknown ChainProposal unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *ChainProposalMutation) ResetEdge(name string) error {
+	switch name {
+	case chainproposal.EdgeChain:
+		m.ResetChain()
+		return nil
+	}
+	return fmt.Errorf("unknown ChainProposal edge %s", name)
+}
 
 // ContractMutation represents an operation that mutates the Contract nodes in the graph.
 type ContractMutation struct {
@@ -948,6 +2694,9 @@ type DiscordChannelMutation struct {
 	contracts        map[int]struct{}
 	removedcontracts map[int]struct{}
 	clearedcontracts bool
+	chains           map[int]struct{}
+	removedchains    map[int]struct{}
+	clearedchains    bool
 	done             bool
 	oldValue         func(context.Context) (*DiscordChannel, error)
 	predicates       []predicate.DiscordChannel
@@ -1359,6 +3108,60 @@ func (m *DiscordChannelMutation) ResetContracts() {
 	m.removedcontracts = nil
 }
 
+// AddChainIDs adds the "chains" edge to the Chain entity by ids.
+func (m *DiscordChannelMutation) AddChainIDs(ids ...int) {
+	if m.chains == nil {
+		m.chains = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.chains[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChains clears the "chains" edge to the Chain entity.
+func (m *DiscordChannelMutation) ClearChains() {
+	m.clearedchains = true
+}
+
+// ChainsCleared reports if the "chains" edge to the Chain entity was cleared.
+func (m *DiscordChannelMutation) ChainsCleared() bool {
+	return m.clearedchains
+}
+
+// RemoveChainIDs removes the "chains" edge to the Chain entity by IDs.
+func (m *DiscordChannelMutation) RemoveChainIDs(ids ...int) {
+	if m.removedchains == nil {
+		m.removedchains = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.chains, ids[i])
+		m.removedchains[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChains returns the removed IDs of the "chains" edge to the Chain entity.
+func (m *DiscordChannelMutation) RemovedChainsIDs() (ids []int) {
+	for id := range m.removedchains {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChainsIDs returns the "chains" edge IDs in the mutation.
+func (m *DiscordChannelMutation) ChainsIDs() (ids []int) {
+	for id := range m.chains {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChains resets all changes to the "chains" edge.
+func (m *DiscordChannelMutation) ResetChains() {
+	m.chains = nil
+	m.clearedchains = false
+	m.removedchains = nil
+}
+
 // Where appends a list predicates to the DiscordChannelMutation builder.
 func (m *DiscordChannelMutation) Where(ps ...predicate.DiscordChannel) {
 	m.predicates = append(m.predicates, ps...)
@@ -1560,12 +3363,15 @@ func (m *DiscordChannelMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DiscordChannelMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.users != nil {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
 	if m.contracts != nil {
 		edges = append(edges, discordchannel.EdgeContracts)
+	}
+	if m.chains != nil {
+		edges = append(edges, discordchannel.EdgeChains)
 	}
 	return edges
 }
@@ -1586,18 +3392,27 @@ func (m *DiscordChannelMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case discordchannel.EdgeChains:
+		ids := make([]ent.Value, 0, len(m.chains))
+		for id := range m.chains {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DiscordChannelMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedusers != nil {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
 	if m.removedcontracts != nil {
 		edges = append(edges, discordchannel.EdgeContracts)
+	}
+	if m.removedchains != nil {
+		edges = append(edges, discordchannel.EdgeChains)
 	}
 	return edges
 }
@@ -1618,18 +3433,27 @@ func (m *DiscordChannelMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case discordchannel.EdgeChains:
+		ids := make([]ent.Value, 0, len(m.removedchains))
+		for id := range m.removedchains {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DiscordChannelMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedusers {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
 	if m.clearedcontracts {
 		edges = append(edges, discordchannel.EdgeContracts)
+	}
+	if m.clearedchains {
+		edges = append(edges, discordchannel.EdgeChains)
 	}
 	return edges
 }
@@ -1642,6 +3466,8 @@ func (m *DiscordChannelMutation) EdgeCleared(name string) bool {
 		return m.clearedusers
 	case discordchannel.EdgeContracts:
 		return m.clearedcontracts
+	case discordchannel.EdgeChains:
+		return m.clearedchains
 	}
 	return false
 }
@@ -1663,6 +3489,9 @@ func (m *DiscordChannelMutation) ResetEdge(name string) error {
 		return nil
 	case discordchannel.EdgeContracts:
 		m.ResetContracts()
+		return nil
+	case discordchannel.EdgeChains:
+		m.ResetChains()
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel edge %s", name)
@@ -2427,6 +4256,9 @@ type TelegramChatMutation struct {
 	contracts        map[int]struct{}
 	removedcontracts map[int]struct{}
 	clearedcontracts bool
+	chains           map[int]struct{}
+	removedchains    map[int]struct{}
+	clearedchains    bool
 	done             bool
 	oldValue         func(context.Context) (*TelegramChat, error)
 	predicates       []predicate.TelegramChat
@@ -2838,6 +4670,60 @@ func (m *TelegramChatMutation) ResetContracts() {
 	m.removedcontracts = nil
 }
 
+// AddChainIDs adds the "chains" edge to the Chain entity by ids.
+func (m *TelegramChatMutation) AddChainIDs(ids ...int) {
+	if m.chains == nil {
+		m.chains = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.chains[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChains clears the "chains" edge to the Chain entity.
+func (m *TelegramChatMutation) ClearChains() {
+	m.clearedchains = true
+}
+
+// ChainsCleared reports if the "chains" edge to the Chain entity was cleared.
+func (m *TelegramChatMutation) ChainsCleared() bool {
+	return m.clearedchains
+}
+
+// RemoveChainIDs removes the "chains" edge to the Chain entity by IDs.
+func (m *TelegramChatMutation) RemoveChainIDs(ids ...int) {
+	if m.removedchains == nil {
+		m.removedchains = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.chains, ids[i])
+		m.removedchains[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChains returns the removed IDs of the "chains" edge to the Chain entity.
+func (m *TelegramChatMutation) RemovedChainsIDs() (ids []int) {
+	for id := range m.removedchains {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChainsIDs returns the "chains" edge IDs in the mutation.
+func (m *TelegramChatMutation) ChainsIDs() (ids []int) {
+	for id := range m.chains {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChains resets all changes to the "chains" edge.
+func (m *TelegramChatMutation) ResetChains() {
+	m.chains = nil
+	m.clearedchains = false
+	m.removedchains = nil
+}
+
 // Where appends a list predicates to the TelegramChatMutation builder.
 func (m *TelegramChatMutation) Where(ps ...predicate.TelegramChat) {
 	m.predicates = append(m.predicates, ps...)
@@ -3039,12 +4925,15 @@ func (m *TelegramChatMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TelegramChatMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.users != nil {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
 	if m.contracts != nil {
 		edges = append(edges, telegramchat.EdgeContracts)
+	}
+	if m.chains != nil {
+		edges = append(edges, telegramchat.EdgeChains)
 	}
 	return edges
 }
@@ -3065,18 +4954,27 @@ func (m *TelegramChatMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case telegramchat.EdgeChains:
+		ids := make([]ent.Value, 0, len(m.chains))
+		for id := range m.chains {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TelegramChatMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedusers != nil {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
 	if m.removedcontracts != nil {
 		edges = append(edges, telegramchat.EdgeContracts)
+	}
+	if m.removedchains != nil {
+		edges = append(edges, telegramchat.EdgeChains)
 	}
 	return edges
 }
@@ -3097,18 +4995,27 @@ func (m *TelegramChatMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case telegramchat.EdgeChains:
+		ids := make([]ent.Value, 0, len(m.removedchains))
+		for id := range m.removedchains {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TelegramChatMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedusers {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
 	if m.clearedcontracts {
 		edges = append(edges, telegramchat.EdgeContracts)
+	}
+	if m.clearedchains {
+		edges = append(edges, telegramchat.EdgeChains)
 	}
 	return edges
 }
@@ -3121,6 +5028,8 @@ func (m *TelegramChatMutation) EdgeCleared(name string) bool {
 		return m.clearedusers
 	case telegramchat.EdgeContracts:
 		return m.clearedcontracts
+	case telegramchat.EdgeChains:
+		return m.clearedchains
 	}
 	return false
 }
@@ -3142,6 +5051,9 @@ func (m *TelegramChatMutation) ResetEdge(name string) error {
 		return nil
 	case telegramchat.EdgeContracts:
 		m.ResetContracts()
+		return nil
+	case telegramchat.EdgeChains:
+		m.ResetChains()
 		return nil
 	}
 	return fmt.Errorf("unknown TelegramChat edge %s", name)

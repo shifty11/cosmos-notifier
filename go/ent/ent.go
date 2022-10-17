@@ -10,6 +10,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
+	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/proposal"
@@ -35,6 +37,8 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		chain.Table:          chain.ValidColumn,
+		chainproposal.Table:  chainproposal.ValidColumn,
 		contract.Table:       contract.ValidColumn,
 		discordchannel.Table: discordchannel.ValidColumn,
 		proposal.Table:       proposal.ValidColumn,
@@ -89,7 +93,6 @@ type AggregateFunc func(*sql.Selector) string
 //	GroupBy(field1, field2).
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
-//
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.As(fn(s), end)

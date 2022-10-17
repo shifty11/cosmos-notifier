@@ -25,6 +25,8 @@ const (
 	EdgeUsers = "users"
 	// EdgeContracts holds the string denoting the contracts edge name in mutations.
 	EdgeContracts = "contracts"
+	// EdgeChains holds the string denoting the chains edge name in mutations.
+	EdgeChains = "chains"
 	// Table holds the table name of the telegramchat in the database.
 	Table = "telegram_chats"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -37,6 +39,11 @@ const (
 	// ContractsInverseTable is the table name for the Contract entity.
 	// It exists in this package in order to avoid circular dependency with the "contract" package.
 	ContractsInverseTable = "contracts"
+	// ChainsTable is the table that holds the chains relation/edge. The primary key declared below.
+	ChainsTable = "telegram_chat_chains"
+	// ChainsInverseTable is the table name for the Chain entity.
+	// It exists in this package in order to avoid circular dependency with the "chain" package.
+	ChainsInverseTable = "chains"
 )
 
 // Columns holds all SQL columns for telegramchat fields.
@@ -56,6 +63,9 @@ var (
 	// ContractsPrimaryKey and ContractsColumn2 are the table columns denoting the
 	// primary key for the contracts relation (M2M).
 	ContractsPrimaryKey = []string{"telegram_chat_id", "contract_id"}
+	// ChainsPrimaryKey and ChainsColumn2 are the table columns denoting the
+	// primary key for the chains relation (M2M).
+	ChainsPrimaryKey = []string{"telegram_chat_id", "chain_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

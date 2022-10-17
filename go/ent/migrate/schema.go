@@ -8,6 +8,58 @@ import (
 )
 
 var (
+	// ChainsColumns holds the columns for the "chains" table.
+	ChainsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "chain_id", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "pretty_name", Type: field.TypeString, Unique: true},
+		{Name: "is_enabled", Type: field.TypeBool, Default: true},
+		{Name: "image_url", Type: field.TypeString},
+		{Name: "thumbnail_url", Type: field.TypeString, Default: ""},
+	}
+	// ChainsTable holds the schema information for the "chains" table.
+	ChainsTable = &schema.Table{
+		Name:       "chains",
+		Columns:    ChainsColumns,
+		PrimaryKey: []*schema.Column{ChainsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "chain_name",
+				Unique:  true,
+				Columns: []*schema.Column{ChainsColumns[4]},
+			},
+		},
+	}
+	// ChainProposalsColumns holds the columns for the "chain_proposals" table.
+	ChainProposalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "proposal_id", Type: field.TypeInt},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "voting_start_time", Type: field.TypeTime},
+		{Name: "voting_end_time", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
+		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
+	}
+	// ChainProposalsTable holds the schema information for the "chain_proposals" table.
+	ChainProposalsTable = &schema.Table{
+		Name:       "chain_proposals",
+		Columns:    ChainProposalsColumns,
+		PrimaryKey: []*schema.Column{ChainProposalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "chain_proposals_chains_chain_proposals",
+				Columns:    []*schema.Column{ChainProposalsColumns[9]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// ContractsColumns holds the columns for the "contracts" table.
 	ContractsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -154,6 +206,31 @@ var (
 			},
 		},
 	}
+	// DiscordChannelChainsColumns holds the columns for the "discord_channel_chains" table.
+	DiscordChannelChainsColumns = []*schema.Column{
+		{Name: "discord_channel_id", Type: field.TypeInt},
+		{Name: "chain_id", Type: field.TypeInt},
+	}
+	// DiscordChannelChainsTable holds the schema information for the "discord_channel_chains" table.
+	DiscordChannelChainsTable = &schema.Table{
+		Name:       "discord_channel_chains",
+		Columns:    DiscordChannelChainsColumns,
+		PrimaryKey: []*schema.Column{DiscordChannelChainsColumns[0], DiscordChannelChainsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "discord_channel_chains_discord_channel_id",
+				Columns:    []*schema.Column{DiscordChannelChainsColumns[0]},
+				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "discord_channel_chains_chain_id",
+				Columns:    []*schema.Column{DiscordChannelChainsColumns[1]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// TelegramChatUsersColumns holds the columns for the "telegram_chat_users" table.
 	TelegramChatUsersColumns = []*schema.Column{
 		{Name: "telegram_chat_id", Type: field.TypeInt},
@@ -204,8 +281,35 @@ var (
 			},
 		},
 	}
+	// TelegramChatChainsColumns holds the columns for the "telegram_chat_chains" table.
+	TelegramChatChainsColumns = []*schema.Column{
+		{Name: "telegram_chat_id", Type: field.TypeInt},
+		{Name: "chain_id", Type: field.TypeInt},
+	}
+	// TelegramChatChainsTable holds the schema information for the "telegram_chat_chains" table.
+	TelegramChatChainsTable = &schema.Table{
+		Name:       "telegram_chat_chains",
+		Columns:    TelegramChatChainsColumns,
+		PrimaryKey: []*schema.Column{TelegramChatChainsColumns[0], TelegramChatChainsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "telegram_chat_chains_telegram_chat_id",
+				Columns:    []*schema.Column{TelegramChatChainsColumns[0]},
+				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "telegram_chat_chains_chain_id",
+				Columns:    []*schema.Column{TelegramChatChainsColumns[1]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		ChainsTable,
+		ChainProposalsTable,
 		ContractsTable,
 		DiscordChannelsTable,
 		ProposalsTable,
@@ -213,19 +317,26 @@ var (
 		UsersTable,
 		DiscordChannelUsersTable,
 		DiscordChannelContractsTable,
+		DiscordChannelChainsTable,
 		TelegramChatUsersTable,
 		TelegramChatContractsTable,
+		TelegramChatChainsTable,
 	}
 )
 
 func init() {
+	ChainProposalsTable.ForeignKeys[0].RefTable = ChainsTable
 	ProposalsTable.ForeignKeys[0].RefTable = ContractsTable
 	DiscordChannelUsersTable.ForeignKeys[0].RefTable = DiscordChannelsTable
 	DiscordChannelUsersTable.ForeignKeys[1].RefTable = UsersTable
 	DiscordChannelContractsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
 	DiscordChannelContractsTable.ForeignKeys[1].RefTable = ContractsTable
+	DiscordChannelChainsTable.ForeignKeys[0].RefTable = DiscordChannelsTable
+	DiscordChannelChainsTable.ForeignKeys[1].RefTable = ChainsTable
 	TelegramChatUsersTable.ForeignKeys[0].RefTable = TelegramChatsTable
 	TelegramChatUsersTable.ForeignKeys[1].RefTable = UsersTable
 	TelegramChatContractsTable.ForeignKeys[0].RefTable = TelegramChatsTable
 	TelegramChatContractsTable.ForeignKeys[1].RefTable = ContractsTable
+	TelegramChatChainsTable.ForeignKeys[0].RefTable = TelegramChatsTable
+	TelegramChatChainsTable.ForeignKeys[1].RefTable = ChainsTable
 }

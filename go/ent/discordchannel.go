@@ -37,9 +37,11 @@ type DiscordChannelEdges struct {
 	Users []*User `json:"users,omitempty"`
 	// Contracts holds the value of the contracts edge.
 	Contracts []*Contract `json:"contracts,omitempty"`
+	// Chains holds the value of the chains edge.
+	Chains []*Chain `json:"chains,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -58,6 +60,15 @@ func (e DiscordChannelEdges) ContractsOrErr() ([]*Contract, error) {
 		return e.Contracts, nil
 	}
 	return nil, &NotLoadedError{edge: "contracts"}
+}
+
+// ChainsOrErr returns the Chains value or an error if the edge
+// was not loaded in eager-loading.
+func (e DiscordChannelEdges) ChainsOrErr() ([]*Chain, error) {
+	if e.loadedTypes[2] {
+		return e.Chains, nil
+	}
+	return nil, &NotLoadedError{edge: "chains"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -137,6 +148,11 @@ func (dc *DiscordChannel) QueryUsers() *UserQuery {
 // QueryContracts queries the "contracts" edge of the DiscordChannel entity.
 func (dc *DiscordChannel) QueryContracts() *ContractQuery {
 	return (&DiscordChannelClient{config: dc.config}).QueryContracts(dc)
+}
+
+// QueryChains queries the "chains" edge of the DiscordChannel entity.
+func (dc *DiscordChannel) QueryChains() *ChainQuery {
+	return (&DiscordChannelClient{config: dc.config}).QueryChains(dc)
 }
 
 // Update returns a builder for updating this DiscordChannel.

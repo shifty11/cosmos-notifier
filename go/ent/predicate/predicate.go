@@ -6,6 +6,12 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// Chain is the predicate function for chain builders.
+type Chain func(*sql.Selector)
+
+// ChainProposal is the predicate function for chainproposal builders.
+type ChainProposal func(*sql.Selector)
+
 // Contract is the predicate function for contract builders.
 type Contract func(*sql.Selector)
 

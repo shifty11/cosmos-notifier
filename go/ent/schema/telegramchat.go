@@ -35,5 +35,6 @@ func (TelegramChat) Edges() []ent.Edge {
 		edge.To("users", User.Type).
 			Required(),
 		edge.To("contracts", Contract.Type),
+		edge.To("chains", Chain.Type),
 	}
 }

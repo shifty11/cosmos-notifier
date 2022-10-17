@@ -12,6 +12,10 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Chain is the client for interacting with the Chain builders.
+	Chain *ChainClient
+	// ChainProposal is the client for interacting with the ChainProposal builders.
+	ChainProposal *ChainProposalClient
 	// Contract is the client for interacting with the Contract builders.
 	Contract *ContractClient
 	// DiscordChannel is the client for interacting with the DiscordChannel builders.
@@ -157,6 +161,8 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Chain = NewChainClient(tx.config)
+	tx.ChainProposal = NewChainProposalClient(tx.config)
 	tx.Contract = NewContractClient(tx.config)
 	tx.DiscordChannel = NewDiscordChannelClient(tx.config)
 	tx.Proposal = NewProposalClient(tx.config)
@@ -171,7 +177,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Contract.QueryXXX(), the query will be executed
+// applies a query, for example: Chain.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

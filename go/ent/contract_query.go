@@ -371,7 +371,6 @@ func (cq *ContractQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery))
 //		GroupBy(contract.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (cq *ContractQuery) GroupBy(field string, fields ...string) *ContractGroupBy {
 	grbuild := &ContractGroupBy{config: cq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -398,7 +397,6 @@ func (cq *ContractQuery) GroupBy(field string, fields ...string) *ContractGroupB
 //	client.Contract.Query().
 //		Select(contract.FieldCreateTime).
 //		Scan(ctx, &v)
-//
 func (cq *ContractQuery) Select(fields ...string) *ContractSelect {
 	cq.fields = append(cq.fields, fields...)
 	selbuild := &ContractSelect{ContractQuery: cq}

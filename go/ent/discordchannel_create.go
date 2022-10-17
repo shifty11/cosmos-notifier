@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
@@ -96,6 +97,21 @@ func (dcc *DiscordChannelCreate) AddContracts(c ...*Contract) *DiscordChannelCre
 		ids[i] = c[i].ID
 	}
 	return dcc.AddContractIDs(ids...)
+}
+
+// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
+func (dcc *DiscordChannelCreate) AddChainIDs(ids ...int) *DiscordChannelCreate {
+	dcc.mutation.AddChainIDs(ids...)
+	return dcc
+}
+
+// AddChains adds the "chains" edges to the Chain entity.
+func (dcc *DiscordChannelCreate) AddChains(c ...*Chain) *DiscordChannelCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return dcc.AddChainIDs(ids...)
 }
 
 // Mutation returns the DiscordChannelMutation object of the builder.
@@ -302,6 +318,25 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: contract.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dcc.mutation.ChainsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
 				},
 			},
 		}

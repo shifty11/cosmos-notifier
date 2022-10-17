@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
@@ -29,6 +30,7 @@ type TelegramChatQuery struct {
 	// eager-loading edges.
 	withUsers     *UserQuery
 	withContracts *ContractQuery
+	withChains    *ChainQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -102,6 +104,28 @@ func (tcq *TelegramChatQuery) QueryContracts() *ContractQuery {
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, selector),
 			sqlgraph.To(contract.Table, contract.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ContractsTable, telegramchat.ContractsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryChains chains the current query on the "chains" edge.
+func (tcq *TelegramChatQuery) QueryChains() *ChainQuery {
+	query := &ChainQuery{config: tcq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, selector),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ChainsTable, telegramchat.ChainsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
 		return fromU, nil
@@ -292,6 +316,7 @@ func (tcq *TelegramChatQuery) Clone() *TelegramChatQuery {
 		predicates:    append([]predicate.TelegramChat{}, tcq.predicates...),
 		withUsers:     tcq.withUsers.Clone(),
 		withContracts: tcq.withContracts.Clone(),
+		withChains:    tcq.withChains.Clone(),
 		// clone intermediate query.
 		sql:    tcq.sql.Clone(),
 		path:   tcq.path,
@@ -321,6 +346,17 @@ func (tcq *TelegramChatQuery) WithContracts(opts ...func(*ContractQuery)) *Teleg
 	return tcq
 }
 
+// WithChains tells the query-builder to eager-load the nodes that are connected to
+// the "chains" edge. The optional arguments are used to configure the query builder of the edge.
+func (tcq *TelegramChatQuery) WithChains(opts ...func(*ChainQuery)) *TelegramChatQuery {
+	query := &ChainQuery{config: tcq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	tcq.withChains = query
+	return tcq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -335,7 +371,6 @@ func (tcq *TelegramChatQuery) WithContracts(opts ...func(*ContractQuery)) *Teleg
 //		GroupBy(telegramchat.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (tcq *TelegramChatQuery) GroupBy(field string, fields ...string) *TelegramChatGroupBy {
 	grbuild := &TelegramChatGroupBy{config: tcq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -362,7 +397,6 @@ func (tcq *TelegramChatQuery) GroupBy(field string, fields ...string) *TelegramC
 //	client.TelegramChat.Query().
 //		Select(telegramchat.FieldCreateTime).
 //		Scan(ctx, &v)
-//
 func (tcq *TelegramChatQuery) Select(fields ...string) *TelegramChatSelect {
 	tcq.fields = append(tcq.fields, fields...)
 	selbuild := &TelegramChatSelect{TelegramChatQuery: tcq}
@@ -391,9 +425,10 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	var (
 		nodes       = []*TelegramChat{}
 		_spec       = tcq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			tcq.withUsers != nil,
 			tcq.withContracts != nil,
+			tcq.withChains != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -517,6 +552,59 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 			}
 			for kn := range nodes {
 				kn.Edges.Contracts = append(kn.Edges.Contracts, n)
+			}
+		}
+	}
+
+	if query := tcq.withChains; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*TelegramChat)
+		nids := make(map[int]map[*TelegramChat]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Chains = []*Chain{}
+		}
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(telegramchat.ChainsTable)
+			s.Join(joinT).On(s.C(chain.FieldID), joinT.C(telegramchat.ChainsPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(telegramchat.ChainsPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(telegramchat.ChainsPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TelegramChat]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
+			}
+			for kn := range nodes {
+				kn.Edges.Chains = append(kn.Edges.Chains, n)
 			}
 		}
 	}

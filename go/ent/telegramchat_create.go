@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
@@ -96,6 +97,21 @@ func (tcc *TelegramChatCreate) AddContracts(c ...*Contract) *TelegramChatCreate 
 		ids[i] = c[i].ID
 	}
 	return tcc.AddContractIDs(ids...)
+}
+
+// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
+func (tcc *TelegramChatCreate) AddChainIDs(ids ...int) *TelegramChatCreate {
+	tcc.mutation.AddChainIDs(ids...)
+	return tcc
+}
+
+// AddChains adds the "chains" edges to the Chain entity.
+func (tcc *TelegramChatCreate) AddChains(c ...*Chain) *TelegramChatCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return tcc.AddChainIDs(ids...)
 }
 
 // Mutation returns the TelegramChatMutation object of the builder.
@@ -302,6 +318,25 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: contract.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tcc.mutation.ChainsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
 				},
 			},
 		}

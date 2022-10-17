@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
@@ -85,6 +86,21 @@ func (dcu *DiscordChannelUpdate) AddContracts(c ...*Contract) *DiscordChannelUpd
 	return dcu.AddContractIDs(ids...)
 }
 
+// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
+func (dcu *DiscordChannelUpdate) AddChainIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.AddChainIDs(ids...)
+	return dcu
+}
+
+// AddChains adds the "chains" edges to the Chain entity.
+func (dcu *DiscordChannelUpdate) AddChains(c ...*Chain) *DiscordChannelUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return dcu.AddChainIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcu *DiscordChannelUpdate) Mutation() *DiscordChannelMutation {
 	return dcu.mutation
@@ -130,6 +146,27 @@ func (dcu *DiscordChannelUpdate) RemoveContracts(c ...*Contract) *DiscordChannel
 		ids[i] = c[i].ID
 	}
 	return dcu.RemoveContractIDs(ids...)
+}
+
+// ClearChains clears all "chains" edges to the Chain entity.
+func (dcu *DiscordChannelUpdate) ClearChains() *DiscordChannelUpdate {
+	dcu.mutation.ClearChains()
+	return dcu
+}
+
+// RemoveChainIDs removes the "chains" edge to Chain entities by IDs.
+func (dcu *DiscordChannelUpdate) RemoveChainIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.RemoveChainIDs(ids...)
+	return dcu
+}
+
+// RemoveChains removes "chains" edges to Chain entities.
+func (dcu *DiscordChannelUpdate) RemoveChains(c ...*Chain) *DiscordChannelUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return dcu.RemoveChainIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -349,6 +386,60 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if dcu.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.RemovedChainsIDs(); len(nodes) > 0 && !dcu.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.ChainsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{discordchannel.Label}
@@ -423,6 +514,21 @@ func (dcuo *DiscordChannelUpdateOne) AddContracts(c ...*Contract) *DiscordChanne
 	return dcuo.AddContractIDs(ids...)
 }
 
+// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
+func (dcuo *DiscordChannelUpdateOne) AddChainIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.AddChainIDs(ids...)
+	return dcuo
+}
+
+// AddChains adds the "chains" edges to the Chain entity.
+func (dcuo *DiscordChannelUpdateOne) AddChains(c ...*Chain) *DiscordChannelUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return dcuo.AddChainIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcuo *DiscordChannelUpdateOne) Mutation() *DiscordChannelMutation {
 	return dcuo.mutation
@@ -468,6 +574,27 @@ func (dcuo *DiscordChannelUpdateOne) RemoveContracts(c ...*Contract) *DiscordCha
 		ids[i] = c[i].ID
 	}
 	return dcuo.RemoveContractIDs(ids...)
+}
+
+// ClearChains clears all "chains" edges to the Chain entity.
+func (dcuo *DiscordChannelUpdateOne) ClearChains() *DiscordChannelUpdateOne {
+	dcuo.mutation.ClearChains()
+	return dcuo
+}
+
+// RemoveChainIDs removes the "chains" edge to Chain entities by IDs.
+func (dcuo *DiscordChannelUpdateOne) RemoveChainIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.RemoveChainIDs(ids...)
+	return dcuo
+}
+
+// RemoveChains removes "chains" edges to Chain entities.
+func (dcuo *DiscordChannelUpdateOne) RemoveChains(c ...*Chain) *DiscordChannelUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return dcuo.RemoveChainIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -709,6 +836,60 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: contract.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if dcuo.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.RemovedChainsIDs(); len(nodes) > 0 && !dcuo.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.ChainsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   discordchannel.ChainsTable,
+			Columns: discordchannel.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
 				},
 			},
 		}

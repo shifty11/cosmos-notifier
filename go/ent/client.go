@@ -9,6 +9,8 @@ import (
 
 	"github.com/shifty11/dao-dao-notifier/ent/migrate"
 
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
+	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/proposal"
@@ -25,6 +27,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Chain is the client for interacting with the Chain builders.
+	Chain *ChainClient
+	// ChainProposal is the client for interacting with the ChainProposal builders.
+	ChainProposal *ChainProposalClient
 	// Contract is the client for interacting with the Contract builders.
 	Contract *ContractClient
 	// DiscordChannel is the client for interacting with the DiscordChannel builders.
@@ -48,6 +54,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Chain = NewChainClient(c.config)
+	c.ChainProposal = NewChainProposalClient(c.config)
 	c.Contract = NewContractClient(c.config)
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
 	c.Proposal = NewProposalClient(c.config)
@@ -86,6 +94,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:            ctx,
 		config:         cfg,
+		Chain:          NewChainClient(cfg),
+		ChainProposal:  NewChainProposalClient(cfg),
 		Contract:       NewContractClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
 		Proposal:       NewProposalClient(cfg),
@@ -110,6 +120,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:            ctx,
 		config:         cfg,
+		Chain:          NewChainClient(cfg),
+		ChainProposal:  NewChainProposalClient(cfg),
 		Contract:       NewContractClient(cfg),
 		DiscordChannel: NewDiscordChannelClient(cfg),
 		Proposal:       NewProposalClient(cfg),
@@ -121,10 +133,9 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Contract.
+//		Chain.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -144,11 +155,257 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Chain.Use(hooks...)
+	c.ChainProposal.Use(hooks...)
 	c.Contract.Use(hooks...)
 	c.DiscordChannel.Use(hooks...)
 	c.Proposal.Use(hooks...)
 	c.TelegramChat.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// ChainClient is a client for the Chain schema.
+type ChainClient struct {
+	config
+}
+
+// NewChainClient returns a client for the Chain from the given config.
+func NewChainClient(c config) *ChainClient {
+	return &ChainClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `chain.Hooks(f(g(h())))`.
+func (c *ChainClient) Use(hooks ...Hook) {
+	c.hooks.Chain = append(c.hooks.Chain, hooks...)
+}
+
+// Create returns a builder for creating a Chain entity.
+func (c *ChainClient) Create() *ChainCreate {
+	mutation := newChainMutation(c.config, OpCreate)
+	return &ChainCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Chain entities.
+func (c *ChainClient) CreateBulk(builders ...*ChainCreate) *ChainCreateBulk {
+	return &ChainCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Chain.
+func (c *ChainClient) Update() *ChainUpdate {
+	mutation := newChainMutation(c.config, OpUpdate)
+	return &ChainUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ChainClient) UpdateOne(ch *Chain) *ChainUpdateOne {
+	mutation := newChainMutation(c.config, OpUpdateOne, withChain(ch))
+	return &ChainUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ChainClient) UpdateOneID(id int) *ChainUpdateOne {
+	mutation := newChainMutation(c.config, OpUpdateOne, withChainID(id))
+	return &ChainUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Chain.
+func (c *ChainClient) Delete() *ChainDelete {
+	mutation := newChainMutation(c.config, OpDelete)
+	return &ChainDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ChainClient) DeleteOne(ch *Chain) *ChainDeleteOne {
+	return c.DeleteOneID(ch.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *ChainClient) DeleteOneID(id int) *ChainDeleteOne {
+	builder := c.Delete().Where(chain.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ChainDeleteOne{builder}
+}
+
+// Query returns a query builder for Chain.
+func (c *ChainClient) Query() *ChainQuery {
+	return &ChainQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Chain entity by its id.
+func (c *ChainClient) Get(ctx context.Context, id int) (*Chain, error) {
+	return c.Query().Where(chain.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ChainClient) GetX(ctx context.Context, id int) *Chain {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChainProposals queries the chain_proposals edge of a Chain.
+func (c *ChainClient) QueryChainProposals(ch *Chain) *ChainProposalQuery {
+	query := &ChainProposalQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(chainproposal.Table, chainproposal.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.ChainProposalsTable, chain.ChainProposalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTelegramChats queries the telegram_chats edge of a Chain.
+func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
+	query := &TelegramChatQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.TelegramChatsTable, chain.TelegramChatsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels queries the discord_channels edge of a Chain.
+func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
+	query := &DiscordChannelQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chain.DiscordChannelsTable, chain.DiscordChannelsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ChainClient) Hooks() []Hook {
+	return c.hooks.Chain
+}
+
+// ChainProposalClient is a client for the ChainProposal schema.
+type ChainProposalClient struct {
+	config
+}
+
+// NewChainProposalClient returns a client for the ChainProposal from the given config.
+func NewChainProposalClient(c config) *ChainProposalClient {
+	return &ChainProposalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `chainproposal.Hooks(f(g(h())))`.
+func (c *ChainProposalClient) Use(hooks ...Hook) {
+	c.hooks.ChainProposal = append(c.hooks.ChainProposal, hooks...)
+}
+
+// Create returns a builder for creating a ChainProposal entity.
+func (c *ChainProposalClient) Create() *ChainProposalCreate {
+	mutation := newChainProposalMutation(c.config, OpCreate)
+	return &ChainProposalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of ChainProposal entities.
+func (c *ChainProposalClient) CreateBulk(builders ...*ChainProposalCreate) *ChainProposalCreateBulk {
+	return &ChainProposalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for ChainProposal.
+func (c *ChainProposalClient) Update() *ChainProposalUpdate {
+	mutation := newChainProposalMutation(c.config, OpUpdate)
+	return &ChainProposalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ChainProposalClient) UpdateOne(cp *ChainProposal) *ChainProposalUpdateOne {
+	mutation := newChainProposalMutation(c.config, OpUpdateOne, withChainProposal(cp))
+	return &ChainProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ChainProposalClient) UpdateOneID(id int) *ChainProposalUpdateOne {
+	mutation := newChainProposalMutation(c.config, OpUpdateOne, withChainProposalID(id))
+	return &ChainProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for ChainProposal.
+func (c *ChainProposalClient) Delete() *ChainProposalDelete {
+	mutation := newChainProposalMutation(c.config, OpDelete)
+	return &ChainProposalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ChainProposalClient) DeleteOne(cp *ChainProposal) *ChainProposalDeleteOne {
+	return c.DeleteOneID(cp.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *ChainProposalClient) DeleteOneID(id int) *ChainProposalDeleteOne {
+	builder := c.Delete().Where(chainproposal.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ChainProposalDeleteOne{builder}
+}
+
+// Query returns a query builder for ChainProposal.
+func (c *ChainProposalClient) Query() *ChainProposalQuery {
+	return &ChainProposalQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a ChainProposal entity by its id.
+func (c *ChainProposalClient) Get(ctx context.Context, id int) (*ChainProposal, error) {
+	return c.Query().Where(chainproposal.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ChainProposalClient) GetX(ctx context.Context, id int) *ChainProposal {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChain queries the chain edge of a ChainProposal.
+func (c *ChainProposalClient) QueryChain(cp *ChainProposal) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := cp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chainproposal.Table, chainproposal.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, chainproposal.ChainTable, chainproposal.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(cp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ChainProposalClient) Hooks() []Hook {
+	return c.hooks.ChainProposal
 }
 
 // ContractClient is a client for the Contract schema.
@@ -406,6 +663,22 @@ func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery
 	return query
 }
 
+// QueryChains queries the chains edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := dc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ChainsTable, discordchannel.ChainsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DiscordChannelClient) Hooks() []Hook {
 	return c.hooks.DiscordChannel
@@ -627,6 +900,22 @@ func (c *TelegramChatClient) QueryContracts(tc *TelegramChat) *ContractQuery {
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
 			sqlgraph.To(contract.Table, contract.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ContractsTable, telegramchat.ContractsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChains queries the chains edge of a TelegramChat.
+func (c *TelegramChatClient) QueryChains(tc *TelegramChat) *ChainQuery {
+	query := &ChainQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, telegramchat.ChainsTable, telegramchat.ChainsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
 		return fromV, nil

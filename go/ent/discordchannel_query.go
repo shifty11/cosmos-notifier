@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
@@ -29,6 +30,7 @@ type DiscordChannelQuery struct {
 	// eager-loading edges.
 	withUsers     *UserQuery
 	withContracts *ContractQuery
+	withChains    *ChainQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -102,6 +104,28 @@ func (dcq *DiscordChannelQuery) QueryContracts() *ContractQuery {
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
 			sqlgraph.To(contract.Table, contract.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ContractsTable, discordchannel.ContractsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryChains chains the current query on the "chains" edge.
+func (dcq *DiscordChannelQuery) QueryChains() *ChainQuery {
+	query := &ChainQuery{config: dcq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, discordchannel.ChainsTable, discordchannel.ChainsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
 		return fromU, nil
@@ -292,6 +316,7 @@ func (dcq *DiscordChannelQuery) Clone() *DiscordChannelQuery {
 		predicates:    append([]predicate.DiscordChannel{}, dcq.predicates...),
 		withUsers:     dcq.withUsers.Clone(),
 		withContracts: dcq.withContracts.Clone(),
+		withChains:    dcq.withChains.Clone(),
 		// clone intermediate query.
 		sql:    dcq.sql.Clone(),
 		path:   dcq.path,
@@ -321,6 +346,17 @@ func (dcq *DiscordChannelQuery) WithContracts(opts ...func(*ContractQuery)) *Dis
 	return dcq
 }
 
+// WithChains tells the query-builder to eager-load the nodes that are connected to
+// the "chains" edge. The optional arguments are used to configure the query builder of the edge.
+func (dcq *DiscordChannelQuery) WithChains(opts ...func(*ChainQuery)) *DiscordChannelQuery {
+	query := &ChainQuery{config: dcq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	dcq.withChains = query
+	return dcq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
@@ -335,7 +371,6 @@ func (dcq *DiscordChannelQuery) WithContracts(opts ...func(*ContractQuery)) *Dis
 //		GroupBy(discordchannel.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (dcq *DiscordChannelQuery) GroupBy(field string, fields ...string) *DiscordChannelGroupBy {
 	grbuild := &DiscordChannelGroupBy{config: dcq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -362,7 +397,6 @@ func (dcq *DiscordChannelQuery) GroupBy(field string, fields ...string) *Discord
 //	client.DiscordChannel.Query().
 //		Select(discordchannel.FieldCreateTime).
 //		Scan(ctx, &v)
-//
 func (dcq *DiscordChannelQuery) Select(fields ...string) *DiscordChannelSelect {
 	dcq.fields = append(dcq.fields, fields...)
 	selbuild := &DiscordChannelSelect{DiscordChannelQuery: dcq}
@@ -391,9 +425,10 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*DiscordChannel{}
 		_spec       = dcq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			dcq.withUsers != nil,
 			dcq.withContracts != nil,
+			dcq.withChains != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -517,6 +552,59 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			}
 			for kn := range nodes {
 				kn.Edges.Contracts = append(kn.Edges.Contracts, n)
+			}
+		}
+	}
+
+	if query := dcq.withChains; query != nil {
+		edgeids := make([]driver.Value, len(nodes))
+		byid := make(map[int]*DiscordChannel)
+		nids := make(map[int]map[*DiscordChannel]struct{})
+		for i, node := range nodes {
+			edgeids[i] = node.ID
+			byid[node.ID] = node
+			node.Edges.Chains = []*Chain{}
+		}
+		query.Where(func(s *sql.Selector) {
+			joinT := sql.Table(discordchannel.ChainsTable)
+			s.Join(joinT).On(s.C(chain.FieldID), joinT.C(discordchannel.ChainsPrimaryKey[1]))
+			s.Where(sql.InValues(joinT.C(discordchannel.ChainsPrimaryKey[0]), edgeids...))
+			columns := s.SelectedColumns()
+			s.Select(joinT.C(discordchannel.ChainsPrimaryKey[0]))
+			s.AppendSelect(columns...)
+			s.SetDistinct(false)
+		})
+		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]interface{}, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]interface{}{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []interface{}) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*DiscordChannel]struct{}{byid[outValue]: struct{}{}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byid[outValue]] = struct{}{}
+				return nil
+			}
+		})
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
+			}
+			for kn := range nodes {
+				kn.Edges.Chains = append(kn.Edges.Chains, n)
 			}
 		}
 	}

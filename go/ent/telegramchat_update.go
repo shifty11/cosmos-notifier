@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
@@ -85,6 +86,21 @@ func (tcu *TelegramChatUpdate) AddContracts(c ...*Contract) *TelegramChatUpdate 
 	return tcu.AddContractIDs(ids...)
 }
 
+// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
+func (tcu *TelegramChatUpdate) AddChainIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.AddChainIDs(ids...)
+	return tcu
+}
+
+// AddChains adds the "chains" edges to the Chain entity.
+func (tcu *TelegramChatUpdate) AddChains(c ...*Chain) *TelegramChatUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return tcu.AddChainIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcu *TelegramChatUpdate) Mutation() *TelegramChatMutation {
 	return tcu.mutation
@@ -130,6 +146,27 @@ func (tcu *TelegramChatUpdate) RemoveContracts(c ...*Contract) *TelegramChatUpda
 		ids[i] = c[i].ID
 	}
 	return tcu.RemoveContractIDs(ids...)
+}
+
+// ClearChains clears all "chains" edges to the Chain entity.
+func (tcu *TelegramChatUpdate) ClearChains() *TelegramChatUpdate {
+	tcu.mutation.ClearChains()
+	return tcu
+}
+
+// RemoveChainIDs removes the "chains" edge to Chain entities by IDs.
+func (tcu *TelegramChatUpdate) RemoveChainIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.RemoveChainIDs(ids...)
+	return tcu
+}
+
+// RemoveChains removes "chains" edges to Chain entities.
+func (tcu *TelegramChatUpdate) RemoveChains(c ...*Chain) *TelegramChatUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return tcu.RemoveChainIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -349,6 +386,60 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tcu.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.RemovedChainsIDs(); len(nodes) > 0 && !tcu.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.ChainsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{telegramchat.Label}
@@ -423,6 +514,21 @@ func (tcuo *TelegramChatUpdateOne) AddContracts(c ...*Contract) *TelegramChatUpd
 	return tcuo.AddContractIDs(ids...)
 }
 
+// AddChainIDs adds the "chains" edge to the Chain entity by IDs.
+func (tcuo *TelegramChatUpdateOne) AddChainIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.AddChainIDs(ids...)
+	return tcuo
+}
+
+// AddChains adds the "chains" edges to the Chain entity.
+func (tcuo *TelegramChatUpdateOne) AddChains(c ...*Chain) *TelegramChatUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return tcuo.AddChainIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcuo *TelegramChatUpdateOne) Mutation() *TelegramChatMutation {
 	return tcuo.mutation
@@ -468,6 +574,27 @@ func (tcuo *TelegramChatUpdateOne) RemoveContracts(c ...*Contract) *TelegramChat
 		ids[i] = c[i].ID
 	}
 	return tcuo.RemoveContractIDs(ids...)
+}
+
+// ClearChains clears all "chains" edges to the Chain entity.
+func (tcuo *TelegramChatUpdateOne) ClearChains() *TelegramChatUpdateOne {
+	tcuo.mutation.ClearChains()
+	return tcuo
+}
+
+// RemoveChainIDs removes the "chains" edge to Chain entities by IDs.
+func (tcuo *TelegramChatUpdateOne) RemoveChainIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.RemoveChainIDs(ids...)
+	return tcuo
+}
+
+// RemoveChains removes "chains" edges to Chain entities.
+func (tcuo *TelegramChatUpdateOne) RemoveChains(c ...*Chain) *TelegramChatUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return tcuo.RemoveChainIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -709,6 +836,60 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: contract.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tcuo.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.RemovedChainsIDs(); len(nodes) > 0 && !tcuo.mutation.ChainsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.ChainsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   telegramchat.ChainsTable,
+			Columns: telegramchat.ChainsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: chain.FieldID,
 				},
 			},
 		}

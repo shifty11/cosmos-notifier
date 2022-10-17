@@ -525,6 +525,34 @@ func HasContractsWith(preds ...predicate.Contract) predicate.DiscordChannel {
 	})
 }
 
+// HasChains applies the HasEdge predicate on the "chains" edge.
+func HasChains() predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ChainsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasChainsWith applies the HasEdge predicate on the "chains" edge with a given conditions (other predicates).
+func HasChainsWith(preds ...predicate.Chain) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ChainsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.DiscordChannel) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {

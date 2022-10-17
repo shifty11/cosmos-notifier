@@ -299,7 +299,6 @@ func (pq *ProposalQuery) WithContract(opts ...func(*ContractQuery)) *ProposalQue
 //		GroupBy(proposal.FieldCreateTime).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (pq *ProposalQuery) GroupBy(field string, fields ...string) *ProposalGroupBy {
 	grbuild := &ProposalGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -326,7 +325,6 @@ func (pq *ProposalQuery) GroupBy(field string, fields ...string) *ProposalGroupB
 //	client.Proposal.Query().
 //		Select(proposal.FieldCreateTime).
 //		Scan(ctx, &v)
-//
 func (pq *ProposalQuery) Select(fields ...string) *ProposalSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &ProposalSelect{ProposalQuery: pq}

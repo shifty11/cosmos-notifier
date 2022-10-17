@@ -5,6 +5,8 @@ package ent
 import (
 	"time"
 
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
+	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/proposal"
@@ -17,6 +19,44 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	chainMixin := schema.Chain{}.Mixin()
+	chainMixinFields0 := chainMixin[0].Fields()
+	_ = chainMixinFields0
+	chainFields := schema.Chain{}.Fields()
+	_ = chainFields
+	// chainDescCreateTime is the schema descriptor for create_time field.
+	chainDescCreateTime := chainMixinFields0[0].Descriptor()
+	// chain.DefaultCreateTime holds the default value on creation for the create_time field.
+	chain.DefaultCreateTime = chainDescCreateTime.Default.(func() time.Time)
+	// chainDescUpdateTime is the schema descriptor for update_time field.
+	chainDescUpdateTime := chainMixinFields0[1].Descriptor()
+	// chain.DefaultUpdateTime holds the default value on creation for the update_time field.
+	chain.DefaultUpdateTime = chainDescUpdateTime.Default.(func() time.Time)
+	// chain.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	chain.UpdateDefaultUpdateTime = chainDescUpdateTime.UpdateDefault.(func() time.Time)
+	// chainDescIsEnabled is the schema descriptor for is_enabled field.
+	chainDescIsEnabled := chainFields[3].Descriptor()
+	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
+	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
+	// chainDescThumbnailURL is the schema descriptor for thumbnail_url field.
+	chainDescThumbnailURL := chainFields[5].Descriptor()
+	// chain.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
+	chain.DefaultThumbnailURL = chainDescThumbnailURL.Default.(string)
+	chainproposalMixin := schema.ChainProposal{}.Mixin()
+	chainproposalMixinFields0 := chainproposalMixin[0].Fields()
+	_ = chainproposalMixinFields0
+	chainproposalFields := schema.ChainProposal{}.Fields()
+	_ = chainproposalFields
+	// chainproposalDescCreateTime is the schema descriptor for create_time field.
+	chainproposalDescCreateTime := chainproposalMixinFields0[0].Descriptor()
+	// chainproposal.DefaultCreateTime holds the default value on creation for the create_time field.
+	chainproposal.DefaultCreateTime = chainproposalDescCreateTime.Default.(func() time.Time)
+	// chainproposalDescUpdateTime is the schema descriptor for update_time field.
+	chainproposalDescUpdateTime := chainproposalMixinFields0[1].Descriptor()
+	// chainproposal.DefaultUpdateTime holds the default value on creation for the update_time field.
+	chainproposal.DefaultUpdateTime = chainproposalDescUpdateTime.Default.(func() time.Time)
+	// chainproposal.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	chainproposal.UpdateDefaultUpdateTime = chainproposalDescUpdateTime.UpdateDefault.(func() time.Time)
 	contractMixin := schema.Contract{}.Mixin()
 	contractMixinFields0 := contractMixin[0].Fields()
 	_ = contractMixinFields0
