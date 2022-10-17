@@ -59,6 +59,20 @@ func (cc *ChainCrawler) downloadImage(chain *types.Chain) string {
 	return ""
 }
 
+func (cc *ChainCrawler) addProposals(entChain *ent.Chain) {
+	var resp types.ChainProposalsResponse
+	url := fmt.Sprintf("https://rest.cosmos.directory/%v/cosmos/gov/v1beta1/proposals", entChain.Name)
+	err := cc.getJson(url, &resp)
+	if err != nil {
+		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
+		return
+	}
+
+	for _, proposal := range resp.Proposals {
+		cc.chainProposalManager.CreateOrUpdate(entChain, &proposal)
+	}
+}
+
 func (cc *ChainCrawler) AddOrUpdateChains() {
 	var chainInfo types.ChainInfo
 	err := cc.getJson("https://chains.cosmos.directory/", &chainInfo)
@@ -84,21 +98,7 @@ func (cc *ChainCrawler) AddOrUpdateChains() {
 		if !found && chain.NetworkType == "mainnet" {
 			thumbnailUrl := cc.downloadImage(&chain)
 			entChain := cc.chainManager.Create(&chain, thumbnailUrl)
-			cc.AddProposals(entChain)
+			cc.addProposals(entChain)
 		}
-	}
-}
-
-func (cc *ChainCrawler) AddProposals(entChain *ent.Chain) {
-	var resp types.ChainProposalsResponse
-	url := fmt.Sprintf("https://rest.cosmos.directory/%v/cosmos/gov/v1beta1/proposals", entChain.Name)
-	err := cc.getJson(url, &resp)
-	if err != nil {
-		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
-		return
-	}
-
-	for _, proposal := range resp.Proposals {
-		cc.chainProposalManager.CreateOrUpdate(entChain, &proposal)
 	}
 }
