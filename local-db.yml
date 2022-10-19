@@ -3,7 +3,7 @@ version: '3.8'
 services:
   db:
     image: postgres:14.5
-    container_name: daodao_notifier_db
+    container_name: cosmos_notifier_db
     ports:
       - "5432:5432"
     volumes:
@@ -15,7 +15,7 @@ services:
 
   db-test:
     image: postgres:14.5
-    container_name: daodao_notifier_test_db
+    container_name: cosmos_notifier_test_db
     ports:
       - "5433:5432"
     volumes:
@@ -27,7 +27,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: daodao_notifier_pgadmin
+    container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
@@ -42,7 +42,7 @@ services:
 
 volumes:
   data:
-    name: daodao_notifier_data
+    name: cosmos_notifier_data
   test_data:
-    name: daodao_notifier_test_data
+    name: cosmos_notifier_test_data
   pgadmin:

@@ -3,7 +3,7 @@ version: '3.9'
 services:
   db:
     image: postgres:14.5
-    container_name: daodao_notifier_db
+    container_name: cosmos_notifier_db
     ports:
       - "5432:5432"
     volumes:
@@ -20,18 +20,18 @@ services:
 
   db-migration:
     build: go
-    container_name: daodao_notifier_db_migration
+    container_name: cosmos_notifier_db_migration
     working_dir: /app
     env_file:
       - .env
-    command: "/dao-dao-notifier migrate"
+    command: "/cosmos-notifier db migrate"
     depends_on:
       db:
         condition: service_healthy
 
   nodejs:
     build: nodejs
-    container_name: daodao_notifier_nodejs
+    container_name: cosmos_notifier_nodejs
     working_dir: /usr/src/app
     volumes:
       - /usr/app/node_modules
@@ -46,11 +46,11 @@ services:
 
   telegram:
     build: go
-    container_name: daodao_notifier_telegram
+    container_name: cosmos_notifier_telegram
     working_dir: /app
     env_file:
       - .env
-    command: "/dao-dao-notifier start-telegram-bot"
+    command: "/cosmos-notifier service telegram"
     depends_on:
       db:
         condition: service_healthy
@@ -59,26 +59,43 @@ services:
 
   grpc:
     build: go
-    container_name: daodao_notifier_grpc
+    container_name: cosmos_notifier_grpc
     working_dir: /app
     env_file:
       - .env
-    command: "/dao-dao-notifier grpc"
+    command: "/cosmos-notifier service grpc"
     depends_on:
       db:
         condition: service_healthy
       db-migration:
         condition: service_completed_successfully
 
-  crawler:
+  contract-crawler:
     build: go
-    container_name: daodao_notifier_crawler
+    container_name: cosmos_notifier_crawler
     working_dir: /app
     volumes:
       - ./contracts.txt:/app/contracts.txt
     env_file:
       - .env
-    command: "/dao-dao-notifier crawl --repeat"
+    command: "/cosmos-notifier service contract-crawler --repeat"
+    depends_on:
+      nodejs:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      db-migration:
+        condition: service_completed_successfully
+
+  chain-crawler:
+    build: go
+    container_name: cosmos_notifier_crawler
+    working_dir: /app
+    volumes:
+      - ./contracts.txt:/app/contracts.txt
+    env_file:
+      - .env
+    command: "/cosmos-notifier service chain-crawler --repeat"
     depends_on:
       nodejs:
         condition: service_healthy
@@ -89,7 +106,7 @@ services:
 
   envoy:
     image: envoyproxy/envoy-dev
-    container_name: daodao_notifier_envoy
+    container_name: cosmos_notifier_envoy
     ports:
       - "8090:8090"
     volumes:
@@ -103,11 +120,11 @@ services:
       dockerfile: flutter.Dockerfile
       args:
         CONFIG_FILE: ${FLUTTER_CONFIG_FILE}
-    container_name: daodao_notifier_webapp
+    container_name: cosmos_notifier_webapp
     ports:
       - "80:80"
 
 volumes:
   data:
-    name: daodao_notifier_data
+    name: cosmos_notifier_data
   pgadmin:

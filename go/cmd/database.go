@@ -1,3 +1,6 @@
+/*
+Copyright © 2022 NAME HERE <EMAIL ADDRESS>
+*/
 package cmd
 
 import (
@@ -7,12 +10,29 @@ import (
 	"entgo.io/ent/dialect/sql/schema"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent/migrate"
-	"log"
-	"strings"
-
-	_ "github.com/lib/pq"
+	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/spf13/cobra"
+	"strings"
 )
+
+// databaseCmd represents the database command
+var databaseCmd = &cobra.Command{
+	Use:     "database",
+	Short:   "Database commands",
+	Aliases: []string{"db"},
+}
+
+// migrateCmd represents the migrate command
+var migrateCmd = &cobra.Command{
+	Use:   "migrate",
+	Short: "Migrate the database",
+	Run: func(cmd *cobra.Command, args []string) {
+		err := database.MigrateDb()
+		if err != nil {
+			log.Sugar.Panicf("failed to migrate database: %v", err)
+		}
+	},
+}
 
 // createMigrationsCmd represents the createMigrations command
 var createMigrationsCmd = &cobra.Command{
@@ -33,16 +53,12 @@ go run main.go createMigrations postgres://postgres:postgres@localhost:5432/daod
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(createMigrationsCmd)
-}
-
 func createMigrations(dbCon string) {
 	ctx := context.Background()
 	// Create a local migration directory able to understand golang-migrate migration files for replay.
 	dir, err := sqltool.NewGolangMigrateDir("database/migrations")
 	if err != nil {
-		log.Fatalf("failed creating atlas migration directory: %v", err)
+		log.Sugar.Fatalf("failed creating atlas migration directory: %v", err)
 	}
 	// Write migration diff.
 	opts := []schema.MigrateOption{
@@ -55,6 +71,12 @@ func createMigrations(dbCon string) {
 
 	err = migrate.NamedDiff(ctx, dbCon, "migration", opts...)
 	if err != nil {
-		log.Fatalf("failed generating migration file: %v", err)
+		log.Sugar.Fatalf("failed generating migration file: %v", err)
 	}
+}
+
+func init() {
+	rootCmd.AddCommand(databaseCmd)
+	databaseCmd.AddCommand(migrateCmd)
+	databaseCmd.AddCommand(createMigrationsCmd)
 }

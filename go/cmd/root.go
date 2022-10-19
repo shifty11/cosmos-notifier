@@ -8,8 +8,8 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "dao-dao-notifier",
-	Short: "DAO DAO Notifier cli",
+	Use:   "cosmos-notifier",
+	Short: "Cosmos Notifier cli",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

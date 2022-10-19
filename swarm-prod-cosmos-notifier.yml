@@ -22,7 +22,7 @@ services:
     working_dir: /app
     secrets:
       - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier start-telegram-bot"
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service telegram"
     deploy:
       placement:
         constraints:
@@ -33,7 +33,7 @@ services:
     working_dir: /app
     secrets:
       - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier start-discord-bot"
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service discord"
     deploy:
       placement:
         constraints:
@@ -44,20 +44,34 @@ services:
     working_dir: /app
     secrets:
       - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier migrate && /dao-dao-notifier grpc"
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier db migrate && /cosmos-notifier service grpc"
     deploy:
       placement:
         constraints:
           - node.role != manager
 
-  crawler:
+  contract-crawler:
     image: ghcr.io/shifty11/dao-dao-notifier-go:latest
     working_dir: /app
     volumes:
       - contract_images:/app/assets/images/contracts
     secrets:
       - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /dao-dao-notifier crawl --repeat"
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service contract-crawler --repeat"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+          - node.labels.host == daodao-notifier
+
+  chain-crawler:
+    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    working_dir: /app
+    volumes:
+      - contract_images:/app/assets/images/contracts
+    secrets:
+      - daodao-notifier-env
+    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service chain-crawler --repeat"
     deploy:
       placement:
         constraints:
