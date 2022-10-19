@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/types"
 	"testing"
@@ -232,14 +232,14 @@ func TestContractManager_Delete(t *testing.T) {
 		SetImageURL(imageUrl).
 		SetThumbnailURL(thumbnailUrl).
 		SaveX(m.ctx)
-	m.client.Proposal.
+	m.client.ContractProposal.
 		Create().
 		SetContract(contract).
 		SetDescription("test").
 		SetTitle("test").
 		SetProposalID(1).
 		SetExpiresAt(time.Now()).
-		SetStatus(proposal.StatusOpen).
+		SetStatus(contractproposal.StatusOpen).
 		SaveX(m.ctx)
 	u := m.client.User.
 		Create().
@@ -272,7 +272,7 @@ func TestContractManager_Delete(t *testing.T) {
 		t.Errorf("Expected no contracts, got %d", len(dc.Edges.Contracts))
 	}
 
-	cnt := m.client.Proposal.Query().CountX(m.ctx)
+	cnt := m.client.ContractProposal.Query().CountX(m.ctx)
 	if cnt != 0 {
 		t.Errorf("Expected no proposals, got %d", cnt)
 	}

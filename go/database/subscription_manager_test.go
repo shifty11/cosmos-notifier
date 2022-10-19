@@ -87,10 +87,10 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 	if subscriptions[1].Id != int64(c2.ID) {
 		t.Errorf("Expected %d, got %d", c2.ID, subscriptions[1].Id)
 	}
-	if !subscriptions[0].Notify {
+	if !subscriptions[0].IsSubscribed {
 		t.Error("Expected notify to be true")
 	}
-	if subscriptions[1].Notify {
+	if subscriptions[1].IsSubscribed {
 		t.Error("Expected notify to be false")
 	}
 
@@ -153,8 +153,8 @@ func TestSubscriptionManager_GetSubscriptions(t *testing.T) {
 	if c1s1.Id != int64(c1.ID) && c2s1.Id != int64(c1.ID) && c1s2.Id != int64(c2.ID) && c2s2.Id != int64(c2.ID) {
 		t.Errorf("Expected %d or %d, got %d and %d", c1.ID, c2.ID, c1s1.Id, c1s2.Id)
 	}
-	if c1s1.Notify != false && c2s1.Notify != false && c1s2.Notify != true && c2s2.Notify != false {
-		t.Errorf("Expected %v or %v, got %v and %v", false, true, c1s1.Notify, c1s2.Notify)
+	if c1s1.IsSubscribed != false && c2s1.IsSubscribed != false && c1s2.IsSubscribed != true && c2s2.IsSubscribed != false {
+		t.Errorf("Expected %v or %v, got %v and %v", false, true, c1s1.IsSubscribed, c1s2.IsSubscribed)
 	}
 
 	chatRooms = m.GetSubscriptions(discordUser)
@@ -179,8 +179,8 @@ func TestSubscriptionManager_GetSubscriptions(t *testing.T) {
 	if c1s1.Id != int64(c2.ID) && c1s2.Id != int64(c2.ID) {
 		t.Errorf("Expected %d, got %d and %d", c2.ID, c1s1.Id, c1s2.Id)
 	}
-	if c1s1.Notify != false && c1s2.Notify != true {
-		t.Errorf("Expected %v, got %v and %v", false, c1s1.Notify, c1s2.Notify)
+	if c1s1.IsSubscribed != false && c1s2.IsSubscribed != true {
+		t.Errorf("Expected %v, got %v and %v", false, c1s1.IsSubscribed, c1s2.IsSubscribed)
 	}
 
 }

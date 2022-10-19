@@ -9,6 +9,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
+	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
 )
 
 type SubscriptionStats struct {
@@ -59,20 +60,20 @@ func NewSubscriptionManager(
 	}
 }
 
-func (m *SubscriptionManager) getSubscriptions(ofUser []*ent.Contract) []*Subscription {
+func (m *SubscriptionManager) getSubscriptions(ofUser []*ent.Contract) []*pb.Subscription {
 	contracts := m.contractManager.All()
-	var subs []*Subscription
+	var subs []*pb.Subscription
 	for _, c := range contracts {
-		var subscription = Subscription{
+		var subscription = pb.Subscription{
 			Id:              int64(c.ID),
 			Name:            c.Name,
-			Notify:          false,
+			IsSubscribed:    false,
 			ThumbnailUrl:    c.ThumbnailURL,
 			ContractAddress: c.Address,
 		}
 		for _, nc := range ofUser { // check if user gets notified for this contract
 			if nc.ID == c.ID {
-				subscription.Notify = true
+				subscription.IsSubscribed = true
 			}
 		}
 		subs = append(subs, &subscription)
@@ -88,7 +89,7 @@ func (m *SubscriptionManager) ToggleSubscription(entUser *ent.User, chatRoomId i
 	}
 }
 
-func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
+func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*pb.ChatRoom {
 	if entUser.Type == user.TypeTelegram {
 		tgChats, err := entUser.
 			QueryTelegramChats().
@@ -100,13 +101,17 @@ func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 			log.Sugar.Panicf("Error while querying telegram chats of user %v (%v): %v", entUser.Name, entUser.ID, err)
 		}
 
-		var chats []*ChatRoom
+		var chats []*pb.ChatRoom
 		for _, tgChat := range tgChats {
-			chats = append(chats, &ChatRoom{
+			chats = append(chats, &pb.ChatRoom{
 				Id:            tgChat.ChatID,
 				Name:          tgChat.Name,
+				TYPE:          pb.ChatRoom_TELEGRAM,
 				Subscriptions: m.getSubscriptions(tgChat.Edges.Contracts),
 			})
+			if entUser.Role == user.RoleAdmin {
+				m.collectStats(chats)
+			}
 		}
 		return chats
 	} else {
@@ -120,20 +125,24 @@ func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) []*ChatRoom {
 			log.Sugar.Panicf("Error while querying discord channels of user %v (%v): %v", entUser.Name, entUser.ID, err)
 		}
 
-		var chats []*ChatRoom
+		var chats []*pb.ChatRoom
 		for _, dChannel := range dChannels {
-			chats = append(chats, &ChatRoom{
+			chats = append(chats, &pb.ChatRoom{
 				Id:            dChannel.ChannelID,
 				Name:          dChannel.Name,
+				TYPE:          pb.ChatRoom_DISCORD,
 				Subscriptions: m.getSubscriptions(dChannel.Edges.Contracts),
 			})
+			if entUser.Role == user.RoleAdmin {
+				m.collectStats(chats)
+			}
 		}
 		return chats
 	}
 }
 
-// CollectStats takes a list of ChatRoom and fills the stats for each subscription
-func (m *SubscriptionManager) CollectStats(chats []*ChatRoom) {
+// collectStats takes a list of ChatRoom and fills the stats for each subscription
+func (m *SubscriptionManager) collectStats(chats []*pb.ChatRoom) {
 	type stats []struct {
 		ID  int
 		Cnt int
@@ -170,12 +179,12 @@ func (m *SubscriptionManager) CollectStats(chats []*ChatRoom) {
 		for _, sub := range chat.Subscriptions {
 			for _, s := range tgStats {
 				if s.ID == int(sub.Id) {
-					sub.Stats.Telegram = s.Cnt
+					sub.Stats.Telegram = int32(s.Cnt)
 				}
 			}
 			for _, s := range dStats {
 				if s.ID == int(sub.Id) {
-					sub.Stats.Discord = s.Cnt
+					sub.Stats.Discord = int32(s.Cnt)
 				}
 			}
 			sub.Stats.Total = sub.Stats.Telegram + sub.Stats.Discord

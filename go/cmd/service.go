@@ -161,6 +161,7 @@ var startGrpcServerCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serviceCmd)
 
+	serviceCmd.AddCommand(startGrpcServerCmd)
 	serviceCmd.AddCommand(startTelegramBotCmd)
 	serviceCmd.AddCommand(startDiscordBotCmd)
 

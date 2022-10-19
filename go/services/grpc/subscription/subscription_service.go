@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
 	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
@@ -29,38 +28,6 @@ func NewSubscriptionsServer(managers *database.DbManagers, crawlerClient *contra
 	}
 }
 
-func convertSubscriptionToProtobuf(entUser *ent.User, subscriptions []*database.ChatRoom) []*pb.ChatRoom {
-	var rooms []*pb.ChatRoom
-	for _, chatRoom := range subscriptions {
-		var subs []*pb.Subscription
-		for _, sub := range chatRoom.Subscriptions {
-			subs = append(subs, &pb.Subscription{
-				Id:              sub.Id,
-				Name:            sub.Name,
-				IsSubscribed:    sub.Notify,
-				ThumbnailUrl:    sub.ThumbnailUrl,
-				ContractAddress: sub.ContractAddress,
-				Stats: &pb.SubscriptionStats{
-					Total:    int32(sub.Stats.Total),
-					Telegram: int32(sub.Stats.Telegram),
-					Discord:  int32(sub.Stats.Discord),
-				},
-			})
-		}
-		roomType := pb.ChatRoom_TELEGRAM
-		if entUser.Type == user.TypeDiscord {
-			roomType = pb.ChatRoom_DISCORD
-		}
-		rooms = append(rooms, &pb.ChatRoom{
-			Id:            chatRoom.Id,
-			Name:          chatRoom.Name,
-			TYPE:          roomType,
-			Subscriptions: subs,
-		})
-	}
-	return rooms
-}
-
 func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *emptypb.Empty) (*pb.GetSubscriptionsResponse, error) {
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
@@ -70,11 +37,7 @@ func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *empty
 
 	log.Sugar.Debugf("GetSubscriptions for user %v (%v)", entUser.Name, entUser.UserID)
 
-	subs := server.subscriptionManager.GetSubscriptions(entUser)
-	if entUser.Role == user.RoleAdmin {
-		server.subscriptionManager.CollectStats(subs)
-	}
-	chatRooms := convertSubscriptionToProtobuf(entUser, subs)
+	chatRooms := server.subscriptionManager.GetSubscriptions(entUser)
 
 	var res = &pb.GetSubscriptionsResponse{ChatRooms: chatRooms}
 	return res, nil
