@@ -74,3 +74,13 @@ func (m *ChainProposalManager) CreateOrUpdate(c *ent.Chain, propData *types.Chai
 	}
 	return prop, ProposalNoChanges
 }
+
+func (m *ChainProposalManager) InVotingPeriod(c *ent.Chain) []*ent.ChainProposal {
+	result, err := c.QueryChainProposals().
+		Where(chainproposal.StatusEQ(chainproposal.StatusPROPOSAL_STATUS_VOTING_PERIOD)).
+		All(m.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Error while querying proposals: %v", err)
+	}
+	return result
+}

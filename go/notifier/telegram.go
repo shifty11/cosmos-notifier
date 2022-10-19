@@ -5,8 +5,8 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/dao-dao-notifier/types"
 	"golang.org/x/exp/slices"
 )
 
@@ -45,15 +45,21 @@ func (n *TelegramNotifier) shouldDeleteUser(err error) bool {
 	return false
 }
 
-func (n *TelegramNotifier) Notify(entContract *ent.Contract, entProp *ent.Proposal) {
+func (n *TelegramNotifier) Notify(
+	subscribedIds []types.TgChatQueryResult,
+	contractOrChainName string,
+	proposalId int,
+	proposalTitle string,
+	proposalDescription string,
+) {
 	p := bluemonday.StripTagsPolicy()
 
 	var textMsgs []string
 	text := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>",
-		entContract.Name,
-		entProp.ProposalID,
-		p.Sanitize(entProp.Title),
-		p.Sanitize(entProp.Description),
+		contractOrChainName,
+		proposalId,
+		p.Sanitize(proposalTitle),
+		p.Sanitize(proposalDescription),
 	)
 	if len(text) <= 4096 {
 		textMsgs = append(textMsgs, text)
@@ -66,7 +72,7 @@ func (n *TelegramNotifier) Notify(entContract *ent.Contract, entProp *ent.Propos
 	}
 
 	var errIds []int64
-	for _, tg := range n.telegramChatManager.GetSubscribedIds(entContract) {
+	for _, tg := range subscribedIds {
 		log.Sugar.Debugf("Notifying telegram chat %v (%v)", tg.Name, tg.ChatId)
 		msg := tgbotapi.NewMessage(tg.ChatId, text)
 		msg.ParseMode = "html"

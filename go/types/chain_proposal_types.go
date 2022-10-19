@@ -37,3 +37,7 @@ type ChainProposalsResponse struct {
 	Proposals  []ChainProposal `json:"proposals"`
 	Pagination Pagination      `json:"pagination"`
 }
+
+type ChainProposalResponse struct {
+	Proposal ChainProposal `json:"proposal"`
+}

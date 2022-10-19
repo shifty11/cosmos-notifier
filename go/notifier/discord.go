@@ -5,8 +5,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/dao-dao-notifier/types"
 	"regexp"
 	"strconv"
 )
@@ -62,15 +62,21 @@ func (n *DiscordNotifier) sanitizeUrls(text string) string {
 	)
 }
 
-func (n *DiscordNotifier) Notify(entContract *ent.Contract, entProp *ent.Proposal) {
+func (n *DiscordNotifier) Notify(
+	subscribedIds []types.DiscordChannelQueryResult,
+	contractOrChainName string,
+	proposalId int,
+	proposalTitle string,
+	proposalDescription string,
+) {
 	p := bluemonday.StripTagsPolicy()
 
 	var textMsgs []string
 	text := fmt.Sprintf("🎉  **%v - Proposal %v\n\n%v**\n\n*%v*",
-		entContract.Name,
-		entProp.ProposalID,
-		p.Sanitize(entProp.Title),
-		n.sanitizeUrls(p.Sanitize(entProp.Description)),
+		contractOrChainName,
+		proposalId,
+		p.Sanitize(proposalTitle),
+		n.sanitizeUrls(p.Sanitize(proposalDescription)),
 	)
 	if len(text) <= 2000 {
 		textMsgs = append(textMsgs, text)
@@ -86,7 +92,7 @@ func (n *DiscordNotifier) Notify(entContract *ent.Contract, entProp *ent.Proposa
 	defer n.closeDiscordSession(session)
 
 	var errIds []int64
-	for _, dc := range n.discordChannelManager.GetSubscribedIds(entContract) {
+	for _, dc := range subscribedIds {
 		log.Sugar.Debugf("Notifying discord channel %v (%v)", dc.Name, dc.ChannelId)
 		for _, textMsg := range textMsgs {
 			var _, err = session.ChannelMessageSendComplex(strconv.FormatInt(dc.ChannelId, 10), &discordgo.MessageSend{

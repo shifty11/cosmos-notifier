@@ -46,7 +46,7 @@ var grpcCmd = &cobra.Command{
 			},
 		}
 		dbManagers := database.NewDefaultDbManagers()
-		notifier := notifier.NewNotifier(dbManagers, telegramBotToken, telegramApiEndpoint, discordBotToken)
+		notifier := notifier.NewContractNotifier(dbManagers, telegramBotToken, telegramApiEndpoint, discordBotToken)
 		crawlerClient := crawler.NewCrawler(dbManagers, notifier, nodejsUrl, assetsPath)
 		server := grpc.NewGRPCServer(dbManagers, config, crawlerClient)
 		server.Run()

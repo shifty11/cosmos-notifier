@@ -2,7 +2,8 @@ package database
 
 import (
 	"context"
-	"fmt"
+	"github.com/golang/mock/gomock"
+	mock_database "github.com/shifty11/dao-dao-notifier/database/mock_types"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/types"
@@ -22,84 +23,28 @@ func newTestSubscriptionManager(t *testing.T) *SubscriptionManager {
 	return manager
 }
 
-var compStringTg = ""
-var compStringDiscord = ""
-
-type mockTelegramChatManager struct{}
-
-func (m *mockTelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error) {
-	compStringTg = fmt.Sprintf("%T %d %d", m, tgChatId, contractId)
-	return true, nil
-}
-
-func (m *mockTelegramChatManager) CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool) {
-	panic("implement me")
-}
-
-func (m *mockTelegramChatManager) GetSubscribedIds(entContract *ent.Contract) []TgChatQueryResult {
-	panic("implement me")
-}
-
-func (m *mockTelegramChatManager) Delete(userId int64, chatId int64) error {
-	panic("implement me")
-}
-
-func (m *mockTelegramChatManager) DeleteMultiple(chatIds []int64) {
-	panic("implement me")
-}
-
-type mockDiscordChannelManager struct{}
-
-func (m *mockDiscordChannelManager) AddOrRemoveContract(discordChannelId int64, contractId int) (hasContract bool, err error) {
-	compStringDiscord = fmt.Sprintf("%T %d %d", m, discordChannelId, contractId)
-	return true, nil
-}
-
-func (m *mockDiscordChannelManager) CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool) {
-	panic("implement me")
-}
-
-func (m *mockDiscordChannelManager) Delete(userId int64, channelId int64) error {
-	panic("implement me")
-}
-
-func (m *mockDiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
-	panic("implement me")
-}
-
-func (m *mockDiscordChannelManager) CountSubscriptions(channelId int64) int {
-	panic("implement me")
-}
-
-func (m *mockDiscordChannelManager) GetSubscribedIds(entContract *ent.Contract) []DiscordChannelQueryResult {
-	panic("implement me")
-}
-
-func (m *mockDiscordChannelManager) DeleteMultiple(channelIds []int64) {
-	panic("implement me")
-}
-
 func TestSubscriptionManager_ToggleSubscription(t *testing.T) {
 	m := newTestSubscriptionManager(t)
-	m.telegramChatManager = &mockTelegramChatManager{}
-	m.discordChannelManager = &mockDiscordChannelManager{}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	tgMock := mock_database.NewMockITelegramChatManager(ctrl)
+	m.telegramChatManager = tgMock
+	dMock := mock_database.NewMockIDiscordChannelManager(ctrl)
+
+	m.discordChannelManager = dMock
 
 	tgUser := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
 
+	tgMock.EXPECT().AddOrRemoveContract(int64(1), 1).Return(true, nil)
 	//goland:noinspection GoUnhandledErrorResult
 	m.ToggleSubscription(tgUser, int64(1), 1)
-	if compStringTg != fmt.Sprintf("%T %d %d", m.telegramChatManager, int64(1), 1) {
-		t.Error("Wrong function called")
-	}
 
 	discordUser := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
 
+	dMock.EXPECT().AddOrRemoveContract(int64(1), 1).Return(true, nil)
 	//goland:noinspection GoUnhandledErrorResult
 	m.ToggleSubscription(discordUser, int64(1), 1)
-	if compStringDiscord != fmt.Sprintf("%T %d %d", m.discordChannelManager, int64(1), 1) {
-		t.Error("Wrong function called")
-	}
-
 }
 
 func TestSubscriptionManager_getSubscriptions(t *testing.T) {

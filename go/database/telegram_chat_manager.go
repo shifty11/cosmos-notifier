@@ -8,12 +8,13 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/dao-dao-notifier/types"
 )
 
 type ITelegramChatManager interface {
 	AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error)
 	CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool)
-	GetSubscribedIds(entContract *ent.Contract) []TgChatQueryResult
+	GetSubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult
 	Delete(userId int64, chatId int64) error
 	DeleteMultiple(chatIds []int64)
 	CountSubscriptions(chatId int64) int
@@ -128,19 +129,13 @@ func (m *TelegramChatManager) CreateOrUpdateChat(userId int64, userName string, 
 	return tgChat, false
 }
 
-type TgChatQueryResult struct {
-	ChatId int64  `json:"chat_id,omitempty"`
-	Name   string `json:"name,omitempty"`
-}
-
-func (m *TelegramChatManager) GetSubscribedIds(entContract *ent.Contract) []TgChatQueryResult {
-	var v []TgChatQueryResult
-	err := entContract.
-		QueryTelegramChats().
+func (m *TelegramChatManager) GetSubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult {
+	var v []types.TgChatQueryResult
+	err := query.
 		Select(telegramchat.FieldChatID, telegramchat.FieldName).
 		Scan(m.ctx, &v)
 	if err != nil {
-		log.Sugar.Panicf("Error while querying Telegram chatIds for contract %v (%v): %v", entContract.Name, entContract.Address, err)
+		log.Sugar.Panicf("Error while querying Telegram chatIds: %v", err)
 	}
 	return v
 }

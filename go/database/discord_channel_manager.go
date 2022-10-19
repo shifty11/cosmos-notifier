@@ -8,6 +8,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/dao-dao-notifier/types"
 )
 
 type IDiscordChannelManager interface {
@@ -16,7 +17,7 @@ type IDiscordChannelManager interface {
 	Delete(userId int64, channelId int64) error
 	GetChannelUsers(channelId int64) []*ent.User
 	CountSubscriptions(channelId int64) int
-	GetSubscribedIds(entContract *ent.Contract) []DiscordChannelQueryResult
+	GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult
 	DeleteMultiple(channelIds []int64)
 }
 
@@ -222,19 +223,13 @@ func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
 	return count
 }
 
-type DiscordChannelQueryResult struct {
-	ChannelId int64  `json:"channel_id"`
-	Name      string `json:"name"`
-}
-
-func (m *DiscordChannelManager) GetSubscribedIds(entContract *ent.Contract) []DiscordChannelQueryResult {
-	var v []DiscordChannelQueryResult
-	err := entContract.
-		QueryDiscordChannels().
+func (m *DiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult {
+	var v []types.DiscordChannelQueryResult
+	err := query.
 		Select(discordchannel.FieldChannelID, discordchannel.FieldName).
 		Scan(m.ctx, &v)
 	if err != nil {
-		log.Sugar.Panicf("Could not get discord channels for contract %v (%v): %v", entContract.Name, entContract.Address, err)
+		log.Sugar.Panicf("Could not get discord channels: %v", err)
 	}
 	return v
 }

@@ -128,13 +128,13 @@ func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
 		AddUsers(u).
 		SaveX(m.ctx)
 
-	ids := m.GetSubscribedIds(c1)
+	ids := m.GetSubscribedIds(c1.QueryDiscordChannels())
 	if len(ids) != 0 {
 		t.Fatalf("Expected 0, got %d", len(ids))
 	}
 
 	_, _ = m.AddOrRemoveContract(dc.ChannelID, c1.ID)
-	ids = m.GetSubscribedIds(c1)
+	ids = m.GetSubscribedIds(c1.QueryDiscordChannels())
 	if len(ids) != 1 {
 		t.Fatalf("Expected 1, got %d", len(ids))
 	}
@@ -153,7 +153,7 @@ func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
 		AddUsers(u).
 		SaveX(m.ctx)
 	_, _ = m.AddOrRemoveContract(dc.ChannelID, c1.ID)
-	ids = m.GetSubscribedIds(c1)
+	ids = m.GetSubscribedIds(c1.QueryDiscordChannels())
 	if len(ids) != 2 {
 		t.Fatalf("Expected 2, got %d", len(ids))
 	}
