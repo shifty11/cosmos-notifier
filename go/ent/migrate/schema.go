@@ -43,7 +43,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
 		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainProposalsTable holds the schema information for the "chain_proposals" table.
@@ -84,6 +84,32 @@ var (
 			},
 		},
 	}
+	// ContractProposalsColumns holds the columns for the "contract_proposals" table.
+	ContractProposalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "proposal_id", Type: field.TypeInt},
+		{Name: "title", Type: field.TypeString},
+		{Name: "description", Type: field.TypeString},
+		{Name: "expires_at", Type: field.TypeTime},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "rejected", "passed", "executed", "closed", "execution_failed"}},
+		{Name: "contract_proposals", Type: field.TypeInt, Nullable: true},
+	}
+	// ContractProposalsTable holds the schema information for the "contract_proposals" table.
+	ContractProposalsTable = &schema.Table{
+		Name:       "contract_proposals",
+		Columns:    ContractProposalsColumns,
+		PrimaryKey: []*schema.Column{ContractProposalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "contract_proposals_contracts_proposals",
+				Columns:    []*schema.Column{ContractProposalsColumns[8]},
+				RefColumns: []*schema.Column{ContractsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// DiscordChannelsColumns holds the columns for the "discord_channels" table.
 	DiscordChannelsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -98,32 +124,6 @@ var (
 		Name:       "discord_channels",
 		Columns:    DiscordChannelsColumns,
 		PrimaryKey: []*schema.Column{DiscordChannelsColumns[0]},
-	}
-	// ProposalsColumns holds the columns for the "proposals" table.
-	ProposalsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "create_time", Type: field.TypeTime},
-		{Name: "update_time", Type: field.TypeTime},
-		{Name: "proposal_id", Type: field.TypeInt},
-		{Name: "title", Type: field.TypeString},
-		{Name: "description", Type: field.TypeString},
-		{Name: "expires_at", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"open", "rejected", "passed", "executed", "closed", "execution_failed"}},
-		{Name: "contract_proposals", Type: field.TypeInt, Nullable: true},
-	}
-	// ProposalsTable holds the schema information for the "proposals" table.
-	ProposalsTable = &schema.Table{
-		Name:       "proposals",
-		Columns:    ProposalsColumns,
-		PrimaryKey: []*schema.Column{ProposalsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "proposals_contracts_proposals",
-				Columns:    []*schema.Column{ProposalsColumns[8]},
-				RefColumns: []*schema.Column{ContractsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
 	}
 	// TelegramChatsColumns holds the columns for the "telegram_chats" table.
 	TelegramChatsColumns = []*schema.Column{
@@ -311,8 +311,8 @@ var (
 		ChainsTable,
 		ChainProposalsTable,
 		ContractsTable,
+		ContractProposalsTable,
 		DiscordChannelsTable,
-		ProposalsTable,
 		TelegramChatsTable,
 		UsersTable,
 		DiscordChannelUsersTable,
@@ -326,7 +326,7 @@ var (
 
 func init() {
 	ChainProposalsTable.ForeignKeys[0].RefTable = ChainsTable
-	ProposalsTable.ForeignKeys[0].RefTable = ContractsTable
+	ContractProposalsTable.ForeignKeys[0].RefTable = ContractsTable
 	DiscordChannelUsersTable.ForeignKeys[0].RefTable = DiscordChannelsTable
 	DiscordChannelUsersTable.ForeignKeys[1].RefTable = UsersTable
 	DiscordChannelContractsTable.ForeignKeys[0].RefTable = DiscordChannelsTable

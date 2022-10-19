@@ -850,7 +850,7 @@ func HasProposals() predicate.Contract {
 }
 
 // HasProposalsWith applies the HasEdge predicate on the "proposals" edge with a given conditions (other predicates).
-func HasProposalsWith(preds ...predicate.Proposal) predicate.Contract {
+func HasProposalsWith(preds ...predicate.ContractProposal) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),

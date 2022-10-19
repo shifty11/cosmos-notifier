@@ -1,4 +1,4 @@
-package crawler
+package contract_crawler
 
 import (
 	"github.com/robfig/cron/v3"
@@ -10,16 +10,16 @@ import (
 	"os"
 )
 
-type Crawler struct {
+type ContractCrawler struct {
 	contractManager database.IContractManager
-	proposalManager *database.ProposalManager
+	proposalManager *database.ContractProposalManager
 	notifier        *notifier.ContractNotifier
 	apiUrl          string
 	assetsPath      string
 }
 
-func NewCrawler(managers *database.DbManagers, notifier *notifier.ContractNotifier, apiUrl string, assetsPath string) *Crawler {
-	return &Crawler{
+func NewContractCrawler(managers *database.DbManagers, notifier *notifier.ContractNotifier, apiUrl string, assetsPath string) *ContractCrawler {
+	return &ContractCrawler{
 		contractManager: managers.ContractManager,
 		proposalManager: managers.ProposalManager,
 		notifier:        notifier,
@@ -28,7 +28,7 @@ func NewCrawler(managers *database.DbManagers, notifier *notifier.ContractNotifi
 	}
 }
 
-func (c *Crawler) UpdateContracts() {
+func (c *ContractCrawler) UpdateContracts() {
 	log.Sugar.Info("updating contracts")
 
 	contracts := c.contractManager.All()
@@ -90,7 +90,7 @@ func (c *Crawler) UpdateContracts() {
 	log.Sugar.Infof("processed %v contracts, success: %v failed: %v", len(contracts), cntSuccess, cntFails)
 }
 
-func (c *Crawler) AddContract(contractAddr string) (*ent.Contract, error) {
+func (c *ContractCrawler) AddContract(contractAddr string) (*ent.Contract, error) {
 	client := NewContractClient(c.apiUrl, contractAddr)
 	config, err := client.config()
 	if err != nil {
@@ -129,11 +129,11 @@ func (c *Crawler) AddContract(contractAddr string) (*ent.Contract, error) {
 	return contract, nil
 }
 
-func (c *Crawler) ByAddress(contractAddr string) (*ent.Contract, error) {
+func (c *ContractCrawler) ByAddress(contractAddr string) (*ent.Contract, error) {
 	return c.contractManager.ByAddress(contractAddr)
 }
 
-func (c *Crawler) ScheduleCrawl() {
+func (c *ContractCrawler) ScheduleCrawl() {
 	log.Sugar.Info("Scheduling crawl")
 	cr := cron.New()
 	_, err := cr.AddFunc("@every 1h", func() { c.UpdateContracts() })

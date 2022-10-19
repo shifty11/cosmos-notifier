@@ -6,8 +6,8 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
-	crawler "github.com/shifty11/dao-dao-notifier/service_crawler"
-	pb "github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/subscription_service"
+	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
+	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -18,10 +18,10 @@ type SubscriptionServer struct {
 	pb.UnimplementedSubscriptionServiceServer
 	subscriptionManager *database.SubscriptionManager
 	contractManager     database.IContractManager
-	crawlerClient       *crawler.Crawler
+	crawlerClient       *contract_crawler.ContractCrawler
 }
 
-func NewSubscriptionsServer(managers *database.DbManagers, crawlerClient *crawler.Crawler) pb.SubscriptionServiceServer {
+func NewSubscriptionsServer(managers *database.DbManagers, crawlerClient *contract_crawler.ContractCrawler) pb.SubscriptionServiceServer {
 	return &SubscriptionServer{
 		subscriptionManager: managers.SubscriptionManager,
 		contractManager:     managers.ContractManager,

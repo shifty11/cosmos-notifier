@@ -3,7 +3,7 @@ module github.com/shifty11/dao-dao-notifier
 go 1.19
 
 require (
-	ariga.io/atlas v0.5.0
+	ariga.io/atlas v0.7.1-0.20220925103247-db83ea0cd178
 	entgo.io/ent v0.11.1
 	github.com/TheZeroSlave/zapsentry v1.11.0
 	github.com/bwmarrin/discordgo v0.26.1
@@ -16,7 +16,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/icza/gog v0.0.0-20220909135443-35d926f98ec3
 	github.com/lib/pq v1.10.6
-	github.com/mattn/go-sqlite3 v1.14.13
+	github.com/mattn/go-sqlite3 v1.14.14
 	github.com/microcosm-cc/bluemonday v1.0.20
 	github.com/pkg/errors v0.9.1
 	github.com/ravener/discord-oauth2 v0.0.0-20220615092331-f6a9839c223e
@@ -30,6 +30,7 @@ require (
 )
 
 require (
+	ariga.io/atlas/cmd/atlas v0.7.2 // indirect
 	cosmossdk.io/errors v1.0.0-beta.7 // indirect
 	cosmossdk.io/math v1.0.0-beta.3 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
@@ -87,8 +88,9 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
-	github.com/hashicorp/hcl/v2 v2.10.0 // indirect
+	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/hdevalence/ed25519consensus v0.0.0-20220222234857-c00d1f31bab3 // indirect
+	github.com/hedwigz/entviz v0.0.0-20221011080911-9d47f6f1d818 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/klauspost/compress v1.15.9 // indirect
@@ -132,7 +134,7 @@ require (
 	golang.org/x/image v0.0.0-20210216034530-4410531fe030 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
-	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
+	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
 	golang.org/x/term v0.0.0-20220722155259-a9ba230a4035 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect

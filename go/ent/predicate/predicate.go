@@ -15,11 +15,11 @@ type ChainProposal func(*sql.Selector)
 // Contract is the predicate function for contract builders.
 type Contract func(*sql.Selector)
 
+// ContractProposal is the predicate function for contractproposal builders.
+type ContractProposal func(*sql.Selector)
+
 // DiscordChannel is the predicate function for discordchannel builders.
 type DiscordChannel func(*sql.Selector)
-
-// Proposal is the predicate function for proposal builders.
-type Proposal func(*sql.Selector)
 
 // TelegramChat is the predicate function for telegramchat builders.
 type TelegramChat func(*sql.Selector)

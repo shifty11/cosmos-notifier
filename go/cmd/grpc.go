@@ -5,8 +5,8 @@ import (
 	"github.com/shifty11/dao-dao-notifier/common"
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/notifier"
-	crawler "github.com/shifty11/dao-dao-notifier/service_crawler"
-	grpc "github.com/shifty11/dao-dao-notifier/service_grpc"
+	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
+	"github.com/shifty11/dao-dao-notifier/services/grpc"
 	"golang.org/x/oauth2"
 	"time"
 
@@ -47,7 +47,7 @@ var grpcCmd = &cobra.Command{
 		}
 		dbManagers := database.NewDefaultDbManagers()
 		notifier := notifier.NewContractNotifier(dbManagers, telegramBotToken, telegramApiEndpoint, discordBotToken)
-		crawlerClient := crawler.NewCrawler(dbManagers, notifier, nodejsUrl, assetsPath)
+		crawlerClient := contract_crawler.NewContractCrawler(dbManagers, notifier, nodejsUrl, assetsPath)
 		server := grpc.NewGRPCServer(dbManagers, config, crawlerClient)
 		server.Run()
 	},

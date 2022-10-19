@@ -13,8 +13,8 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 )
@@ -37,13 +37,13 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		chain.Table:          chain.ValidColumn,
-		chainproposal.Table:  chainproposal.ValidColumn,
-		contract.Table:       contract.ValidColumn,
-		discordchannel.Table: discordchannel.ValidColumn,
-		proposal.Table:       proposal.ValidColumn,
-		telegramchat.Table:   telegramchat.ValidColumn,
-		user.Table:           user.ValidColumn,
+		chain.Table:            chain.ValidColumn,
+		chainproposal.Table:    chainproposal.ValidColumn,
+		contract.Table:         contract.ValidColumn,
+		contractproposal.Table: contractproposal.ValidColumn,
+		discordchannel.Table:   discordchannel.ValidColumn,
+		telegramchat.Table:     telegramchat.ValidColumn,
+		user.Table:             user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

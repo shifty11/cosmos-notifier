@@ -1,4 +1,4 @@
-package crawler
+package contract_crawler
 
 import (
 	"bytes"
@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -110,7 +110,7 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 	}
 
 	var proposals types.ProposalList
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil, err

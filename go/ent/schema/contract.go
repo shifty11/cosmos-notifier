@@ -36,7 +36,7 @@ func (Contract) Fields() []ent.Field {
 // Edges of the Contract.
 func (Contract) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("proposals", Proposal.Type).
+		edge.To("proposals", ContractProposal.Type).
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),

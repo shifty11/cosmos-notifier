@@ -3,11 +3,11 @@ package grpc
 import (
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/log"
-	crawler "github.com/shifty11/dao-dao-notifier/service_crawler"
-	"github.com/shifty11/dao-dao-notifier/service_grpc/auth"
-	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/auth_service"
-	"github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/subscription_service"
-	"github.com/shifty11/dao-dao-notifier/service_grpc/subscription"
+	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
+	"github.com/shifty11/dao-dao-notifier/services/grpc/auth"
+	"github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/auth_service"
+	"github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
+	"github.com/shifty11/dao-dao-notifier/services/grpc/subscription"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"net"
@@ -27,10 +27,10 @@ type Config struct {
 type GRPCServer struct {
 	dbManagers    *database.DbManagers
 	config        *Config
-	crawlerClient *crawler.Crawler
+	crawlerClient *contract_crawler.ContractCrawler
 }
 
-func NewGRPCServer(dbManagers *database.DbManagers, config *Config, crawlerClient *crawler.Crawler) *GRPCServer {
+func NewGRPCServer(dbManagers *database.DbManagers, config *Config, crawlerClient *contract_crawler.ContractCrawler) *GRPCServer {
 	return &GRPCServer{dbManagers: dbManagers, config: config, crawlerClient: crawlerClient}
 }
 

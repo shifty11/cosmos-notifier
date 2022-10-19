@@ -10,11 +10,11 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/log"
-	pb "github.com/shifty11/dao-dao-notifier/service_grpc/protobuf/go/auth_service"
+	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/auth_service"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"io/ioutil"
+	"io"
 	"time"
 )
 
@@ -133,7 +133,7 @@ func (s *AuthServer) DiscordLogin(_ context.Context, req *pb.DiscordLoginRequest
 	//goland:noinspection GoUnhandledErrorResult
 	defer res.Body.Close()
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Sugar.Infof("Error reading response body: %v", err)
 		return nil, ErrorInternal

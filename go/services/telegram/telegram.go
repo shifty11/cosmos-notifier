@@ -89,7 +89,7 @@ type TelegramClient struct {
 
 	UserManager         *database.UserManager
 	TelegramChatManager database.ITelegramChatManager
-	ProposalManager     *database.ProposalManager
+	ProposalManager     *database.ContractProposalManager
 
 	telegramToken    string
 	telegramEndpoint string

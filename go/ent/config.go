@@ -24,13 +24,13 @@ type config struct {
 
 // hooks per client, for fast access.
 type hooks struct {
-	Chain          []ent.Hook
-	ChainProposal  []ent.Hook
-	Contract       []ent.Hook
-	DiscordChannel []ent.Hook
-	Proposal       []ent.Hook
-	TelegramChat   []ent.Hook
-	User           []ent.Hook
+	Chain            []ent.Hook
+	ChainProposal    []ent.Hook
+	Contract         []ent.Hook
+	ContractProposal []ent.Hook
+	DiscordChannel   []ent.Hook
+	TelegramChat     []ent.Hook
+	User             []ent.Hook
 }
 
 // Options applies the options on the config object.

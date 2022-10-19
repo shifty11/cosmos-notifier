@@ -38,7 +38,7 @@ type Contract struct {
 // ContractEdges holds the relations/edges for other nodes in the graph.
 type ContractEdges struct {
 	// Proposals holds the value of the proposals edge.
-	Proposals []*Proposal `json:"proposals,omitempty"`
+	Proposals []*ContractProposal `json:"proposals,omitempty"`
 	// TelegramChats holds the value of the telegram_chats edge.
 	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
 	// DiscordChannels holds the value of the discord_channels edge.
@@ -50,7 +50,7 @@ type ContractEdges struct {
 
 // ProposalsOrErr returns the Proposals value or an error if the edge
 // was not loaded in eager-loading.
-func (e ContractEdges) ProposalsOrErr() ([]*Proposal, error) {
+func (e ContractEdges) ProposalsOrErr() ([]*ContractProposal, error) {
 	if e.loadedTypes[0] {
 		return e.Proposals, nil
 	}
@@ -155,7 +155,7 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 }
 
 // QueryProposals queries the "proposals" edge of the Contract entity.
-func (c *Contract) QueryProposals() *ProposalQuery {
+func (c *Contract) QueryProposals() *ContractProposalQuery {
 	return (&ContractClient{config: c.config}).QueryProposals(c)
 }
 

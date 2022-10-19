@@ -13,7 +13,7 @@ import (
 type DiscordClient struct {
 	s                     *discordgo.Session
 	discordChannelManager database.IDiscordChannelManager
-	proposalManager       *database.ProposalManager
+	proposalManager       *database.ContractProposalManager
 	botToken              string
 	clientId              string
 	webAppUrl             string

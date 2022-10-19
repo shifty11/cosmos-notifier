@@ -48,6 +48,19 @@ func (f ContractFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 	return f(ctx, mv)
 }
 
+// The ContractProposalFunc type is an adapter to allow the use of ordinary
+// function as ContractProposal mutator.
+type ContractProposalFunc func(context.Context, *ent.ContractProposalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ContractProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.ContractProposalMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContractProposalMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The DiscordChannelFunc type is an adapter to allow the use of ordinary
 // function as DiscordChannel mutator.
 type DiscordChannelFunc func(context.Context, *ent.DiscordChannelMutation) (ent.Value, error)
@@ -57,19 +70,6 @@ func (f DiscordChannelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Val
 	mv, ok := m.(*ent.DiscordChannelMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiscordChannelMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The ProposalFunc type is an adapter to allow the use of ordinary
-// function as Proposal mutator.
-type ProposalFunc func(context.Context, *ent.ProposalMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ProposalMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProposalMutation", m)
 	}
 	return f(ctx, mv)
 }

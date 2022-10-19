@@ -8,19 +8,19 @@ import (
 	"github.com/shifty11/dao-dao-notifier/types"
 )
 
-// Proposal holds the schema definition for the Proposal entity.
-type Proposal struct {
+// ContractProposal holds the schema definition for the ContractProposal entity.
+type ContractProposal struct {
 	ent.Schema
 }
 
-func (Proposal) Mixin() []ent.Mixin {
+func (ContractProposal) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.Time{},
 	}
 }
 
-// Fields of the Proposal.
-func (Proposal) Fields() []ent.Field {
+// Fields of the ContractProposal.
+func (ContractProposal) Fields() []ent.Field {
 	var statusValues []string
 	for _, status := range types.ProposalStatusValues {
 		statusValues = append(statusValues, string(status))
@@ -35,8 +35,8 @@ func (Proposal) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Proposal.
-func (Proposal) Edges() []ent.Edge {
+// Edges of the ContractProposal.
+func (ContractProposal) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("contract", Contract.Type).
 			Ref("proposals").

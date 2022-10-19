@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 )
 
@@ -28,7 +28,7 @@ type ContractQuery struct {
 	fields     []string
 	predicates []predicate.Contract
 	// eager-loading edges.
-	withProposals       *ProposalQuery
+	withProposals       *ContractProposalQuery
 	withTelegramChats   *TelegramChatQuery
 	withDiscordChannels *DiscordChannelQuery
 	// intermediate query (i.e. traversal path).
@@ -68,8 +68,8 @@ func (cq *ContractQuery) Order(o ...OrderFunc) *ContractQuery {
 }
 
 // QueryProposals chains the current query on the "proposals" edge.
-func (cq *ContractQuery) QueryProposals() *ProposalQuery {
-	query := &ProposalQuery{config: cq.config}
+func (cq *ContractQuery) QueryProposals() *ContractProposalQuery {
+	query := &ContractProposalQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -80,7 +80,7 @@ func (cq *ContractQuery) QueryProposals() *ProposalQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contract.Table, contract.FieldID, selector),
-			sqlgraph.To(proposal.Table, proposal.FieldID),
+			sqlgraph.To(contractproposal.Table, contractproposal.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, contract.ProposalsTable, contract.ProposalsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
@@ -326,8 +326,8 @@ func (cq *ContractQuery) Clone() *ContractQuery {
 
 // WithProposals tells the query-builder to eager-load the nodes that are connected to
 // the "proposals" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *ContractQuery) WithProposals(opts ...func(*ProposalQuery)) *ContractQuery {
-	query := &ProposalQuery{config: cq.config}
+func (cq *ContractQuery) WithProposals(opts ...func(*ContractProposalQuery)) *ContractQuery {
+	query := &ContractProposalQuery{config: cq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -456,10 +456,10 @@ func (cq *ContractQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Con
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Proposals = []*Proposal{}
+			nodes[i].Edges.Proposals = []*ContractProposal{}
 		}
 		query.withFKs = true
-		query.Where(predicate.Proposal(func(s *sql.Selector) {
+		query.Where(predicate.ContractProposal(func(s *sql.Selector) {
 			s.Where(sql.InValues(contract.ProposalsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)

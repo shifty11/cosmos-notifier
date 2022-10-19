@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/shifty11/dao-dao-notifier/common"
 	"github.com/shifty11/dao-dao-notifier/database"
-	notifier "github.com/shifty11/dao-dao-notifier/notifier"
-	"github.com/shifty11/dao-dao-notifier/service_crawler"
+	"github.com/shifty11/dao-dao-notifier/notifier"
+	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -28,7 +28,7 @@ var crawlCmd = &cobra.Command{
 
 		managers := database.NewDefaultDbManagers()
 		notifier := notifier.NewContractNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
-		c := crawler.NewCrawler(managers, notifier, nodejsUrl, assetsPath)
+		c := contract_crawler.NewContractCrawler(managers, notifier, nodejsUrl, assetsPath)
 		c.UpdateContracts()
 		if cmd.Flag("repeat").Value.String() == "true" {
 			c.ScheduleCrawl()

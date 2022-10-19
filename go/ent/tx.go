@@ -18,10 +18,10 @@ type Tx struct {
 	ChainProposal *ChainProposalClient
 	// Contract is the client for interacting with the Contract builders.
 	Contract *ContractClient
+	// ContractProposal is the client for interacting with the ContractProposal builders.
+	ContractProposal *ContractProposalClient
 	// DiscordChannel is the client for interacting with the DiscordChannel builders.
 	DiscordChannel *DiscordChannelClient
-	// Proposal is the client for interacting with the Proposal builders.
-	Proposal *ProposalClient
 	// TelegramChat is the client for interacting with the TelegramChat builders.
 	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
@@ -164,8 +164,8 @@ func (tx *Tx) init() {
 	tx.Chain = NewChainClient(tx.config)
 	tx.ChainProposal = NewChainProposalClient(tx.config)
 	tx.Contract = NewContractClient(tx.config)
+	tx.ContractProposal = NewContractProposalClient(tx.config)
 	tx.DiscordChannel = NewDiscordChannelClient(tx.config)
-	tx.Proposal = NewProposalClient(tx.config)
 	tx.TelegramChat = NewTelegramChatClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }

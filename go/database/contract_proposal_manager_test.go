@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func newTestProposalManager(t *testing.T) *ProposalManager {
-	manager := NewProposalManager(testClient(t), context.Background())
+func newTestProposalManager(t *testing.T) *ContractProposalManager {
+	manager := NewContractProposalManager(testClient(t), context.Background())
 	t.Cleanup(func() { closeTestClient(manager.client) })
 	return manager
 }

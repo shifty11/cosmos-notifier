@@ -9,11 +9,11 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 )
 
-// Proposal is the model entity for the Proposal schema.
-type Proposal struct {
+// ContractProposal is the model entity for the ContractProposal schema.
+type ContractProposal struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -30,15 +30,15 @@ type Proposal struct {
 	// ExpiresAt holds the value of the "expires_at" field.
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
 	// Status holds the value of the "status" field.
-	Status proposal.Status `json:"status,omitempty"`
+	Status contractproposal.Status `json:"status,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ProposalQuery when eager-loading is set.
-	Edges              ProposalEdges `json:"edges"`
+	// The values are being populated by the ContractProposalQuery when eager-loading is set.
+	Edges              ContractProposalEdges `json:"edges"`
 	contract_proposals *int
 }
 
-// ProposalEdges holds the relations/edges for other nodes in the graph.
-type ProposalEdges struct {
+// ContractProposalEdges holds the relations/edges for other nodes in the graph.
+type ContractProposalEdges struct {
 	// Contract holds the value of the contract edge.
 	Contract *Contract `json:"contract,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -48,7 +48,7 @@ type ProposalEdges struct {
 
 // ContractOrErr returns the Contract value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ProposalEdges) ContractOrErr() (*Contract, error) {
+func (e ContractProposalEdges) ContractOrErr() (*Contract, error) {
 	if e.loadedTypes[0] {
 		if e.Contract == nil {
 			// The edge contract was loaded in eager-loading,
@@ -61,150 +61,150 @@ func (e ProposalEdges) ContractOrErr() (*Contract, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Proposal) scanValues(columns []string) ([]interface{}, error) {
+func (*ContractProposal) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case proposal.FieldID, proposal.FieldProposalID:
+		case contractproposal.FieldID, contractproposal.FieldProposalID:
 			values[i] = new(sql.NullInt64)
-		case proposal.FieldTitle, proposal.FieldDescription, proposal.FieldStatus:
+		case contractproposal.FieldTitle, contractproposal.FieldDescription, contractproposal.FieldStatus:
 			values[i] = new(sql.NullString)
-		case proposal.FieldCreateTime, proposal.FieldUpdateTime, proposal.FieldExpiresAt:
+		case contractproposal.FieldCreateTime, contractproposal.FieldUpdateTime, contractproposal.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
-		case proposal.ForeignKeys[0]: // contract_proposals
+		case contractproposal.ForeignKeys[0]: // contract_proposals
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Proposal", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type ContractProposal", columns[i])
 		}
 	}
 	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Proposal fields.
-func (pr *Proposal) assignValues(columns []string, values []interface{}) error {
+// to the ContractProposal fields.
+func (cp *ContractProposal) assignValues(columns []string, values []interface{}) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case proposal.FieldID:
+		case contractproposal.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			pr.ID = int(value.Int64)
-		case proposal.FieldCreateTime:
+			cp.ID = int(value.Int64)
+		case contractproposal.FieldCreateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_time", values[i])
 			} else if value.Valid {
-				pr.CreateTime = value.Time
+				cp.CreateTime = value.Time
 			}
-		case proposal.FieldUpdateTime:
+		case contractproposal.FieldUpdateTime:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
-				pr.UpdateTime = value.Time
+				cp.UpdateTime = value.Time
 			}
-		case proposal.FieldProposalID:
+		case contractproposal.FieldProposalID:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field proposal_id", values[i])
 			} else if value.Valid {
-				pr.ProposalID = int(value.Int64)
+				cp.ProposalID = int(value.Int64)
 			}
-		case proposal.FieldTitle:
+		case contractproposal.FieldTitle:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field title", values[i])
 			} else if value.Valid {
-				pr.Title = value.String
+				cp.Title = value.String
 			}
-		case proposal.FieldDescription:
+		case contractproposal.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				pr.Description = value.String
+				cp.Description = value.String
 			}
-		case proposal.FieldExpiresAt:
+		case contractproposal.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				pr.ExpiresAt = value.Time
+				cp.ExpiresAt = value.Time
 			}
-		case proposal.FieldStatus:
+		case contractproposal.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				pr.Status = proposal.Status(value.String)
+				cp.Status = contractproposal.Status(value.String)
 			}
-		case proposal.ForeignKeys[0]:
+		case contractproposal.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field contract_proposals", value)
 			} else if value.Valid {
-				pr.contract_proposals = new(int)
-				*pr.contract_proposals = int(value.Int64)
+				cp.contract_proposals = new(int)
+				*cp.contract_proposals = int(value.Int64)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryContract queries the "contract" edge of the Proposal entity.
-func (pr *Proposal) QueryContract() *ContractQuery {
-	return (&ProposalClient{config: pr.config}).QueryContract(pr)
+// QueryContract queries the "contract" edge of the ContractProposal entity.
+func (cp *ContractProposal) QueryContract() *ContractQuery {
+	return (&ContractProposalClient{config: cp.config}).QueryContract(cp)
 }
 
-// Update returns a builder for updating this Proposal.
-// Note that you need to call Proposal.Unwrap() before calling this method if this Proposal
+// Update returns a builder for updating this ContractProposal.
+// Note that you need to call ContractProposal.Unwrap() before calling this method if this ContractProposal
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pr *Proposal) Update() *ProposalUpdateOne {
-	return (&ProposalClient{config: pr.config}).UpdateOne(pr)
+func (cp *ContractProposal) Update() *ContractProposalUpdateOne {
+	return (&ContractProposalClient{config: cp.config}).UpdateOne(cp)
 }
 
-// Unwrap unwraps the Proposal entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the ContractProposal entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (pr *Proposal) Unwrap() *Proposal {
-	_tx, ok := pr.config.driver.(*txDriver)
+func (cp *ContractProposal) Unwrap() *ContractProposal {
+	_tx, ok := cp.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Proposal is not a transactional entity")
+		panic("ent: ContractProposal is not a transactional entity")
 	}
-	pr.config.driver = _tx.drv
-	return pr
+	cp.config.driver = _tx.drv
+	return cp
 }
 
 // String implements the fmt.Stringer.
-func (pr *Proposal) String() string {
+func (cp *ContractProposal) String() string {
 	var builder strings.Builder
-	builder.WriteString("Proposal(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", pr.ID))
+	builder.WriteString("ContractProposal(")
+	builder.WriteString(fmt.Sprintf("id=%v, ", cp.ID))
 	builder.WriteString("create_time=")
-	builder.WriteString(pr.CreateTime.Format(time.ANSIC))
+	builder.WriteString(cp.CreateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
-	builder.WriteString(pr.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(cp.UpdateTime.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("proposal_id=")
-	builder.WriteString(fmt.Sprintf("%v", pr.ProposalID))
+	builder.WriteString(fmt.Sprintf("%v", cp.ProposalID))
 	builder.WriteString(", ")
 	builder.WriteString("title=")
-	builder.WriteString(pr.Title)
+	builder.WriteString(cp.Title)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(pr.Description)
+	builder.WriteString(cp.Description)
 	builder.WriteString(", ")
 	builder.WriteString("expires_at=")
-	builder.WriteString(pr.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(cp.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", pr.Status))
+	builder.WriteString(fmt.Sprintf("%v", cp.Status))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Proposals is a parsable slice of Proposal.
-type Proposals []*Proposal
+// ContractProposals is a parsable slice of ContractProposal.
+type ContractProposals []*ContractProposal
 
-func (pr Proposals) config(cfg config) {
-	for _i := range pr {
-		pr[_i].config = cfg
+func (cp ContractProposals) config(cfg config) {
+	for _i := range cp {
+		cp[_i].config = cfg
 	}
 }

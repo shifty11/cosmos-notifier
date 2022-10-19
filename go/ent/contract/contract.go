@@ -34,10 +34,10 @@ const (
 	// Table holds the table name of the contract in the database.
 	Table = "contracts"
 	// ProposalsTable is the table that holds the proposals relation/edge.
-	ProposalsTable = "proposals"
-	// ProposalsInverseTable is the table name for the Proposal entity.
-	// It exists in this package in order to avoid circular dependency with the "proposal" package.
-	ProposalsInverseTable = "proposals"
+	ProposalsTable = "contract_proposals"
+	// ProposalsInverseTable is the table name for the ContractProposal entity.
+	// It exists in this package in order to avoid circular dependency with the "contractproposal" package.
+	ProposalsInverseTable = "contract_proposals"
 	// ProposalsColumn is the table column denoting the proposals relation/edge.
 	ProposalsColumn = "contract_proposals"
 	// TelegramChatsTable is the table that holds the telegram_chats relation/edge. The primary key declared below.

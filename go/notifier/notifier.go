@@ -37,7 +37,7 @@ func NewContractNotifier(managers *database.DbManagers, telegramBotToken string,
 	}
 }
 
-func (n *ContractNotifier) Notify(entContract *ent.Contract, entProp *ent.Proposal) {
+func (n *ContractNotifier) Notify(entContract *ent.Contract, entProp *ent.ContractProposal) {
 	log.Sugar.Infof("Notifying for proposal %v on contract %v", entProp.ProposalID, entContract.Name)
 
 	tgIds := n.telegramChatManager.GetSubscribedIds(entContract.QueryTelegramChats())

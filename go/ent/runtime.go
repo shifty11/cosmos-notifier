@@ -8,8 +8,8 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
 	"github.com/shifty11/dao-dao-notifier/ent/schema"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
@@ -76,6 +76,21 @@ func init() {
 	contractDescThumbnailURL := contractFields[4].Descriptor()
 	// contract.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
 	contract.DefaultThumbnailURL = contractDescThumbnailURL.Default.(string)
+	contractproposalMixin := schema.ContractProposal{}.Mixin()
+	contractproposalMixinFields0 := contractproposalMixin[0].Fields()
+	_ = contractproposalMixinFields0
+	contractproposalFields := schema.ContractProposal{}.Fields()
+	_ = contractproposalFields
+	// contractproposalDescCreateTime is the schema descriptor for create_time field.
+	contractproposalDescCreateTime := contractproposalMixinFields0[0].Descriptor()
+	// contractproposal.DefaultCreateTime holds the default value on creation for the create_time field.
+	contractproposal.DefaultCreateTime = contractproposalDescCreateTime.Default.(func() time.Time)
+	// contractproposalDescUpdateTime is the schema descriptor for update_time field.
+	contractproposalDescUpdateTime := contractproposalMixinFields0[1].Descriptor()
+	// contractproposal.DefaultUpdateTime holds the default value on creation for the update_time field.
+	contractproposal.DefaultUpdateTime = contractproposalDescUpdateTime.Default.(func() time.Time)
+	// contractproposal.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	contractproposal.UpdateDefaultUpdateTime = contractproposalDescUpdateTime.UpdateDefault.(func() time.Time)
 	discordchannelMixin := schema.DiscordChannel{}.Mixin()
 	discordchannelMixinFields0 := discordchannelMixin[0].Fields()
 	_ = discordchannelMixinFields0
@@ -91,21 +106,6 @@ func init() {
 	discordchannel.DefaultUpdateTime = discordchannelDescUpdateTime.Default.(func() time.Time)
 	// discordchannel.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	discordchannel.UpdateDefaultUpdateTime = discordchannelDescUpdateTime.UpdateDefault.(func() time.Time)
-	proposalMixin := schema.Proposal{}.Mixin()
-	proposalMixinFields0 := proposalMixin[0].Fields()
-	_ = proposalMixinFields0
-	proposalFields := schema.Proposal{}.Fields()
-	_ = proposalFields
-	// proposalDescCreateTime is the schema descriptor for create_time field.
-	proposalDescCreateTime := proposalMixinFields0[0].Descriptor()
-	// proposal.DefaultCreateTime holds the default value on creation for the create_time field.
-	proposal.DefaultCreateTime = proposalDescCreateTime.Default.(func() time.Time)
-	// proposalDescUpdateTime is the schema descriptor for update_time field.
-	proposalDescUpdateTime := proposalMixinFields0[1].Descriptor()
-	// proposal.DefaultUpdateTime holds the default value on creation for the update_time field.
-	proposal.DefaultUpdateTime = proposalDescUpdateTime.Default.(func() time.Time)
-	// proposal.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
-	proposal.UpdateDefaultUpdateTime = proposalDescUpdateTime.UpdateDefault.(func() time.Time)
 	telegramchatMixin := schema.TelegramChat{}.Mixin()
 	telegramchatMixinFields0 := telegramchatMixin[0].Fields()
 	_ = telegramchatMixinFields0

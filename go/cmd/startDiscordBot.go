@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/shifty11/dao-dao-notifier/common"
 	"github.com/shifty11/dao-dao-notifier/database"
-	discord "github.com/shifty11/dao-dao-notifier/service_discord"
+	"github.com/shifty11/dao-dao-notifier/services/discord"
 	"github.com/spf13/cobra"
 )
 

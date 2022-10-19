@@ -4,18 +4,18 @@ import (
 	"context"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
 )
 
-type ProposalManager struct {
+type ContractProposalManager struct {
 	client *ent.Client
 	ctx    context.Context
 }
 
-func NewProposalManager(client *ent.Client, ctx context.Context) *ProposalManager {
-	return &ProposalManager{client: client, ctx: ctx}
+func NewContractProposalManager(client *ent.Client, ctx context.Context) *ContractProposalManager {
+	return &ContractProposalManager{client: client, ctx: ctx}
 }
 
 type ProposalStatus string
@@ -35,44 +35,44 @@ const (
 // - no_changes: proposal not changed
 //
 // returns (proposal, status)
-func (m *ProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.Proposal) (*ent.Proposal, ProposalStatus) {
+func (m *ContractProposalManager) CreateOrUpdate(c *ent.Contract, propData *types.Proposal) (*ent.ContractProposal, ProposalStatus) {
 	log.Sugar.Debugf("CreateOrUpdate proposal %v of contract %v", propData.Id, c.Name)
-	prop, err := m.client.Proposal.
+	prop, err := m.client.ContractProposal.
 		Query().
 		Where(
-			proposal.And(
-				proposal.HasContractWith(contract.IDEQ(c.ID)),
-				proposal.ProposalIDEQ(propData.Id),
+			contractproposal.And(
+				contractproposal.HasContractWith(contract.IDEQ(c.ID)),
+				contractproposal.ProposalIDEQ(propData.Id),
 			)).
 		First(m.ctx)
 	if err != nil && ent.IsNotFound(err) {
-		prop, err = m.client.Proposal.
+		prop, err = m.client.ContractProposal.
 			Create().
 			SetContract(c).
 			SetProposalID(propData.Id).
 			SetTitle(propData.Title).
 			SetDescription(propData.Description).
-			SetStatus(proposal.Status(propData.Status)).
+			SetStatus(contractproposal.Status(propData.Status)).
 			SetExpiresAt(propData.Expires.AtTime).
 			Save(m.ctx)
 		if err != nil {
-			log.Sugar.Panicf("Error while creating proposal: %v", err)
+			log.Sugar.Panicf("Error while creating ContractProposal: %v", err)
 		}
 		return prop, ProposalCreated
 	} else if err != nil {
-		log.Sugar.Errorf("Error while querying proposal: %v", err)
+		log.Sugar.Errorf("Error while querying ContractProposal: %v", err)
 	} else {
-		if prop.Title != propData.Title || prop.Description != propData.Description || prop.Status != proposal.Status(propData.Status) {
-			updatedProp, err := m.client.Proposal.
+		if prop.Title != propData.Title || prop.Description != propData.Description || prop.Status != contractproposal.Status(propData.Status) {
+			updatedProp, err := m.client.ContractProposal.
 				UpdateOne(prop).
 				SetTitle(propData.Title).
 				SetDescription(propData.Description).
-				SetStatus(proposal.Status(propData.Status)).
+				SetStatus(contractproposal.Status(propData.Status)).
 				Save(m.ctx)
 			if err != nil {
-				log.Sugar.Panicf("Error while updating proposal: %v", err)
+				log.Sugar.Panicf("Error while updating ContractProposal: %v", err)
 			}
-			if prop.Status == proposal.StatusOpen && updatedProp.Status != prop.Status {
+			if prop.Status == contractproposal.StatusOpen && updatedProp.Status != prop.Status {
 				return updatedProp, ProposalStatusChangedFromOpen
 			}
 			return updatedProp, ProposalUpdated

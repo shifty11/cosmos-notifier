@@ -37,8 +37,8 @@ func NewChainCrawler(dbManagers *database.DbManagers, notifier *notifier.ChainNo
 	}
 }
 
-func (cc *ChainCrawler) getJson(url string, target interface{}) error {
-	resp, err := cc.client.Get(url)
+func (c *ChainCrawler) getJson(url string, target interface{}) error {
+	resp, err := c.client.Get(url)
 	if err != nil {
 		return err
 	}
@@ -51,12 +51,12 @@ func (cc *ChainCrawler) getJson(url string, target interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(target)
 }
 
-func (cc *ChainCrawler) downloadImage(chain *types.Chain) string {
+func (c *ChainCrawler) downloadImage(chain *types.Chain) string {
 	im := common.NewImageManager(
 		chain.Name,
 		chain.PrettyName,
 		chain.Image,
-		cc.assetsPath,
+		c.assetsPath,
 		"images/chains/",
 		100,
 		100,
@@ -70,9 +70,9 @@ func (cc *ChainCrawler) downloadImage(chain *types.Chain) string {
 	return ""
 }
 
-func (cc *ChainCrawler) addProposals(entChain *ent.Chain, url string) []*ent.ChainProposal {
+func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []*ent.ChainProposal {
 	var resp types.ChainProposalsResponse
-	err := cc.getJson(url, &resp)
+	err := c.getJson(url, &resp)
 	if err != nil {
 		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
 		return nil
@@ -80,74 +80,74 @@ func (cc *ChainCrawler) addProposals(entChain *ent.Chain, url string) []*ent.Cha
 
 	var props []*ent.ChainProposal
 	for _, proposal := range resp.Proposals {
-		prop, _ := cc.chainProposalManager.CreateOrUpdate(entChain, &proposal)
+		prop, _ := c.chainProposalManager.CreateOrUpdate(entChain, &proposal)
 		props = append(props, prop)
 	}
 	return props
 }
 
-func (cc *ChainCrawler) updateProposal(entChain *ent.Chain, url string) {
+func (c *ChainCrawler) updateProposal(entChain *ent.Chain, url string) {
 	var resp types.ChainProposalResponse
-	err := cc.getJson(url, &resp)
+	err := c.getJson(url, &resp)
 	if err != nil {
 		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
 		return
 	}
-	cc.chainProposalManager.CreateOrUpdate(entChain, &resp.Proposal)
+	c.chainProposalManager.CreateOrUpdate(entChain, &resp.Proposal)
 }
 
-func (cc *ChainCrawler) AddOrUpdateChains() {
+func (c *ChainCrawler) AddOrUpdateChains() {
 	var chainInfo types.ChainInfo
-	err := cc.getJson("https://chains.cosmos.directory/", &chainInfo)
+	err := c.getJson("https://chains.cosmos.directory/", &chainInfo)
 	if err != nil {
 		log.Sugar.Errorf("Error calling reg.ListChains: %v", err)
 	}
 
 	for _, chain := range chainInfo.Chains {
 		var found = false
-		for _, entChain := range cc.chainManager.All() {
+		for _, entChain := range c.chainManager.All() {
 			if entChain.ChainID == chain.ChainId {
 				found = true
 				if (entChain.Name != chain.Name) ||
 					(entChain.PrettyName != chain.PrettyName) ||
 					(entChain.ImageURL != chain.Image) ||
 					(chain.Image != "" && entChain.ThumbnailURL == "") {
-					thumbnailUrl := cc.downloadImage(&chain)
-					cc.chainManager.Update(entChain, &chain, thumbnailUrl)
+					thumbnailUrl := c.downloadImage(&chain)
+					c.chainManager.Update(entChain, &chain, thumbnailUrl)
 				}
 				break
 			}
 		}
 		if !found && chain.NetworkType == "mainnet" {
-			thumbnailUrl := cc.downloadImage(&chain)
-			entChain := cc.chainManager.Create(&chain, thumbnailUrl)
+			thumbnailUrl := c.downloadImage(&chain)
+			entChain := c.chainManager.Create(&chain, thumbnailUrl)
 			url := fmt.Sprintf(urlProposals, entChain.Name)
-			cc.addProposals(entChain, url)
+			c.addProposals(entChain, url)
 		}
 	}
 }
 
-func (cc *ChainCrawler) UpdateProposals() {
-	for _, entChain := range cc.chainManager.All() {
-		for _, entProposal := range cc.chainProposalManager.InVotingPeriod(entChain) {
+func (c *ChainCrawler) UpdateProposals() {
+	for _, entChain := range c.chainManager.All() {
+		for _, entProposal := range c.chainProposalManager.InVotingPeriod(entChain) {
 			url := fmt.Sprintf(urlProposals+"/%v", entChain.Name, entProposal.ProposalID)
-			cc.updateProposal(entChain, url)
+			c.updateProposal(entChain, url)
 		}
 
 		url := fmt.Sprintf(urlProposals+"?proposal_status=%v", entChain.Name, cosmossdktypes.StatusVotingPeriod)
-		props := cc.addProposals(entChain, url)
+		props := c.addProposals(entChain, url)
 		for _, prop := range props {
 			if entChain.IsEnabled {
-				cc.notifier.Notify(entChain, prop)
+				c.notifier.Notify(entChain, prop)
 			}
 		}
 	}
 }
 
-func (cc *ChainCrawler) ScheduleCrawl() {
+func (c *ChainCrawler) ScheduleCrawl() {
 	log.Sugar.Info("Scheduling chain crawl")
 	cr := cron.New()
-	_, err := cr.AddFunc("@every 15min", func() { cc.UpdateProposals() })
+	_, err := cr.AddFunc("@every 15min", func() { c.UpdateProposals() })
 	if err != nil {
 		log.Sugar.Errorf("while executing 'updateContracts' via cron: %v", err)
 	}

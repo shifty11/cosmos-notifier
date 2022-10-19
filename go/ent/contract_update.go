@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/predicate"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 )
 
@@ -75,17 +75,17 @@ func (cu *ContractUpdate) SetNillableThumbnailURL(s *string) *ContractUpdate {
 	return cu
 }
 
-// AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
+// AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cu *ContractUpdate) AddProposalIDs(ids ...int) *ContractUpdate {
 	cu.mutation.AddProposalIDs(ids...)
 	return cu
 }
 
-// AddProposals adds the "proposals" edges to the Proposal entity.
-func (cu *ContractUpdate) AddProposals(p ...*Proposal) *ContractUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddProposals adds the "proposals" edges to the ContractProposal entity.
+func (cu *ContractUpdate) AddProposals(c ...*ContractProposal) *ContractUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
 	return cu.AddProposalIDs(ids...)
 }
@@ -125,23 +125,23 @@ func (cu *ContractUpdate) Mutation() *ContractMutation {
 	return cu.mutation
 }
 
-// ClearProposals clears all "proposals" edges to the Proposal entity.
+// ClearProposals clears all "proposals" edges to the ContractProposal entity.
 func (cu *ContractUpdate) ClearProposals() *ContractUpdate {
 	cu.mutation.ClearProposals()
 	return cu
 }
 
-// RemoveProposalIDs removes the "proposals" edge to Proposal entities by IDs.
+// RemoveProposalIDs removes the "proposals" edge to ContractProposal entities by IDs.
 func (cu *ContractUpdate) RemoveProposalIDs(ids ...int) *ContractUpdate {
 	cu.mutation.RemoveProposalIDs(ids...)
 	return cu
 }
 
-// RemoveProposals removes "proposals" edges to Proposal entities.
-func (cu *ContractUpdate) RemoveProposals(p ...*Proposal) *ContractUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// RemoveProposals removes "proposals" edges to ContractProposal entities.
+func (cu *ContractUpdate) RemoveProposals(c ...*ContractProposal) *ContractUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
 	return cu.RemoveProposalIDs(ids...)
 }
@@ -321,7 +321,7 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}
@@ -337,7 +337,7 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}
@@ -356,7 +356,7 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}
@@ -536,17 +536,17 @@ func (cuo *ContractUpdateOne) SetNillableThumbnailURL(s *string) *ContractUpdate
 	return cuo
 }
 
-// AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
+// AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cuo *ContractUpdateOne) AddProposalIDs(ids ...int) *ContractUpdateOne {
 	cuo.mutation.AddProposalIDs(ids...)
 	return cuo
 }
 
-// AddProposals adds the "proposals" edges to the Proposal entity.
-func (cuo *ContractUpdateOne) AddProposals(p ...*Proposal) *ContractUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddProposals adds the "proposals" edges to the ContractProposal entity.
+func (cuo *ContractUpdateOne) AddProposals(c ...*ContractProposal) *ContractUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
 	return cuo.AddProposalIDs(ids...)
 }
@@ -586,23 +586,23 @@ func (cuo *ContractUpdateOne) Mutation() *ContractMutation {
 	return cuo.mutation
 }
 
-// ClearProposals clears all "proposals" edges to the Proposal entity.
+// ClearProposals clears all "proposals" edges to the ContractProposal entity.
 func (cuo *ContractUpdateOne) ClearProposals() *ContractUpdateOne {
 	cuo.mutation.ClearProposals()
 	return cuo
 }
 
-// RemoveProposalIDs removes the "proposals" edge to Proposal entities by IDs.
+// RemoveProposalIDs removes the "proposals" edge to ContractProposal entities by IDs.
 func (cuo *ContractUpdateOne) RemoveProposalIDs(ids ...int) *ContractUpdateOne {
 	cuo.mutation.RemoveProposalIDs(ids...)
 	return cuo
 }
 
-// RemoveProposals removes "proposals" edges to Proposal entities.
-func (cuo *ContractUpdateOne) RemoveProposals(p ...*Proposal) *ContractUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// RemoveProposals removes "proposals" edges to ContractProposal entities.
+func (cuo *ContractUpdateOne) RemoveProposals(c ...*ContractProposal) *ContractUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
 	return cuo.RemoveProposalIDs(ids...)
 }
@@ -812,7 +812,7 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}
@@ -828,7 +828,7 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}
@@ -847,7 +847,7 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}

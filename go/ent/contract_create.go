@@ -11,8 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
+	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/proposal"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 )
 
@@ -89,17 +89,17 @@ func (cc *ContractCreate) SetNillableThumbnailURL(s *string) *ContractCreate {
 	return cc
 }
 
-// AddProposalIDs adds the "proposals" edge to the Proposal entity by IDs.
+// AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cc *ContractCreate) AddProposalIDs(ids ...int) *ContractCreate {
 	cc.mutation.AddProposalIDs(ids...)
 	return cc
 }
 
-// AddProposals adds the "proposals" edges to the Proposal entity.
-func (cc *ContractCreate) AddProposals(p ...*Proposal) *ContractCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// AddProposals adds the "proposals" edges to the ContractProposal entity.
+func (cc *ContractCreate) AddProposals(c ...*ContractProposal) *ContractCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
 	return cc.AddProposalIDs(ids...)
 }
@@ -341,7 +341,7 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: proposal.FieldID,
+					Column: contractproposal.FieldID,
 				},
 			},
 		}
