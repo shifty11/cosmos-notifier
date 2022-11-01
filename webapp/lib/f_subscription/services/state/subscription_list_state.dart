@@ -1,4 +1,4 @@
-import 'package:dao_dao_notifier/api/protobuf/dart/subscription_service.pb.dart';
+import 'package:cosmos_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'subscription_list_state.freezed.dart';

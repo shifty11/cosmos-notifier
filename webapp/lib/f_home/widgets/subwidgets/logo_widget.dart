@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:dao_dao_notifier/style.dart';
+import 'package:cosmos_notifier/style.dart';
 
 class LogoWidget extends StatelessWidget {
   final double sideBarWith = 300;

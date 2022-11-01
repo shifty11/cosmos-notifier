@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:dao_dao_notifier/config.dart';
-import 'package:dao_dao_notifier/f_home/services/auth_provider.dart';
-import 'package:dao_dao_notifier/f_home/services/auth_service.dart';
-import 'package:dao_dao_notifier/f_home/widgets/subwidgets/footer_widget.dart';
-import 'package:dao_dao_notifier/f_home/widgets/subwidgets/logo_widget.dart';
-import 'package:dao_dao_notifier/style.dart';
+import 'package:cosmos_notifier/config.dart';
+import 'package:cosmos_notifier/f_home/services/auth_provider.dart';
+import 'package:cosmos_notifier/f_home/services/auth_service.dart';
+import 'package:cosmos_notifier/f_home/widgets/subwidgets/footer_widget.dart';
+import 'package:cosmos_notifier/f_home/widgets/subwidgets/logo_widget.dart';
+import 'package:cosmos_notifier/style.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key, errorCode}) : super(key: key);
