@@ -19,7 +19,7 @@ var (
 	dbHost     = "localhost"
 	dbUser     = "postgres"
 	dbPassword = "postgres"
-	dbName     = "daodao-notifier-db"
+	dbName     = "cosmos-notifier-db"
 	dbPort     = "5432"
 	dbSSLMode  = "disable"
 	dbTimezone = "Europe/Zurich"
@@ -109,13 +109,13 @@ func NewDefaultDbManagers() *DbManagers {
 }
 
 func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
+	chainManager := NewChainManager(client, ctx)
 	contractManager := NewContractManager(client, ctx)
 	proposalManager := NewContractProposalManager(client, ctx)
 	userManager := NewUserManager(client, ctx)
-	discordChannelManager := NewDiscordChannelManager(client, ctx, contractManager, userManager)
-	telegramChatManager := NewTelegramChatManager(client, ctx, contractManager, userManager)
-	subscriptionManager := NewSubscriptionManager(client, ctx, userManager, contractManager, telegramChatManager, discordChannelManager)
-	chainManager := NewChainManager(client, ctx)
+	discordChannelManager := NewDiscordChannelManager(client, ctx, chainManager, contractManager, userManager)
+	telegramChatManager := NewTelegramChatManager(client, ctx, chainManager, contractManager, userManager)
+	subscriptionManager := NewSubscriptionManager(client, ctx, userManager, chainManager, contractManager, telegramChatManager, discordChannelManager)
 	chainProposalManager := NewChainProposalManager(client, ctx)
 	return &DbManagers{
 		ContractManager:       contractManager,

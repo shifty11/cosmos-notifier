@@ -115,6 +115,8 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 					thumbnailUrl := c.downloadImage(&chain)
 					c.chainManager.Update(entChain, &chain, thumbnailUrl)
 				}
+				thumbnailUrl := c.downloadImage(&chain)
+				c.chainManager.Update(entChain, &chain, thumbnailUrl)
 				break
 			}
 		}

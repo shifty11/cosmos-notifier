@@ -9,9 +9,57 @@ import (
 )
 
 func newTestDiscordChannelManager(t *testing.T) *DiscordChannelManager {
-	manager := NewDiscordChannelManager(testClient(t), context.Background(), newTestContractManager(t), newTestUserManager(t))
+	manager := NewDiscordChannelManager(testClient(t), context.Background(), newTestChainManager(t), newTestContractManager(t), newTestUserManager(t))
 	t.Cleanup(func() { closeTestClient(manager.client) })
 	return manager
+}
+
+func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
+	m := newTestDiscordChannelManager(t)
+	_, err := m.AddOrRemoveChain(1, 1)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+
+	dc := m.client.DiscordChannel.
+		Create().
+		AddUsers(u).
+		SetChannelID(1).
+		SetName("test").
+		SetIsGroup(false).
+		SaveX(m.ctx)
+
+	_, err = m.AddOrRemoveChain(1, 1)
+	if !ent.IsNotFound(err) {
+		t.Fatalf("Expected not found error, got %s", err)
+	}
+
+	data := &types.Chain{
+		ChainId:     "chainid-1",
+		Name:        "chain-1",
+		PrettyName:  "Chain 1",
+		NetworkType: "mainnet",
+		Image:       "https://image.com",
+	}
+
+	c := m.chainManager.Create(data, data.Image)
+	added, err := m.AddOrRemoveChain(dc.ChannelID, c.ID)
+	if err != nil {
+		t.Fatalf("Expected nil, got %s", err)
+	}
+	if !added {
+		t.Fatal("Expected true, got false")
+	}
+
+	added, err = m.AddOrRemoveChain(dc.ChannelID, c.ID)
+	if err != nil {
+		t.Fatalf("Expected nil, got %s", err)
+	}
+	if added {
+		t.Fatal("Expected false, got true")
+	}
 }
 
 func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
@@ -59,7 +107,6 @@ func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
 	if added {
 		t.Fatal("Expected false, got true")
 	}
-
 }
 
 func TestDiscordChannelManager_CreateOrUpdateChannel(t *testing.T) {

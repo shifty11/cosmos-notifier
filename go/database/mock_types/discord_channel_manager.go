@@ -35,6 +35,21 @@ func (m *MockIDiscordChannelManager) EXPECT() *MockIDiscordChannelManagerMockRec
 	return m.recorder
 }
 
+// AddOrRemoveChain mocks base method.
+func (m *MockIDiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainId int) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddOrRemoveChain", tgChatId, chainId)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddOrRemoveChain indicates an expected call of AddOrRemoveChain.
+func (mr *MockIDiscordChannelManagerMockRecorder) AddOrRemoveChain(tgChatId, chainId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrRemoveChain", reflect.TypeOf((*MockIDiscordChannelManager)(nil).AddOrRemoveChain), tgChatId, chainId)
+}
+
 // AddOrRemoveContract mocks base method.
 func (m *MockIDiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId int) (bool, error) {
 	m.ctrl.T.Helper()

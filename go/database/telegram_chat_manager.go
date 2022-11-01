@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/shifty11/dao-dao-notifier/ent"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
@@ -12,6 +13,7 @@ import (
 )
 
 type ITelegramChatManager interface {
+	AddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error)
 	AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error)
 	CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool)
 	GetSubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult
@@ -25,16 +27,74 @@ type TelegramChatManager struct {
 	client          *ent.Client
 	ctx             context.Context
 	contractManager IContractManager
+	chainManager    *ChainManager
 	userManager     *UserManager
 }
 
-func NewTelegramChatManager(client *ent.Client, ctx context.Context, contractManager IContractManager, userManager *UserManager) *TelegramChatManager {
-	return &TelegramChatManager{client: client, ctx: ctx, contractManager: contractManager, userManager: userManager}
+func NewTelegramChatManager(
+	client *ent.Client,
+	ctx context.Context,
+	chainManager *ChainManager,
+	contractManager IContractManager,
+	userManager *UserManager,
+) *TelegramChatManager {
+	return &TelegramChatManager{
+		client:          client,
+		ctx:             ctx,
+		chainManager:    chainManager,
+		contractManager: contractManager,
+		userManager:     userManager,
+	}
 }
 
-// AddOrRemoveContract adds or removes a contract from a Telegram chat
+// AddOrRemoveChain adds or removes a chain from a telegram chat
+// Returns true if the contract is now added to the chat
+func (m *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error) {
+	log.Sugar.Debugf("Adding or removing chain %d from telegram chat %d", chainId, tgChatId)
+	tgChat, err := m.client.TelegramChat.
+		Query().
+		Where(telegramchat.ChatIDEQ(tgChatId)).
+		First(m.ctx)
+	if err != nil {
+		return false, err
+	}
+
+	entChain, err := m.chainManager.Get(chainId)
+	if err != nil {
+		return false, err
+	}
+
+	exists, err := tgChat.
+		QueryChains().
+		Where(chain.IDEQ(entChain.ID)).
+		Exist(m.ctx)
+	if err != nil {
+		return false, err
+	}
+	if exists {
+		_, err := tgChat.
+			Update().
+			RemoveChainIDs(entChain.ID).
+			Save(m.ctx)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		_, err := tgChat.
+			Update().
+			AddChainIDs(entChain.ID).
+			Save(m.ctx)
+		if err != nil {
+			return false, err
+		}
+	}
+	return !exists, nil
+}
+
+// AddOrRemoveContract adds or removes a contract from a telegram chat
 // Returns true if the contract is now added to the chat
 func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error) {
+	log.Sugar.Debugf("Adding or removing contract %d from telegram chat %d", contractId, tgChatId)
 	tgChat, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(tgChatId)).

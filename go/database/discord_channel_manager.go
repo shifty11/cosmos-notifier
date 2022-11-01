@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/shifty11/dao-dao-notifier/ent"
+	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
@@ -12,6 +13,7 @@ import (
 )
 
 type IDiscordChannelManager interface {
+	AddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error)
 	AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error)
 	CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool)
 	Delete(userId int64, channelId int64) error
@@ -24,12 +26,69 @@ type IDiscordChannelManager interface {
 type DiscordChannelManager struct {
 	client          *ent.Client
 	ctx             context.Context
+	chainManager    *ChainManager
 	contractManager IContractManager
 	userManager     *UserManager
 }
 
-func NewDiscordChannelManager(client *ent.Client, ctx context.Context, contractManager IContractManager, userManager *UserManager) *DiscordChannelManager {
-	return &DiscordChannelManager{client: client, ctx: ctx, contractManager: contractManager, userManager: userManager}
+func NewDiscordChannelManager(
+	client *ent.Client,
+	ctx context.Context,
+	chainManager *ChainManager,
+	contractManager IContractManager,
+	userManager *UserManager,
+) *DiscordChannelManager {
+	return &DiscordChannelManager{
+		client:          client,
+		ctx:             ctx,
+		chainManager:    chainManager,
+		contractManager: contractManager,
+		userManager:     userManager,
+	}
+}
+
+// AddOrRemoveChain adds or removes a chain from a discord channel
+// Returns true if the contract is now added
+func (m *DiscordChannelManager) AddOrRemoveChain(dChannelId int64, chainId int) (hasContract bool, err error) {
+	log.Sugar.Debugf("Adding or removing chain %d from discord channel %d", chainId, dChannelId)
+	dChannel, err := m.client.DiscordChannel.
+		Query().
+		Where(discordchannel.ChannelID(dChannelId)).
+		First(m.ctx)
+	if err != nil {
+		return false, err
+	}
+
+	entChain, err := m.chainManager.Get(chainId)
+	if err != nil {
+		return false, err
+	}
+
+	exists, err := dChannel.
+		QueryChains().
+		Where(chain.IDEQ(entChain.ID)).
+		Exist(m.ctx)
+	if err != nil {
+		return false, err
+	}
+	if exists {
+		_, err := dChannel.
+			Update().
+			RemoveChainIDs(entChain.ID).
+			Save(m.ctx)
+		if err != nil {
+			return false, err
+		}
+	} else {
+		_, err := dChannel.
+			Update().
+			AddChainIDs(entChain.ID).
+			Save(m.ctx)
+		if err != nil {
+			return false, err
+		}
+	}
+	return !exists, nil
 }
 
 // AddOrRemoveContract adds or removes a contract from a discord channel

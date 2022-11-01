@@ -57,7 +57,7 @@ go generate ./ent && go run main.go create-migrations
 go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest migrate -database "postgres:
 
 # apply migrations
-migrate -source file://database/migrations -database "postgres://postgres:postgres@localhost:5432/daodao-notifier-db?sslmode=disable&TimeZone=Europe/Zurich" up
+migrate -source file://database/migrations -database "postgres://postgres:postgres@localhost:5432/cosmos-notifier-db?sslmode=disable&TimeZone=Europe/Zurich" up
 ```
 
 

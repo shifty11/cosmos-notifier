@@ -26,7 +26,7 @@ services:
       - POSTGRES_DB=daodao-notifier-db
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:5.4
     container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
@@ -46,3 +46,4 @@ volumes:
   test_data:
     name: cosmos_notifier_test_data
   pgadmin:
+    name: pgadmin

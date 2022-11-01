@@ -9,9 +9,57 @@ import (
 )
 
 func newTestTelegramChatManager(t *testing.T) *TelegramChatManager {
-	manager := NewTelegramChatManager(testClient(t), context.Background(), newTestContractManager(t), newTestUserManager(t))
+	manager := NewTelegramChatManager(testClient(t), context.Background(), newTestChainManager(t), newTestContractManager(t), newTestUserManager(t))
 	t.Cleanup(func() { closeTestClient(manager.client) })
 	return manager
+}
+
+func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
+	m := newTestTelegramChatManager(t)
+	_, err := m.AddOrRemoveChain(1, 1)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
+
+	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+
+	dc := m.client.TelegramChat.
+		Create().
+		AddUsers(u).
+		SetChatID(1).
+		SetName("test").
+		SetIsGroup(false).
+		SaveX(m.ctx)
+
+	_, err = m.AddOrRemoveChain(1, 1)
+	if !ent.IsNotFound(err) {
+		t.Fatalf("Expected not found error, got %s", err)
+	}
+
+	data := &types.Chain{
+		ChainId:     "chainid-1",
+		Name:        "chain-1",
+		PrettyName:  "Chain 1",
+		NetworkType: "mainnet",
+		Image:       "https://image.com",
+	}
+
+	c := m.chainManager.Create(data, data.Image)
+	hasChain, err := m.AddOrRemoveChain(dc.ChatID, c.ID)
+	if err != nil {
+		t.Fatalf("Expected nil, got %s", err)
+	}
+	if !hasChain {
+		t.Fatal("Expected true, got false")
+	}
+
+	hasChain, err = m.AddOrRemoveChain(dc.ChatID, c.ID)
+	if err != nil {
+		t.Fatalf("Expected nil, got %s", err)
+	}
+	if hasChain {
+		t.Fatal("Expected false, got true")
+	}
 }
 
 func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
@@ -59,7 +107,6 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 	if hasContract {
 		t.Fatal("Expected false, got true")
 	}
-
 }
 
 func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {

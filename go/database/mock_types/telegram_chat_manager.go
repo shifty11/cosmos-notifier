@@ -35,6 +35,21 @@ func (m *MockITelegramChatManager) EXPECT() *MockITelegramChatManagerMockRecorde
 	return m.recorder
 }
 
+// AddOrRemoveChain mocks base method.
+func (m *MockITelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddOrRemoveChain", tgChatId, chainId)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddOrRemoveChain indicates an expected call of AddOrRemoveChain.
+func (mr *MockITelegramChatManagerMockRecorder) AddOrRemoveChain(tgChatId, chainId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrRemoveChain", reflect.TypeOf((*MockITelegramChatManager)(nil).AddOrRemoveChain), tgChatId, chainId)
+}
+
 // AddOrRemoveContract mocks base method.
 func (m *MockITelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (bool, error) {
 	m.ctrl.T.Helper()

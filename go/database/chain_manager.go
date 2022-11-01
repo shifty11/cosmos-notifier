@@ -47,6 +47,13 @@ func (manager *ChainManager) All() []*ent.Chain {
 	return chains
 }
 
+func (manager *ChainManager) Get(id int) (*ent.Chain, error) {
+	return manager.client.Chain.
+		Query().
+		Where(chain.IDEQ(id)).
+		Only(manager.ctx)
+}
+
 func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string) *ent.Chain {
 	log.Sugar.Infof("Create new chain: %v", chainData.PrettyName)
 	c, err := manager.client.Chain.
@@ -56,7 +63,7 @@ func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string)
 		SetPrettyName(chainData.PrettyName).
 		SetImageURL(chainData.Image).
 		SetThumbnailURL(thumbnailUrl).
-		SetIsEnabled(false).
+		SetIsEnabled(true).
 		Save(manager.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while creating chain: %v", err)

@@ -3,9 +3,12 @@ package common
 import (
 	"bytes"
 	"errors"
-	imaging "github.com/disintegration/imaging"
+	"github.com/disintegration/imaging"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/srwiley/oksvg"
+	"github.com/srwiley/rasterx"
 	"image"
+	"image/png"
 	"io"
 	"net/http"
 	"os"
@@ -30,9 +33,9 @@ func isSVG(url string) bool {
 
 func NewImageManager(name string, description string, url string, weblocation string, imagePath string, width int, height int) *ImageManager {
 	extension := ".png"
-	if isSVG(url) {
-		extension = ".svg"
-	}
+	//if isSVG(url) {
+	//	extension = ".svg"
+	//}
 	return &ImageManager{
 		Name:          name,
 		Description:   description,
@@ -93,6 +96,37 @@ func (im *ImageManager) saveAsSVG(data []byte) error {
 	return nil
 }
 
+func (im *ImageManager) saveAsPNG(data []byte) error {
+	w, h := 512, 512
+	tmpFilePath := "/tmp/out.png"
+	icon, _ := oksvg.ReadIconStream(bytes.NewReader(data))
+	icon.SetTarget(0, 0, float64(w), float64(h))
+	rgba := image.NewRGBA(image.Rect(0, 0, w, h))
+	icon.Draw(rasterx.NewDasher(w, h, rasterx.NewScannerGV(w, h, rgba, rgba.Bounds())), 1)
+
+	out, err := os.Create(tmpFilePath)
+	if err != nil {
+		return err
+	}
+	//goland:noinspection GoUnhandledErrorResult
+	defer out.Close()
+
+	err = png.Encode(out, rgba)
+	if err != nil {
+		return err
+	}
+
+	pngData, err := os.ReadFile(tmpFilePath)
+	if err != nil {
+		return err
+	}
+
+	if im.isImageFiletype(pngData) {
+		return im.createThumbnail(pngData)
+	}
+	return errors.New("not an image filetype")
+}
+
 func (im *ImageManager) DownloadAndCreateThumbnail() error {
 	log.Sugar.Debugf("downloading image for %v (%v): %v", im.Description, im.Name, im.DownloadUrl)
 	resp, err := http.Get(im.DownloadUrl)
@@ -108,7 +142,7 @@ func (im *ImageManager) DownloadAndCreateThumbnail() error {
 	}
 
 	if isSVG(im.DownloadUrl) {
-		return im.saveAsSVG(data)
+		return im.saveAsPNG(data)
 	}
 
 	if im.isImageFiletype(data) {

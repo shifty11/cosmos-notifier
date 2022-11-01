@@ -20,7 +20,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SubscriptionServiceClient interface {
 	GetSubscriptions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetSubscriptionsResponse, error)
-	ToggleSubscription(ctx context.Context, in *ToggleSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error)
+	ToggleChainSubscription(ctx context.Context, in *ToggleChainSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error)
+	ToggleContractSubscription(ctx context.Context, in *ToggleContractSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error)
 	AddDao(ctx context.Context, in *AddDaoRequest, opts ...grpc.CallOption) (SubscriptionService_AddDaoClient, error)
 	DeleteDao(ctx context.Context, in *DeleteDaoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
@@ -42,9 +43,18 @@ func (c *subscriptionServiceClient) GetSubscriptions(ctx context.Context, in *em
 	return out, nil
 }
 
-func (c *subscriptionServiceClient) ToggleSubscription(ctx context.Context, in *ToggleSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error) {
+func (c *subscriptionServiceClient) ToggleChainSubscription(ctx context.Context, in *ToggleChainSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error) {
 	out := new(ToggleSubscriptionResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/ToggleSubscription", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/ToggleChainSubscription", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *subscriptionServiceClient) ToggleContractSubscription(ctx context.Context, in *ToggleContractSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error) {
+	out := new(ToggleSubscriptionResponse)
+	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/ToggleContractSubscription", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +107,8 @@ func (c *subscriptionServiceClient) DeleteDao(ctx context.Context, in *DeleteDao
 // for forward compatibility
 type SubscriptionServiceServer interface {
 	GetSubscriptions(context.Context, *emptypb.Empty) (*GetSubscriptionsResponse, error)
-	ToggleSubscription(context.Context, *ToggleSubscriptionRequest) (*ToggleSubscriptionResponse, error)
+	ToggleChainSubscription(context.Context, *ToggleChainSubscriptionRequest) (*ToggleSubscriptionResponse, error)
+	ToggleContractSubscription(context.Context, *ToggleContractSubscriptionRequest) (*ToggleSubscriptionResponse, error)
 	AddDao(*AddDaoRequest, SubscriptionService_AddDaoServer) error
 	DeleteDao(context.Context, *DeleteDaoRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSubscriptionServiceServer()
@@ -110,8 +121,11 @@ type UnimplementedSubscriptionServiceServer struct {
 func (UnimplementedSubscriptionServiceServer) GetSubscriptions(context.Context, *emptypb.Empty) (*GetSubscriptionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSubscriptions not implemented")
 }
-func (UnimplementedSubscriptionServiceServer) ToggleSubscription(context.Context, *ToggleSubscriptionRequest) (*ToggleSubscriptionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ToggleSubscription not implemented")
+func (UnimplementedSubscriptionServiceServer) ToggleChainSubscription(context.Context, *ToggleChainSubscriptionRequest) (*ToggleSubscriptionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleChainSubscription not implemented")
+}
+func (UnimplementedSubscriptionServiceServer) ToggleContractSubscription(context.Context, *ToggleContractSubscriptionRequest) (*ToggleSubscriptionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleContractSubscription not implemented")
 }
 func (UnimplementedSubscriptionServiceServer) AddDao(*AddDaoRequest, SubscriptionService_AddDaoServer) error {
 	return status.Errorf(codes.Unimplemented, "method AddDao not implemented")
@@ -150,20 +164,38 @@ func _SubscriptionService_GetSubscriptions_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SubscriptionService_ToggleSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ToggleSubscriptionRequest)
+func _SubscriptionService_ToggleChainSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleChainSubscriptionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscriptionServiceServer).ToggleSubscription(ctx, in)
+		return srv.(SubscriptionServiceServer).ToggleChainSubscription(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.SubscriptionService/ToggleSubscription",
+		FullMethod: "/daodao_notifier_grpc.SubscriptionService/ToggleChainSubscription",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscriptionServiceServer).ToggleSubscription(ctx, req.(*ToggleSubscriptionRequest))
+		return srv.(SubscriptionServiceServer).ToggleChainSubscription(ctx, req.(*ToggleChainSubscriptionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SubscriptionService_ToggleContractSubscription_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleContractSubscriptionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SubscriptionServiceServer).ToggleContractSubscription(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daodao_notifier_grpc.SubscriptionService/ToggleContractSubscription",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SubscriptionServiceServer).ToggleContractSubscription(ctx, req.(*ToggleContractSubscriptionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -219,8 +251,12 @@ var SubscriptionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _SubscriptionService_GetSubscriptions_Handler,
 		},
 		{
-			MethodName: "ToggleSubscription",
-			Handler:    _SubscriptionService_ToggleSubscription_Handler,
+			MethodName: "ToggleChainSubscription",
+			Handler:    _SubscriptionService_ToggleChainSubscription_Handler,
+		},
+		{
+			MethodName: "ToggleContractSubscription",
+			Handler:    _SubscriptionService_ToggleContractSubscription_Handler,
 		},
 		{
 			MethodName: "DeleteDao",

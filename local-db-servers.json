@@ -1,7 +1,7 @@
 {
   "Servers": {
     "1": {
-      "Name": "daodao-notifier-db (dev)",
+      "Name": "cosmos-notifier-db (dev)",
       "Group": "Servers",
       "Host": "db",
       "Port": 5432,
@@ -11,7 +11,7 @@
       "PassFile": "/pgpassfile"
     },
     "2": {
-      "Name": "daodao-notifier-test-db (dev)",
+      "Name": "cosmos-notifier-test-db (dev)",
       "Group": "Servers",
       "Host": "db",
       "Port": 5433,

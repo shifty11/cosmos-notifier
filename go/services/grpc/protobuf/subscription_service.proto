@@ -8,7 +8,8 @@ option go_package = "go/subscription_service";
 
 service SubscriptionService {
   rpc GetSubscriptions (google.protobuf.Empty) returns (GetSubscriptionsResponse) {}
-  rpc ToggleSubscription (ToggleSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
+  rpc ToggleChainSubscription (ToggleChainSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
+  rpc ToggleContractSubscription (ToggleContractSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
   rpc AddDao (AddDaoRequest) returns (stream AddDaoResponse) {}
   rpc DeleteDao (DeleteDaoRequest) returns (google.protobuf.Empty) {}
 }
@@ -40,10 +41,16 @@ message ChatRoom {
 }
 
 message GetSubscriptionsResponse {
-  repeated ChatRoom chat_rooms = 1;
+  repeated ChatRoom chain_chat_rooms = 1;
+  repeated ChatRoom contract_chat_rooms = 2;
 }
 
-message ToggleSubscriptionRequest {
+message ToggleChainSubscriptionRequest {
+  int64 chatRoomId = 1;
+  int64 chainId = 2;
+}
+
+message ToggleContractSubscriptionRequest {
   int64 chatRoomId = 1;
   int64 contractId = 2;
 }

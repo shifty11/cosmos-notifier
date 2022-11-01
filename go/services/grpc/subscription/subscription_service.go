@@ -37,22 +37,38 @@ func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *empty
 
 	log.Sugar.Debugf("GetSubscriptions for user %v (%v)", entUser.Name, entUser.UserID)
 
-	chatRooms := server.subscriptionManager.GetSubscriptions(entUser)
-
-	var res = &pb.GetSubscriptionsResponse{ChatRooms: chatRooms}
+	res := server.subscriptionManager.GetSubscriptions(entUser)
 	return res, nil
 }
 
-func (server *SubscriptionServer) ToggleSubscription(ctx context.Context, req *pb.ToggleSubscriptionRequest) (*pb.ToggleSubscriptionResponse, error) {
+func (server *SubscriptionServer) ToggleChainSubscription(ctx context.Context, req *pb.ToggleChainSubscriptionRequest) (*pb.ToggleSubscriptionResponse, error) {
 	entUser, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	log.Sugar.Debugf("ToggleSubscription %v for user %v (%v)", req.ContractId, entUser.Name, entUser.UserID)
+	log.Sugar.Debugf("ToggleChainSubscription %v for user %v (%v)", req.ChainId, entUser.Name, entUser.UserID)
 
-	isSubscribed, err := server.subscriptionManager.ToggleSubscription(entUser, req.ChatRoomId, int(req.ContractId))
+	isSubscribed, err := server.subscriptionManager.ToggleChainSubscription(entUser, req.ChatRoomId, int(req.ChainId))
+	if err != nil {
+		log.Sugar.Errorf("error while toggling subscription: %v", err)
+		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+	}
+	var res = &pb.ToggleSubscriptionResponse{IsSubscribed: isSubscribed}
+	return res, nil
+}
+
+func (server *SubscriptionServer) ToggleContractSubscription(ctx context.Context, req *pb.ToggleContractSubscriptionRequest) (*pb.ToggleSubscriptionResponse, error) {
+	entUser, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
+	}
+
+	log.Sugar.Debugf("ToggleContractSubscription %v for user %v (%v)", req.ContractId, entUser.Name, entUser.UserID)
+
+	isSubscribed, err := server.subscriptionManager.ToggleContractSubscription(entUser, req.ChatRoomId, int(req.ContractId))
 	if err != nil {
 		log.Sugar.Errorf("error while toggling subscription: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
