@@ -293,17 +293,22 @@ class ChatRoom extends $pb.GeneratedMessage {
 
 class GetSubscriptionsResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetSubscriptionsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
-    ..pc<ChatRoom>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRooms', $pb.PbFieldType.PM, subBuilder: ChatRoom.create)
+    ..pc<ChatRoom>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chainChatRooms', $pb.PbFieldType.PM, subBuilder: ChatRoom.create)
+    ..pc<ChatRoom>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractChatRooms', $pb.PbFieldType.PM, subBuilder: ChatRoom.create)
     ..hasRequiredFields = false
   ;
 
   GetSubscriptionsResponse._() : super();
   factory GetSubscriptionsResponse({
-    $core.Iterable<ChatRoom>? chatRooms,
+    $core.Iterable<ChatRoom>? chainChatRooms,
+    $core.Iterable<ChatRoom>? contractChatRooms,
   }) {
     final _result = create();
-    if (chatRooms != null) {
-      _result.chatRooms.addAll(chatRooms);
+    if (chainChatRooms != null) {
+      _result.chainChatRooms.addAll(chainChatRooms);
+    }
+    if (contractChatRooms != null) {
+      _result.contractChatRooms.addAll(contractChatRooms);
     }
     return _result;
   }
@@ -329,18 +334,82 @@ class GetSubscriptionsResponse extends $pb.GeneratedMessage {
   static GetSubscriptionsResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.List<ChatRoom> get chatRooms => $_getList(0);
+  $core.List<ChatRoom> get chainChatRooms => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<ChatRoom> get contractChatRooms => $_getList(1);
 }
 
-class ToggleSubscriptionRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ToggleSubscriptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+class ToggleChainSubscriptionRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ToggleChainSubscriptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoomId', protoName: 'chatRoomId')
+    ..aInt64(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chainId', protoName: 'chainId')
+    ..hasRequiredFields = false
+  ;
+
+  ToggleChainSubscriptionRequest._() : super();
+  factory ToggleChainSubscriptionRequest({
+    $fixnum.Int64? chatRoomId,
+    $fixnum.Int64? chainId,
+  }) {
+    final _result = create();
+    if (chatRoomId != null) {
+      _result.chatRoomId = chatRoomId;
+    }
+    if (chainId != null) {
+      _result.chainId = chainId;
+    }
+    return _result;
+  }
+  factory ToggleChainSubscriptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ToggleChainSubscriptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ToggleChainSubscriptionRequest clone() => ToggleChainSubscriptionRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ToggleChainSubscriptionRequest copyWith(void Function(ToggleChainSubscriptionRequest) updates) => super.copyWith((message) => updates(message as ToggleChainSubscriptionRequest)) as ToggleChainSubscriptionRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ToggleChainSubscriptionRequest create() => ToggleChainSubscriptionRequest._();
+  ToggleChainSubscriptionRequest createEmptyInstance() => create();
+  static $pb.PbList<ToggleChainSubscriptionRequest> createRepeated() => $pb.PbList<ToggleChainSubscriptionRequest>();
+  @$core.pragma('dart2js:noInline')
+  static ToggleChainSubscriptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ToggleChainSubscriptionRequest>(create);
+  static ToggleChainSubscriptionRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get chatRoomId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set chatRoomId($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChatRoomId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearChatRoomId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get chainId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set chainId($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasChainId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChainId() => clearField(2);
+}
+
+class ToggleContractSubscriptionRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ToggleContractSubscriptionRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoomId', protoName: 'chatRoomId')
     ..aInt64(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractId', protoName: 'contractId')
     ..hasRequiredFields = false
   ;
 
-  ToggleSubscriptionRequest._() : super();
-  factory ToggleSubscriptionRequest({
+  ToggleContractSubscriptionRequest._() : super();
+  factory ToggleContractSubscriptionRequest({
     $fixnum.Int64? chatRoomId,
     $fixnum.Int64? contractId,
   }) {
@@ -353,26 +422,26 @@ class ToggleSubscriptionRequest extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory ToggleSubscriptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory ToggleSubscriptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ToggleContractSubscriptionRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ToggleContractSubscriptionRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  ToggleSubscriptionRequest clone() => ToggleSubscriptionRequest()..mergeFromMessage(this);
+  ToggleContractSubscriptionRequest clone() => ToggleContractSubscriptionRequest()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  ToggleSubscriptionRequest copyWith(void Function(ToggleSubscriptionRequest) updates) => super.copyWith((message) => updates(message as ToggleSubscriptionRequest)) as ToggleSubscriptionRequest; // ignore: deprecated_member_use
+  ToggleContractSubscriptionRequest copyWith(void Function(ToggleContractSubscriptionRequest) updates) => super.copyWith((message) => updates(message as ToggleContractSubscriptionRequest)) as ToggleContractSubscriptionRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static ToggleSubscriptionRequest create() => ToggleSubscriptionRequest._();
-  ToggleSubscriptionRequest createEmptyInstance() => create();
-  static $pb.PbList<ToggleSubscriptionRequest> createRepeated() => $pb.PbList<ToggleSubscriptionRequest>();
+  static ToggleContractSubscriptionRequest create() => ToggleContractSubscriptionRequest._();
+  ToggleContractSubscriptionRequest createEmptyInstance() => create();
+  static $pb.PbList<ToggleContractSubscriptionRequest> createRepeated() => $pb.PbList<ToggleContractSubscriptionRequest>();
   @$core.pragma('dart2js:noInline')
-  static ToggleSubscriptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ToggleSubscriptionRequest>(create);
-  static ToggleSubscriptionRequest? _defaultInstance;
+  static ToggleContractSubscriptionRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ToggleContractSubscriptionRequest>(create);
+  static ToggleContractSubscriptionRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $fixnum.Int64 get chatRoomId => $_getI64(0);

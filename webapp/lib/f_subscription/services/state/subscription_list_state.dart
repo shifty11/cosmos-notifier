@@ -8,5 +8,5 @@ class SubscriptionListState with _$SubscriptionListState {
   const SubscriptionListState._();
 
   factory SubscriptionListState.loading() = Loading;
-  factory SubscriptionListState.data({required List<ChatRoom> chatRooms}) = Data;
+  factory SubscriptionListState.data({required List<ChatRoom> chainChatRooms, required List<ChatRoom> contractChatRooms}) = Data;
 }

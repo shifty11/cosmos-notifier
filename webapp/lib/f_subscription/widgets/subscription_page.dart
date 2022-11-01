@@ -92,7 +92,9 @@ class SubscriptionPage extends StatelessWidget {
 
   Widget _subscriptionSecondLine(BuildContext context, Subscription subscription) {
     var text = Text(
-      "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
+      subscription.contractAddress.isEmpty
+          ? ""
+          : "${subscription.contractAddress.substring(0, 10)}...${subscription.contractAddress.substring(subscription.contractAddress.length - 5)}",
       style: TextStyle(fontSize: 12, color: Theme.of(context).inputDecorationTheme.hintStyle!.color),
       overflow: TextOverflow.ellipsis,
     );
@@ -148,7 +150,7 @@ class SubscriptionPage extends StatelessWidget {
         final state = ref.watch(chatroomListStateProvider);
         return state.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          data: (chatRooms) {
+          data: (chainChatRooms, contractChatRooms) {
             return GridView.builder(
               shrinkWrap: true,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -190,21 +192,21 @@ class SubscriptionPage extends StatelessWidget {
                           const SizedBox(width: sidePadding),
                           CircleAvatar(
                               backgroundColor: Colors.transparent,
-                              child: subscription.thumbnailUrl.isNotEmpty
-                                  ? ClipOval(
-                                      child: Image.asset(
-                                        subscription.thumbnailUrl,
-                                        width: 40,
-                                        height: 40,
-                                      ),
-                                    )
-                                  : Container(
+                              child: subscription.thumbnailUrl.isEmpty
+                                  ? Container(
                                       decoration: BoxDecoration(
                                         border: Border.all(
                                           width: 5,
                                           color: Colors.black,
                                         ),
                                         shape: BoxShape.circle,
+                                      ),
+                                    )
+                                  : ClipOval(
+                                      child: Image.asset(
+                                        subscription.thumbnailUrl,
+                                        width: 40,
+                                        height: 40,
                                       ),
                                     )),
                           const SizedBox(width: 10),
@@ -254,12 +256,50 @@ class SubscriptionPage extends StatelessWidget {
     });
   }
 
+  Widget subscriptionTypeWidget(BuildContext context) {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      final isChainsSelected = ref.watch(isChainsSelectedProvider);
+      return Column(children: [
+        ToggleButtons(
+          isSelected: [isChainsSelected, !isChainsSelected],
+          onPressed: (int index) {
+            ref.read(isChainsSelectedProvider.notifier).state = index != 1;
+          },
+          borderRadius: BorderRadius.circular(10),
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: const [
+                  Icon(Icons.link),
+                  SizedBox(width: 5),
+                  Text("Chains"),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: const [
+                  Text("DAO's"),
+                  SizedBox(width: 5),
+                  Icon(Icons.people),
+                ],
+              ),
+            ),
+          ],
+        )
+      ]);
+    });
+  }
+
   Widget chatDropdownWidget(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
       final state = ref.watch(chatroomListStateProvider);
       return state.when(
         loading: () => Container(),
-        data: (chatRooms) {
+        data: (chainChatRooms, contractChatRooms) {
+          var chatRooms = ref.read(isChainsSelectedProvider) ? chainChatRooms : contractChatRooms;
           if (chatRooms.isEmpty) {
             return Container();
           }
@@ -417,7 +457,13 @@ class SubscriptionPage extends StatelessWidget {
                   header(context),
                   const Divider(),
                   const SizedBox(height: 10),
-                  title(context),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      title(context),
+                      subscriptionTypeWidget(context),
+                    ],
+                  ),
                   const SizedBox(height: 20),
                   searchWidget(context),
                   const SizedBox(height: 20),

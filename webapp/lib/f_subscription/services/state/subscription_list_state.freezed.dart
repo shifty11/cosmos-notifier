@@ -19,19 +19,25 @@ mixin _$SubscriptionListState {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() loading,
-    required TResult Function(List<ChatRoom> chatRooms) data,
+    required TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)
+        data,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? loading,
-    TResult Function(List<ChatRoom> chatRooms)? data,
+    TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
+        data,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? loading,
-    TResult Function(List<ChatRoom> chatRooms)? data,
+    TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
+        data,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -113,7 +119,9 @@ class _$Loading extends Loading {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() loading,
-    required TResult Function(List<ChatRoom> chatRooms) data,
+    required TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)
+        data,
   }) {
     return loading();
   }
@@ -122,7 +130,9 @@ class _$Loading extends Loading {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? loading,
-    TResult Function(List<ChatRoom> chatRooms)? data,
+    TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
+        data,
   }) {
     return loading?.call();
   }
@@ -131,7 +141,9 @@ class _$Loading extends Loading {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? loading,
-    TResult Function(List<ChatRoom> chatRooms)? data,
+    TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
+        data,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -181,7 +193,7 @@ abstract class Loading extends SubscriptionListState {
 abstract class _$$DataCopyWith<$Res> {
   factory _$$DataCopyWith(_$Data value, $Res Function(_$Data) then) =
       __$$DataCopyWithImpl<$Res>;
-  $Res call({List<ChatRoom> chatRooms});
+  $Res call({List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms});
 }
 
 /// @nodoc
@@ -196,12 +208,17 @@ class __$$DataCopyWithImpl<$Res>
 
   @override
   $Res call({
-    Object? chatRooms = freezed,
+    Object? chainChatRooms = freezed,
+    Object? contractChatRooms = freezed,
   }) {
     return _then(_$Data(
-      chatRooms: chatRooms == freezed
-          ? _value._chatRooms
-          : chatRooms // ignore: cast_nullable_to_non_nullable
+      chainChatRooms: chainChatRooms == freezed
+          ? _value._chainChatRooms
+          : chainChatRooms // ignore: cast_nullable_to_non_nullable
+              as List<ChatRoom>,
+      contractChatRooms: contractChatRooms == freezed
+          ? _value._contractChatRooms
+          : contractChatRooms // ignore: cast_nullable_to_non_nullable
               as List<ChatRoom>,
     ));
   }
@@ -210,20 +227,30 @@ class __$$DataCopyWithImpl<$Res>
 /// @nodoc
 
 class _$Data extends Data {
-  _$Data({required final List<ChatRoom> chatRooms})
-      : _chatRooms = chatRooms,
+  _$Data(
+      {required final List<ChatRoom> chainChatRooms,
+      required final List<ChatRoom> contractChatRooms})
+      : _chainChatRooms = chainChatRooms,
+        _contractChatRooms = contractChatRooms,
         super._();
 
-  final List<ChatRoom> _chatRooms;
+  final List<ChatRoom> _chainChatRooms;
   @override
-  List<ChatRoom> get chatRooms {
+  List<ChatRoom> get chainChatRooms {
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_chatRooms);
+    return EqualUnmodifiableListView(_chainChatRooms);
+  }
+
+  final List<ChatRoom> _contractChatRooms;
+  @override
+  List<ChatRoom> get contractChatRooms {
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_contractChatRooms);
   }
 
   @override
   String toString() {
-    return 'SubscriptionListState.data(chatRooms: $chatRooms)';
+    return 'SubscriptionListState.data(chainChatRooms: $chainChatRooms, contractChatRooms: $contractChatRooms)';
   }
 
   @override
@@ -232,12 +259,16 @@ class _$Data extends Data {
         (other.runtimeType == runtimeType &&
             other is _$Data &&
             const DeepCollectionEquality()
-                .equals(other._chatRooms, _chatRooms));
+                .equals(other._chainChatRooms, _chainChatRooms) &&
+            const DeepCollectionEquality()
+                .equals(other._contractChatRooms, _contractChatRooms));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(_chatRooms));
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_chainChatRooms),
+      const DeepCollectionEquality().hash(_contractChatRooms));
 
   @JsonKey(ignore: true)
   @override
@@ -248,29 +279,35 @@ class _$Data extends Data {
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() loading,
-    required TResult Function(List<ChatRoom> chatRooms) data,
+    required TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)
+        data,
   }) {
-    return data(chatRooms);
+    return data(chainChatRooms, contractChatRooms);
   }
 
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult Function()? loading,
-    TResult Function(List<ChatRoom> chatRooms)? data,
+    TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
+        data,
   }) {
-    return data?.call(chatRooms);
+    return data?.call(chainChatRooms, contractChatRooms);
   }
 
   @override
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? loading,
-    TResult Function(List<ChatRoom> chatRooms)? data,
+    TResult Function(
+            List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
+        data,
     required TResult orElse(),
   }) {
     if (data != null) {
-      return data(chatRooms);
+      return data(chainChatRooms, contractChatRooms);
     }
     return orElse();
   }
@@ -308,10 +345,13 @@ class _$Data extends Data {
 }
 
 abstract class Data extends SubscriptionListState {
-  factory Data({required final List<ChatRoom> chatRooms}) = _$Data;
+  factory Data(
+      {required final List<ChatRoom> chainChatRooms,
+      required final List<ChatRoom> contractChatRooms}) = _$Data;
   Data._() : super._();
 
-  List<ChatRoom> get chatRooms;
+  List<ChatRoom> get chainChatRooms;
+  List<ChatRoom> get contractChatRooms;
   @JsonKey(ignore: true)
   _$$DataCopyWith<_$Data> get copyWith => throw _privateConstructorUsedError;
 }

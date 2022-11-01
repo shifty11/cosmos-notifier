@@ -15,7 +15,7 @@ Add the following line to `/etc/hosts` (optional):
 
 Then run the frontend:
 ```
-flutter run --web-port 40001 --web-hostname test.mydomain.com
+flutter run --web-port 40001 --web-hostname test.mydomain.com -d chrome
 ```
 
 ## Build freezed classes

@@ -62,23 +62,35 @@ final $typed_data.Uint8List chatRoomDescriptor = $convert.base64Decode('CghDaGF0
 const GetSubscriptionsResponse$json = const {
   '1': 'GetSubscriptionsResponse',
   '2': const [
-    const {'1': 'chat_rooms', '3': 1, '4': 3, '5': 11, '6': '.daodao_notifier_grpc.ChatRoom', '10': 'chatRooms'},
+    const {'1': 'chain_chat_rooms', '3': 1, '4': 3, '5': 11, '6': '.daodao_notifier_grpc.ChatRoom', '10': 'chainChatRooms'},
+    const {'1': 'contract_chat_rooms', '3': 2, '4': 3, '5': 11, '6': '.daodao_notifier_grpc.ChatRoom', '10': 'contractChatRooms'},
   ],
 };
 
 /// Descriptor for `GetSubscriptionsResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getSubscriptionsResponseDescriptor = $convert.base64Decode('ChhHZXRTdWJzY3JpcHRpb25zUmVzcG9uc2USPQoKY2hhdF9yb29tcxgBIAMoCzIeLmRhb2Rhb19ub3RpZmllcl9ncnBjLkNoYXRSb29tUgljaGF0Um9vbXM=');
-@$core.Deprecated('Use toggleSubscriptionRequestDescriptor instead')
-const ToggleSubscriptionRequest$json = const {
-  '1': 'ToggleSubscriptionRequest',
+final $typed_data.Uint8List getSubscriptionsResponseDescriptor = $convert.base64Decode('ChhHZXRTdWJzY3JpcHRpb25zUmVzcG9uc2USSAoQY2hhaW5fY2hhdF9yb29tcxgBIAMoCzIeLmRhb2Rhb19ub3RpZmllcl9ncnBjLkNoYXRSb29tUg5jaGFpbkNoYXRSb29tcxJOChNjb250cmFjdF9jaGF0X3Jvb21zGAIgAygLMh4uZGFvZGFvX25vdGlmaWVyX2dycGMuQ2hhdFJvb21SEWNvbnRyYWN0Q2hhdFJvb21z');
+@$core.Deprecated('Use toggleChainSubscriptionRequestDescriptor instead')
+const ToggleChainSubscriptionRequest$json = const {
+  '1': 'ToggleChainSubscriptionRequest',
+  '2': const [
+    const {'1': 'chatRoomId', '3': 1, '4': 1, '5': 3, '10': 'chatRoomId'},
+    const {'1': 'chainId', '3': 2, '4': 1, '5': 3, '10': 'chainId'},
+  ],
+};
+
+/// Descriptor for `ToggleChainSubscriptionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List toggleChainSubscriptionRequestDescriptor = $convert.base64Decode('Ch5Ub2dnbGVDaGFpblN1YnNjcmlwdGlvblJlcXVlc3QSHgoKY2hhdFJvb21JZBgBIAEoA1IKY2hhdFJvb21JZBIYCgdjaGFpbklkGAIgASgDUgdjaGFpbklk');
+@$core.Deprecated('Use toggleContractSubscriptionRequestDescriptor instead')
+const ToggleContractSubscriptionRequest$json = const {
+  '1': 'ToggleContractSubscriptionRequest',
   '2': const [
     const {'1': 'chatRoomId', '3': 1, '4': 1, '5': 3, '10': 'chatRoomId'},
     const {'1': 'contractId', '3': 2, '4': 1, '5': 3, '10': 'contractId'},
   ],
 };
 
-/// Descriptor for `ToggleSubscriptionRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List toggleSubscriptionRequestDescriptor = $convert.base64Decode('ChlUb2dnbGVTdWJzY3JpcHRpb25SZXF1ZXN0Eh4KCmNoYXRSb29tSWQYASABKANSCmNoYXRSb29tSWQSHgoKY29udHJhY3RJZBgCIAEoA1IKY29udHJhY3RJZA==');
+/// Descriptor for `ToggleContractSubscriptionRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List toggleContractSubscriptionRequestDescriptor = $convert.base64Decode('CiFUb2dnbGVDb250cmFjdFN1YnNjcmlwdGlvblJlcXVlc3QSHgoKY2hhdFJvb21JZBgBIAEoA1IKY2hhdFJvb21JZBIeCgpjb250cmFjdElkGAIgASgDUgpjb250cmFjdElk');
 @$core.Deprecated('Use toggleSubscriptionResponseDescriptor instead')
 const ToggleSubscriptionResponse$json = const {
   '1': 'ToggleSubscriptionResponse',

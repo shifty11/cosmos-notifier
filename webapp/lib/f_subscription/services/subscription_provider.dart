@@ -19,7 +19,8 @@ final chatroomListStateProvider = StateNotifierProvider<SubscriptionListNotifier
 
 class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
   final StateNotifierProviderRef _ref;
-  List<ChatRoom> _chatRooms = [];
+  List<ChatRoom> _chainChatRooms = [];
+  List<ChatRoom> _contractChatRooms = [];
 
   late final SubscriptionService _subsService;
 
@@ -31,35 +32,54 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
   Future<void> _loadSubscriptions() async {
     try {
       final response = await _subsService.getSubscriptions(Empty());
-      _chatRooms = response.chatRooms;
-      state = SubscriptionListState.data(chatRooms: _chatRooms);
+      _chainChatRooms = response.chainChatRooms;
+      _contractChatRooms = response.contractChatRooms;
+      state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
     } catch (e) {
       _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
     }
   }
 
-  _updateSubscription(Int64 chatRoomId, Subscription subscription) {
-    final chatRoom = _chatRooms.firstWhere((element) => element.id == chatRoomId);
-    final index = chatRoom.subscriptions.indexWhere((element) => element.id == subscription.id);
-    chatRoom.subscriptions[index] = subscription;
+  _updateSubscription(Int64 chatRoomId, Int64 subscriptionId, ToggleSubscriptionResponse response) {
+    ChatRoom chatRoom;
+    if (_ref.read(isChainsSelectedProvider)) {
+      chatRoom = _chainChatRooms.firstWhere((element) => element.id == chatRoomId);
+    } else {
+      chatRoom = _contractChatRooms.firstWhere((element) => element.id == chatRoomId);
+    }
+    final sub = chatRoom.subscriptions.firstWhere(((s) => s.id == subscriptionId)).deepCopy();
+    sub.isSubscribed = response.isSubscribed;
+    final index = chatRoom.subscriptions.indexWhere((element) => element.id == sub.id);
+    chatRoom.subscriptions[index] = sub;
 
-    state = SubscriptionListState.data(chatRooms: _chatRooms);
+    state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
   }
 
   _removeSubscriptions(Int64 id) {
-    for (var chatRoom in _chatRooms) {
-      chatRoom.subscriptions.removeWhere((element) => element.id == id);
+    if (_ref.read(isChainsSelectedProvider)) {
+      for (var chatRoom in _chainChatRooms) {
+        chatRoom.subscriptions.removeWhere((element) => element.id == id);
+      }
+    } else {
+      for (var chatRoom in _contractChatRooms) {
+        chatRoom.subscriptions.removeWhere((element) => element.id == id);
+      }
     }
 
-    state = SubscriptionListState.data(chatRooms: _chatRooms);
+    state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
   }
 
-  Future<void> toggleSubscription(chatRoomId, Int64 subscriptionId) async {
+  Future<void> toggleSubscription(Int64 chatRoomId, Int64 subscriptionId) async {
     try {
-      final response = await _subsService.toggleSubscription(ToggleSubscriptionRequest(chatRoomId: chatRoomId, contractId: subscriptionId));
-      final sub = _chatRooms.firstWhere((c) => c.id == chatRoomId).subscriptions.firstWhere(((s) => s.id == subscriptionId)).deepCopy();
-      sub.isSubscribed = response.isSubscribed;
-      _updateSubscription(chatRoomId, sub);
+      ToggleSubscriptionResponse response;
+      if (_ref.read(isChainsSelectedProvider)) {
+        response =
+            await _subsService.toggleChainSubscription(ToggleChainSubscriptionRequest(chatRoomId: chatRoomId, chainId: subscriptionId));
+      } else {
+        response = await _subsService
+            .toggleContractSubscription(ToggleContractSubscriptionRequest(chatRoomId: chatRoomId, contractId: subscriptionId));
+      }
+      _updateSubscription(chatRoomId, subscriptionId, response);
       if (jwtManager.isAdmin) {
         _loadSubscriptions(); // to update statistics
       }
@@ -112,12 +132,19 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
 
 final searchSubsProvider = StateProvider((ref) => "");
 
+final isChainsSelectedProvider = StateProvider((ref) => true);
+
 final selectedChatRoomProvider = StateProvider<ChatRoom?>((ref) {
   final chatRooms = ref.watch(chatroomListStateProvider);
+  final isChain = ref.watch(isChainsSelectedProvider);
   return chatRooms.maybeWhen(
-    data: (chatRooms) {
+    data: (chainChatRooms, contractChatRooms) {
       final chatId = ref.read(chatIdProvider) ?? Int64(0);
-      return chatRooms.firstWhere((element) => element.id == chatId, orElse: () => chatRooms.first);
+      if (isChain) {
+        return chainChatRooms.firstWhere((element) => element.id == chatId, orElse: () => chainChatRooms.first);
+      } else {
+        return contractChatRooms.firstWhere((element) => element.id == chatId, orElse: () => contractChatRooms.first);
+      }
     },
     orElse: () => null,
   );
@@ -127,8 +154,9 @@ final searchedSubsProvider = Provider<ChatroomData>((ref) {
   final search = ref.watch(searchSubsProvider);
   final chatRoom = ref.watch(selectedChatRoomProvider);
   final subs = ref.watch(chatroomListStateProvider);
-  return subs.whenOrNull(data: (chatRooms) {
-        for (var cr in chatRooms) {
+  final isChain = ref.watch(isChainsSelectedProvider);
+  return subs.whenOrNull(data: (chainChatRooms, contractChatRooms) {
+        for (var cr in isChain ? chainChatRooms : contractChatRooms) {
           if (cr.id == chatRoom?.id || chatRoom == null) {
             if (search.isEmpty) {
               return ChatroomData(
