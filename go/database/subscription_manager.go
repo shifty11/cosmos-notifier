@@ -48,7 +48,7 @@ func (m *SubscriptionManager) getSubscriptions(ofUser []int, qType queryType) []
 		for _, c := range m.chainManager.Enabled() {
 			var subscription = pb.Subscription{
 				Id:              int64(c.ID),
-				Name:            c.Name,
+				Name:            c.PrettyName,
 				IsSubscribed:    false,
 				ThumbnailUrl:    c.ThumbnailURL,
 				ContractAddress: "",
