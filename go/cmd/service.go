@@ -14,6 +14,9 @@ import (
 	"github.com/shifty11/dao-dao-notifier/services/grpc"
 	"github.com/shifty11/dao-dao-notifier/services/telegram"
 	"golang.org/x/oauth2"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -85,7 +88,9 @@ var runChainCrawlerCmd = &cobra.Command{
 		if cmd.Flag("repeat").Value.String() == "true" {
 			crawler.ScheduleCrawl()
 
-			time.Sleep(time.Duration(1<<63 - 1))
+			stop := make(chan os.Signal, 1)
+			signal.Notify(stop, syscall.SIGINT)
+			<-stop
 		}
 	},
 }
@@ -110,10 +115,13 @@ var runContractCrawlerCmd = &cobra.Command{
 		notifier := notifier.NewContractNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
 		c := contract_crawler.NewContractCrawler(managers, notifier, nodejsUrl, assetsPath)
 		c.UpdateContracts()
+
 		if cmd.Flag("repeat").Value.String() == "true" {
 			c.ScheduleCrawl()
 
-			time.Sleep(time.Duration(1<<63 - 1))
+			stop := make(chan os.Signal, 1)
+			signal.Notify(stop, syscall.SIGINT)
+			<-stop
 		}
 	},
 }

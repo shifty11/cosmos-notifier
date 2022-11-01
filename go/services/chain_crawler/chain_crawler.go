@@ -149,7 +149,11 @@ func (c *ChainCrawler) UpdateProposals() {
 func (c *ChainCrawler) ScheduleCrawl() {
 	log.Sugar.Info("Scheduling chain crawl")
 	cr := cron.New()
-	_, err := cr.AddFunc("@every 15min", func() { c.UpdateProposals() })
+	_, err := cr.AddFunc("*/15 * * * *", func() { c.UpdateProposals() }) // every 15min
+	if err != nil {
+		log.Sugar.Errorf("while executing 'updateContracts' via cron: %v", err)
+	}
+	_, err = cr.AddFunc("0 9 * * *", func() { c.AddOrUpdateChains() }) // every day at 9:00
 	if err != nil {
 		log.Sugar.Errorf("while executing 'updateContracts' via cron: %v", err)
 	}
