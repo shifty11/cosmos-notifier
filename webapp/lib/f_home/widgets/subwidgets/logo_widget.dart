@@ -43,7 +43,7 @@ class LogoWidget extends StatelessWidget {
           child: Center(
               child: Column(
             children: [
-              Text("DAO DAO", style: Theme.of(context).textTheme.headline3?.copyWith(fontSize: fontSize, fontFamily: "Alienated")),
+              Text("Cosmos", style: Theme.of(context).textTheme.headline3?.copyWith(fontSize: fontSize, fontFamily: "Alienated")),
               Text("Notifier", style: Theme.of(context).textTheme.headline3!.copyWith(fontSize: fontSize, fontFamily: "Alien Robot")),
             ],
           )),

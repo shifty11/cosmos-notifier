@@ -1,4 +1,4 @@
-# DAO DAO Notifier Frontend
+# Cosmos Notifier Frontend
 
 
 ## Run envoy

@@ -9,7 +9,7 @@ void main() {
     final router = ref.read(routerProvider).router;
     final state = ref.watch(themeProvider);
     return MaterialApp.router(
-      title: 'DAO DAO Notifier',
+      title: 'Cosmos Notifier',
       theme: state.map(initial: (theme) => theme.lightStyle, custom: (theme) => theme.style),
       darkTheme: state.map(initial: (theme) => theme.darkStyle, custom: (theme) => theme.style),
       themeMode: ThemeMode.system,

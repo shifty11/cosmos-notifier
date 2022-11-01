@@ -119,7 +119,7 @@ class HomePage extends StatelessWidget {
             const Spacer(flex: 2),
             Flexible(
               flex: 0,
-              child: Text("Get notified about DAO DAO governance proposals",
+              child: Text("Get notified about governance proposals of Cosmos chains and DAO's",
                   textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline5),
             ),
             const SizedBox(height: 10),

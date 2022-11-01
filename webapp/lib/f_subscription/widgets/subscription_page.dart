@@ -434,7 +434,7 @@ class SubscriptionPage extends StatelessWidget {
         Tooltip(
             triggerMode: TooltipTriggerMode.tap,
             showDuration: const Duration(seconds: 5),
-            message: "Select the DAO's that you want to follow. "
+            message: "Select the chains and DAO's that you want to follow. "
                 "You will receive notifications about new governance proposals.",
             child: Icon(Icons.info, size: 20, color: Theme.of(context).disabledColor)),
       ],
