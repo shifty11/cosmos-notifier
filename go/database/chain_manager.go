@@ -55,7 +55,7 @@ func (manager *ChainManager) Get(id int) (*ent.Chain, error) {
 }
 
 func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string) *ent.Chain {
-	log.Sugar.Infof("Create new chain: %v", chainData.PrettyName)
+	log.Sugar.Infof("Create new chain: %v (%v)", chainData.PrettyName, chainData.ChainId)
 	c, err := manager.client.Chain.
 		Create().
 		SetChainID(chainData.ChainId).
