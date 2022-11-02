@@ -76,7 +76,7 @@ func (m *ChainProposalManager) CreateOrUpdate(c *ent.Chain, propData *types.Chai
 	return prop, ProposalNoChanges
 }
 
-func (m *ChainProposalManager) InVotingPeriod(c *ent.Chain) []*ent.ChainProposal {
+func (m *ChainProposalManager) VotingPeriodExpired(c *ent.Chain) []*ent.ChainProposal {
 	result, err := c.QueryChainProposals().
 		Where(
 			chainproposal.And(
