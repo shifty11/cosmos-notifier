@@ -29,7 +29,7 @@ func NewContractCrawler(managers *database.DbManagers, notifier *notifier.Contra
 }
 
 func (c *ContractCrawler) UpdateContracts() {
-	log.Sugar.Info("updating contracts")
+	log.Sugar.Info("Updating contracts")
 
 	contracts := c.contractManager.All()
 	var cntSuccess, cntFails = 0, len(contracts)

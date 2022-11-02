@@ -119,6 +119,7 @@ func (c *ChainCrawler) updateProposal(entChain *ent.Chain, url string) {
 }
 
 func (c *ChainCrawler) AddOrUpdateChains() {
+	log.Sugar.Debug("Updating chains")
 	var chainInfo types.ChainInfo
 	err := c.getJson("https://chains.cosmos.directory/", &chainInfo)
 	if err != nil {
@@ -151,6 +152,7 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 }
 
 func (c *ChainCrawler) UpdateProposals() {
+	log.Sugar.Debug("Updating chain proposals")
 	for _, entChain := range c.chainManager.All() {
 		log.Sugar.Debugf("Updating proposals for chain %v", entChain.PrettyName)
 		for _, entProposal := range c.chainProposalManager.VotingPeriodExpired(entChain) {
