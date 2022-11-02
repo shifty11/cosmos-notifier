@@ -53,8 +53,8 @@ func (c *ChainCrawler) getJson(url string, target interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(target)
 }
 
-func (c *ChainCrawler) downloadImage(chain *types.Chain) string {
-	im := common.NewImageManager(
+func (c *ChainCrawler) imageManager(chain *types.Chain) *common.ImageManager {
+	return common.NewImageManager(
 		chain.Name,
 		chain.PrettyName,
 		chain.Image,
@@ -63,6 +63,10 @@ func (c *ChainCrawler) downloadImage(chain *types.Chain) string {
 		100,
 		100,
 	)
+}
+
+func (c *ChainCrawler) downloadThumbnail(chain *types.Chain) string {
+	im := c.imageManager(chain)
 	err := im.DownloadAndCreateThumbnail()
 	if err != nil {
 		log.Sugar.Infof("while downloading image for chain %v: %v", chain.PrettyName, err)
@@ -70,6 +74,10 @@ func (c *ChainCrawler) downloadImage(chain *types.Chain) string {
 		return im.ThumbnailUrl
 	}
 	return ""
+}
+
+func (c *ChainCrawler) doesThumbnailExist(chain *types.Chain) bool {
+	return c.imageManager(chain).DoesExist()
 }
 
 type ProposalInfo struct {
@@ -124,17 +132,15 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 				if (entChain.Name != chain.Name) ||
 					(entChain.PrettyName != chain.PrettyName) ||
 					(entChain.ImageURL != chain.Image) ||
-					(chain.Image != "" && entChain.ThumbnailURL == "") {
-					thumbnailUrl := c.downloadImage(&chain)
+					(chain.Image != "" && entChain.ThumbnailURL == "") ||
+					(!c.doesThumbnailExist(&chain)) {
+					thumbnailUrl := c.downloadThumbnail(&chain)
 					c.chainManager.Update(entChain, &chain, thumbnailUrl)
 				}
-				thumbnailUrl := c.downloadImage(&chain)
-				c.chainManager.Update(entChain, &chain, thumbnailUrl)
-				break
 			}
 		}
 		if !found && chain.NetworkType == "mainnet" {
-			thumbnailUrl := c.downloadImage(&chain)
+			thumbnailUrl := c.downloadThumbnail(&chain)
 			entChain := c.chainManager.Create(&chain, thumbnailUrl)
 			url := fmt.Sprintf(urlProposals, entChain.Name)
 			c.addProposals(entChain, url)
