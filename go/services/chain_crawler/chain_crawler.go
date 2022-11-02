@@ -70,7 +70,12 @@ func (c *ChainCrawler) downloadImage(chain *types.Chain) string {
 	return ""
 }
 
-func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []*ent.ChainProposal {
+type ProposalInfo struct {
+	proposal *ent.ChainProposal
+	status   database.ProposalStatus
+}
+
+func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []ProposalInfo {
 	var resp types.ChainProposalsResponse
 	err := c.getJson(url, &resp)
 	if err != nil {
@@ -78,10 +83,13 @@ func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []*ent.Chai
 		return nil
 	}
 
-	var props []*ent.ChainProposal
+	var props []ProposalInfo
 	for _, proposal := range resp.Proposals {
-		prop, _ := c.chainProposalManager.CreateOrUpdate(entChain, &proposal)
-		props = append(props, prop)
+		prop, status := c.chainProposalManager.CreateOrUpdate(entChain, &proposal)
+		props = append(props, ProposalInfo{
+			proposal: prop,
+			status:   status,
+		})
 	}
 	return props
 }
@@ -139,8 +147,8 @@ func (c *ChainCrawler) UpdateProposals() {
 		url := fmt.Sprintf(urlProposals+"?proposal_status=%v", entChain.Name, cosmossdktypes.StatusVotingPeriod)
 		props := c.addProposals(entChain, url)
 		for _, prop := range props {
-			if entChain.IsEnabled {
-				c.notifier.Notify(entChain, prop)
+			if entChain.IsEnabled && prop.status == database.ProposalCreated {
+				c.notifier.Notify(entChain, prop.proposal)
 			}
 		}
 	}

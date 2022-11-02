@@ -7,6 +7,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
+	"time"
 )
 
 type ChainProposalManager struct {
@@ -77,7 +78,11 @@ func (m *ChainProposalManager) CreateOrUpdate(c *ent.Chain, propData *types.Chai
 
 func (m *ChainProposalManager) InVotingPeriod(c *ent.Chain) []*ent.ChainProposal {
 	result, err := c.QueryChainProposals().
-		Where(chainproposal.StatusEQ(chainproposal.StatusPROPOSAL_STATUS_VOTING_PERIOD)).
+		Where(
+			chainproposal.And(
+				chainproposal.StatusEQ(chainproposal.StatusPROPOSAL_STATUS_VOTING_PERIOD),
+				chainproposal.VotingEndTimeLTE(time.Now()),
+			)).
 		All(m.ctx)
 	if err != nil {
 		log.Sugar.Panicf("Error while querying proposals: %v", err)
