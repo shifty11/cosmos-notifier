@@ -25,7 +25,7 @@ type ChainCrawler struct {
 	chainProposalManager *database.ChainProposalManager
 	notifier             *notifier.ChainNotifier
 	assetsPath           string
-	errorCnt             map[string]int
+	errorCnt             map[int]int
 }
 
 func NewChainCrawler(dbManagers *database.DbManagers, notifier *notifier.ChainNotifier, assetsPath string) *ChainCrawler {
@@ -36,6 +36,7 @@ func NewChainCrawler(dbManagers *database.DbManagers, notifier *notifier.ChainNo
 		chainProposalManager: dbManagers.ChainProposalManager,
 		notifier:             notifier,
 		assetsPath:           assetsPath,
+		errorCnt:             make(map[int]int),
 	}
 }
 
@@ -89,8 +90,8 @@ func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []ProposalI
 	var resp types.ChainProposalsResponse
 	err := c.getJson(url, &resp)
 	if err != nil {
-		c.errorCnt[entChain.Name]++
-		if c.errorCnt[entChain.Name]%maxErrorCntUntilNotification == 0 { // report every `maxErrorCntUntilNotification` times
+		c.errorCnt[entChain.ID]++
+		if c.errorCnt[entChain.ID]%maxErrorCntUntilNotification == 0 { // report every `maxErrorCntUntilNotification` times
 			log.Sugar.Errorf("Error calling `%v`: %v", url, err)
 		}
 		return nil
