@@ -17,6 +17,7 @@ import (
 )
 
 const urlProposals = "https://rest.cosmos.directory/%v/cosmos/gov/v1beta1/proposals"
+const maxErrorCntUntilNotification = 96
 
 type ChainCrawler struct {
 	client               *http.Client
@@ -24,6 +25,7 @@ type ChainCrawler struct {
 	chainProposalManager *database.ChainProposalManager
 	notifier             *notifier.ChainNotifier
 	assetsPath           string
+	errorCnt             map[string]int
 }
 
 func NewChainCrawler(dbManagers *database.DbManagers, notifier *notifier.ChainNotifier, assetsPath string) *ChainCrawler {
@@ -79,7 +81,10 @@ func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []ProposalI
 	var resp types.ChainProposalsResponse
 	err := c.getJson(url, &resp)
 	if err != nil {
-		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
+		c.errorCnt[entChain.Name]++
+		if c.errorCnt[entChain.Name]%maxErrorCntUntilNotification == 0 { // report every `maxErrorCntUntilNotification` times
+			log.Sugar.Errorf("Error calling `%v`: %v", url, err)
+		}
 		return nil
 	}
 
