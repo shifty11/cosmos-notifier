@@ -252,6 +252,9 @@ func (m *SubscriptionManager) collectContractStats(chats []*pb.ChatRoom) {
 
 	for _, chat := range chats {
 		for _, sub := range chat.Subscriptions {
+			if sub.Stats == nil {
+				sub.Stats = &pb.SubscriptionStats{}
+			}
 			for _, s := range tgStats {
 				if s.ID == int(sub.Id) {
 					sub.Stats.Telegram = int32(s.Cnt)
@@ -303,6 +306,9 @@ func (m *SubscriptionManager) collectChainStats(chats []*pb.ChatRoom) {
 
 	for _, chat := range chats {
 		for _, sub := range chat.Subscriptions {
+			if sub.Stats == nil {
+				sub.Stats = &pb.SubscriptionStats{}
+			}
 			for _, s := range tgStats {
 				if s.ID == int(sub.Id) {
 					sub.Stats.Telegram = int32(s.Cnt)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang/mock/gomock"
 	mock_database "github.com/shifty11/dao-dao-notifier/database/mock_types"
+	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
 	"github.com/shifty11/dao-dao-notifier/types"
 	"testing"
@@ -331,7 +332,7 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleContractSubscription(discordUser, int64(12), c2.ID)
+	_, err = m.ToggleContractSubscription(discordUser, int64(12), contract1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -420,5 +421,94 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 	c1s1 = response.ContractChatRooms[0].Subscriptions[0]
 	if c1s1.IsSubscribed != false {
 		t.Errorf("Expected %v, got %v", false, c1s1.IsSubscribed)
+	}
+}
+
+func TestSubscriptionManager_GetSubscriptions_WithStats(t *testing.T) {
+	m := newTestSubscriptionManager(t)
+
+	data1 := &types.Chain{
+		ChainId:     "chain1",
+		Name:        "chain1",
+		PrettyName:  "Chain 1",
+		NetworkType: "mainnet",
+		Image:       "https://image1.png",
+	}
+	data2 := &types.Chain{
+		ChainId:     "chain2",
+		Name:        "chain2",
+		PrettyName:  "Chain 2",
+		NetworkType: "mainnet",
+		Image:       "https://image2.png",
+	}
+	data3 := &types.ContractData{
+		Address:     "0x123",
+		Name:        "contract1",
+		Description: "desc1",
+		ImageUrl:    "url1",
+	}
+	chain2 := m.chainManager.Create(data2, data2.Image)
+	chain1 := m.chainManager.Create(data1, data1.Image)
+	contract1, _ := m.contractManager.Create(data3)
+
+	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
+	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 11, "chat1", false)
+	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
+	m.userManager.SetRole("telegramuser", user.RoleAdmin)
+	m.userManager.SetRole("discorduser", user.RoleAdmin)
+
+	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
+	m.userManager.Get(2, user.TypeTelegram)
+	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+
+	_, err := m.ToggleChainSubscription(tgUser1, int64(10), chain1.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = m.ToggleChainSubscription(discordUser, int64(12), chain2.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = m.ToggleContractSubscription(tgUser1, int64(10), contract1.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = m.ToggleContractSubscription(discordUser, int64(12), contract1.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i, u := range []*ent.User{tgUser1, discordUser} {
+		response := m.GetSubscriptions(u)
+		if i == 0 {
+			if len(response.ChainChatRooms) != 2 {
+				t.Fatalf("Expected 2 chainChatRooms, got %d", len(response.ChainChatRooms))
+			}
+			if len(response.ContractChatRooms) != 2 {
+				t.Fatalf("Expected 2 contractChatRooms, got %d", len(response.ContractChatRooms))
+			}
+		} else {
+			if len(response.ChainChatRooms) != 1 {
+				t.Fatalf("Expected 1 chainChatRooms, got %d", len(response.ChainChatRooms))
+			}
+			if len(response.ContractChatRooms) != 1 {
+				t.Fatalf("Expected 1 contractChatRooms, got %d", len(response.ContractChatRooms))
+			}
+		}
+		for _, c := range response.ChainChatRooms {
+			c1s1, c1s2 := c.Subscriptions[0].Stats, c.Subscriptions[1].Stats
+			if c1s1.Total != 1 || c1s1.Telegram != 1 || c1s1.Discord != 0 {
+				t.Errorf("Expected (1, 1, 0), got (%d, %d, %d)", c1s1.Total, c1s1.Telegram, c1s1.Discord)
+			}
+			if c1s2.Total != 1 || c1s2.Telegram != 0 || c1s2.Discord != 1 {
+				t.Errorf("Expected (1, 0, 1), got (%d, %d, %d)", c1s2.Total, c1s2.Telegram, c1s2.Discord)
+			}
+		}
+		for _, c := range response.ContractChatRooms {
+			c1s1 := c.Subscriptions[0].Stats
+			if c1s1.Total != 2 || c1s1.Telegram != 1 || c1s1.Discord != 1 {
+				t.Errorf("Expected (2, 1, 1), got (%d, %d, %d)", c1s1.Total, c1s1.Telegram, c1s1.Discord)
+			}
+		}
 	}
 }
