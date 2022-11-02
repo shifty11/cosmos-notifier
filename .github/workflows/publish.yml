@@ -78,4 +78,4 @@ jobs:
           deploy_path: /home/ubuntu
           stack_file_name: swarm-prod-cosmos-notifier.yml
           keep_files: 5
-          args: daodao-notifier
+          args: cosmos-notifier
