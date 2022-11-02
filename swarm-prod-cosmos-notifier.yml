@@ -89,7 +89,7 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
     volumes:
       - /var/www/daodao-notifier:/app/build/web
-      - contract_images:/var/www/daodao-notifier/assets/images/contracts
+      - images:/var/www/daodao-notifier/assets/images/contracts
     networks:
       - caddy
       - default
