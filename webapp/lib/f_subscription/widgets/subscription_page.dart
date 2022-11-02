@@ -261,15 +261,19 @@ class SubscriptionPage extends StatelessWidget {
       final isChainsSelected = ref.watch(isChainsSelectedProvider);
       return Column(children: [
         ToggleButtons(
+          borderRadius: BorderRadius.circular(10),
+          constraints: ResponsiveWrapper.of(context).isSmallerThan(TABLET)
+              ? BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2 - 42)
+              : null,
           isSelected: [isChainsSelected, !isChainsSelected],
           onPressed: (int index) {
             ref.read(isChainsSelectedProvider.notifier).state = index != 1;
           },
-          borderRadius: BorderRadius.circular(10),
           children: [
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: const [
                   Icon(Icons.link),
                   SizedBox(width: 5),
@@ -428,15 +432,23 @@ class SubscriptionPage extends StatelessWidget {
   }
 
   Widget title(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
-        Tooltip(
-            triggerMode: TooltipTriggerMode.tap,
-            showDuration: const Duration(seconds: 5),
-            message: "Select the chains and DAO's that you want to follow. "
-                "You will receive notifications about new governance proposals.",
-            child: Icon(Icons.info, size: 20, color: Theme.of(context).disabledColor)),
+        Row(
+          children: [
+            Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
+            Tooltip(
+                triggerMode: TooltipTriggerMode.tap,
+                showDuration: const Duration(seconds: 5),
+                message: "Select the chains and DAO's that you want to follow. "
+                    "You will receive notifications about new governance proposals.",
+                child: Icon(Icons.info, size: 20, color: Theme.of(context).disabledColor)),
+            const Spacer(),
+            ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? Container() : subscriptionTypeWidget(context),
+          ],
+        ),
+        ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? subscriptionTypeWidget(context) : Container(),
       ],
     );
   }
@@ -457,13 +469,7 @@ class SubscriptionPage extends StatelessWidget {
                   header(context),
                   const Divider(),
                   const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      title(context),
-                      subscriptionTypeWidget(context),
-                    ],
-                  ),
+                  title(context),
                   const SizedBox(height: 20),
                   searchWidget(context),
                   const SizedBox(height: 20),
