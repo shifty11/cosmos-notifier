@@ -138,6 +138,7 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 					thumbnailUrl := c.downloadThumbnail(&chain)
 					c.chainManager.Update(entChain, &chain, thumbnailUrl)
 				}
+				break
 			}
 		}
 		if !found && chain.NetworkType == "mainnet" {
