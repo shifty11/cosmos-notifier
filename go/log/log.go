@@ -8,19 +8,24 @@ import (
 	"os"
 )
 
+func useSentry() bool {
+	return os.Getenv("SENTRY_DSN") != ""
+}
+
 func addSentryToLogger(log *zap.Logger) *zap.Logger {
-	sentryDsn := os.Getenv("SENTRY_DSN")
-	if sentryDsn == "" {
+	if !useSentry() {
 		return log
 	}
 
 	cfg := zapsentry.Configuration{
-		Level: zapcore.ErrorLevel, // when to send message to sentry
+		Level:             zapcore.ErrorLevel, // when to send message to sentry
+		EnableBreadcrumbs: true,               // enable sending breadcrumbs to Sentry
+		BreadcrumbLevel:   zapcore.InfoLevel,  // at what level should we sent breadcrumbs to sentry
 		Tags: map[string]string{
 			"component": "system",
 		},
 	}
-	core, err := zapsentry.NewCore(cfg, zapsentry.NewSentryClientFromDSN(sentryDsn))
+	core, err := zapsentry.NewCore(cfg, zapsentry.NewSentryClientFromDSN(os.Getenv("SENTRY_DSN")))
 
 	// to use breadcrumbs feature - create new scope explicitly
 	log = log.With(zapsentry.NewScope())
@@ -32,7 +37,7 @@ func addSentryToLogger(log *zap.Logger) *zap.Logger {
 	return zapsentry.AttachCoreToLogger(core, log)
 }
 
-var Sugar *zap.SugaredLogger
+var Sugar *StackTraceLogger
 var logger *zap.Logger
 
 func init() {
@@ -46,7 +51,7 @@ func init() {
 			fmt.Println(err)
 		}
 		logger = addSentryToLogger(logger)
-		Sugar = logger.Sugar()
+		Sugar = NewStackTraceLogger(logger.Sugar())
 	}
 }
 
