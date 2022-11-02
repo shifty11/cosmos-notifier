@@ -251,8 +251,8 @@ func TestSubscriptionManager_GetSubscriptions_Chains(t *testing.T) {
 		t.Errorf("Expected 2 subscriptions, got %d", len(chatRooms[0].Subscriptions))
 	}
 	c1s1, c1s2, c2s1, c2s2 := chatRooms[0].Subscriptions[0], chatRooms[0].Subscriptions[1], chatRooms[1].Subscriptions[0], chatRooms[1].Subscriptions[1]
-	if c1s1.Name != data1.Name || c2s1.Name != data1.Name || c1s2.Name != data2.Name || c2s2.Name != data2.Name {
-		t.Errorf("Expected %s or %s, got %s and %s", data1.Name, data2.Name, c1s1.Name, c1s2.Name)
+	if c1s1.Name != data1.PrettyName || c2s1.Name != data1.PrettyName || c1s2.Name != data2.PrettyName || c2s2.Name != data2.PrettyName {
+		t.Errorf("Expected %s, %s, %s, %s, got %s, %s, %s, %s", data1.PrettyName, data1.PrettyName, data2.PrettyName, data2.PrettyName, c1s1.Name, c2s1.Name, c1s2.Name, c2s2.Name)
 	}
 	if c1s1.Id != int64(c1.ID) || c2s1.Id != int64(c1.ID) || c1s2.Id != int64(c2.ID) || c2s2.Id != int64(c2.ID) {
 		t.Errorf("Expected %d or %d, got %d and %d", c1.ID, c2.ID, c1s1.Id, c1s2.Id)
@@ -278,8 +278,8 @@ func TestSubscriptionManager_GetSubscriptions_Chains(t *testing.T) {
 		t.Errorf("Expected 2 subscriptions, got %d", len(chatRooms[0].Subscriptions))
 	}
 	c1s1, c1s2 = chatRooms[0].Subscriptions[0], chatRooms[0].Subscriptions[1]
-	if c1s1.Name != data1.Name || c1s2.Name != data2.Name {
-		t.Errorf("Expected (%s, %s), got (%s, %s)", data2.Name, data2.Name, c1s1.Name, c1s2.Name)
+	if c1s1.Name != data1.PrettyName || c1s2.Name != data2.PrettyName {
+		t.Errorf("Expected (%s, %s), got (%s, %s)", data1.PrettyName, data2.PrettyName, c1s1.Name, c1s2.Name)
 	}
 	if c1s1.Id != int64(c1.ID) || c1s2.Id != int64(c2.ID) {
 		t.Errorf("Expected (%d, %d), got (%d, %d)", c1.ID, c2.ID, c1s1.Id, c1s2.Id)
@@ -351,8 +351,8 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 		t.Errorf("Expected 2 subscriptions, got %d", len(chainChatRooms[0].Subscriptions))
 	}
 	c1s1, c1s2, c2s1, c2s2 := chainChatRooms[0].Subscriptions[0], chainChatRooms[0].Subscriptions[1], chainChatRooms[1].Subscriptions[0], chainChatRooms[1].Subscriptions[1]
-	if c1s1.Name != data1.Name || c2s1.Name != data1.Name || c1s2.Name != data2.Name || c2s2.Name != data2.Name {
-		t.Errorf("Expected %s or %s, got %s and %s", data1.Name, data2.Name, c1s1.Name, c1s2.Name)
+	if c1s1.Name != data1.PrettyName || c2s1.Name != data1.PrettyName || c1s2.Name != data2.PrettyName || c2s2.Name != data2.PrettyName {
+		t.Errorf("Expected (%s, %s, %s, %s), got (%s, %s, %s, %s)", data1.PrettyName, data1.PrettyName, data2.PrettyName, data2.PrettyName, c1s1.Name, c2s1.Name, c1s2.Name, c2s2.Name)
 	}
 	if c1s1.Id != int64(c1.ID) || c2s1.Id != int64(c1.ID) || c1s2.Id != int64(c2.ID) || c2s2.Id != int64(c2.ID) {
 		t.Errorf("Expected %d or %d, got %d and %d", c1.ID, c2.ID, c1s1.Id, c1s2.Id)
@@ -389,8 +389,8 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 		t.Errorf("Expected 2 subscriptions, got %d", len(chainChatRooms[0].Subscriptions))
 	}
 	c1s1, c1s2 = chainChatRooms[0].Subscriptions[0], chainChatRooms[0].Subscriptions[1]
-	if c1s1.Name != data1.Name || c1s2.Name != data2.Name {
-		t.Errorf("Expected (%s, %s), got (%s, %s)", data2.Name, data2.Name, c1s1.Name, c1s2.Name)
+	if c1s1.Name != data1.PrettyName || c1s2.Name != data2.PrettyName {
+		t.Errorf("Expected (%s, %s), got (%s, %s)", data1.PrettyName, data2.PrettyName, c1s1.Name, c1s2.Name)
 	}
 	if c1s1.Id != int64(c1.ID) || c1s2.Id != int64(c2.ID) {
 		t.Errorf("Expected (%d, %d), got (%d, %d)", c1.ID, c2.ID, c1s1.Id, c1s2.Id)
