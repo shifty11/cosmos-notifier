@@ -18,13 +18,12 @@ import (
 // ContractProposalQuery is the builder for querying ContractProposal entities.
 type ContractProposalQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.ContractProposal
-	// eager-loading edges.
+	limit        *int
+	offset       *int
+	unique       *bool
+	order        []OrderFunc
+	fields       []string
+	predicates   []predicate.ContractProposal
 	withContract *ContractQuery
 	withFKs      bool
 	// intermediate query (i.e. traversal path).
@@ -333,6 +332,11 @@ func (cpq *ContractProposalQuery) Select(fields ...string) *ContractProposalSele
 	return selbuild
 }
 
+// Aggregate returns a ContractProposalSelect configured with the given aggregations.
+func (cpq *ContractProposalQuery) Aggregate(fns ...AggregateFunc) *ContractProposalSelect {
+	return cpq.Select().Aggregate(fns...)
+}
+
 func (cpq *ContractProposalQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cpq.fields {
 		if !contractproposal.ValidColumn(f) {
@@ -364,10 +368,10 @@ func (cpq *ContractProposalQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, contractproposal.ForeignKeys...)
 	}
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*ContractProposal).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &ContractProposal{config: cpq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -382,37 +386,43 @@ func (cpq *ContractProposalQuery) sqlAll(ctx context.Context, hooks ...queryHook
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cpq.withContract; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*ContractProposal)
-		for i := range nodes {
-			if nodes[i].contract_proposals == nil {
-				continue
-			}
-			fk := *nodes[i].contract_proposals
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(contract.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cpq.loadContract(ctx, query, nodes, nil,
+			func(n *ContractProposal, e *Contract) { n.Edges.Contract = e }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "contract_proposals" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Contract = n
-			}
+	}
+	return nodes, nil
+}
+
+func (cpq *ContractProposalQuery) loadContract(ctx context.Context, query *ContractQuery, nodes []*ContractProposal, init func(*ContractProposal), assign func(*ContractProposal, *Contract)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*ContractProposal)
+	for i := range nodes {
+		if nodes[i].contract_proposals == nil {
+			continue
+		}
+		fk := *nodes[i].contract_proposals
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	query.Where(contract.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "contract_proposals" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
-
-	return nodes, nil
+	return nil
 }
 
 func (cpq *ContractProposalQuery) sqlCount(ctx context.Context) (int, error) {
@@ -425,11 +435,14 @@ func (cpq *ContractProposalQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cpq *ContractProposalQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cpq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cpq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cpq *ContractProposalQuery) querySpec() *sqlgraph.QuerySpec {
@@ -530,7 +543,7 @@ func (cpgb *ContractProposalGroupBy) Aggregate(fns ...AggregateFunc) *ContractPr
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cpgb *ContractProposalGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cpgb *ContractProposalGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cpgb.path(ctx)
 	if err != nil {
 		return err
@@ -539,7 +552,7 @@ func (cpgb *ContractProposalGroupBy) Scan(ctx context.Context, v interface{}) er
 	return cpgb.sqlScan(ctx, v)
 }
 
-func (cpgb *ContractProposalGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cpgb *ContractProposalGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cpgb.fields {
 		if !contractproposal.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -564,8 +577,6 @@ func (cpgb *ContractProposalGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range cpgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(cpgb.fields)+len(cpgb.fns))
 		for _, f := range cpgb.fields {
@@ -585,8 +596,14 @@ type ContractProposalSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cps *ContractProposalSelect) Aggregate(fns ...AggregateFunc) *ContractProposalSelect {
+	cps.fns = append(cps.fns, fns...)
+	return cps
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cps *ContractProposalSelect) Scan(ctx context.Context, v interface{}) error {
+func (cps *ContractProposalSelect) Scan(ctx context.Context, v any) error {
 	if err := cps.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -594,7 +611,17 @@ func (cps *ContractProposalSelect) Scan(ctx context.Context, v interface{}) erro
 	return cps.sqlScan(ctx, v)
 }
 
-func (cps *ContractProposalSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cps *ContractProposalSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cps.fns))
+	for _, fn := range cps.fns {
+		aggregation = append(aggregation, fn(cps.sql))
+	}
+	switch n := len(*cps.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cps.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cps.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cps.sql.Query()
 	if err := cps.driver.Query(ctx, query, args, rows); err != nil {

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -83,7 +84,7 @@ func Open(driverName, dataSourceName string, options ...Option) (*Client, error)
 // is used until the transaction is committed or rolled back.
 func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := newTx(ctx, c.driver)
 	if err != nil {
@@ -107,7 +108,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 // BeginTx returns a transactional client with specified options.
 func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) {
 	if _, ok := c.driver.(*txDriver); ok {
-		return nil, fmt.Errorf("ent: cannot start a transaction within a transaction")
+		return nil, errors.New("ent: cannot start a transaction within a transaction")
 	}
 	tx, err := c.driver.(interface {
 		BeginTx(context.Context, *sql.TxOptions) (dialect.Tx, error)
@@ -220,7 +221,7 @@ func (c *ChainClient) DeleteOne(ch *Chain) *ChainDeleteOne {
 	return c.DeleteOneID(ch.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ChainClient) DeleteOneID(id int) *ChainDeleteOne {
 	builder := c.Delete().Where(chain.ID(id))
 	builder.mutation.id = &id
@@ -252,7 +253,7 @@ func (c *ChainClient) GetX(ctx context.Context, id int) *Chain {
 // QueryChainProposals queries the chain_proposals edge of a Chain.
 func (c *ChainClient) QueryChainProposals(ch *Chain) *ChainProposalQuery {
 	query := &ChainProposalQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(chain.Table, chain.FieldID, id),
@@ -268,7 +269,7 @@ func (c *ChainClient) QueryChainProposals(ch *Chain) *ChainProposalQuery {
 // QueryTelegramChats queries the telegram_chats edge of a Chain.
 func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
 	query := &TelegramChatQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(chain.Table, chain.FieldID, id),
@@ -284,7 +285,7 @@ func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
 // QueryDiscordChannels queries the discord_channels edge of a Chain.
 func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
 	query := &DiscordChannelQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(chain.Table, chain.FieldID, id),
@@ -358,7 +359,7 @@ func (c *ChainProposalClient) DeleteOne(cp *ChainProposal) *ChainProposalDeleteO
 	return c.DeleteOneID(cp.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ChainProposalClient) DeleteOneID(id int) *ChainProposalDeleteOne {
 	builder := c.Delete().Where(chainproposal.ID(id))
 	builder.mutation.id = &id
@@ -390,7 +391,7 @@ func (c *ChainProposalClient) GetX(ctx context.Context, id int) *ChainProposal {
 // QueryChain queries the chain edge of a ChainProposal.
 func (c *ChainProposalClient) QueryChain(cp *ChainProposal) *ChainQuery {
 	query := &ChainQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cp.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(chainproposal.Table, chainproposal.FieldID, id),
@@ -464,7 +465,7 @@ func (c *ContractClient) DeleteOne(co *Contract) *ContractDeleteOne {
 	return c.DeleteOneID(co.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ContractClient) DeleteOneID(id int) *ContractDeleteOne {
 	builder := c.Delete().Where(contract.ID(id))
 	builder.mutation.id = &id
@@ -496,7 +497,7 @@ func (c *ContractClient) GetX(ctx context.Context, id int) *Contract {
 // QueryProposals queries the proposals edge of a Contract.
 func (c *ContractClient) QueryProposals(co *Contract) *ContractProposalQuery {
 	query := &ContractProposalQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contract.Table, contract.FieldID, id),
@@ -512,7 +513,7 @@ func (c *ContractClient) QueryProposals(co *Contract) *ContractProposalQuery {
 // QueryTelegramChats queries the telegram_chats edge of a Contract.
 func (c *ContractClient) QueryTelegramChats(co *Contract) *TelegramChatQuery {
 	query := &TelegramChatQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contract.Table, contract.FieldID, id),
@@ -528,7 +529,7 @@ func (c *ContractClient) QueryTelegramChats(co *Contract) *TelegramChatQuery {
 // QueryDiscordChannels queries the discord_channels edge of a Contract.
 func (c *ContractClient) QueryDiscordChannels(co *Contract) *DiscordChannelQuery {
 	query := &DiscordChannelQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contract.Table, contract.FieldID, id),
@@ -602,7 +603,7 @@ func (c *ContractProposalClient) DeleteOne(cp *ContractProposal) *ContractPropos
 	return c.DeleteOneID(cp.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *ContractProposalClient) DeleteOneID(id int) *ContractProposalDeleteOne {
 	builder := c.Delete().Where(contractproposal.ID(id))
 	builder.mutation.id = &id
@@ -634,7 +635,7 @@ func (c *ContractProposalClient) GetX(ctx context.Context, id int) *ContractProp
 // QueryContract queries the contract edge of a ContractProposal.
 func (c *ContractProposalClient) QueryContract(cp *ContractProposal) *ContractQuery {
 	query := &ContractQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cp.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(contractproposal.Table, contractproposal.FieldID, id),
@@ -708,7 +709,7 @@ func (c *DiscordChannelClient) DeleteOne(dc *DiscordChannel) *DiscordChannelDele
 	return c.DeleteOneID(dc.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *DiscordChannelClient) DeleteOneID(id int) *DiscordChannelDeleteOne {
 	builder := c.Delete().Where(discordchannel.ID(id))
 	builder.mutation.id = &id
@@ -740,7 +741,7 @@ func (c *DiscordChannelClient) GetX(ctx context.Context, id int) *DiscordChannel
 // QueryUsers queries the users edge of a DiscordChannel.
 func (c *DiscordChannelClient) QueryUsers(dc *DiscordChannel) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
@@ -756,7 +757,7 @@ func (c *DiscordChannelClient) QueryUsers(dc *DiscordChannel) *UserQuery {
 // QueryContracts queries the contracts edge of a DiscordChannel.
 func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery {
 	query := &ContractQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
@@ -772,7 +773,7 @@ func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery
 // QueryChains queries the chains edge of a DiscordChannel.
 func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
 	query := &ChainQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
@@ -846,7 +847,7 @@ func (c *TelegramChatClient) DeleteOne(tc *TelegramChat) *TelegramChatDeleteOne 
 	return c.DeleteOneID(tc.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *TelegramChatClient) DeleteOneID(id int) *TelegramChatDeleteOne {
 	builder := c.Delete().Where(telegramchat.ID(id))
 	builder.mutation.id = &id
@@ -878,7 +879,7 @@ func (c *TelegramChatClient) GetX(ctx context.Context, id int) *TelegramChat {
 // QueryUsers queries the users edge of a TelegramChat.
 func (c *TelegramChatClient) QueryUsers(tc *TelegramChat) *UserQuery {
 	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
@@ -894,7 +895,7 @@ func (c *TelegramChatClient) QueryUsers(tc *TelegramChat) *UserQuery {
 // QueryContracts queries the contracts edge of a TelegramChat.
 func (c *TelegramChatClient) QueryContracts(tc *TelegramChat) *ContractQuery {
 	query := &ContractQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
@@ -910,7 +911,7 @@ func (c *TelegramChatClient) QueryContracts(tc *TelegramChat) *ContractQuery {
 // QueryChains queries the chains edge of a TelegramChat.
 func (c *TelegramChatClient) QueryChains(tc *TelegramChat) *ChainQuery {
 	query := &ChainQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
@@ -984,7 +985,7 @@ func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
-// DeleteOne returns a builder for deleting the given entity by its id.
+// DeleteOneID returns a builder for deleting the given entity by its id.
 func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 	builder := c.Delete().Where(user.ID(id))
 	builder.mutation.id = &id
@@ -1016,7 +1017,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 // QueryTelegramChats queries the telegram_chats edge of a User.
 func (c *UserClient) QueryTelegramChats(u *User) *TelegramChatQuery {
 	query := &TelegramChatQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
@@ -1032,7 +1033,7 @@ func (c *UserClient) QueryTelegramChats(u *User) *TelegramChatQuery {
 // QueryDiscordChannels queries the discord_channels edge of a User.
 func (c *UserClient) QueryDiscordChannels(u *User) *DiscordChannelQuery {
 	query := &DiscordChannelQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),

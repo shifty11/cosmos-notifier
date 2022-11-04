@@ -250,67 +250,35 @@ func (cpc *ChainProposalCreate) createSpec() (*ChainProposal, *sqlgraph.CreateSp
 		}
 	)
 	if value, ok := cpc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldCreateTime,
-		})
+		_spec.SetField(chainproposal.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := cpc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldUpdateTime,
-		})
+		_spec.SetField(chainproposal.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := cpc.mutation.ProposalID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: chainproposal.FieldProposalID,
-		})
+		_spec.SetField(chainproposal.FieldProposalID, field.TypeInt, value)
 		_node.ProposalID = value
 	}
 	if value, ok := cpc.mutation.Title(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chainproposal.FieldTitle,
-		})
+		_spec.SetField(chainproposal.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
 	if value, ok := cpc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chainproposal.FieldDescription,
-		})
+		_spec.SetField(chainproposal.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if value, ok := cpc.mutation.VotingStartTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldVotingStartTime,
-		})
+		_spec.SetField(chainproposal.FieldVotingStartTime, field.TypeTime, value)
 		_node.VotingStartTime = value
 	}
 	if value, ok := cpc.mutation.VotingEndTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldVotingEndTime,
-		})
+		_spec.SetField(chainproposal.FieldVotingEndTime, field.TypeTime, value)
 		_node.VotingEndTime = value
 	}
 	if value, ok := cpc.mutation.Status(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: chainproposal.FieldStatus,
-		})
+		_spec.SetField(chainproposal.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
 	if nodes := cpc.mutation.ChainIDs(); len(nodes) > 0 {

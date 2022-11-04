@@ -249,43 +249,23 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 		}
 	)
 	if value, ok := dcc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: discordchannel.FieldCreateTime,
-		})
+		_spec.SetField(discordchannel.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := dcc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: discordchannel.FieldUpdateTime,
-		})
+		_spec.SetField(discordchannel.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := dcc.mutation.ChannelID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: discordchannel.FieldChannelID,
-		})
+		_spec.SetField(discordchannel.FieldChannelID, field.TypeInt64, value)
 		_node.ChannelID = value
 	}
 	if value, ok := dcc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: discordchannel.FieldName,
-		})
+		_spec.SetField(discordchannel.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := dcc.mutation.IsGroup(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: discordchannel.FieldIsGroup,
-		})
+		_spec.SetField(discordchannel.FieldIsGroup, field.TypeBool, value)
 		_node.IsGroup = value
 	}
 	if nodes := dcc.mutation.UsersIDs(); len(nodes) > 0 {

@@ -206,60 +206,28 @@ func (cpu *ChainProposalUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 	}
 	if value, ok := cpu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldUpdateTime,
-		})
+		_spec.SetField(chainproposal.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cpu.mutation.ProposalID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: chainproposal.FieldProposalID,
-		})
+		_spec.SetField(chainproposal.FieldProposalID, field.TypeInt, value)
 	}
 	if value, ok := cpu.mutation.AddedProposalID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: chainproposal.FieldProposalID,
-		})
+		_spec.AddField(chainproposal.FieldProposalID, field.TypeInt, value)
 	}
 	if value, ok := cpu.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chainproposal.FieldTitle,
-		})
+		_spec.SetField(chainproposal.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := cpu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chainproposal.FieldDescription,
-		})
+		_spec.SetField(chainproposal.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := cpu.mutation.VotingStartTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldVotingStartTime,
-		})
+		_spec.SetField(chainproposal.FieldVotingStartTime, field.TypeTime, value)
 	}
 	if value, ok := cpu.mutation.VotingEndTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldVotingEndTime,
-		})
+		_spec.SetField(chainproposal.FieldVotingEndTime, field.TypeTime, value)
 	}
 	if value, ok := cpu.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: chainproposal.FieldStatus,
-		})
+		_spec.SetField(chainproposal.FieldStatus, field.TypeEnum, value)
 	}
 	if cpu.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -522,60 +490,28 @@ func (cpuo *ChainProposalUpdateOne) sqlSave(ctx context.Context) (_node *ChainPr
 		}
 	}
 	if value, ok := cpuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldUpdateTime,
-		})
+		_spec.SetField(chainproposal.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cpuo.mutation.ProposalID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: chainproposal.FieldProposalID,
-		})
+		_spec.SetField(chainproposal.FieldProposalID, field.TypeInt, value)
 	}
 	if value, ok := cpuo.mutation.AddedProposalID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: chainproposal.FieldProposalID,
-		})
+		_spec.AddField(chainproposal.FieldProposalID, field.TypeInt, value)
 	}
 	if value, ok := cpuo.mutation.Title(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chainproposal.FieldTitle,
-		})
+		_spec.SetField(chainproposal.FieldTitle, field.TypeString, value)
 	}
 	if value, ok := cpuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chainproposal.FieldDescription,
-		})
+		_spec.SetField(chainproposal.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := cpuo.mutation.VotingStartTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldVotingStartTime,
-		})
+		_spec.SetField(chainproposal.FieldVotingStartTime, field.TypeTime, value)
 	}
 	if value, ok := cpuo.mutation.VotingEndTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chainproposal.FieldVotingEndTime,
-		})
+		_spec.SetField(chainproposal.FieldVotingEndTime, field.TypeTime, value)
 	}
 	if value, ok := cpuo.mutation.Status(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: chainproposal.FieldStatus,
-		})
+		_spec.SetField(chainproposal.FieldStatus, field.TypeEnum, value)
 	}
 	if cpuo.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{

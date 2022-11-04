@@ -75,6 +75,34 @@ func (cu *ContractUpdate) SetNillableThumbnailURL(s *string) *ContractUpdate {
 	return cu
 }
 
+// SetRPCEndpoint sets the "rpc_endpoint" field.
+func (cu *ContractUpdate) SetRPCEndpoint(s string) *ContractUpdate {
+	cu.mutation.SetRPCEndpoint(s)
+	return cu
+}
+
+// SetNillableRPCEndpoint sets the "rpc_endpoint" field if the given value is not nil.
+func (cu *ContractUpdate) SetNillableRPCEndpoint(s *string) *ContractUpdate {
+	if s != nil {
+		cu.SetRPCEndpoint(*s)
+	}
+	return cu
+}
+
+// SetConfigVersion sets the "config_version" field.
+func (cu *ContractUpdate) SetConfigVersion(cv contract.ConfigVersion) *ContractUpdate {
+	cu.mutation.SetConfigVersion(cv)
+	return cu
+}
+
+// SetNillableConfigVersion sets the "config_version" field if the given value is not nil.
+func (cu *ContractUpdate) SetNillableConfigVersion(cv *contract.ConfigVersion) *ContractUpdate {
+	if cv != nil {
+		cu.SetConfigVersion(*cv)
+	}
+	return cu
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cu *ContractUpdate) AddProposalIDs(ids ...int) *ContractUpdate {
 	cu.mutation.AddProposalIDs(ids...)
@@ -196,12 +224,18 @@ func (cu *ContractUpdate) Save(ctx context.Context) (int, error) {
 	)
 	cu.defaults()
 	if len(cu.hooks) == 0 {
+		if err = cu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = cu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ContractMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cu.check(); err != nil {
+				return 0, err
 			}
 			cu.mutation = mutation
 			affected, err = cu.sqlSave(ctx)
@@ -251,6 +285,16 @@ func (cu *ContractUpdate) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (cu *ContractUpdate) check() error {
+	if v, ok := cu.mutation.ConfigVersion(); ok {
+		if err := contract.ConfigVersionValidator(v); err != nil {
+			return &ValidationError{Name: "config_version", err: fmt.Errorf(`ent: validator failed for field "Contract.config_version": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -270,46 +314,28 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contract.FieldUpdateTime,
-		})
+		_spec.SetField(contract.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cu.mutation.Address(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldAddress,
-		})
+		_spec.SetField(contract.FieldAddress, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldName,
-		})
+		_spec.SetField(contract.FieldName, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldDescription,
-		})
+		_spec.SetField(contract.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.ImageURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldImageURL,
-		})
+		_spec.SetField(contract.FieldImageURL, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.ThumbnailURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldThumbnailURL,
-		})
+		_spec.SetField(contract.FieldThumbnailURL, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.RPCEndpoint(); ok {
+		_spec.SetField(contract.FieldRPCEndpoint, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.ConfigVersion(); ok {
+		_spec.SetField(contract.FieldConfigVersion, field.TypeEnum, value)
 	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -536,6 +562,34 @@ func (cuo *ContractUpdateOne) SetNillableThumbnailURL(s *string) *ContractUpdate
 	return cuo
 }
 
+// SetRPCEndpoint sets the "rpc_endpoint" field.
+func (cuo *ContractUpdateOne) SetRPCEndpoint(s string) *ContractUpdateOne {
+	cuo.mutation.SetRPCEndpoint(s)
+	return cuo
+}
+
+// SetNillableRPCEndpoint sets the "rpc_endpoint" field if the given value is not nil.
+func (cuo *ContractUpdateOne) SetNillableRPCEndpoint(s *string) *ContractUpdateOne {
+	if s != nil {
+		cuo.SetRPCEndpoint(*s)
+	}
+	return cuo
+}
+
+// SetConfigVersion sets the "config_version" field.
+func (cuo *ContractUpdateOne) SetConfigVersion(cv contract.ConfigVersion) *ContractUpdateOne {
+	cuo.mutation.SetConfigVersion(cv)
+	return cuo
+}
+
+// SetNillableConfigVersion sets the "config_version" field if the given value is not nil.
+func (cuo *ContractUpdateOne) SetNillableConfigVersion(cv *contract.ConfigVersion) *ContractUpdateOne {
+	if cv != nil {
+		cuo.SetConfigVersion(*cv)
+	}
+	return cuo
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cuo *ContractUpdateOne) AddProposalIDs(ids ...int) *ContractUpdateOne {
 	cuo.mutation.AddProposalIDs(ids...)
@@ -664,12 +718,18 @@ func (cuo *ContractUpdateOne) Save(ctx context.Context) (*Contract, error) {
 	)
 	cuo.defaults()
 	if len(cuo.hooks) == 0 {
+		if err = cuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = cuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*ContractMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = cuo.check(); err != nil {
+				return nil, err
 			}
 			cuo.mutation = mutation
 			node, err = cuo.sqlSave(ctx)
@@ -725,6 +785,16 @@ func (cuo *ContractUpdateOne) defaults() {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (cuo *ContractUpdateOne) check() error {
+	if v, ok := cuo.mutation.ConfigVersion(); ok {
+		if err := contract.ConfigVersionValidator(v); err != nil {
+			return &ValidationError{Name: "config_version", err: fmt.Errorf(`ent: validator failed for field "Contract.config_version": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -761,46 +831,28 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 		}
 	}
 	if value, ok := cuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contract.FieldUpdateTime,
-		})
+		_spec.SetField(contract.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cuo.mutation.Address(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldAddress,
-		})
+		_spec.SetField(contract.FieldAddress, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldName,
-		})
+		_spec.SetField(contract.FieldName, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Description(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldDescription,
-		})
+		_spec.SetField(contract.FieldDescription, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.ImageURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldImageURL,
-		})
+		_spec.SetField(contract.FieldImageURL, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.ThumbnailURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldThumbnailURL,
-		})
+		_spec.SetField(contract.FieldThumbnailURL, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.RPCEndpoint(); ok {
+		_spec.SetField(contract.FieldRPCEndpoint, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.ConfigVersion(); ok {
+		_spec.SetField(contract.FieldConfigVersion, field.TypeEnum, value)
 	}
 	if cuo.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

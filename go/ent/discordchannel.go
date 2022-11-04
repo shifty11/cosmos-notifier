@@ -72,8 +72,8 @@ func (e DiscordChannelEdges) ChainsOrErr() ([]*Chain, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*DiscordChannel) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*DiscordChannel) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case discordchannel.FieldIsGroup:
@@ -93,7 +93,7 @@ func (*DiscordChannel) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the DiscordChannel fields.
-func (dc *DiscordChannel) assignValues(columns []string, values []interface{}) error {
+func (dc *DiscordChannel) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}

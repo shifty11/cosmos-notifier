@@ -249,43 +249,23 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 		}
 	)
 	if value, ok := tcc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: telegramchat.FieldCreateTime,
-		})
+		_spec.SetField(telegramchat.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := tcc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: telegramchat.FieldUpdateTime,
-		})
+		_spec.SetField(telegramchat.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := tcc.mutation.ChatID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: telegramchat.FieldChatID,
-		})
+		_spec.SetField(telegramchat.FieldChatID, field.TypeInt64, value)
 		_node.ChatID = value
 	}
 	if value, ok := tcc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: telegramchat.FieldName,
-		})
+		_spec.SetField(telegramchat.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := tcc.mutation.IsGroup(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: telegramchat.FieldIsGroup,
-		})
+		_spec.SetField(telegramchat.FieldIsGroup, field.TypeBool, value)
 		_node.IsGroup = value
 	}
 	if nodes := tcc.mutation.UsersIDs(); len(nodes) > 0 {

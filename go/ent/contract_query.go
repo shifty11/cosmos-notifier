@@ -21,13 +21,12 @@ import (
 // ContractQuery is the builder for querying Contract entities.
 type ContractQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.Contract
-	// eager-loading edges.
+	limit               *int
+	offset              *int
+	unique              *bool
+	order               []OrderFunc
+	fields              []string
+	predicates          []predicate.Contract
 	withProposals       *ContractProposalQuery
 	withTelegramChats   *TelegramChatQuery
 	withDiscordChannels *DiscordChannelQuery
@@ -405,6 +404,11 @@ func (cq *ContractQuery) Select(fields ...string) *ContractSelect {
 	return selbuild
 }
 
+// Aggregate returns a ContractSelect configured with the given aggregations.
+func (cq *ContractQuery) Aggregate(fns ...AggregateFunc) *ContractSelect {
+	return cq.Select().Aggregate(fns...)
+}
+
 func (cq *ContractQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cq.fields {
 		if !contract.ValidColumn(f) {
@@ -431,10 +435,10 @@ func (cq *ContractQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Con
 			cq.withDiscordChannels != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Contract).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &Contract{config: cq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -449,143 +453,176 @@ func (cq *ContractQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Con
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := cq.withProposals; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*Contract)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Proposals = []*ContractProposal{}
-		}
-		query.withFKs = true
-		query.Where(predicate.ContractProposal(func(s *sql.Selector) {
-			s.Where(sql.InValues(contract.ProposalsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
+		if err := cq.loadProposals(ctx, query, nodes,
+			func(n *Contract) { n.Edges.Proposals = []*ContractProposal{} },
+			func(n *Contract, e *ContractProposal) { n.Edges.Proposals = append(n.Edges.Proposals, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			fk := n.contract_proposals
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "contract_proposals" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "contract_proposals" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Proposals = append(node.Edges.Proposals, n)
-		}
 	}
-
 	if query := cq.withTelegramChats; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Contract)
-		nids := make(map[int]map[*Contract]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.TelegramChats = []*TelegramChat{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(contract.TelegramChatsTable)
-			s.Join(joinT).On(s.C(telegramchat.FieldID), joinT.C(contract.TelegramChatsPrimaryKey[0]))
-			s.Where(sql.InValues(joinT.C(contract.TelegramChatsPrimaryKey[1]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(contract.TelegramChatsPrimaryKey[1]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Contract]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := cq.loadTelegramChats(ctx, query, nodes,
+			func(n *Contract) { n.Edges.TelegramChats = []*TelegramChat{} },
+			func(n *Contract, e *TelegramChat) { n.Edges.TelegramChats = append(n.Edges.TelegramChats, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.TelegramChats = append(kn.Edges.TelegramChats, n)
-			}
-		}
 	}
-
 	if query := cq.withDiscordChannels; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*Contract)
-		nids := make(map[int]map[*Contract]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.DiscordChannels = []*DiscordChannel{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(contract.DiscordChannelsTable)
-			s.Join(joinT).On(s.C(discordchannel.FieldID), joinT.C(contract.DiscordChannelsPrimaryKey[0]))
-			s.Where(sql.InValues(joinT.C(contract.DiscordChannelsPrimaryKey[1]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(contract.DiscordChannelsPrimaryKey[1]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Contract]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := cq.loadDiscordChannels(ctx, query, nodes,
+			func(n *Contract) { n.Edges.DiscordChannels = []*DiscordChannel{} },
+			func(n *Contract, e *DiscordChannel) { n.Edges.DiscordChannels = append(n.Edges.DiscordChannels, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.DiscordChannels = append(kn.Edges.DiscordChannels, n)
-			}
+	}
+	return nodes, nil
+}
+
+func (cq *ContractQuery) loadProposals(ctx context.Context, query *ContractProposalQuery, nodes []*Contract, init func(*Contract), assign func(*Contract, *ContractProposal)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Contract)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
 	}
-
-	return nodes, nil
+	query.withFKs = true
+	query.Where(predicate.ContractProposal(func(s *sql.Selector) {
+		s.Where(sql.InValues(contract.ProposalsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.contract_proposals
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "contract_proposals" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "contract_proposals" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (cq *ContractQuery) loadTelegramChats(ctx context.Context, query *TelegramChatQuery, nodes []*Contract, init func(*Contract), assign func(*Contract, *TelegramChat)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Contract)
+	nids := make(map[int]map[*Contract]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(contract.TelegramChatsTable)
+		s.Join(joinT).On(s.C(telegramchat.FieldID), joinT.C(contract.TelegramChatsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(contract.TelegramChatsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(contract.TelegramChatsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Contract]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (cq *ContractQuery) loadDiscordChannels(ctx context.Context, query *DiscordChannelQuery, nodes []*Contract, init func(*Contract), assign func(*Contract, *DiscordChannel)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Contract)
+	nids := make(map[int]map[*Contract]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(contract.DiscordChannelsTable)
+		s.Join(joinT).On(s.C(discordchannel.FieldID), joinT.C(contract.DiscordChannelsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(contract.DiscordChannelsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(contract.DiscordChannelsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*Contract]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (cq *ContractQuery) sqlCount(ctx context.Context) (int, error) {
@@ -598,11 +635,14 @@ func (cq *ContractQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (cq *ContractQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := cq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := cq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (cq *ContractQuery) querySpec() *sqlgraph.QuerySpec {
@@ -703,7 +743,7 @@ func (cgb *ContractGroupBy) Aggregate(fns ...AggregateFunc) *ContractGroupBy {
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *ContractGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *ContractGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -712,7 +752,7 @@ func (cgb *ContractGroupBy) Scan(ctx context.Context, v interface{}) error {
 	return cgb.sqlScan(ctx, v)
 }
 
-func (cgb *ContractGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *ContractGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range cgb.fields {
 		if !contract.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -737,8 +777,6 @@ func (cgb *ContractGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range cgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(cgb.fields)+len(cgb.fns))
 		for _, f := range cgb.fields {
@@ -758,8 +796,14 @@ type ContractSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (cs *ContractSelect) Aggregate(fns ...AggregateFunc) *ContractSelect {
+	cs.fns = append(cs.fns, fns...)
+	return cs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (cs *ContractSelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *ContractSelect) Scan(ctx context.Context, v any) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -767,7 +811,17 @@ func (cs *ContractSelect) Scan(ctx context.Context, v interface{}) error {
 	return cs.sqlScan(ctx, v)
 }
 
-func (cs *ContractSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *ContractSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(cs.fns))
+	for _, fn := range cs.fns {
+		aggregation = append(aggregation, fn(cs.sql))
+	}
+	switch n := len(*cs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		cs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		cs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

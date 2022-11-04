@@ -7,6 +7,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
+	"github.com/shifty11/dao-dao-notifier/types"
 )
 
 // Contract holds the schema definition for the Contract entity.
@@ -30,6 +31,15 @@ func (Contract) Fields() []ent.Field {
 		field.String("image_url"),
 		field.String("thumbnail_url").
 			Default(""),
+		field.String("rpc_endpoint").
+			Default("https://rpc.cosmos.directory/juno"),
+		field.Enum("config_version").
+			Values(
+				types.ContractVersionUnknown.String(),
+				types.ContractVersionV1.String(),
+				types.ContractVersionV2.String(),
+			).
+			Default(types.ContractVersionUnknown.String()),
 	}
 }
 

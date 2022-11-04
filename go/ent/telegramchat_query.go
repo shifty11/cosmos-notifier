@@ -21,13 +21,12 @@ import (
 // TelegramChatQuery is the builder for querying TelegramChat entities.
 type TelegramChatQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.TelegramChat
-	// eager-loading edges.
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.TelegramChat
 	withUsers     *UserQuery
 	withContracts *ContractQuery
 	withChains    *ChainQuery
@@ -405,6 +404,11 @@ func (tcq *TelegramChatQuery) Select(fields ...string) *TelegramChatSelect {
 	return selbuild
 }
 
+// Aggregate returns a TelegramChatSelect configured with the given aggregations.
+func (tcq *TelegramChatQuery) Aggregate(fns ...AggregateFunc) *TelegramChatSelect {
+	return tcq.Select().Aggregate(fns...)
+}
+
 func (tcq *TelegramChatQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range tcq.fields {
 		if !telegramchat.ValidColumn(f) {
@@ -431,10 +435,10 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 			tcq.withChains != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*TelegramChat).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &TelegramChat{config: tcq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -449,167 +453,203 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := tcq.withUsers; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*TelegramChat)
-		nids := make(map[int]map[*TelegramChat]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Users = []*User{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(telegramchat.UsersTable)
-			s.Join(joinT).On(s.C(user.FieldID), joinT.C(telegramchat.UsersPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(telegramchat.UsersPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(telegramchat.UsersPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TelegramChat]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := tcq.loadUsers(ctx, query, nodes,
+			func(n *TelegramChat) { n.Edges.Users = []*User{} },
+			func(n *TelegramChat, e *User) { n.Edges.Users = append(n.Edges.Users, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Users = append(kn.Edges.Users, n)
-			}
-		}
 	}
-
 	if query := tcq.withContracts; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*TelegramChat)
-		nids := make(map[int]map[*TelegramChat]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Contracts = []*Contract{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(telegramchat.ContractsTable)
-			s.Join(joinT).On(s.C(contract.FieldID), joinT.C(telegramchat.ContractsPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(telegramchat.ContractsPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(telegramchat.ContractsPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TelegramChat]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := tcq.loadContracts(ctx, query, nodes,
+			func(n *TelegramChat) { n.Edges.Contracts = []*Contract{} },
+			func(n *TelegramChat, e *Contract) { n.Edges.Contracts = append(n.Edges.Contracts, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "contracts" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Contracts = append(kn.Edges.Contracts, n)
-			}
-		}
 	}
-
 	if query := tcq.withChains; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*TelegramChat)
-		nids := make(map[int]map[*TelegramChat]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Chains = []*Chain{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(telegramchat.ChainsTable)
-			s.Join(joinT).On(s.C(chain.FieldID), joinT.C(telegramchat.ChainsPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(telegramchat.ChainsPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(telegramchat.ChainsPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*TelegramChat]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := tcq.loadChains(ctx, query, nodes,
+			func(n *TelegramChat) { n.Edges.Chains = []*Chain{} },
+			func(n *TelegramChat, e *Chain) { n.Edges.Chains = append(n.Edges.Chains, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Chains = append(kn.Edges.Chains, n)
-			}
+	}
+	return nodes, nil
+}
+
+func (tcq *TelegramChatQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*TelegramChat, init func(*TelegramChat), assign func(*TelegramChat, *User)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*TelegramChat)
+	nids := make(map[int]map[*TelegramChat]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
 	}
-
-	return nodes, nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(telegramchat.UsersTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(telegramchat.UsersPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(telegramchat.UsersPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(telegramchat.UsersPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (tcq *TelegramChatQuery) loadContracts(ctx context.Context, query *ContractQuery, nodes []*TelegramChat, init func(*TelegramChat), assign func(*TelegramChat, *Contract)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*TelegramChat)
+	nids := make(map[int]map[*TelegramChat]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(telegramchat.ContractsTable)
+		s.Join(joinT).On(s.C(contract.FieldID), joinT.C(telegramchat.ContractsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(telegramchat.ContractsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(telegramchat.ContractsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "contracts" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (tcq *TelegramChatQuery) loadChains(ctx context.Context, query *ChainQuery, nodes []*TelegramChat, init func(*TelegramChat), assign func(*TelegramChat, *Chain)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*TelegramChat)
+	nids := make(map[int]map[*TelegramChat]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(telegramchat.ChainsTable)
+		s.Join(joinT).On(s.C(chain.FieldID), joinT.C(telegramchat.ChainsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(telegramchat.ChainsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(telegramchat.ChainsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (tcq *TelegramChatQuery) sqlCount(ctx context.Context) (int, error) {
@@ -622,11 +662,14 @@ func (tcq *TelegramChatQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tcq *TelegramChatQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := tcq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := tcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (tcq *TelegramChatQuery) querySpec() *sqlgraph.QuerySpec {
@@ -727,7 +770,7 @@ func (tcgb *TelegramChatGroupBy) Aggregate(fns ...AggregateFunc) *TelegramChatGr
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (tcgb *TelegramChatGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (tcgb *TelegramChatGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := tcgb.path(ctx)
 	if err != nil {
 		return err
@@ -736,7 +779,7 @@ func (tcgb *TelegramChatGroupBy) Scan(ctx context.Context, v interface{}) error 
 	return tcgb.sqlScan(ctx, v)
 }
 
-func (tcgb *TelegramChatGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (tcgb *TelegramChatGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range tcgb.fields {
 		if !telegramchat.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -761,8 +804,6 @@ func (tcgb *TelegramChatGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range tcgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(tcgb.fields)+len(tcgb.fns))
 		for _, f := range tcgb.fields {
@@ -782,8 +823,14 @@ type TelegramChatSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (tcs *TelegramChatSelect) Aggregate(fns ...AggregateFunc) *TelegramChatSelect {
+	tcs.fns = append(tcs.fns, fns...)
+	return tcs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (tcs *TelegramChatSelect) Scan(ctx context.Context, v interface{}) error {
+func (tcs *TelegramChatSelect) Scan(ctx context.Context, v any) error {
 	if err := tcs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -791,7 +838,17 @@ func (tcs *TelegramChatSelect) Scan(ctx context.Context, v interface{}) error {
 	return tcs.sqlScan(ctx, v)
 }
 
-func (tcs *TelegramChatSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (tcs *TelegramChatSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(tcs.fns))
+	for _, fn := range tcs.fns {
+		aggregation = append(aggregation, fn(tcs.sql))
+	}
+	switch n := len(*tcs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		tcs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		tcs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := tcs.sql.Query()
 	if err := tcs.driver.Query(ctx, query, args, rows); err != nil {

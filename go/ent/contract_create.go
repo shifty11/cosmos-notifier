@@ -89,6 +89,34 @@ func (cc *ContractCreate) SetNillableThumbnailURL(s *string) *ContractCreate {
 	return cc
 }
 
+// SetRPCEndpoint sets the "rpc_endpoint" field.
+func (cc *ContractCreate) SetRPCEndpoint(s string) *ContractCreate {
+	cc.mutation.SetRPCEndpoint(s)
+	return cc
+}
+
+// SetNillableRPCEndpoint sets the "rpc_endpoint" field if the given value is not nil.
+func (cc *ContractCreate) SetNillableRPCEndpoint(s *string) *ContractCreate {
+	if s != nil {
+		cc.SetRPCEndpoint(*s)
+	}
+	return cc
+}
+
+// SetConfigVersion sets the "config_version" field.
+func (cc *ContractCreate) SetConfigVersion(cv contract.ConfigVersion) *ContractCreate {
+	cc.mutation.SetConfigVersion(cv)
+	return cc
+}
+
+// SetNillableConfigVersion sets the "config_version" field if the given value is not nil.
+func (cc *ContractCreate) SetNillableConfigVersion(cv *contract.ConfigVersion) *ContractCreate {
+	if cv != nil {
+		cc.SetConfigVersion(*cv)
+	}
+	return cc
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cc *ContractCreate) AddProposalIDs(ids ...int) *ContractCreate {
 	cc.mutation.AddProposalIDs(ids...)
@@ -223,6 +251,14 @@ func (cc *ContractCreate) defaults() {
 		v := contract.DefaultThumbnailURL
 		cc.mutation.SetThumbnailURL(v)
 	}
+	if _, ok := cc.mutation.RPCEndpoint(); !ok {
+		v := contract.DefaultRPCEndpoint
+		cc.mutation.SetRPCEndpoint(v)
+	}
+	if _, ok := cc.mutation.ConfigVersion(); !ok {
+		v := contract.DefaultConfigVersion
+		cc.mutation.SetConfigVersion(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -247,6 +283,17 @@ func (cc *ContractCreate) check() error {
 	}
 	if _, ok := cc.mutation.ThumbnailURL(); !ok {
 		return &ValidationError{Name: "thumbnail_url", err: errors.New(`ent: missing required field "Contract.thumbnail_url"`)}
+	}
+	if _, ok := cc.mutation.RPCEndpoint(); !ok {
+		return &ValidationError{Name: "rpc_endpoint", err: errors.New(`ent: missing required field "Contract.rpc_endpoint"`)}
+	}
+	if _, ok := cc.mutation.ConfigVersion(); !ok {
+		return &ValidationError{Name: "config_version", err: errors.New(`ent: missing required field "Contract.config_version"`)}
+	}
+	if v, ok := cc.mutation.ConfigVersion(); ok {
+		if err := contract.ConfigVersionValidator(v); err != nil {
+			return &ValidationError{Name: "config_version", err: fmt.Errorf(`ent: validator failed for field "Contract.config_version": %w`, err)}
+		}
 	}
 	return nil
 }
@@ -276,60 +323,40 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := cc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contract.FieldCreateTime,
-		})
+		_spec.SetField(contract.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := cc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contract.FieldUpdateTime,
-		})
+		_spec.SetField(contract.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.Address(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldAddress,
-		})
+		_spec.SetField(contract.FieldAddress, field.TypeString, value)
 		_node.Address = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldName,
-		})
+		_spec.SetField(contract.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := cc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldDescription,
-		})
+		_spec.SetField(contract.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if value, ok := cc.mutation.ImageURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldImageURL,
-		})
+		_spec.SetField(contract.FieldImageURL, field.TypeString, value)
 		_node.ImageURL = value
 	}
 	if value, ok := cc.mutation.ThumbnailURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contract.FieldThumbnailURL,
-		})
+		_spec.SetField(contract.FieldThumbnailURL, field.TypeString, value)
 		_node.ThumbnailURL = value
+	}
+	if value, ok := cc.mutation.RPCEndpoint(); ok {
+		_spec.SetField(contract.FieldRPCEndpoint, field.TypeString, value)
+		_node.RPCEndpoint = value
+	}
+	if value, ok := cc.mutation.ConfigVersion(); ok {
+		_spec.SetField(contract.FieldConfigVersion, field.TypeEnum, value)
+		_node.ConfigVersion = value
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

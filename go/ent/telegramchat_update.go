@@ -251,32 +251,16 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := tcu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: telegramchat.FieldUpdateTime,
-		})
+		_spec.SetField(telegramchat.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := tcu.mutation.ChatID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: telegramchat.FieldChatID,
-		})
+		_spec.SetField(telegramchat.FieldChatID, field.TypeInt64, value)
 	}
 	if value, ok := tcu.mutation.AddedChatID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: telegramchat.FieldChatID,
-		})
+		_spec.AddField(telegramchat.FieldChatID, field.TypeInt64, value)
 	}
 	if value, ok := tcu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: telegramchat.FieldName,
-		})
+		_spec.SetField(telegramchat.FieldName, field.TypeString, value)
 	}
 	if tcu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -709,32 +693,16 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 		}
 	}
 	if value, ok := tcuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: telegramchat.FieldUpdateTime,
-		})
+		_spec.SetField(telegramchat.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := tcuo.mutation.ChatID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: telegramchat.FieldChatID,
-		})
+		_spec.SetField(telegramchat.FieldChatID, field.TypeInt64, value)
 	}
 	if value, ok := tcuo.mutation.AddedChatID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: telegramchat.FieldChatID,
-		})
+		_spec.AddField(telegramchat.FieldChatID, field.TypeInt64, value)
 	}
 	if value, ok := tcuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: telegramchat.FieldName,
-		})
+		_spec.SetField(telegramchat.FieldName, field.TypeString, value)
 	}
 	if tcuo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -43,7 +43,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED"}},
 		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainProposalsTable holds the schema information for the "chain_proposals" table.
@@ -70,6 +70,8 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "image_url", Type: field.TypeString},
 		{Name: "thumbnail_url", Type: field.TypeString, Default: ""},
+		{Name: "rpc_endpoint", Type: field.TypeString, Default: "https://rpc.cosmos.directory/juno"},
+		{Name: "config_version", Type: field.TypeEnum, Enums: []string{"unknown", "v1", "v2"}, Default: "unknown"},
 	}
 	// ContractsTable holds the schema information for the "contracts" table.
 	ContractsTable = &schema.Table{

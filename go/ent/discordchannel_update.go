@@ -251,32 +251,16 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 	}
 	if value, ok := dcu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: discordchannel.FieldUpdateTime,
-		})
+		_spec.SetField(discordchannel.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := dcu.mutation.ChannelID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: discordchannel.FieldChannelID,
-		})
+		_spec.SetField(discordchannel.FieldChannelID, field.TypeInt64, value)
 	}
 	if value, ok := dcu.mutation.AddedChannelID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: discordchannel.FieldChannelID,
-		})
+		_spec.AddField(discordchannel.FieldChannelID, field.TypeInt64, value)
 	}
 	if value, ok := dcu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: discordchannel.FieldName,
-		})
+		_spec.SetField(discordchannel.FieldName, field.TypeString, value)
 	}
 	if dcu.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -709,32 +693,16 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 		}
 	}
 	if value, ok := dcuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: discordchannel.FieldUpdateTime,
-		})
+		_spec.SetField(discordchannel.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := dcuo.mutation.ChannelID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: discordchannel.FieldChannelID,
-		})
+		_spec.SetField(discordchannel.FieldChannelID, field.TypeInt64, value)
 	}
 	if value, ok := dcuo.mutation.AddedChannelID(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt64,
-			Value:  value,
-			Column: discordchannel.FieldChannelID,
-		})
+		_spec.AddField(discordchannel.FieldChannelID, field.TypeInt64, value)
 	}
 	if value, ok := dcuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: discordchannel.FieldName,
-		})
+		_spec.SetField(discordchannel.FieldName, field.TypeString, value)
 	}
 	if dcuo.mutation.UsersCleared() {
 		edge := &sqlgraph.EdgeSpec{

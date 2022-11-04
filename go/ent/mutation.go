@@ -1735,8 +1735,6 @@ func (m *ChainProposalMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ChainProposalMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 
@@ -1794,6 +1792,8 @@ type ContractMutation struct {
 	description             *string
 	image_url               *string
 	thumbnail_url           *string
+	rpc_endpoint            *string
+	config_version          *contract.ConfigVersion
 	clearedFields           map[string]struct{}
 	proposals               map[int]struct{}
 	removedproposals        map[int]struct{}
@@ -2159,6 +2159,78 @@ func (m *ContractMutation) ResetThumbnailURL() {
 	m.thumbnail_url = nil
 }
 
+// SetRPCEndpoint sets the "rpc_endpoint" field.
+func (m *ContractMutation) SetRPCEndpoint(s string) {
+	m.rpc_endpoint = &s
+}
+
+// RPCEndpoint returns the value of the "rpc_endpoint" field in the mutation.
+func (m *ContractMutation) RPCEndpoint() (r string, exists bool) {
+	v := m.rpc_endpoint
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRPCEndpoint returns the old "rpc_endpoint" field's value of the Contract entity.
+// If the Contract object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContractMutation) OldRPCEndpoint(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRPCEndpoint is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRPCEndpoint requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRPCEndpoint: %w", err)
+	}
+	return oldValue.RPCEndpoint, nil
+}
+
+// ResetRPCEndpoint resets all changes to the "rpc_endpoint" field.
+func (m *ContractMutation) ResetRPCEndpoint() {
+	m.rpc_endpoint = nil
+}
+
+// SetConfigVersion sets the "config_version" field.
+func (m *ContractMutation) SetConfigVersion(cv contract.ConfigVersion) {
+	m.config_version = &cv
+}
+
+// ConfigVersion returns the value of the "config_version" field in the mutation.
+func (m *ContractMutation) ConfigVersion() (r contract.ConfigVersion, exists bool) {
+	v := m.config_version
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConfigVersion returns the old "config_version" field's value of the Contract entity.
+// If the Contract object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContractMutation) OldConfigVersion(ctx context.Context) (v contract.ConfigVersion, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConfigVersion is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConfigVersion requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConfigVersion: %w", err)
+	}
+	return oldValue.ConfigVersion, nil
+}
+
+// ResetConfigVersion resets all changes to the "config_version" field.
+func (m *ContractMutation) ResetConfigVersion() {
+	m.config_version = nil
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by ids.
 func (m *ContractMutation) AddProposalIDs(ids ...int) {
 	if m.proposals == nil {
@@ -2340,7 +2412,7 @@ func (m *ContractMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ContractMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 9)
 	if m.create_time != nil {
 		fields = append(fields, contract.FieldCreateTime)
 	}
@@ -2361,6 +2433,12 @@ func (m *ContractMutation) Fields() []string {
 	}
 	if m.thumbnail_url != nil {
 		fields = append(fields, contract.FieldThumbnailURL)
+	}
+	if m.rpc_endpoint != nil {
+		fields = append(fields, contract.FieldRPCEndpoint)
+	}
+	if m.config_version != nil {
+		fields = append(fields, contract.FieldConfigVersion)
 	}
 	return fields
 }
@@ -2384,6 +2462,10 @@ func (m *ContractMutation) Field(name string) (ent.Value, bool) {
 		return m.ImageURL()
 	case contract.FieldThumbnailURL:
 		return m.ThumbnailURL()
+	case contract.FieldRPCEndpoint:
+		return m.RPCEndpoint()
+	case contract.FieldConfigVersion:
+		return m.ConfigVersion()
 	}
 	return nil, false
 }
@@ -2407,6 +2489,10 @@ func (m *ContractMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldImageURL(ctx)
 	case contract.FieldThumbnailURL:
 		return m.OldThumbnailURL(ctx)
+	case contract.FieldRPCEndpoint:
+		return m.OldRPCEndpoint(ctx)
+	case contract.FieldConfigVersion:
+		return m.OldConfigVersion(ctx)
 	}
 	return nil, fmt.Errorf("unknown Contract field %s", name)
 }
@@ -2464,6 +2550,20 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetThumbnailURL(v)
+		return nil
+	case contract.FieldRPCEndpoint:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRPCEndpoint(v)
+		return nil
+	case contract.FieldConfigVersion:
+		v, ok := value.(contract.ConfigVersion)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConfigVersion(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -2534,6 +2634,12 @@ func (m *ContractMutation) ResetField(name string) error {
 		return nil
 	case contract.FieldThumbnailURL:
 		m.ResetThumbnailURL()
+		return nil
+	case contract.FieldRPCEndpoint:
+		m.ResetRPCEndpoint()
+		return nil
+	case contract.FieldConfigVersion:
+		m.ResetConfigVersion()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -3369,8 +3475,6 @@ func (m *ContractProposalMutation) RemovedEdges() []string {
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ContractProposalMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
 	return nil
 }
 

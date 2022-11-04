@@ -284,53 +284,25 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := cu.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdateTime,
-		})
+		_spec.SetField(chain.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cu.mutation.ChainID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldChainID,
-		})
+		_spec.SetField(chain.FieldChainID, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldName,
-		})
+		_spec.SetField(chain.FieldName, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.PrettyName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldPrettyName,
-		})
+		_spec.SetField(chain.FieldPrettyName, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.IsEnabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: chain.FieldIsEnabled,
-		})
+		_spec.SetField(chain.FieldIsEnabled, field.TypeBool, value)
 	}
 	if value, ok := cu.mutation.ImageURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldImageURL,
-		})
+		_spec.SetField(chain.FieldImageURL, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.ThumbnailURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldThumbnailURL,
-		})
+		_spec.SetField(chain.FieldThumbnailURL, field.TypeString, value)
 	}
 	if cu.mutation.ChainProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -796,53 +768,25 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 		}
 	}
 	if value, ok := cuo.mutation.UpdateTime(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdateTime,
-		})
+		_spec.SetField(chain.FieldUpdateTime, field.TypeTime, value)
 	}
 	if value, ok := cuo.mutation.ChainID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldChainID,
-		})
+		_spec.SetField(chain.FieldChainID, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Name(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldName,
-		})
+		_spec.SetField(chain.FieldName, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.PrettyName(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldPrettyName,
-		})
+		_spec.SetField(chain.FieldPrettyName, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.IsEnabled(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: chain.FieldIsEnabled,
-		})
+		_spec.SetField(chain.FieldIsEnabled, field.TypeBool, value)
 	}
 	if value, ok := cuo.mutation.ImageURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldImageURL,
-		})
+		_spec.SetField(chain.FieldImageURL, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.ThumbnailURL(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldThumbnailURL,
-		})
+		_spec.SetField(chain.FieldThumbnailURL, field.TypeString, value)
 	}
 	if cuo.mutation.ChainProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -34,7 +34,7 @@ func IDNEQ(id int) predicate.Contract {
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -45,7 +45,7 @@ func IDIn(ids ...int) predicate.Contract {
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		v := make([]interface{}, len(ids))
+		v := make([]any, len(ids))
 		for i := range v {
 			v[i] = ids[i]
 		}
@@ -130,6 +130,13 @@ func ThumbnailURL(v string) predicate.Contract {
 	})
 }
 
+// RPCEndpoint applies equality check predicate on the "rpc_endpoint" field. It's identical to RPCEndpointEQ.
+func RPCEndpoint(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRPCEndpoint), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
@@ -146,34 +153,22 @@ func CreateTimeNEQ(v time.Time) predicate.Contract {
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldCreateTime), v...))
 	})
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
 	})
 }
@@ -222,34 +217,22 @@ func UpdateTimeNEQ(v time.Time) predicate.Contract {
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldUpdateTime), v...))
 	})
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
 	})
 }
@@ -298,34 +281,22 @@ func AddressNEQ(v string) predicate.Contract {
 
 // AddressIn applies the In predicate on the "address" field.
 func AddressIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldAddress), v...))
 	})
 }
 
 // AddressNotIn applies the NotIn predicate on the "address" field.
 func AddressNotIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldAddress), v...))
 	})
 }
@@ -409,34 +380,22 @@ func NameNEQ(v string) predicate.Contract {
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldName), v...))
 	})
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldName), v...))
 	})
 }
@@ -520,34 +479,22 @@ func DescriptionNEQ(v string) predicate.Contract {
 
 // DescriptionIn applies the In predicate on the "description" field.
 func DescriptionIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldDescription), v...))
 	})
 }
 
 // DescriptionNotIn applies the NotIn predicate on the "description" field.
 func DescriptionNotIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldDescription), v...))
 	})
 }
@@ -631,34 +578,22 @@ func ImageURLNEQ(v string) predicate.Contract {
 
 // ImageURLIn applies the In predicate on the "image_url" field.
 func ImageURLIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldImageURL), v...))
 	})
 }
 
 // ImageURLNotIn applies the NotIn predicate on the "image_url" field.
 func ImageURLNotIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldImageURL), v...))
 	})
 }
@@ -742,34 +677,22 @@ func ThumbnailURLNEQ(v string) predicate.Contract {
 
 // ThumbnailURLIn applies the In predicate on the "thumbnail_url" field.
 func ThumbnailURLIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.In(s.C(FieldThumbnailURL), v...))
 	})
 }
 
 // ThumbnailURLNotIn applies the NotIn predicate on the "thumbnail_url" field.
 func ThumbnailURLNotIn(vs ...string) predicate.Contract {
-	v := make([]interface{}, len(vs))
+	v := make([]any, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
 		s.Where(sql.NotIn(s.C(FieldThumbnailURL), v...))
 	})
 }
@@ -834,6 +757,141 @@ func ThumbnailURLEqualFold(v string) predicate.Contract {
 func ThumbnailURLContainsFold(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldThumbnailURL), v))
+	})
+}
+
+// RPCEndpointEQ applies the EQ predicate on the "rpc_endpoint" field.
+func RPCEndpointEQ(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointNEQ applies the NEQ predicate on the "rpc_endpoint" field.
+func RPCEndpointNEQ(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointIn applies the In predicate on the "rpc_endpoint" field.
+func RPCEndpointIn(vs ...string) predicate.Contract {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldRPCEndpoint), v...))
+	})
+}
+
+// RPCEndpointNotIn applies the NotIn predicate on the "rpc_endpoint" field.
+func RPCEndpointNotIn(vs ...string) predicate.Contract {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldRPCEndpoint), v...))
+	})
+}
+
+// RPCEndpointGT applies the GT predicate on the "rpc_endpoint" field.
+func RPCEndpointGT(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointGTE applies the GTE predicate on the "rpc_endpoint" field.
+func RPCEndpointGTE(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointLT applies the LT predicate on the "rpc_endpoint" field.
+func RPCEndpointLT(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointLTE applies the LTE predicate on the "rpc_endpoint" field.
+func RPCEndpointLTE(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointContains applies the Contains predicate on the "rpc_endpoint" field.
+func RPCEndpointContains(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointHasPrefix applies the HasPrefix predicate on the "rpc_endpoint" field.
+func RPCEndpointHasPrefix(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointHasSuffix applies the HasSuffix predicate on the "rpc_endpoint" field.
+func RPCEndpointHasSuffix(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointEqualFold applies the EqualFold predicate on the "rpc_endpoint" field.
+func RPCEndpointEqualFold(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// RPCEndpointContainsFold applies the ContainsFold predicate on the "rpc_endpoint" field.
+func RPCEndpointContainsFold(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldRPCEndpoint), v))
+	})
+}
+
+// ConfigVersionEQ applies the EQ predicate on the "config_version" field.
+func ConfigVersionEQ(v ConfigVersion) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldConfigVersion), v))
+	})
+}
+
+// ConfigVersionNEQ applies the NEQ predicate on the "config_version" field.
+func ConfigVersionNEQ(v ConfigVersion) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldConfigVersion), v))
+	})
+}
+
+// ConfigVersionIn applies the In predicate on the "config_version" field.
+func ConfigVersionIn(vs ...ConfigVersion) predicate.Contract {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldConfigVersion), v...))
+	})
+}
+
+// ConfigVersionNotIn applies the NotIn predicate on the "config_version" field.
+func ConfigVersionNotIn(vs ...ConfigVersion) predicate.Contract {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldConfigVersion), v...))
 	})
 }
 

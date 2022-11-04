@@ -3,6 +3,7 @@
 package contract
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -25,6 +26,10 @@ const (
 	FieldImageURL = "image_url"
 	// FieldThumbnailURL holds the string denoting the thumbnail_url field in the database.
 	FieldThumbnailURL = "thumbnail_url"
+	// FieldRPCEndpoint holds the string denoting the rpc_endpoint field in the database.
+	FieldRPCEndpoint = "rpc_endpoint"
+	// FieldConfigVersion holds the string denoting the config_version field in the database.
+	FieldConfigVersion = "config_version"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
@@ -62,6 +67,8 @@ var Columns = []string{
 	FieldDescription,
 	FieldImageURL,
 	FieldThumbnailURL,
+	FieldRPCEndpoint,
+	FieldConfigVersion,
 }
 
 var (
@@ -92,4 +99,33 @@ var (
 	UpdateDefaultUpdateTime func() time.Time
 	// DefaultThumbnailURL holds the default value on creation for the "thumbnail_url" field.
 	DefaultThumbnailURL string
+	// DefaultRPCEndpoint holds the default value on creation for the "rpc_endpoint" field.
+	DefaultRPCEndpoint string
 )
+
+// ConfigVersion defines the type for the "config_version" enum field.
+type ConfigVersion string
+
+// ConfigVersionUnknown is the default value of the ConfigVersion enum.
+const DefaultConfigVersion = ConfigVersionUnknown
+
+// ConfigVersion values.
+const (
+	ConfigVersionUnknown ConfigVersion = "unknown"
+	ConfigVersionV1      ConfigVersion = "v1"
+	ConfigVersionV2      ConfigVersion = "v2"
+)
+
+func (cv ConfigVersion) String() string {
+	return string(cv)
+}
+
+// ConfigVersionValidator is a validator for the "config_version" field enum values. It is called by the builders before save.
+func ConfigVersionValidator(cv ConfigVersion) error {
+	switch cv {
+	case ConfigVersionUnknown, ConfigVersionV1, ConfigVersionV2:
+		return nil
+	default:
+		return fmt.Errorf("contract: invalid enum value for config_version field: %q", cv)
+	}
+}

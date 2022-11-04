@@ -297,67 +297,35 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		}
 	)
 	if value, ok := cc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldCreateTime,
-		})
+		_spec.SetField(chain.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := cc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: chain.FieldUpdateTime,
-		})
+		_spec.SetField(chain.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := cc.mutation.ChainID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldChainID,
-		})
+		_spec.SetField(chain.FieldChainID, field.TypeString, value)
 		_node.ChainID = value
 	}
 	if value, ok := cc.mutation.Name(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldName,
-		})
+		_spec.SetField(chain.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if value, ok := cc.mutation.PrettyName(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldPrettyName,
-		})
+		_spec.SetField(chain.FieldPrettyName, field.TypeString, value)
 		_node.PrettyName = value
 	}
 	if value, ok := cc.mutation.IsEnabled(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeBool,
-			Value:  value,
-			Column: chain.FieldIsEnabled,
-		})
+		_spec.SetField(chain.FieldIsEnabled, field.TypeBool, value)
 		_node.IsEnabled = value
 	}
 	if value, ok := cc.mutation.ImageURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldImageURL,
-		})
+		_spec.SetField(chain.FieldImageURL, field.TypeString, value)
 		_node.ImageURL = value
 	}
 	if value, ok := cc.mutation.ThumbnailURL(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: chain.FieldThumbnailURL,
-		})
+		_spec.SetField(chain.FieldThumbnailURL, field.TypeString, value)
 		_node.ThumbnailURL = value
 	}
 	if nodes := cc.mutation.ChainProposalsIDs(); len(nodes) > 0 {

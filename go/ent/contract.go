@@ -30,6 +30,10 @@ type Contract struct {
 	ImageURL string `json:"image_url,omitempty"`
 	// ThumbnailURL holds the value of the "thumbnail_url" field.
 	ThumbnailURL string `json:"thumbnail_url,omitempty"`
+	// RPCEndpoint holds the value of the "rpc_endpoint" field.
+	RPCEndpoint string `json:"rpc_endpoint,omitempty"`
+	// ConfigVersion holds the value of the "config_version" field.
+	ConfigVersion contract.ConfigVersion `json:"config_version,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ContractQuery when eager-loading is set.
 	Edges ContractEdges `json:"edges"`
@@ -76,13 +80,13 @@ func (e ContractEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Contract) scanValues(columns []string) ([]interface{}, error) {
-	values := make([]interface{}, len(columns))
+func (*Contract) scanValues(columns []string) ([]any, error) {
+	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
 		case contract.FieldID:
 			values[i] = new(sql.NullInt64)
-		case contract.FieldAddress, contract.FieldName, contract.FieldDescription, contract.FieldImageURL, contract.FieldThumbnailURL:
+		case contract.FieldAddress, contract.FieldName, contract.FieldDescription, contract.FieldImageURL, contract.FieldThumbnailURL, contract.FieldRPCEndpoint, contract.FieldConfigVersion:
 			values[i] = new(sql.NullString)
 		case contract.FieldCreateTime, contract.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -95,7 +99,7 @@ func (*Contract) scanValues(columns []string) ([]interface{}, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Contract fields.
-func (c *Contract) assignValues(columns []string, values []interface{}) error {
+func (c *Contract) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -148,6 +152,18 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field thumbnail_url", values[i])
 			} else if value.Valid {
 				c.ThumbnailURL = value.String
+			}
+		case contract.FieldRPCEndpoint:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field rpc_endpoint", values[i])
+			} else if value.Valid {
+				c.RPCEndpoint = value.String
+			}
+		case contract.FieldConfigVersion:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field config_version", values[i])
+			} else if value.Valid {
+				c.ConfigVersion = contract.ConfigVersion(value.String)
 			}
 		}
 	}
@@ -212,6 +228,12 @@ func (c *Contract) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("thumbnail_url=")
 	builder.WriteString(c.ThumbnailURL)
+	builder.WriteString(", ")
+	builder.WriteString("rpc_endpoint=")
+	builder.WriteString(c.RPCEndpoint)
+	builder.WriteString(", ")
+	builder.WriteString("config_version=")
+	builder.WriteString(fmt.Sprintf("%v", c.ConfigVersion))
 	builder.WriteByte(')')
 	return builder.String()
 }

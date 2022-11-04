@@ -76,6 +76,10 @@ func init() {
 	contractDescThumbnailURL := contractFields[4].Descriptor()
 	// contract.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
 	contract.DefaultThumbnailURL = contractDescThumbnailURL.Default.(string)
+	// contractDescRPCEndpoint is the schema descriptor for rpc_endpoint field.
+	contractDescRPCEndpoint := contractFields[5].Descriptor()
+	// contract.DefaultRPCEndpoint holds the default value on creation for the rpc_endpoint field.
+	contract.DefaultRPCEndpoint = contractDescRPCEndpoint.Default.(string)
 	contractproposalMixin := schema.ContractProposal{}.Mixin()
 	contractproposalMixinFields0 := contractproposalMixin[0].Fields()
 	_ = contractproposalMixinFields0

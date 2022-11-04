@@ -241,59 +241,31 @@ func (cpc *ContractProposalCreate) createSpec() (*ContractProposal, *sqlgraph.Cr
 		}
 	)
 	if value, ok := cpc.mutation.CreateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contractproposal.FieldCreateTime,
-		})
+		_spec.SetField(contractproposal.FieldCreateTime, field.TypeTime, value)
 		_node.CreateTime = value
 	}
 	if value, ok := cpc.mutation.UpdateTime(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contractproposal.FieldUpdateTime,
-		})
+		_spec.SetField(contractproposal.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
 	}
 	if value, ok := cpc.mutation.ProposalID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: contractproposal.FieldProposalID,
-		})
+		_spec.SetField(contractproposal.FieldProposalID, field.TypeInt, value)
 		_node.ProposalID = value
 	}
 	if value, ok := cpc.mutation.Title(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contractproposal.FieldTitle,
-		})
+		_spec.SetField(contractproposal.FieldTitle, field.TypeString, value)
 		_node.Title = value
 	}
 	if value, ok := cpc.mutation.Description(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Value:  value,
-			Column: contractproposal.FieldDescription,
-		})
+		_spec.SetField(contractproposal.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
 	if value, ok := cpc.mutation.ExpiresAt(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: contractproposal.FieldExpiresAt,
-		})
+		_spec.SetField(contractproposal.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
 	if value, ok := cpc.mutation.Status(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeEnum,
-			Value:  value,
-			Column: contractproposal.FieldStatus,
-		})
+		_spec.SetField(contractproposal.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
 	if nodes := cpc.mutation.ContractIDs(); len(nodes) > 0 {

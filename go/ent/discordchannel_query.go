@@ -21,13 +21,12 @@ import (
 // DiscordChannelQuery is the builder for querying DiscordChannel entities.
 type DiscordChannelQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.DiscordChannel
-	// eager-loading edges.
+	limit         *int
+	offset        *int
+	unique        *bool
+	order         []OrderFunc
+	fields        []string
+	predicates    []predicate.DiscordChannel
 	withUsers     *UserQuery
 	withContracts *ContractQuery
 	withChains    *ChainQuery
@@ -405,6 +404,11 @@ func (dcq *DiscordChannelQuery) Select(fields ...string) *DiscordChannelSelect {
 	return selbuild
 }
 
+// Aggregate returns a DiscordChannelSelect configured with the given aggregations.
+func (dcq *DiscordChannelQuery) Aggregate(fns ...AggregateFunc) *DiscordChannelSelect {
+	return dcq.Select().Aggregate(fns...)
+}
+
 func (dcq *DiscordChannelQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range dcq.fields {
 		if !discordchannel.ValidColumn(f) {
@@ -431,10 +435,10 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			dcq.withChains != nil,
 		}
 	)
-	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
+	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*DiscordChannel).scanValues(nil, columns)
 	}
-	_spec.Assign = func(columns []string, values []interface{}) error {
+	_spec.Assign = func(columns []string, values []any) error {
 		node := &DiscordChannel{config: dcq.config}
 		nodes = append(nodes, node)
 		node.Edges.loadedTypes = loadedTypes
@@ -449,167 +453,203 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-
 	if query := dcq.withUsers; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*DiscordChannel)
-		nids := make(map[int]map[*DiscordChannel]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Users = []*User{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(discordchannel.UsersTable)
-			s.Join(joinT).On(s.C(user.FieldID), joinT.C(discordchannel.UsersPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(discordchannel.UsersPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(discordchannel.UsersPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*DiscordChannel]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := dcq.loadUsers(ctx, query, nodes,
+			func(n *DiscordChannel) { n.Edges.Users = []*User{} },
+			func(n *DiscordChannel, e *User) { n.Edges.Users = append(n.Edges.Users, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Users = append(kn.Edges.Users, n)
-			}
-		}
 	}
-
 	if query := dcq.withContracts; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*DiscordChannel)
-		nids := make(map[int]map[*DiscordChannel]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Contracts = []*Contract{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(discordchannel.ContractsTable)
-			s.Join(joinT).On(s.C(contract.FieldID), joinT.C(discordchannel.ContractsPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(discordchannel.ContractsPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(discordchannel.ContractsPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*DiscordChannel]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := dcq.loadContracts(ctx, query, nodes,
+			func(n *DiscordChannel) { n.Edges.Contracts = []*Contract{} },
+			func(n *DiscordChannel, e *Contract) { n.Edges.Contracts = append(n.Edges.Contracts, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "contracts" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Contracts = append(kn.Edges.Contracts, n)
-			}
-		}
 	}
-
 	if query := dcq.withChains; query != nil {
-		edgeids := make([]driver.Value, len(nodes))
-		byid := make(map[int]*DiscordChannel)
-		nids := make(map[int]map[*DiscordChannel]struct{})
-		for i, node := range nodes {
-			edgeids[i] = node.ID
-			byid[node.ID] = node
-			node.Edges.Chains = []*Chain{}
-		}
-		query.Where(func(s *sql.Selector) {
-			joinT := sql.Table(discordchannel.ChainsTable)
-			s.Join(joinT).On(s.C(chain.FieldID), joinT.C(discordchannel.ChainsPrimaryKey[1]))
-			s.Where(sql.InValues(joinT.C(discordchannel.ChainsPrimaryKey[0]), edgeids...))
-			columns := s.SelectedColumns()
-			s.Select(joinT.C(discordchannel.ChainsPrimaryKey[0]))
-			s.AppendSelect(columns...)
-			s.SetDistinct(false)
-		})
-		neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]interface{}, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]interface{}{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []interface{}) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*DiscordChannel]struct{}{byid[outValue]: struct{}{}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byid[outValue]] = struct{}{}
-				return nil
-			}
-		})
-		if err != nil {
+		if err := dcq.loadChains(ctx, query, nodes,
+			func(n *DiscordChannel) { n.Edges.Chains = []*Chain{} },
+			func(n *DiscordChannel, e *Chain) { n.Edges.Chains = append(n.Edges.Chains, e) }); err != nil {
 			return nil, err
 		}
-		for _, n := range neighbors {
-			nodes, ok := nids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
-			}
-			for kn := range nodes {
-				kn.Edges.Chains = append(kn.Edges.Chains, n)
-			}
+	}
+	return nodes, nil
+}
+
+func (dcq *DiscordChannelQuery) loadUsers(ctx context.Context, query *UserQuery, nodes []*DiscordChannel, init func(*DiscordChannel), assign func(*DiscordChannel, *User)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*DiscordChannel)
+	nids := make(map[int]map[*DiscordChannel]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
 	}
-
-	return nodes, nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(discordchannel.UsersTable)
+		s.Join(joinT).On(s.C(user.FieldID), joinT.C(discordchannel.UsersPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(discordchannel.UsersPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(discordchannel.UsersPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "users" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (dcq *DiscordChannelQuery) loadContracts(ctx context.Context, query *ContractQuery, nodes []*DiscordChannel, init func(*DiscordChannel), assign func(*DiscordChannel, *Contract)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*DiscordChannel)
+	nids := make(map[int]map[*DiscordChannel]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(discordchannel.ContractsTable)
+		s.Join(joinT).On(s.C(contract.FieldID), joinT.C(discordchannel.ContractsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(discordchannel.ContractsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(discordchannel.ContractsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "contracts" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (dcq *DiscordChannelQuery) loadChains(ctx context.Context, query *ChainQuery, nodes []*DiscordChannel, init func(*DiscordChannel), assign func(*DiscordChannel, *Chain)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*DiscordChannel)
+	nids := make(map[int]map[*DiscordChannel]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(discordchannel.ChainsTable)
+		s.Join(joinT).On(s.C(chain.FieldID), joinT.C(discordchannel.ChainsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(discordchannel.ChainsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(discordchannel.ChainsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+		assign := spec.Assign
+		values := spec.ScanValues
+		spec.ScanValues = func(columns []string) ([]any, error) {
+			values, err := values(columns[1:])
+			if err != nil {
+				return nil, err
+			}
+			return append([]any{new(sql.NullInt64)}, values...), nil
+		}
+		spec.Assign = func(columns []string, values []any) error {
+			outValue := int(values[0].(*sql.NullInt64).Int64)
+			inValue := int(values[1].(*sql.NullInt64).Int64)
+			if nids[inValue] == nil {
+				nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+				return assign(columns[1:], values[1:])
+			}
+			nids[inValue][byID[outValue]] = struct{}{}
+			return nil
+		}
+	})
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "chains" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
 }
 
 func (dcq *DiscordChannelQuery) sqlCount(ctx context.Context) (int, error) {
@@ -622,11 +662,14 @@ func (dcq *DiscordChannelQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (dcq *DiscordChannelQuery) sqlExist(ctx context.Context) (bool, error) {
-	n, err := dcq.sqlCount(ctx)
-	if err != nil {
+	switch _, err := dcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
 		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return n > 0, nil
 }
 
 func (dcq *DiscordChannelQuery) querySpec() *sqlgraph.QuerySpec {
@@ -727,7 +770,7 @@ func (dcgb *DiscordChannelGroupBy) Aggregate(fns ...AggregateFunc) *DiscordChann
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (dcgb *DiscordChannelGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (dcgb *DiscordChannelGroupBy) Scan(ctx context.Context, v any) error {
 	query, err := dcgb.path(ctx)
 	if err != nil {
 		return err
@@ -736,7 +779,7 @@ func (dcgb *DiscordChannelGroupBy) Scan(ctx context.Context, v interface{}) erro
 	return dcgb.sqlScan(ctx, v)
 }
 
-func (dcgb *DiscordChannelGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (dcgb *DiscordChannelGroupBy) sqlScan(ctx context.Context, v any) error {
 	for _, f := range dcgb.fields {
 		if !discordchannel.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
@@ -761,8 +804,6 @@ func (dcgb *DiscordChannelGroupBy) sqlQuery() *sql.Selector {
 	for _, fn := range dcgb.fns {
 		aggregation = append(aggregation, fn(selector))
 	}
-	// If no columns were selected in a custom aggregation function, the default
-	// selection is the fields used for "group-by", and the aggregation functions.
 	if len(selector.SelectedColumns()) == 0 {
 		columns := make([]string, 0, len(dcgb.fields)+len(dcgb.fns))
 		for _, f := range dcgb.fields {
@@ -782,8 +823,14 @@ type DiscordChannelSelect struct {
 	sql *sql.Selector
 }
 
+// Aggregate adds the given aggregation functions to the selector query.
+func (dcs *DiscordChannelSelect) Aggregate(fns ...AggregateFunc) *DiscordChannelSelect {
+	dcs.fns = append(dcs.fns, fns...)
+	return dcs
+}
+
 // Scan applies the selector query and scans the result into the given value.
-func (dcs *DiscordChannelSelect) Scan(ctx context.Context, v interface{}) error {
+func (dcs *DiscordChannelSelect) Scan(ctx context.Context, v any) error {
 	if err := dcs.prepareQuery(ctx); err != nil {
 		return err
 	}
@@ -791,7 +838,17 @@ func (dcs *DiscordChannelSelect) Scan(ctx context.Context, v interface{}) error 
 	return dcs.sqlScan(ctx, v)
 }
 
-func (dcs *DiscordChannelSelect) sqlScan(ctx context.Context, v interface{}) error {
+func (dcs *DiscordChannelSelect) sqlScan(ctx context.Context, v any) error {
+	aggregation := make([]string, 0, len(dcs.fns))
+	for _, fn := range dcs.fns {
+		aggregation = append(aggregation, fn(dcs.sql))
+	}
+	switch n := len(*dcs.selector.flds); {
+	case n == 0 && len(aggregation) > 0:
+		dcs.sql.Select(aggregation...)
+	case n != 0 && len(aggregation) > 0:
+		dcs.sql.AppendSelect(aggregation...)
+	}
 	rows := &sql.Rows{}
 	query, args := dcs.sql.Query()
 	if err := dcs.driver.Query(ctx, query, args, rows); err != nil {
