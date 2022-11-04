@@ -10,4 +10,4 @@ models:
 	cd go && go generate ./ent
 
 migration:
-	cd go && go run main.go create-migrations
+	cd go && go run main.go database create-migrations

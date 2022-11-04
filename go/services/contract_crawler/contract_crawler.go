@@ -7,6 +7,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/notifier"
+	"github.com/shifty11/dao-dao-notifier/types"
 	"os"
 )
 
@@ -33,21 +34,21 @@ func (c *ContractCrawler) UpdateContracts() {
 
 	contracts := c.contractManager.All()
 	var cntSuccess, cntFails = 0, len(contracts)
-	for _, oldContract := range contracts {
-		client := NewContractClient(c.apiUrl, oldContract.Address)
-		config, err := client.config()
+	for _, contract := range contracts {
+		client := NewContractClient(c.apiUrl, contract.Address, contract.RPCEndpoint)
+		config, err := client.config(types.ContractVersion(contract.ConfigVersion))
 		if err != nil {
-			log.Sugar.Debugf("error while getting config for contract %v (%v): %v", oldContract.Name, oldContract.Address, err)
+			log.Sugar.Debugf("error while getting config for contract %v (%v): %v", contract.Name, contract.Address, err)
 			continue
 		}
 		proposals, err := client.proposals()
 		if err != nil {
-			log.Sugar.Debugf("error while getting proposals for contract %v (%v): %v", oldContract.Name, oldContract.Address, err)
+			log.Sugar.Debugf("error while getting proposals for contract %v (%v): %v", contract.Name, contract.Address, err)
 			continue
 		}
 
-		oldImageUrl := oldContract.ImageURL
-		updatedContract := c.contractManager.Update(oldContract, config)
+		oldImageUrl := contract.ImageURL
+		updatedContract := c.contractManager.Update(contract, config)
 		for _, proposal := range proposals.Proposals {
 			dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(updatedContract, &proposal)
 			if proposalStatus == database.ProposalStatusChangedFromOpen {
@@ -91,8 +92,8 @@ func (c *ContractCrawler) UpdateContracts() {
 }
 
 func (c *ContractCrawler) AddContract(contractAddr string) (*ent.Contract, error) {
-	client := NewContractClient(c.apiUrl, contractAddr)
-	config, err := client.config()
+	client := NewContractClient(c.apiUrl, contractAddr, "https://rpc.cosmos.directory/juno")
+	config, err := client.config(types.ContractVersionUnknown)
 	if err != nil {
 		return nil, err
 	}

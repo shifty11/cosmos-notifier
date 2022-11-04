@@ -36,6 +36,7 @@ func (m *ContractManager) Create(data *types.ContractData) (*ent.Contract, error
 		SetName(data.Name).
 		SetDescription(data.Description).
 		SetImageURL(data.ImageUrl).
+		SetConfigVersion(contract.ConfigVersion(data.ContractVersion)).
 		Save(m.ctx)
 	return c, err
 }
@@ -43,12 +44,13 @@ func (m *ContractManager) Create(data *types.ContractData) (*ent.Contract, error
 // Update creates a new contract or updates an existing one
 // returns (contract, created)
 func (m *ContractManager) Update(c *ent.Contract, data *types.ContractData) *ent.Contract {
-	if c.Name != data.Name || c.Description != data.Description || c.ImageURL != data.ImageUrl {
+	if c.Name != data.Name || c.Description != data.Description || c.ImageURL != data.ImageUrl || c.ConfigVersion != contract.ConfigVersion(data.ContractVersion) {
 		updated, err := m.client.Contract.
 			UpdateOne(c).
 			SetName(data.Name).
 			SetDescription(data.Description).
 			SetImageURL(data.ImageUrl).
+			SetConfigVersion(contract.ConfigVersion(data.ContractVersion)).
 			Save(m.ctx)
 		if err != nil {
 			log.Sugar.Panicf("Error while updating contract: %v", err)

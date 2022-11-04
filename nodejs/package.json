@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.mjs",
   "scripts": {
-    "start": "node index.mjs"
+    "start": "node index.mjs",
+    "watch": "node index.mjs --watch index.mjs"
   },
   "keywords": [],
   "author": "",

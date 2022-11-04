@@ -23,18 +23,32 @@ type ConfigV1 struct {
 }
 
 type ContractData struct {
-	Address     string
-	Name        string
-	Description string
-	ImageUrl    string
+	Address         string
+	Name            string
+	Description     string
+	ImageUrl        string
+	ContractVersion ContractVersion
+}
+
+type ContractVersion string
+
+const (
+	ContractVersionUnknown ContractVersion = "unknown"
+	ContractVersionV1      ContractVersion = "v1"
+	ContractVersionV2      ContractVersion = "v2"
+)
+
+func (cv ContractVersion) String() string {
+	return string(cv)
 }
 
 func (c *Config) ToContractData(address string) *ContractData {
 	data := &ContractData{
-		Address:     address,
-		Name:        c.Config.Name,
-		Description: c.Config.Description,
-		ImageUrl:    c.Config.ImageUrl,
+		Address:         address,
+		Name:            c.Config.Name,
+		Description:     c.Config.Description,
+		ImageUrl:        c.Config.ImageUrl,
+		ContractVersion: ContractVersionV2,
 	}
 	if data.Name == "" {
 		data.Name = address
@@ -44,10 +58,11 @@ func (c *Config) ToContractData(address string) *ContractData {
 
 func (c *ConfigV1) ToContractData(address string) *ContractData {
 	data := &ContractData{
-		Address:     address,
-		Name:        c.Name,
-		Description: c.Description,
-		ImageUrl:    c.ImageUrl,
+		Address:         address,
+		Name:            c.Name,
+		Description:     c.Description,
+		ImageUrl:        c.ImageUrl,
+		ContractVersion: ContractVersionV1,
 	}
 	if data.Name == "" {
 		data.Name = address

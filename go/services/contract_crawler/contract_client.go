@@ -10,124 +10,94 @@ import (
 	"github.com/shifty11/dao-dao-notifier/types"
 	"io"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
 type ContractClient struct {
 	URL             string
 	ContractAddress string
+	RpcEndpoint     string
 }
 
-func NewContractClient(URL string, contractAddress string) *ContractClient {
+func NewContractClient(URL string, contractAddress string, rpcEndpoint string) *ContractClient {
 	if strings.HasSuffix(URL, "/") {
 		URL = URL[:len(URL)-1]
 	}
 	return &ContractClient{
 		URL:             URL,
 		ContractAddress: contractAddress,
+		RpcEndpoint:     rpcEndpoint,
 	}
 }
 
-func (cc *ContractClient) config() (*types.ContractData, error) {
-	values := map[string]string{"contractAddress": cc.ContractAddress}
-	jsonData, err := json.Marshal(values)
+func (cc *ContractClient) configV2() (*types.ContractData, error) {
+	resp, err := cc.querySmartContract("{\"get_config\":{}}")
 	if err != nil {
-		log.Sugar.Fatal(err)
 		return nil, err
-	}
-
-	resp, err := http.Post(fmt.Sprintf("%v/get_config", cc.URL), "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotAcceptable {
-			return cc.configV1(jsonData)
-		}
-		log.Sugar.Errorf("error querying /get_config: %v", resp.StatusCode)
-		return nil, errors.New("error querying /get_config")
 	}
 
 	var config types.Config
-	err = json.NewDecoder(resp.Body).Decode(&config)
+	err = json.Unmarshal(resp, &config)
 	if err != nil {
-		log.Sugar.Fatal(err)
 		return nil, err
 	}
-
 	return config.ToContractData(cc.ContractAddress), nil
 }
 
-func (cc *ContractClient) configV1(jsonData []byte) (*types.ContractData, error) {
-	resp, err := http.Post(fmt.Sprintf("%v/config", cc.URL), "application/json", bytes.NewBuffer(jsonData))
+func (cc *ContractClient) configV1() (*types.ContractData, error) {
+	resp, err := cc.querySmartContract("{\"config\":{}}")
 	if err != nil {
-		log.Sugar.Fatal(err)
 		return nil, err
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.Sugar.Errorf("error querying /config: %v", resp.StatusCode)
-		return nil, errors.New("error querying /config")
-	}
-
-	var configV1 types.ConfigV1
-	err = json.NewDecoder(resp.Body).Decode(&configV1)
+	var config types.ConfigV1
+	err = json.Unmarshal(resp, &config)
 	if err != nil {
-		log.Sugar.Fatal(err)
 		return nil, err
 	}
+	return config.ToContractData(cc.ContractAddress), nil
+}
 
-	return configV1.ToContractData(cc.ContractAddress), nil
+func (cc *ContractClient) config(contractVersion types.ContractVersion) (*types.ContractData, error) {
+	switch contractVersion {
+	case types.ContractVersionV1:
+		return cc.configV1()
+	case types.ContractVersionV2:
+		return cc.configV2()
+	default:
+		result, err := cc.configV2()
+		if err != nil {
+			if errors.Is(err, UnknownVariantError) {
+				return cc.configV1()
+			}
+			return nil, err
+		}
+		return result, nil
+	}
 }
 
 func (cc *ContractClient) proposals() (*types.ProposalList, error) {
-	values := map[string]string{"contractAddress": cc.ContractAddress}
-	jsonData, err := json.Marshal(values)
+	resp, err := cc.querySmartContract("{\"list_proposals\":{}}")
 	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil, err
-	}
-
-	resp, err := http.Post(fmt.Sprintf("%v/list_proposals", cc.URL), "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotAcceptable {
-			proposalModules := cc.proposalModules(jsonData)
+		if errors.Is(err, UnknownVariantError) {
+			proposalModules, _ := cc.proposalModules()
 			if len(proposalModules) > 0 {
-				return NewContractClient(cc.URL, proposalModules[0]).proposals()
+				return NewContractClient(cc.URL, proposalModules[0], cc.RpcEndpoint).proposals()
 			}
 			return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
 		}
-		log.Sugar.Errorf("error querying /list_proposals: %v", resp.StatusCode)
-		return nil, errors.New("error querying /list_proposals")
+		return nil, err
 	}
 
 	var proposals types.ProposalList
-	body, err := io.ReadAll(resp.Body)
+	err = json.Unmarshal(resp, &proposals)
 	if err != nil {
-		log.Sugar.Fatal(err)
 		return nil, err
 	}
-
-	err = json.Unmarshal(body, &proposals)
-	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil, err
-	}
-	// if status is empty it means that the format of proposals is old and needs to be converted
 	if len(proposals.Proposals) > 0 && proposals.Proposals[0].Status == "" {
 		var propsV1 types.ProposalListV1
-		err = json.Unmarshal(body, &propsV1)
+		err = json.Unmarshal(resp, &propsV1)
 		if err != nil {
 			log.Sugar.Fatal(err)
-			return nil, err
 		}
 
 		var propsList = propsV1.ToProposalList()
@@ -136,56 +106,57 @@ func (cc *ContractClient) proposals() (*types.ProposalList, error) {
 		}
 		return propsList, nil
 	}
-
 	return &proposals, nil
 }
 
-func (cc *ContractClient) proposalModules(jsonData []byte) []string {
-	resp, err := http.Post(fmt.Sprintf("%v/proposal_modules", cc.URL), "application/json", bytes.NewBuffer(jsonData))
+func (cc *ContractClient) proposalModules() ([]string, error) {
+	resp, err := cc.querySmartContract("{\"proposal_modules\":{}}")
 	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil
+		return nil, err
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.Sugar.Errorf("error querying /proposal_modules: %v", resp.StatusCode)
-		return nil
-	}
-
 	var proposalModules []string
-	err = json.NewDecoder(resp.Body).Decode(&proposalModules)
-	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil
-	}
-	return proposalModules
+	err = json.Unmarshal(resp, &proposalModules)
+	return proposalModules, err
 }
 
 func (cc *ContractClient) proposal(proposalId int) (*types.Proposal, error) {
-	values := map[string]string{"contractAddress": cc.ContractAddress, "id": strconv.Itoa(proposalId)}
-	jsonData, err := json.Marshal(values)
+	resp, err := cc.querySmartContract(fmt.Sprintf("{\"proposal\":{\"proposal_id\": %v}}", proposalId))
 	if err != nil {
-		log.Sugar.Fatal(err)
 		return nil, err
 	}
-
-	resp, err := http.Post(fmt.Sprintf("%v/proposal", cc.URL), "application/json", bytes.NewBuffer(jsonData))
-	if err != nil {
-		log.Sugar.Fatal(err)
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.Sugar.Errorf("error querying /proposal: %v", resp.StatusCode)
-		return nil, errors.New("error querying /proposal")
-	}
-
 	var proposal types.Proposal
-	err = json.NewDecoder(resp.Body).Decode(&proposal)
+	err = json.Unmarshal(resp, &proposal)
 	if err != nil {
 		log.Sugar.Fatal(err)
 		return nil, err
 	}
 
 	return &proposal, nil
+}
+
+var UnknownVariantError = errors.New("unknown variant")
+
+func (cc *ContractClient) querySmartContract(query string) ([]byte, error) {
+	values := map[string]string{"contractAddress": cc.ContractAddress, "rpcEndpoint": cc.RpcEndpoint, "query": query}
+	jsonData, err := json.Marshal(values)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(fmt.Sprintf("%v/query_smart_contract", cc.URL), "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotAcceptable {
+			return nil, UnknownVariantError
+		}
+		respErr, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("error read response from /query_smart_contract: %v %v", resp.StatusCode, err))
+		}
+		return nil, errors.New(fmt.Sprintf("error querying /query_smart_contract: %v %v", resp.StatusCode, respErr))
+	}
+
+	return io.ReadAll(resp.Body)
 }
