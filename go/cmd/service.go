@@ -114,6 +114,7 @@ var runContractCrawlerCmd = &cobra.Command{
 		managers := database.NewDefaultDbManagers()
 		notifier := notifier.NewContractNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
 		c := contract_crawler.NewContractCrawler(managers, notifier, nodejsUrl, assetsPath)
+		c.AddContracts()
 		c.UpdateContracts()
 
 		if cmd.Flag("repeat").Value.String() == "true" {

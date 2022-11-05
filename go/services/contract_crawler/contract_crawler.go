@@ -1,6 +1,8 @@
 package contract_crawler
 
 import (
+	"context"
+	"github.com/hasura/go-graphql-client"
 	"github.com/robfig/cron/v3"
 	"github.com/shifty11/dao-dao-notifier/common"
 	"github.com/shifty11/dao-dao-notifier/database"
@@ -50,11 +52,13 @@ func (c *ContractCrawler) UpdateContracts() {
 		oldImageUrl := contract.ImageURL
 		updatedContract := c.contractManager.Update(contract, config)
 		for _, proposal := range proposals.Proposals {
-			dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(updatedContract, &proposal)
-			if proposalStatus == database.ProposalStatusChangedFromOpen {
-				log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
-			} else if proposalStatus == database.ProposalCreated {
-				c.notifier.Notify(updatedContract, dbProp)
+			if proposal.Status == types.StatusOpen {
+				dbProp, proposalStatus := c.proposalManager.CreateOrUpdate(updatedContract, &proposal)
+				if proposalStatus == database.ProposalStatusChangedFromOpen {
+					log.Sugar.Infof("Proposal %v changed status to %v", dbProp.ID, dbProp.Status)
+				} else if proposalStatus == database.ProposalCreated {
+					c.notifier.Notify(updatedContract, dbProp)
+				}
 			}
 		}
 
@@ -89,6 +93,45 @@ func (c *ContractCrawler) UpdateContracts() {
 	}
 
 	log.Sugar.Infof("processed %v contracts, success: %v failed: %v", len(contracts), cntSuccess, cntFails)
+}
+
+func (c *ContractCrawler) AddContracts() {
+	log.Sugar.Info("Add contracts")
+
+	var query struct {
+		Daos struct {
+			Nodes []struct {
+				Address     string `graphql:"id"`
+				Name        string
+				Description string
+				ImageUrl    string
+			}
+		}
+	}
+
+	client := graphql.NewClient("https://index.daodao.zone/daos", nil)
+
+	err := client.Query(context.Background(), &query, nil)
+	if err != nil {
+		log.Sugar.Errorf("while querying daos: %v", err)
+	}
+
+	contracts := c.contractManager.All()
+	for _, dao := range query.Daos.Nodes {
+		found := false
+		for _, contract := range contracts {
+			if contract.Address == dao.Address {
+				found = true
+				break
+			}
+		}
+		if !found {
+			_, err := c.AddContract(dao.Address)
+			if err != nil {
+				log.Sugar.Errorf("while adding contract %v: %v", dao.Address, err)
+			}
+		}
+	}
 }
 
 func (c *ContractCrawler) AddContract(contractAddr string) (*ent.Contract, error) {
@@ -139,7 +182,11 @@ func (c *ContractCrawler) ScheduleCrawl() {
 	cr := cron.New()
 	_, err := cr.AddFunc("@every 1h", func() { c.UpdateContracts() })
 	if err != nil {
-		log.Sugar.Errorf("while executing 'updateContracts' via cron: %v", err)
+		log.Sugar.Errorf("while executing 'UpdateContracts' via cron: %v", err)
+	}
+	_, err = cr.AddFunc("0 10 * * *", func() { c.AddContracts() }) // every day at 10:00
+	if err != nil {
+		log.Sugar.Errorf("while executing 'AddContracts' via cron: %v", err)
 	}
 	cr.Start()
 }
