@@ -77,6 +77,8 @@ func (manager *ChainManager) Update(entChain *ent.Chain, chainData *types.Chain,
 		Update().
 		SetName(chainData.Name).
 		SetPrettyName(chainData.PrettyName).
+		SetPath(chainData.Path).
+		SetDisplay(chainData.Display).
 		SetImageURL(chainData.Image).
 		SetThumbnailURL(thumbnailUrl).
 		Save(manager.ctx)

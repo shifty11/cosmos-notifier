@@ -116,6 +116,20 @@ func PrettyName(v string) predicate.Chain {
 	})
 }
 
+// Path applies equality check predicate on the "path" field. It's identical to PathEQ.
+func Path(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPath), v))
+	})
+}
+
+// Display applies equality check predicate on the "display" field. It's identical to DisplayEQ.
+func Display(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDisplay), v))
+	})
+}
+
 // IsEnabled applies equality check predicate on the "is_enabled" field. It's identical to IsEnabledEQ.
 func IsEnabled(v bool) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
@@ -559,6 +573,204 @@ func PrettyNameEqualFold(v string) predicate.Chain {
 func PrettyNameContainsFold(v string) predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldPrettyName), v))
+	})
+}
+
+// PathEQ applies the EQ predicate on the "path" field.
+func PathEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldPath), v))
+	})
+}
+
+// PathNEQ applies the NEQ predicate on the "path" field.
+func PathNEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldPath), v))
+	})
+}
+
+// PathIn applies the In predicate on the "path" field.
+func PathIn(vs ...string) predicate.Chain {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldPath), v...))
+	})
+}
+
+// PathNotIn applies the NotIn predicate on the "path" field.
+func PathNotIn(vs ...string) predicate.Chain {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldPath), v...))
+	})
+}
+
+// PathGT applies the GT predicate on the "path" field.
+func PathGT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldPath), v))
+	})
+}
+
+// PathGTE applies the GTE predicate on the "path" field.
+func PathGTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldPath), v))
+	})
+}
+
+// PathLT applies the LT predicate on the "path" field.
+func PathLT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldPath), v))
+	})
+}
+
+// PathLTE applies the LTE predicate on the "path" field.
+func PathLTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldPath), v))
+	})
+}
+
+// PathContains applies the Contains predicate on the "path" field.
+func PathContains(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldPath), v))
+	})
+}
+
+// PathHasPrefix applies the HasPrefix predicate on the "path" field.
+func PathHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldPath), v))
+	})
+}
+
+// PathHasSuffix applies the HasSuffix predicate on the "path" field.
+func PathHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldPath), v))
+	})
+}
+
+// PathEqualFold applies the EqualFold predicate on the "path" field.
+func PathEqualFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldPath), v))
+	})
+}
+
+// PathContainsFold applies the ContainsFold predicate on the "path" field.
+func PathContainsFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldPath), v))
+	})
+}
+
+// DisplayEQ applies the EQ predicate on the "display" field.
+func DisplayEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayNEQ applies the NEQ predicate on the "display" field.
+func DisplayNEQ(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayIn applies the In predicate on the "display" field.
+func DisplayIn(vs ...string) predicate.Chain {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldDisplay), v...))
+	})
+}
+
+// DisplayNotIn applies the NotIn predicate on the "display" field.
+func DisplayNotIn(vs ...string) predicate.Chain {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldDisplay), v...))
+	})
+}
+
+// DisplayGT applies the GT predicate on the "display" field.
+func DisplayGT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayGTE applies the GTE predicate on the "display" field.
+func DisplayGTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayLT applies the LT predicate on the "display" field.
+func DisplayLT(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayLTE applies the LTE predicate on the "display" field.
+func DisplayLTE(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayContains applies the Contains predicate on the "display" field.
+func DisplayContains(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayHasPrefix applies the HasPrefix predicate on the "display" field.
+func DisplayHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayHasSuffix applies the HasSuffix predicate on the "display" field.
+func DisplayHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayEqualFold applies the EqualFold predicate on the "display" field.
+func DisplayEqualFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldDisplay), v))
+	})
+}
+
+// DisplayContainsFold applies the ContainsFold predicate on the "display" field.
+func DisplayContainsFold(v string) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldDisplay), v))
 	})
 }
 

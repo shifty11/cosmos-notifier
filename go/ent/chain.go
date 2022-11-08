@@ -26,6 +26,10 @@ type Chain struct {
 	Name string `json:"name,omitempty"`
 	// PrettyName holds the value of the "pretty_name" field.
 	PrettyName string `json:"pretty_name,omitempty"`
+	// Path holds the value of the "path" field.
+	Path string `json:"path,omitempty"`
+	// Display holds the value of the "display" field.
+	Display string `json:"display,omitempty"`
 	// IsEnabled holds the value of the "is_enabled" field.
 	IsEnabled bool `json:"is_enabled,omitempty"`
 	// ImageURL holds the value of the "image_url" field.
@@ -86,7 +90,7 @@ func (*Chain) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
-		case chain.FieldChainID, chain.FieldName, chain.FieldPrettyName, chain.FieldImageURL, chain.FieldThumbnailURL:
+		case chain.FieldChainID, chain.FieldName, chain.FieldPrettyName, chain.FieldPath, chain.FieldDisplay, chain.FieldImageURL, chain.FieldThumbnailURL:
 			values[i] = new(sql.NullString)
 		case chain.FieldCreateTime, chain.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -140,6 +144,18 @@ func (c *Chain) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field pretty_name", values[i])
 			} else if value.Valid {
 				c.PrettyName = value.String
+			}
+		case chain.FieldPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field path", values[i])
+			} else if value.Valid {
+				c.Path = value.String
+			}
+		case chain.FieldDisplay:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field display", values[i])
+			} else if value.Valid {
+				c.Display = value.String
 			}
 		case chain.FieldIsEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -216,6 +232,12 @@ func (c *Chain) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("pretty_name=")
 	builder.WriteString(c.PrettyName)
+	builder.WriteString(", ")
+	builder.WriteString("path=")
+	builder.WriteString(c.Path)
+	builder.WriteString(", ")
+	builder.WriteString("display=")
+	builder.WriteString(c.Display)
 	builder.WriteString(", ")
 	builder.WriteString("is_enabled=")
 	builder.WriteString(fmt.Sprintf("%v", c.IsEnabled))

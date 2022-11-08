@@ -69,6 +69,34 @@ func (cc *ChainCreate) SetPrettyName(s string) *ChainCreate {
 	return cc
 }
 
+// SetPath sets the "path" field.
+func (cc *ChainCreate) SetPath(s string) *ChainCreate {
+	cc.mutation.SetPath(s)
+	return cc
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (cc *ChainCreate) SetNillablePath(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetPath(*s)
+	}
+	return cc
+}
+
+// SetDisplay sets the "display" field.
+func (cc *ChainCreate) SetDisplay(s string) *ChainCreate {
+	cc.mutation.SetDisplay(s)
+	return cc
+}
+
+// SetNillableDisplay sets the "display" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableDisplay(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetDisplay(*s)
+	}
+	return cc
+}
+
 // SetIsEnabled sets the "is_enabled" field.
 func (cc *ChainCreate) SetIsEnabled(b bool) *ChainCreate {
 	cc.mutation.SetIsEnabled(b)
@@ -233,6 +261,14 @@ func (cc *ChainCreate) defaults() {
 		v := chain.DefaultUpdateTime()
 		cc.mutation.SetUpdateTime(v)
 	}
+	if _, ok := cc.mutation.Path(); !ok {
+		v := chain.DefaultPath
+		cc.mutation.SetPath(v)
+	}
+	if _, ok := cc.mutation.Display(); !ok {
+		v := chain.DefaultDisplay
+		cc.mutation.SetDisplay(v)
+	}
 	if _, ok := cc.mutation.IsEnabled(); !ok {
 		v := chain.DefaultIsEnabled
 		cc.mutation.SetIsEnabled(v)
@@ -259,6 +295,12 @@ func (cc *ChainCreate) check() error {
 	}
 	if _, ok := cc.mutation.PrettyName(); !ok {
 		return &ValidationError{Name: "pretty_name", err: errors.New(`ent: missing required field "Chain.pretty_name"`)}
+	}
+	if _, ok := cc.mutation.Path(); !ok {
+		return &ValidationError{Name: "path", err: errors.New(`ent: missing required field "Chain.path"`)}
+	}
+	if _, ok := cc.mutation.Display(); !ok {
+		return &ValidationError{Name: "display", err: errors.New(`ent: missing required field "Chain.display"`)}
 	}
 	if _, ok := cc.mutation.IsEnabled(); !ok {
 		return &ValidationError{Name: "is_enabled", err: errors.New(`ent: missing required field "Chain.is_enabled"`)}
@@ -315,6 +357,14 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.PrettyName(); ok {
 		_spec.SetField(chain.FieldPrettyName, field.TypeString, value)
 		_node.PrettyName = value
+	}
+	if value, ok := cc.mutation.Path(); ok {
+		_spec.SetField(chain.FieldPath, field.TypeString, value)
+		_node.Path = value
+	}
+	if value, ok := cc.mutation.Display(); ok {
+		_spec.SetField(chain.FieldDisplay, field.TypeString, value)
+		_node.Display = value
 	}
 	if value, ok := cc.mutation.IsEnabled(); ok {
 		_spec.SetField(chain.FieldIsEnabled, field.TypeBool, value)

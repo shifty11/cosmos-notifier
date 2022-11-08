@@ -34,12 +34,20 @@ func init() {
 	chain.DefaultUpdateTime = chainDescUpdateTime.Default.(func() time.Time)
 	// chain.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	chain.UpdateDefaultUpdateTime = chainDescUpdateTime.UpdateDefault.(func() time.Time)
+	// chainDescPath is the schema descriptor for path field.
+	chainDescPath := chainFields[3].Descriptor()
+	// chain.DefaultPath holds the default value on creation for the path field.
+	chain.DefaultPath = chainDescPath.Default.(string)
+	// chainDescDisplay is the schema descriptor for display field.
+	chainDescDisplay := chainFields[4].Descriptor()
+	// chain.DefaultDisplay holds the default value on creation for the display field.
+	chain.DefaultDisplay = chainDescDisplay.Default.(string)
 	// chainDescIsEnabled is the schema descriptor for is_enabled field.
-	chainDescIsEnabled := chainFields[3].Descriptor()
+	chainDescIsEnabled := chainFields[5].Descriptor()
 	// chain.DefaultIsEnabled holds the default value on creation for the is_enabled field.
 	chain.DefaultIsEnabled = chainDescIsEnabled.Default.(bool)
 	// chainDescThumbnailURL is the schema descriptor for thumbnail_url field.
-	chainDescThumbnailURL := chainFields[5].Descriptor()
+	chainDescThumbnailURL := chainFields[7].Descriptor()
 	// chain.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
 	chain.DefaultThumbnailURL = chainDescThumbnailURL.Default.(string)
 	chainproposalMixin := schema.ChainProposal{}.Mixin()
@@ -80,6 +88,10 @@ func init() {
 	contractDescRPCEndpoint := contractFields[5].Descriptor()
 	// contract.DefaultRPCEndpoint holds the default value on creation for the rpc_endpoint field.
 	contract.DefaultRPCEndpoint = contractDescRPCEndpoint.Default.(string)
+	// contractDescGetProposalsQuery is the schema descriptor for get_proposals_query field.
+	contractDescGetProposalsQuery := contractFields[7].Descriptor()
+	// contract.DefaultGetProposalsQuery holds the default value on creation for the get_proposals_query field.
+	contract.DefaultGetProposalsQuery = contractDescGetProposalsQuery.Default.(string)
 	contractproposalMixin := schema.ContractProposal{}.Mixin()
 	contractproposalMixinFields0 := contractproposalMixin[0].Fields()
 	_ = contractproposalMixinFields0

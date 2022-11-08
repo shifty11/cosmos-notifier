@@ -103,6 +103,20 @@ func (cu *ContractUpdate) SetNillableConfigVersion(cv *contract.ConfigVersion) *
 	return cu
 }
 
+// SetGetProposalsQuery sets the "get_proposals_query" field.
+func (cu *ContractUpdate) SetGetProposalsQuery(s string) *ContractUpdate {
+	cu.mutation.SetGetProposalsQuery(s)
+	return cu
+}
+
+// SetNillableGetProposalsQuery sets the "get_proposals_query" field if the given value is not nil.
+func (cu *ContractUpdate) SetNillableGetProposalsQuery(s *string) *ContractUpdate {
+	if s != nil {
+		cu.SetGetProposalsQuery(*s)
+	}
+	return cu
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cu *ContractUpdate) AddProposalIDs(ids ...int) *ContractUpdate {
 	cu.mutation.AddProposalIDs(ids...)
@@ -336,6 +350,9 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.ConfigVersion(); ok {
 		_spec.SetField(contract.FieldConfigVersion, field.TypeEnum, value)
+	}
+	if value, ok := cu.mutation.GetProposalsQuery(); ok {
+		_spec.SetField(contract.FieldGetProposalsQuery, field.TypeString, value)
 	}
 	if cu.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -586,6 +603,20 @@ func (cuo *ContractUpdateOne) SetConfigVersion(cv contract.ConfigVersion) *Contr
 func (cuo *ContractUpdateOne) SetNillableConfigVersion(cv *contract.ConfigVersion) *ContractUpdateOne {
 	if cv != nil {
 		cuo.SetConfigVersion(*cv)
+	}
+	return cuo
+}
+
+// SetGetProposalsQuery sets the "get_proposals_query" field.
+func (cuo *ContractUpdateOne) SetGetProposalsQuery(s string) *ContractUpdateOne {
+	cuo.mutation.SetGetProposalsQuery(s)
+	return cuo
+}
+
+// SetNillableGetProposalsQuery sets the "get_proposals_query" field if the given value is not nil.
+func (cuo *ContractUpdateOne) SetNillableGetProposalsQuery(s *string) *ContractUpdateOne {
+	if s != nil {
+		cuo.SetGetProposalsQuery(*s)
 	}
 	return cuo
 }
@@ -853,6 +884,9 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 	}
 	if value, ok := cuo.mutation.ConfigVersion(); ok {
 		_spec.SetField(contract.FieldConfigVersion, field.TypeEnum, value)
+	}
+	if value, ok := cuo.mutation.GetProposalsQuery(); ok {
+		_spec.SetField(contract.FieldGetProposalsQuery, field.TypeString, value)
 	}
 	if cuo.mutation.ProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{

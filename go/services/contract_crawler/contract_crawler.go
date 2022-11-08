@@ -43,7 +43,7 @@ func (c *ContractCrawler) UpdateContracts() {
 			log.Sugar.Debugf("error while getting config for contract %v (%v): %v", contract.Name, contract.Address, err)
 			continue
 		}
-		proposals, err := client.proposals()
+		proposals, err := client.proposals("")
 		if err != nil {
 			log.Sugar.Debugf("error while getting proposals for contract %v (%v): %v", contract.Name, contract.Address, err)
 			continue
@@ -126,7 +126,7 @@ func (c *ContractCrawler) AddContracts() {
 			}
 		}
 		if !found {
-			_, err := c.AddContract(dao.Address)
+			_, err := c.AddContract(nil, dao.Address, "")
 			if err != nil {
 				log.Sugar.Errorf("while adding contract %v: %v", dao.Address, err)
 			}
@@ -134,13 +134,17 @@ func (c *ContractCrawler) AddContracts() {
 	}
 }
 
-func (c *ContractCrawler) AddContract(contractAddr string) (*ent.Contract, error) {
-	client := NewContractClient(c.apiUrl, contractAddr, "https://rpc.cosmos.directory/juno")
+func (c *ContractCrawler) AddContract(chain *ent.Chain, contractAddr string, proposalQuery string) (*ent.Contract, error) {
+	rpcName := chain.Path
+	if rpcName == "" {
+		rpcName = chain.Name
+	}
+	client := NewContractClient(c.apiUrl, contractAddr, "https://rpc.cosmos.directory/"+rpcName)
 	config, err := client.config(types.ContractVersionUnknown)
 	if err != nil {
 		return nil, err
 	}
-	proposals, err := client.proposals()
+	proposals, err := client.proposals(proposalQuery)
 	if err != nil {
 		return nil, err
 	}

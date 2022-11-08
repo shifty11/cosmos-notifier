@@ -41,7 +41,7 @@ func (cc *ContractClient) configV2() (*types.ContractData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return config.ToContractData(cc.ContractAddress), nil
+	return config.ToContractData(cc.ContractAddress, cc.RpcEndpoint), nil
 }
 
 func (cc *ContractClient) configV1() (*types.ContractData, error) {
@@ -54,7 +54,7 @@ func (cc *ContractClient) configV1() (*types.ContractData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return config.ToContractData(cc.ContractAddress), nil
+	return config.ToContractData(cc.ContractAddress, cc.RpcEndpoint), nil
 }
 
 func (cc *ContractClient) config(contractVersion types.ContractVersion) (*types.ContractData, error) {
@@ -75,13 +75,16 @@ func (cc *ContractClient) config(contractVersion types.ContractVersion) (*types.
 	}
 }
 
-func (cc *ContractClient) proposals() (*types.ProposalList, error) {
-	resp, err := cc.querySmartContract("{\"list_proposals\":{}}")
+func (cc *ContractClient) proposals(query string) (*types.ProposalList, error) {
+	if query == "" {
+		query = "{\"list_proposals\":{}}"
+	}
+	resp, err := cc.querySmartContract(query)
 	if err != nil {
 		if errors.Is(err, UnknownVariantError) {
 			proposalModules, _ := cc.proposalModules()
 			if len(proposalModules) > 0 {
-				return NewContractClient(cc.URL, proposalModules[0], cc.RpcEndpoint).proposals()
+				return NewContractClient(cc.URL, proposalModules[0], cc.RpcEndpoint).proposals("")
 			}
 			return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
 		}

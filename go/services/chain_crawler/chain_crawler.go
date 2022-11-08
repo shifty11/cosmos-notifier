@@ -118,6 +118,16 @@ func (c *ChainCrawler) updateProposal(entChain *ent.Chain, url string) {
 	c.chainProposalManager.CreateOrUpdate(entChain, &resp.Proposal)
 }
 
+func (c *ChainCrawler) chainNeedsUpdate(entChain *ent.Chain, chainInfo *types.Chain) bool {
+	return entChain.Name != chainInfo.Name ||
+		entChain.PrettyName != chainInfo.PrettyName ||
+		entChain.Path != chainInfo.Path ||
+		entChain.Display != chainInfo.Display ||
+		entChain.ImageURL != chainInfo.Image ||
+		(chainInfo.Image != "" && entChain.ThumbnailURL == "") ||
+		!c.doesThumbnailExist(chainInfo)
+}
+
 func (c *ChainCrawler) AddOrUpdateChains() {
 	log.Sugar.Debug("Updating chains")
 	var chainInfo types.ChainInfo
@@ -131,12 +141,11 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 		for _, entChain := range c.chainManager.All() {
 			if entChain.ChainID == chain.ChainId {
 				found = true
-				if (entChain.Name != chain.Name) ||
-					(entChain.PrettyName != chain.PrettyName) ||
-					(entChain.ImageURL != chain.Image) ||
-					(chain.Image != "" && entChain.ThumbnailURL == "") ||
-					(!c.doesThumbnailExist(&chain)) {
-					thumbnailUrl := c.downloadThumbnail(&chain)
+				if c.chainNeedsUpdate(entChain, &chain) {
+					thumbnailUrl := entChain.ThumbnailURL
+					if !c.doesThumbnailExist(&chain) {
+						thumbnailUrl = c.downloadThumbnail(&chain)
+					}
 					c.chainManager.Update(entChain, &chain, thumbnailUrl)
 				}
 				break
@@ -160,7 +169,11 @@ func (c *ChainCrawler) UpdateProposals() {
 			c.updateProposal(entChain, url)
 		}
 
-		url := fmt.Sprintf(urlProposals+"?proposal_status=%v", entChain.Name, cosmossdktypes.StatusVotingPeriod)
+		urlChain := entChain.Path
+		if urlChain == "" {
+			urlChain = entChain.Name
+		}
+		url := fmt.Sprintf(urlProposals+"?proposal_status=%v", urlChain, cosmossdktypes.StatusVotingPeriod)
 		props := c.addProposals(entChain, url)
 		for _, prop := range props {
 			if entChain.IsEnabled && prop.status == database.ProposalCreated {

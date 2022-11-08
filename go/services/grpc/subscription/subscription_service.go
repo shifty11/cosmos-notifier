@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"strings"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -17,6 +18,7 @@ type SubscriptionServer struct {
 	pb.UnimplementedSubscriptionServiceServer
 	subscriptionManager *database.SubscriptionManager
 	contractManager     database.IContractManager
+	chainManager        *database.ChainManager
 	crawlerClient       *contract_crawler.ContractCrawler
 }
 
@@ -24,6 +26,7 @@ func NewSubscriptionsServer(managers *database.DbManagers, crawlerClient *contra
 	return &SubscriptionServer{
 		subscriptionManager: managers.SubscriptionManager,
 		contractManager:     managers.ContractManager,
+		chainManager:        managers.ChainManager,
 		crawlerClient:       crawlerClient,
 	}
 }
@@ -84,9 +87,22 @@ func (server *SubscriptionServer) AddDao(req *pb.AddDaoRequest, stream pb.Subscr
 		return status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	if len(req.ContractAddress) != 63 {
+	if req.ContractAddress == "" {
 		log.Sugar.Error("invalid contract address")
 		return status.Errorf(codes.InvalidArgument, "invalid contract address")
+	}
+
+	var chain *ent.Chain
+	for _, c := range server.chainManager.All() {
+		if c.Display != "" && strings.HasPrefix(req.ContractAddress, c.Display) {
+			chain = c
+			break
+		}
+	}
+
+	if chain == nil {
+		log.Sugar.Error("invalid contract address: no chain found")
+		return status.Errorf(codes.InvalidArgument, "invalid contract address: no chain found")
 	}
 
 	log.Sugar.Debugf("AddDao %v by user %v (%v)", req.ContractAddress, entUser.Name, entUser.UserID)
@@ -116,7 +132,7 @@ func (server *SubscriptionServer) AddDao(req *pb.AddDaoRequest, stream pb.Subscr
 
 	waitc := make(chan *ent.Contract)
 	go func() {
-		contract, err = server.crawlerClient.AddContract(req.ContractAddress)
+		contract, err = server.crawlerClient.AddContract(chain, req.ContractAddress, req.CustomQuery)
 		if err != nil {
 			log.Sugar.Errorf("error while adding dao: %v", req.ContractAddress)
 		}

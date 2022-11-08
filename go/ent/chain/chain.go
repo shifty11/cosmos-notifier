@@ -21,6 +21,10 @@ const (
 	FieldName = "name"
 	// FieldPrettyName holds the string denoting the pretty_name field in the database.
 	FieldPrettyName = "pretty_name"
+	// FieldPath holds the string denoting the path field in the database.
+	FieldPath = "path"
+	// FieldDisplay holds the string denoting the display field in the database.
+	FieldDisplay = "display"
 	// FieldIsEnabled holds the string denoting the is_enabled field in the database.
 	FieldIsEnabled = "is_enabled"
 	// FieldImageURL holds the string denoting the image_url field in the database.
@@ -62,6 +66,8 @@ var Columns = []string{
 	FieldChainID,
 	FieldName,
 	FieldPrettyName,
+	FieldPath,
+	FieldDisplay,
 	FieldIsEnabled,
 	FieldImageURL,
 	FieldThumbnailURL,
@@ -93,6 +99,10 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
+	// DefaultPath holds the default value on creation for the "path" field.
+	DefaultPath string
+	// DefaultDisplay holds the default value on creation for the "display" field.
+	DefaultDisplay string
 	// DefaultIsEnabled holds the default value on creation for the "is_enabled" field.
 	DefaultIsEnabled bool
 	// DefaultThumbnailURL holds the default value on creation for the "thumbnail_url" field.

@@ -27,6 +27,7 @@ type ContractData struct {
 	Name            string
 	Description     string
 	ImageUrl        string
+	RpcEndpoint     string
 	ContractVersion ContractVersion
 }
 
@@ -42,12 +43,13 @@ func (cv ContractVersion) String() string {
 	return string(cv)
 }
 
-func (c *Config) ToContractData(address string) *ContractData {
+func (c *Config) ToContractData(address string, rpcEndpoint string) *ContractData {
 	data := &ContractData{
 		Address:         address,
 		Name:            c.Config.Name,
 		Description:     c.Config.Description,
 		ImageUrl:        c.Config.ImageUrl,
+		RpcEndpoint:     rpcEndpoint,
 		ContractVersion: ContractVersionV2,
 	}
 	if data.Name == "" {
@@ -56,12 +58,13 @@ func (c *Config) ToContractData(address string) *ContractData {
 	return data
 }
 
-func (c *ConfigV1) ToContractData(address string) *ContractData {
+func (c *ConfigV1) ToContractData(address string, rpcEndpoint string) *ContractData {
 	data := &ContractData{
 		Address:         address,
 		Name:            c.Name,
 		Description:     c.Description,
 		ImageUrl:        c.ImageUrl,
+		RpcEndpoint:     rpcEndpoint,
 		ContractVersion: ContractVersionV1,
 	}
 	if data.Name == "" {

@@ -40,6 +40,8 @@ func (Contract) Fields() []ent.Field {
 				types.ContractVersionV2.String(),
 			).
 			Default(types.ContractVersionUnknown.String()),
+		field.String("get_proposals_query").
+			Default("{\"list_proposals\":{}}"),
 	}
 }
 

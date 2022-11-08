@@ -137,6 +137,13 @@ func RPCEndpoint(v string) predicate.Contract {
 	})
 }
 
+// GetProposalsQuery applies equality check predicate on the "get_proposals_query" field. It's identical to GetProposalsQueryEQ.
+func GetProposalsQuery(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
@@ -892,6 +899,105 @@ func ConfigVersionNotIn(vs ...ConfigVersion) predicate.Contract {
 	}
 	return predicate.Contract(func(s *sql.Selector) {
 		s.Where(sql.NotIn(s.C(FieldConfigVersion), v...))
+	})
+}
+
+// GetProposalsQueryEQ applies the EQ predicate on the "get_proposals_query" field.
+func GetProposalsQueryEQ(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryNEQ applies the NEQ predicate on the "get_proposals_query" field.
+func GetProposalsQueryNEQ(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryIn applies the In predicate on the "get_proposals_query" field.
+func GetProposalsQueryIn(vs ...string) predicate.Contract {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldGetProposalsQuery), v...))
+	})
+}
+
+// GetProposalsQueryNotIn applies the NotIn predicate on the "get_proposals_query" field.
+func GetProposalsQueryNotIn(vs ...string) predicate.Contract {
+	v := make([]any, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldGetProposalsQuery), v...))
+	})
+}
+
+// GetProposalsQueryGT applies the GT predicate on the "get_proposals_query" field.
+func GetProposalsQueryGT(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryGTE applies the GTE predicate on the "get_proposals_query" field.
+func GetProposalsQueryGTE(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryLT applies the LT predicate on the "get_proposals_query" field.
+func GetProposalsQueryLT(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryLTE applies the LTE predicate on the "get_proposals_query" field.
+func GetProposalsQueryLTE(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryContains applies the Contains predicate on the "get_proposals_query" field.
+func GetProposalsQueryContains(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryHasPrefix applies the HasPrefix predicate on the "get_proposals_query" field.
+func GetProposalsQueryHasPrefix(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryHasSuffix applies the HasSuffix predicate on the "get_proposals_query" field.
+func GetProposalsQueryHasSuffix(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryEqualFold applies the EqualFold predicate on the "get_proposals_query" field.
+func GetProposalsQueryEqualFold(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldGetProposalsQuery), v))
+	})
+}
+
+// GetProposalsQueryContainsFold applies the ContainsFold predicate on the "get_proposals_query" field.
+func GetProposalsQueryContainsFold(v string) predicate.Contract {
+	return predicate.Contract(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldGetProposalsQuery), v))
 	})
 }
 

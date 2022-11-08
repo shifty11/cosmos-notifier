@@ -61,6 +61,7 @@ message ToggleSubscriptionResponse {
 
 message AddDaoRequest {
   string contractAddress = 1;
+  string customQuery = 2;
 }
 
 message AddDaoResponse {

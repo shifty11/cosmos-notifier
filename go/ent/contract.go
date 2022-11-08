@@ -34,6 +34,8 @@ type Contract struct {
 	RPCEndpoint string `json:"rpc_endpoint,omitempty"`
 	// ConfigVersion holds the value of the "config_version" field.
 	ConfigVersion contract.ConfigVersion `json:"config_version,omitempty"`
+	// GetProposalsQuery holds the value of the "get_proposals_query" field.
+	GetProposalsQuery string `json:"get_proposals_query,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ContractQuery when eager-loading is set.
 	Edges ContractEdges `json:"edges"`
@@ -86,7 +88,7 @@ func (*Contract) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case contract.FieldID:
 			values[i] = new(sql.NullInt64)
-		case contract.FieldAddress, contract.FieldName, contract.FieldDescription, contract.FieldImageURL, contract.FieldThumbnailURL, contract.FieldRPCEndpoint, contract.FieldConfigVersion:
+		case contract.FieldAddress, contract.FieldName, contract.FieldDescription, contract.FieldImageURL, contract.FieldThumbnailURL, contract.FieldRPCEndpoint, contract.FieldConfigVersion, contract.FieldGetProposalsQuery:
 			values[i] = new(sql.NullString)
 		case contract.FieldCreateTime, contract.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -165,6 +167,12 @@ func (c *Contract) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.ConfigVersion = contract.ConfigVersion(value.String)
 			}
+		case contract.FieldGetProposalsQuery:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field get_proposals_query", values[i])
+			} else if value.Valid {
+				c.GetProposalsQuery = value.String
+			}
 		}
 	}
 	return nil
@@ -234,6 +242,9 @@ func (c *Contract) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("config_version=")
 	builder.WriteString(fmt.Sprintf("%v", c.ConfigVersion))
+	builder.WriteString(", ")
+	builder.WriteString("get_proposals_query=")
+	builder.WriteString(c.GetProposalsQuery)
 	builder.WriteByte(')')
 	return builder.String()
 }

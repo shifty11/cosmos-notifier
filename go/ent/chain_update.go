@@ -55,6 +55,34 @@ func (cu *ChainUpdate) SetPrettyName(s string) *ChainUpdate {
 	return cu
 }
 
+// SetPath sets the "path" field.
+func (cu *ChainUpdate) SetPath(s string) *ChainUpdate {
+	cu.mutation.SetPath(s)
+	return cu
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillablePath(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetPath(*s)
+	}
+	return cu
+}
+
+// SetDisplay sets the "display" field.
+func (cu *ChainUpdate) SetDisplay(s string) *ChainUpdate {
+	cu.mutation.SetDisplay(s)
+	return cu
+}
+
+// SetNillableDisplay sets the "display" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableDisplay(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetDisplay(*s)
+	}
+	return cu
+}
+
 // SetIsEnabled sets the "is_enabled" field.
 func (cu *ChainUpdate) SetIsEnabled(b bool) *ChainUpdate {
 	cu.mutation.SetIsEnabled(b)
@@ -295,6 +323,12 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.PrettyName(); ok {
 		_spec.SetField(chain.FieldPrettyName, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.Path(); ok {
+		_spec.SetField(chain.FieldPath, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.Display(); ok {
+		_spec.SetField(chain.FieldDisplay, field.TypeString, value)
+	}
 	if value, ok := cu.mutation.IsEnabled(); ok {
 		_spec.SetField(chain.FieldIsEnabled, field.TypeBool, value)
 	}
@@ -506,6 +540,34 @@ func (cuo *ChainUpdateOne) SetName(s string) *ChainUpdateOne {
 // SetPrettyName sets the "pretty_name" field.
 func (cuo *ChainUpdateOne) SetPrettyName(s string) *ChainUpdateOne {
 	cuo.mutation.SetPrettyName(s)
+	return cuo
+}
+
+// SetPath sets the "path" field.
+func (cuo *ChainUpdateOne) SetPath(s string) *ChainUpdateOne {
+	cuo.mutation.SetPath(s)
+	return cuo
+}
+
+// SetNillablePath sets the "path" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillablePath(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetPath(*s)
+	}
+	return cuo
+}
+
+// SetDisplay sets the "display" field.
+func (cuo *ChainUpdateOne) SetDisplay(s string) *ChainUpdateOne {
+	cuo.mutation.SetDisplay(s)
+	return cuo
+}
+
+// SetNillableDisplay sets the "display" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableDisplay(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetDisplay(*s)
+	}
 	return cuo
 }
 
@@ -778,6 +840,12 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 	}
 	if value, ok := cuo.mutation.PrettyName(); ok {
 		_spec.SetField(chain.FieldPrettyName, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.Path(); ok {
+		_spec.SetField(chain.FieldPath, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.Display(); ok {
+		_spec.SetField(chain.FieldDisplay, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.IsEnabled(); ok {
 		_spec.SetField(chain.FieldIsEnabled, field.TypeBool, value)

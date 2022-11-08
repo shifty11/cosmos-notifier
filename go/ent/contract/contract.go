@@ -30,6 +30,8 @@ const (
 	FieldRPCEndpoint = "rpc_endpoint"
 	// FieldConfigVersion holds the string denoting the config_version field in the database.
 	FieldConfigVersion = "config_version"
+	// FieldGetProposalsQuery holds the string denoting the get_proposals_query field in the database.
+	FieldGetProposalsQuery = "get_proposals_query"
 	// EdgeProposals holds the string denoting the proposals edge name in mutations.
 	EdgeProposals = "proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
@@ -69,6 +71,7 @@ var Columns = []string{
 	FieldThumbnailURL,
 	FieldRPCEndpoint,
 	FieldConfigVersion,
+	FieldGetProposalsQuery,
 }
 
 var (
@@ -101,6 +104,8 @@ var (
 	DefaultThumbnailURL string
 	// DefaultRPCEndpoint holds the default value on creation for the "rpc_endpoint" field.
 	DefaultRPCEndpoint string
+	// DefaultGetProposalsQuery holds the default value on creation for the "get_proposals_query" field.
+	DefaultGetProposalsQuery string
 )
 
 // ConfigVersion defines the type for the "config_version" enum field.

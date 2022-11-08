@@ -50,6 +50,8 @@ type ChainMutation struct {
 	chain_id                *string
 	name                    *string
 	pretty_name             *string
+	_path                   *string
+	display                 *string
 	is_enabled              *bool
 	image_url               *string
 	thumbnail_url           *string
@@ -346,6 +348,78 @@ func (m *ChainMutation) ResetPrettyName() {
 	m.pretty_name = nil
 }
 
+// SetPath sets the "path" field.
+func (m *ChainMutation) SetPath(s string) {
+	m._path = &s
+}
+
+// Path returns the value of the "path" field in the mutation.
+func (m *ChainMutation) Path() (r string, exists bool) {
+	v := m._path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPath returns the old "path" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPath: %w", err)
+	}
+	return oldValue.Path, nil
+}
+
+// ResetPath resets all changes to the "path" field.
+func (m *ChainMutation) ResetPath() {
+	m._path = nil
+}
+
+// SetDisplay sets the "display" field.
+func (m *ChainMutation) SetDisplay(s string) {
+	m.display = &s
+}
+
+// Display returns the value of the "display" field in the mutation.
+func (m *ChainMutation) Display() (r string, exists bool) {
+	v := m.display
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDisplay returns the old "display" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldDisplay(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDisplay is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDisplay requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDisplay: %w", err)
+	}
+	return oldValue.Display, nil
+}
+
+// ResetDisplay resets all changes to the "display" field.
+func (m *ChainMutation) ResetDisplay() {
+	m.display = nil
+}
+
 // SetIsEnabled sets the "is_enabled" field.
 func (m *ChainMutation) SetIsEnabled(b bool) {
 	m.is_enabled = &b
@@ -635,7 +709,7 @@ func (m *ChainMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChainMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 10)
 	if m.create_time != nil {
 		fields = append(fields, chain.FieldCreateTime)
 	}
@@ -650,6 +724,12 @@ func (m *ChainMutation) Fields() []string {
 	}
 	if m.pretty_name != nil {
 		fields = append(fields, chain.FieldPrettyName)
+	}
+	if m._path != nil {
+		fields = append(fields, chain.FieldPath)
+	}
+	if m.display != nil {
+		fields = append(fields, chain.FieldDisplay)
 	}
 	if m.is_enabled != nil {
 		fields = append(fields, chain.FieldIsEnabled)
@@ -678,6 +758,10 @@ func (m *ChainMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case chain.FieldPrettyName:
 		return m.PrettyName()
+	case chain.FieldPath:
+		return m.Path()
+	case chain.FieldDisplay:
+		return m.Display()
 	case chain.FieldIsEnabled:
 		return m.IsEnabled()
 	case chain.FieldImageURL:
@@ -703,6 +787,10 @@ func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldName(ctx)
 	case chain.FieldPrettyName:
 		return m.OldPrettyName(ctx)
+	case chain.FieldPath:
+		return m.OldPath(ctx)
+	case chain.FieldDisplay:
+		return m.OldDisplay(ctx)
 	case chain.FieldIsEnabled:
 		return m.OldIsEnabled(ctx)
 	case chain.FieldImageURL:
@@ -752,6 +840,20 @@ func (m *ChainMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPrettyName(v)
+		return nil
+	case chain.FieldPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPath(v)
+		return nil
+	case chain.FieldDisplay:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDisplay(v)
 		return nil
 	case chain.FieldIsEnabled:
 		v, ok := value.(bool)
@@ -837,6 +939,12 @@ func (m *ChainMutation) ResetField(name string) error {
 		return nil
 	case chain.FieldPrettyName:
 		m.ResetPrettyName()
+		return nil
+	case chain.FieldPath:
+		m.ResetPath()
+		return nil
+	case chain.FieldDisplay:
+		m.ResetDisplay()
 		return nil
 	case chain.FieldIsEnabled:
 		m.ResetIsEnabled()
@@ -1794,6 +1902,7 @@ type ContractMutation struct {
 	thumbnail_url           *string
 	rpc_endpoint            *string
 	config_version          *contract.ConfigVersion
+	get_proposals_query     *string
 	clearedFields           map[string]struct{}
 	proposals               map[int]struct{}
 	removedproposals        map[int]struct{}
@@ -2231,6 +2340,42 @@ func (m *ContractMutation) ResetConfigVersion() {
 	m.config_version = nil
 }
 
+// SetGetProposalsQuery sets the "get_proposals_query" field.
+func (m *ContractMutation) SetGetProposalsQuery(s string) {
+	m.get_proposals_query = &s
+}
+
+// GetProposalsQuery returns the value of the "get_proposals_query" field in the mutation.
+func (m *ContractMutation) GetProposalsQuery() (r string, exists bool) {
+	v := m.get_proposals_query
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGetProposalsQuery returns the old "get_proposals_query" field's value of the Contract entity.
+// If the Contract object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ContractMutation) OldGetProposalsQuery(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGetProposalsQuery is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGetProposalsQuery requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGetProposalsQuery: %w", err)
+	}
+	return oldValue.GetProposalsQuery, nil
+}
+
+// ResetGetProposalsQuery resets all changes to the "get_proposals_query" field.
+func (m *ContractMutation) ResetGetProposalsQuery() {
+	m.get_proposals_query = nil
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by ids.
 func (m *ContractMutation) AddProposalIDs(ids ...int) {
 	if m.proposals == nil {
@@ -2412,7 +2557,7 @@ func (m *ContractMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ContractMutation) Fields() []string {
-	fields := make([]string, 0, 9)
+	fields := make([]string, 0, 10)
 	if m.create_time != nil {
 		fields = append(fields, contract.FieldCreateTime)
 	}
@@ -2440,6 +2585,9 @@ func (m *ContractMutation) Fields() []string {
 	if m.config_version != nil {
 		fields = append(fields, contract.FieldConfigVersion)
 	}
+	if m.get_proposals_query != nil {
+		fields = append(fields, contract.FieldGetProposalsQuery)
+	}
 	return fields
 }
 
@@ -2466,6 +2614,8 @@ func (m *ContractMutation) Field(name string) (ent.Value, bool) {
 		return m.RPCEndpoint()
 	case contract.FieldConfigVersion:
 		return m.ConfigVersion()
+	case contract.FieldGetProposalsQuery:
+		return m.GetProposalsQuery()
 	}
 	return nil, false
 }
@@ -2493,6 +2643,8 @@ func (m *ContractMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldRPCEndpoint(ctx)
 	case contract.FieldConfigVersion:
 		return m.OldConfigVersion(ctx)
+	case contract.FieldGetProposalsQuery:
+		return m.OldGetProposalsQuery(ctx)
 	}
 	return nil, fmt.Errorf("unknown Contract field %s", name)
 }
@@ -2564,6 +2716,13 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetConfigVersion(v)
+		return nil
+	case contract.FieldGetProposalsQuery:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGetProposalsQuery(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -2640,6 +2799,9 @@ func (m *ContractMutation) ResetField(name string) error {
 		return nil
 	case contract.FieldConfigVersion:
 		m.ResetConfigVersion()
+		return nil
+	case contract.FieldGetProposalsQuery:
+		m.ResetGetProposalsQuery()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)

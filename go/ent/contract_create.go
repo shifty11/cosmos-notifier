@@ -117,6 +117,20 @@ func (cc *ContractCreate) SetNillableConfigVersion(cv *contract.ConfigVersion) *
 	return cc
 }
 
+// SetGetProposalsQuery sets the "get_proposals_query" field.
+func (cc *ContractCreate) SetGetProposalsQuery(s string) *ContractCreate {
+	cc.mutation.SetGetProposalsQuery(s)
+	return cc
+}
+
+// SetNillableGetProposalsQuery sets the "get_proposals_query" field if the given value is not nil.
+func (cc *ContractCreate) SetNillableGetProposalsQuery(s *string) *ContractCreate {
+	if s != nil {
+		cc.SetGetProposalsQuery(*s)
+	}
+	return cc
+}
+
 // AddProposalIDs adds the "proposals" edge to the ContractProposal entity by IDs.
 func (cc *ContractCreate) AddProposalIDs(ids ...int) *ContractCreate {
 	cc.mutation.AddProposalIDs(ids...)
@@ -259,6 +273,10 @@ func (cc *ContractCreate) defaults() {
 		v := contract.DefaultConfigVersion
 		cc.mutation.SetConfigVersion(v)
 	}
+	if _, ok := cc.mutation.GetProposalsQuery(); !ok {
+		v := contract.DefaultGetProposalsQuery
+		cc.mutation.SetGetProposalsQuery(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -294,6 +312,9 @@ func (cc *ContractCreate) check() error {
 		if err := contract.ConfigVersionValidator(v); err != nil {
 			return &ValidationError{Name: "config_version", err: fmt.Errorf(`ent: validator failed for field "Contract.config_version": %w`, err)}
 		}
+	}
+	if _, ok := cc.mutation.GetProposalsQuery(); !ok {
+		return &ValidationError{Name: "get_proposals_query", err: errors.New(`ent: missing required field "Contract.get_proposals_query"`)}
 	}
 	return nil
 }
@@ -357,6 +378,10 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.ConfigVersion(); ok {
 		_spec.SetField(contract.FieldConfigVersion, field.TypeEnum, value)
 		_node.ConfigVersion = value
+	}
+	if value, ok := cc.mutation.GetProposalsQuery(); ok {
+		_spec.SetField(contract.FieldGetProposalsQuery, field.TypeString, value)
+		_node.GetProposalsQuery = value
 	}
 	if nodes := cc.mutation.ProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

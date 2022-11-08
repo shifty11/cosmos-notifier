@@ -29,6 +29,10 @@ func (Chain) Fields() []ent.Field {
 			Unique(),
 		field.String("pretty_name").
 			Unique(),
+		field.String("path").
+			Default(""), //TODO: remove this field after migration
+		field.String("display").
+			Default(""), //TODO: remove this field after migration
 		field.Bool("is_enabled").
 			Default(true),
 		field.String("image_url"),
