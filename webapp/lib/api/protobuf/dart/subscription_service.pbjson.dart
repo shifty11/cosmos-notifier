@@ -27,14 +27,15 @@ const Subscription$json = const {
     const {'1': 'id', '3': 1, '4': 1, '5': 3, '10': 'id'},
     const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
     const {'1': 'is_subscribed', '3': 3, '4': 1, '5': 8, '10': 'isSubscribed'},
-    const {'1': 'thumbnail_url', '3': 4, '4': 1, '5': 9, '10': 'thumbnailUrl'},
-    const {'1': 'contract_address', '3': 5, '4': 1, '5': 9, '10': 'contractAddress'},
-    const {'1': 'stats', '3': 6, '4': 1, '5': 11, '6': '.daodao_notifier_grpc.SubscriptionStats', '10': 'stats'},
+    const {'1': 'is_enabled', '3': 4, '4': 1, '5': 8, '10': 'isEnabled'},
+    const {'1': 'thumbnail_url', '3': 5, '4': 1, '5': 9, '10': 'thumbnailUrl'},
+    const {'1': 'contract_address', '3': 6, '4': 1, '5': 9, '10': 'contractAddress'},
+    const {'1': 'stats', '3': 7, '4': 1, '5': 11, '6': '.daodao_notifier_grpc.SubscriptionStats', '10': 'stats'},
   ],
 };
 
 /// Descriptor for `Subscription`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List subscriptionDescriptor = $convert.base64Decode('CgxTdWJzY3JpcHRpb24SDgoCaWQYASABKANSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSIwoNaXNfc3Vic2NyaWJlZBgDIAEoCFIMaXNTdWJzY3JpYmVkEiMKDXRodW1ibmFpbF91cmwYBCABKAlSDHRodW1ibmFpbFVybBIpChBjb250cmFjdF9hZGRyZXNzGAUgASgJUg9jb250cmFjdEFkZHJlc3MSPQoFc3RhdHMYBiABKAsyJy5kYW9kYW9fbm90aWZpZXJfZ3JwYy5TdWJzY3JpcHRpb25TdGF0c1IFc3RhdHM=');
+final $typed_data.Uint8List subscriptionDescriptor = $convert.base64Decode('CgxTdWJzY3JpcHRpb24SDgoCaWQYASABKANSAmlkEhIKBG5hbWUYAiABKAlSBG5hbWUSIwoNaXNfc3Vic2NyaWJlZBgDIAEoCFIMaXNTdWJzY3JpYmVkEh0KCmlzX2VuYWJsZWQYBCABKAhSCWlzRW5hYmxlZBIjCg10aHVtYm5haWxfdXJsGAUgASgJUgx0aHVtYm5haWxVcmwSKQoQY29udHJhY3RfYWRkcmVzcxgGIAEoCVIPY29udHJhY3RBZGRyZXNzEj0KBXN0YXRzGAcgASgLMicuZGFvZGFvX25vdGlmaWVyX2dycGMuU3Vic2NyaXB0aW9uU3RhdHNSBXN0YXRz');
 @$core.Deprecated('Use chatRoomDescriptor instead')
 const ChatRoom$json = const {
   '1': 'ChatRoom',
@@ -106,11 +107,12 @@ const AddDaoRequest$json = const {
   '1': 'AddDaoRequest',
   '2': const [
     const {'1': 'contractAddress', '3': 1, '4': 1, '5': 9, '10': 'contractAddress'},
+    const {'1': 'customQuery', '3': 2, '4': 1, '5': 9, '10': 'customQuery'},
   ],
 };
 
 /// Descriptor for `AddDaoRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addDaoRequestDescriptor = $convert.base64Decode('Cg1BZGREYW9SZXF1ZXN0EigKD2NvbnRyYWN0QWRkcmVzcxgBIAEoCVIPY29udHJhY3RBZGRyZXNz');
+final $typed_data.Uint8List addDaoRequestDescriptor = $convert.base64Decode('Cg1BZGREYW9SZXF1ZXN0EigKD2NvbnRyYWN0QWRkcmVzcxgBIAEoCVIPY29udHJhY3RBZGRyZXNzEiAKC2N1c3RvbVF1ZXJ5GAIgASgJUgtjdXN0b21RdWVyeQ==');
 @$core.Deprecated('Use addDaoResponseDescriptor instead')
 const AddDaoResponse$json = const {
   '1': 'AddDaoResponse',
@@ -145,3 +147,14 @@ const DeleteDaoRequest$json = const {
 
 /// Descriptor for `DeleteDaoRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List deleteDaoRequestDescriptor = $convert.base64Decode('ChBEZWxldGVEYW9SZXF1ZXN0Eh4KCmNvbnRyYWN0SWQYASABKANSCmNvbnRyYWN0SWQ=');
+@$core.Deprecated('Use enableChainRequestDescriptor instead')
+const EnableChainRequest$json = const {
+  '1': 'EnableChainRequest',
+  '2': const [
+    const {'1': 'chainId', '3': 1, '4': 1, '5': 3, '10': 'chainId'},
+    const {'1': 'isEnabled', '3': 2, '4': 1, '5': 8, '10': 'isEnabled'},
+  ],
+};
+
+/// Descriptor for `EnableChainRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List enableChainRequestDescriptor = $convert.base64Decode('ChJFbmFibGVDaGFpblJlcXVlc3QSGAoHY2hhaW5JZBgBIAEoA1IHY2hhaW5JZBIcCglpc0VuYWJsZWQYAiABKAhSCWlzRW5hYmxlZA==');

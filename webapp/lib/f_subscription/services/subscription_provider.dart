@@ -55,7 +55,7 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
     state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
   }
 
-  _removeSubscriptions(Int64 id) {
+  _removeSubscription(Int64 id) {
     if (_ref.read(isChainsSelectedProvider)) {
       for (var chatRoom in _chainChatRooms) {
         chatRoom.subscriptions.removeWhere((element) => element.id == id);
@@ -66,6 +66,13 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
       }
     }
 
+    state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
+  }
+
+  _setSubscriptionEnabled(Int64 id, bool isEnabled) {
+    for (var chatRoom in _chainChatRooms) {
+      chatRoom.subscriptions.firstWhere((element) => element.id == id).isEnabled = isEnabled;
+    }
     state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
   }
 
@@ -88,20 +95,30 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
     }
   }
 
+  Future<void> enableChain(Int64 chainId, String name, bool isEnabled) async {
+    try {
+      await _subsService.enableChain(EnableChainRequest(chainId: chainId, isEnabled: isEnabled));
+      _setSubscriptionEnabled(chainId, isEnabled);
+      _ref.read(messageProvider.notifier).sendMsg(info: "Chain $name ${isEnabled ? 'enabled' : 'disabled'}");
+    } catch (e) {
+      _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
+    }
+  }
+
   Future<void> deleteDao(Int64 contractId, String name) async {
     try {
       await _subsService.deleteDao(DeleteDaoRequest(contractId: contractId));
-      _removeSubscriptions(contractId);
+      _removeSubscription(contractId);
       _ref.read(messageProvider.notifier).sendMsg(info: "DAO $name deleted");
     } catch (e) {
       _ref.read(messageProvider.notifier).sendMsg(error: e.toString());
     }
   }
 
-  Future<void> addDao(String contractAddress) async {
+  Future<void> addDao(String contractAddress, String proposalQuery) async {
     final msgProvider = _ref.read(messageProvider.notifier);
     try {
-      final stream = _subsService.addDao(AddDaoRequest(contractAddress: contractAddress));
+      final stream = _subsService.addDao(AddDaoRequest(contractAddress: contractAddress, customQuery: proposalQuery));
       stream.listen(
         (resp) {
           switch (resp.status) {

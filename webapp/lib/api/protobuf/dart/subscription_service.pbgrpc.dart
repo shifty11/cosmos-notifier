@@ -42,6 +42,11 @@ class SubscriptionServiceClient extends $grpc.Client {
       '/daodao_notifier_grpc.SubscriptionService/DeleteDao',
       ($2.DeleteDaoRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $1.Empty.fromBuffer(value));
+  static final _$enableChain =
+      $grpc.ClientMethod<$2.EnableChainRequest, $1.Empty>(
+          '/daodao_notifier_grpc.SubscriptionService/EnableChain',
+          ($2.EnableChainRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $1.Empty.fromBuffer(value));
 
   SubscriptionServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -77,6 +82,11 @@ class SubscriptionServiceClient extends $grpc.Client {
   $grpc.ResponseFuture<$1.Empty> deleteDao($2.DeleteDaoRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$deleteDao, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$1.Empty> enableChain($2.EnableChainRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$enableChain, request, options: options);
   }
 }
 
@@ -123,6 +133,14 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $2.DeleteDaoRequest.fromBuffer(value),
         ($1.Empty value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$2.EnableChainRequest, $1.Empty>(
+        'EnableChain',
+        enableChain_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $2.EnableChainRequest.fromBuffer(value),
+        ($1.Empty value) => value.writeToBuffer()));
   }
 
   $async.Future<$2.GetSubscriptionsResponse> getSubscriptions_Pre(
@@ -152,6 +170,11 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
     return deleteDao(call, await request);
   }
 
+  $async.Future<$1.Empty> enableChain_Pre($grpc.ServiceCall call,
+      $async.Future<$2.EnableChainRequest> request) async {
+    return enableChain(call, await request);
+  }
+
   $async.Future<$2.GetSubscriptionsResponse> getSubscriptions(
       $grpc.ServiceCall call, $1.Empty request);
   $async.Future<$2.ToggleSubscriptionResponse> toggleChainSubscription(
@@ -162,4 +185,6 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $2.AddDaoRequest request);
   $async.Future<$1.Empty> deleteDao(
       $grpc.ServiceCall call, $2.DeleteDaoRequest request);
+  $async.Future<$1.Empty> enableChain(
+      $grpc.ServiceCall call, $2.EnableChainRequest request);
 }

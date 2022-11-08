@@ -31,6 +31,41 @@ class SubscriptionPage extends StatelessWidget {
     return 4;
   }
 
+  void showConfirmEnableChainDialog(BuildContext context, Subscription subscription) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: Text('${subscription.isEnabled ? 'Disable' : 'Enable'} chain?'),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Are you sure you want to ${subscription.isEnabled ? 'disable' : 'enable'} ${subscription.name}?"),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              return ElevatedButton(
+                style: ElevatedButton.styleFrom(primary: Styles.dangerBgColor, onPrimary: Styles.dangerTextColor),
+                onPressed: () {
+                  ref.read(chatroomListStateProvider.notifier).enableChain(subscription.id, subscription.name, !subscription.isEnabled);
+                  Navigator.pop(context);
+                },
+                child: Text(subscription.isEnabled ? 'Disable' : 'Enable'),
+              );
+            }),
+          ],
+        );
+      },
+    );
+  }
+
   void showConfirmDeleteDaoDialog(BuildContext context, Subscription subscription) {
     showDialog(
       context: context,
@@ -77,12 +112,18 @@ class SubscriptionPage extends StatelessWidget {
         children: [
           SlidableAction(
             onPressed: (_) {
-              showConfirmDeleteDaoDialog(context, subscription);
+              ref.watch(isChainsSelectedProvider)
+                  ? showConfirmEnableChainDialog(context, subscription)
+                  : showConfirmDeleteDaoDialog(context, subscription);
             },
             backgroundColor: Styles.dangerBgColor,
             foregroundColor: Styles.dangerTextColor,
             icon: Icons.delete,
-            label: 'Delete',
+            label: ref.watch(isChainsSelectedProvider)
+                ? subscription.isEnabled
+                    ? 'Disable'
+                    : 'Enable'
+                : 'Delete',
           ),
         ],
       ),
@@ -172,6 +213,7 @@ class SubscriptionPage extends StatelessWidget {
                   ref: ref,
                   child: Container(
                     decoration: BoxDecoration(
+                        color: subscription.isEnabled ? null : Colors.grey,
                         border: Border.all(
                           width: Styles.selectCardBorderWidth,
                           color: Theme.of(context).inputDecorationTheme.enabledBorder!.borderSide.color,
@@ -340,6 +382,7 @@ class SubscriptionPage extends StatelessWidget {
       context: context,
       builder: (_) {
         var addressController = TextEditingController();
+        var proposalQueryController = TextEditingController();
         var formKey = GlobalKey<FormState>();
         return AlertDialog(
           title: const Text('Add DAO'),
@@ -349,7 +392,7 @@ class SubscriptionPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Enter the Juno address of the DAO you want to add"),
+                  const Text("Enter the address of the DAO you want to add"),
                   const SizedBox(height: 15),
                   TextFormField(
                     controller: addressController,
@@ -360,17 +403,19 @@ class SubscriptionPage extends StatelessWidget {
                       if (text.isEmpty) {
                         return "Address cannot be empty";
                       }
-                      if (!text.toLowerCase().startsWith("juno")) {
-                        return "Address must start with juno";
-                      }
-                      if (text.length != 63) {
-                        return "Address must be 63 characters long";
-                      }
                       return null;
                     },
                     decoration: const InputDecoration(
                       labelText: 'Contract Address',
                       hintText: 'juno1z3zqgz7t0hcu2fx4wusuyjq0gc2m33la8l64saunfz7vmqwa2d5sz6jnep',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextFormField(
+                    controller: proposalQueryController,
+                    decoration: const InputDecoration(
+                      labelText: 'Proposal query (optional)',
+                      hintText: '{"proposals":{"query":{"everything":{}}}}',
                     ),
                   ),
                 ],
@@ -387,7 +432,8 @@ class SubscriptionPage extends StatelessWidget {
                 onPressed: () {
                   if (formKey.currentState!.validate()) {
                     var address = addressController.text.toLowerCase();
-                    ref.read(chatroomListStateProvider.notifier).addDao(address);
+                    var proposalQuery = proposalQueryController.text;
+                    ref.read(chatroomListStateProvider.notifier).addDao(address, proposalQuery);
                     Navigator.pop(context);
                   }
                 },
@@ -401,17 +447,22 @@ class SubscriptionPage extends StatelessWidget {
   }
 
   Widget addDaoButton(BuildContext context) {
-    return Center(
-      child: OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          minimumSize: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? const Size(double.infinity, 50) : const Size(200, 50),
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      if (ref.watch(isChainsSelectedProvider)) {
+        return Container();
+      }
+      return Center(
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? const Size(double.infinity, 50) : const Size(200, 50),
+          ),
+          onPressed: () {
+            showAddDaoDialog(context);
+          },
+          child: const Text("Add DAO"),
         ),
-        onPressed: () {
-          showAddDaoDialog(context);
-        },
-        child: const Text("Add DAO"),
-      ),
-    );
+      );
+    });
   }
 
   Widget header(BuildContext context) {

@@ -94,9 +94,10 @@ class Subscription extends $pb.GeneratedMessage {
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isSubscribed')
-    ..aOS(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'thumbnailUrl')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress')
-    ..aOM<SubscriptionStats>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: SubscriptionStats.create)
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'thumbnailUrl')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress')
+    ..aOM<SubscriptionStats>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'stats', subBuilder: SubscriptionStats.create)
     ..hasRequiredFields = false
   ;
 
@@ -105,6 +106,7 @@ class Subscription extends $pb.GeneratedMessage {
     $fixnum.Int64? id,
     $core.String? name,
     $core.bool? isSubscribed,
+    $core.bool? isEnabled,
     $core.String? thumbnailUrl,
     $core.String? contractAddress,
     SubscriptionStats? stats,
@@ -118,6 +120,9 @@ class Subscription extends $pb.GeneratedMessage {
     }
     if (isSubscribed != null) {
       _result.isSubscribed = isSubscribed;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
     }
     if (thumbnailUrl != null) {
       _result.thumbnailUrl = thumbnailUrl;
@@ -179,33 +184,42 @@ class Subscription extends $pb.GeneratedMessage {
   void clearIsSubscribed() => clearField(3);
 
   @$pb.TagNumber(4)
-  $core.String get thumbnailUrl => $_getSZ(3);
+  $core.bool get isEnabled => $_getBF(3);
   @$pb.TagNumber(4)
-  set thumbnailUrl($core.String v) { $_setString(3, v); }
+  set isEnabled($core.bool v) { $_setBool(3, v); }
   @$pb.TagNumber(4)
-  $core.bool hasThumbnailUrl() => $_has(3);
+  $core.bool hasIsEnabled() => $_has(3);
   @$pb.TagNumber(4)
-  void clearThumbnailUrl() => clearField(4);
+  void clearIsEnabled() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get contractAddress => $_getSZ(4);
+  $core.String get thumbnailUrl => $_getSZ(4);
   @$pb.TagNumber(5)
-  set contractAddress($core.String v) { $_setString(4, v); }
+  set thumbnailUrl($core.String v) { $_setString(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasContractAddress() => $_has(4);
+  $core.bool hasThumbnailUrl() => $_has(4);
   @$pb.TagNumber(5)
-  void clearContractAddress() => clearField(5);
+  void clearThumbnailUrl() => clearField(5);
 
   @$pb.TagNumber(6)
-  SubscriptionStats get stats => $_getN(5);
+  $core.String get contractAddress => $_getSZ(5);
   @$pb.TagNumber(6)
-  set stats(SubscriptionStats v) { setField(6, v); }
+  set contractAddress($core.String v) { $_setString(5, v); }
   @$pb.TagNumber(6)
-  $core.bool hasStats() => $_has(5);
+  $core.bool hasContractAddress() => $_has(5);
   @$pb.TagNumber(6)
-  void clearStats() => clearField(6);
-  @$pb.TagNumber(6)
-  SubscriptionStats ensureStats() => $_ensure(5);
+  void clearContractAddress() => clearField(6);
+
+  @$pb.TagNumber(7)
+  SubscriptionStats get stats => $_getN(6);
+  @$pb.TagNumber(7)
+  set stats(SubscriptionStats v) { setField(7, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasStats() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearStats() => clearField(7);
+  @$pb.TagNumber(7)
+  SubscriptionStats ensureStats() => $_ensure(6);
 }
 
 class ChatRoom extends $pb.GeneratedMessage {
@@ -512,16 +526,21 @@ class ToggleSubscriptionResponse extends $pb.GeneratedMessage {
 class AddDaoRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddDaoRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress', protoName: 'contractAddress')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'customQuery', protoName: 'customQuery')
     ..hasRequiredFields = false
   ;
 
   AddDaoRequest._() : super();
   factory AddDaoRequest({
     $core.String? contractAddress,
+    $core.String? customQuery,
   }) {
     final _result = create();
     if (contractAddress != null) {
       _result.contractAddress = contractAddress;
+    }
+    if (customQuery != null) {
+      _result.customQuery = customQuery;
     }
     return _result;
   }
@@ -554,6 +573,15 @@ class AddDaoRequest extends $pb.GeneratedMessage {
   $core.bool hasContractAddress() => $_has(0);
   @$pb.TagNumber(1)
   void clearContractAddress() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get customQuery => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set customQuery($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasCustomQuery() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCustomQuery() => clearField(2);
 }
 
 class AddDaoResponse extends $pb.GeneratedMessage {
@@ -676,5 +704,66 @@ class DeleteDaoRequest extends $pb.GeneratedMessage {
   $core.bool hasContractId() => $_has(0);
   @$pb.TagNumber(1)
   void clearContractId() => clearField(1);
+}
+
+class EnableChainRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'EnableChainRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'daodao_notifier_grpc'), createEmptyInstance: create)
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chainId', protoName: 'chainId')
+    ..aOB(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isEnabled', protoName: 'isEnabled')
+    ..hasRequiredFields = false
+  ;
+
+  EnableChainRequest._() : super();
+  factory EnableChainRequest({
+    $fixnum.Int64? chainId,
+    $core.bool? isEnabled,
+  }) {
+    final _result = create();
+    if (chainId != null) {
+      _result.chainId = chainId;
+    }
+    if (isEnabled != null) {
+      _result.isEnabled = isEnabled;
+    }
+    return _result;
+  }
+  factory EnableChainRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory EnableChainRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  EnableChainRequest clone() => EnableChainRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  EnableChainRequest copyWith(void Function(EnableChainRequest) updates) => super.copyWith((message) => updates(message as EnableChainRequest)) as EnableChainRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static EnableChainRequest create() => EnableChainRequest._();
+  EnableChainRequest createEmptyInstance() => create();
+  static $pb.PbList<EnableChainRequest> createRepeated() => $pb.PbList<EnableChainRequest>();
+  @$core.pragma('dart2js:noInline')
+  static EnableChainRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<EnableChainRequest>(create);
+  static EnableChainRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get chainId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set chainId($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasChainId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearChainId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.bool get isEnabled => $_getBF(1);
+  @$pb.TagNumber(2)
+  set isEnabled($core.bool v) { $_setBool(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasIsEnabled() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearIsEnabled() => clearField(2);
 }
 
