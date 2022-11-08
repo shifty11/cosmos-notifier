@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cosmos_notifier/f_home/services/type/custom_theme_data.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/transition_builder_widget.dart';
+import 'package:flutter/material.dart';
 
 extension ColorBrightness on Color {
   Color darken([double amount = .1]) {
@@ -125,9 +125,11 @@ class Styles {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          primary: primaryColor, // Button color
-          onPrimary: textColor, // Text color
-        ),
+            primary: primaryColor, // Button color
+            onPrimary: textColor, // Text color
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(5)),
+            )),
       ),
       dialogTheme: DialogTheme(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),

@@ -54,7 +54,7 @@ class MyRouter {
         path: rAdmin.path,
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
-          child: const AdminPage(),
+          child: AdminPage(),
         ),
       ),
     ],

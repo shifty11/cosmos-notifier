@@ -1,3 +1,4 @@
+import 'package:cosmos_notifier/f_admin/widget/services/admin_service.dart';
 import 'package:grpc/grpc_web.dart';
 import 'package:cosmos_notifier/env.dart';
 import 'package:cosmos_notifier/f_home/services/auth_interceptor.dart';
@@ -13,6 +14,7 @@ final jwtManager = JwtManager();
 final authInterceptor = AuthInterceptor(jwtManager);
 final authService = AuthService(channel, [authInterceptor], jwtManager, refreshBeforeExpDuration);
 final subsService = SubscriptionService(channel, [authInterceptor]);
+final adminService = AdminService(channel, [authInterceptor]);
 
 class RouteData {
   final String name;

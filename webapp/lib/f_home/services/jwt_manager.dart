@@ -70,4 +70,12 @@ class JwtManager {
   bool get isAdmin {
     return (accessTokenDecoded["role"] ?? "").toString().toLowerCase() == "admin";
   }
+
+  bool get isTelegramUser {
+    return (accessTokenDecoded["type"] ?? "").toString().toLowerCase() == "telegram";
+  }
+
+  bool get isDiscordUser {
+    return (accessTokenDecoded["type"] ?? "").toString().toLowerCase() == "discord";
+  }
 }
