@@ -76,7 +76,7 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 	c2, _ := m.contractManager.Create(data2)
 	c1, _ := m.contractManager.Create(data1)
 
-	subscriptions := m.getSubscriptions([]int{c1.ID}, "")
+	subscriptions := m.getSubscriptions([]int{c1.ID}, "", false)
 	if len(subscriptions) != 2 {
 		t.Fatalf("Expected 2 subscriptions, got %d", len(subscriptions))
 	}
@@ -509,6 +509,75 @@ func TestSubscriptionManager_GetSubscriptions_WithStats(t *testing.T) {
 			if c1s1.Total != 2 || c1s1.Telegram != 1 || c1s1.Discord != 1 {
 				t.Errorf("Expected (2, 1, 1), got (%d, %d, %d)", c1s1.Total, c1s1.Telegram, c1s1.Discord)
 			}
+		}
+	}
+}
+
+func TestSubscriptionManager_GetSubscriptions_EnabledChains(t *testing.T) {
+	m := newTestSubscriptionManager(t)
+
+	data1 := &types.Chain{
+		ChainId:     "chain1",
+		Name:        "chain1",
+		PrettyName:  "Chain 1",
+		NetworkType: "mainnet",
+		Image:       "https://image1.png",
+	}
+	data2 := &types.Chain{
+		ChainId:     "chain2",
+		Name:        "chain2",
+		PrettyName:  "Chain 2",
+		NetworkType: "mainnet",
+		Image:       "https://image2.png",
+	}
+	m.chainManager.Create(data2, data2.Image)
+	chain1 := m.chainManager.Create(data1, data1.Image)
+
+	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
+	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
+
+	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
+	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+
+	for _, u := range []*ent.User{tgUser1, discordUser} {
+		response := m.GetSubscriptions(u)
+		if len(response.ChainChatRooms[0].Subscriptions) != 2 {
+			t.Fatalf("Expected 2 subscriptions, got %d", len(response.ChainChatRooms[0].Subscriptions))
+		}
+		for _, s := range response.ChainChatRooms[0].Subscriptions {
+			if !s.IsEnabled {
+				t.Errorf("Expected enabled chain subscription, got disabled")
+			}
+		}
+	}
+
+	m.chainManager.Enable(chain1.ID, false)
+
+	for _, u := range []*ent.User{tgUser1, discordUser} {
+		response := m.GetSubscriptions(u)
+		if len(response.ChainChatRooms[0].Subscriptions) != 1 {
+			t.Fatalf("Expected 1 subscription, got %d", len(response.ChainChatRooms[0].Subscriptions))
+		}
+		for _, s := range response.ChainChatRooms[0].Subscriptions {
+			if !s.IsEnabled {
+				t.Errorf("Expected enabled chain subscription, got disabled")
+			}
+		}
+	}
+
+	tgUser1, _ = m.userManager.SetRole("telegramuser", user.RoleAdmin)
+	discordUser, _ = m.userManager.SetRole("discorduser", user.RoleAdmin)
+
+	for _, u := range []*ent.User{tgUser1, discordUser} {
+		response := m.GetSubscriptions(u)
+		if len(response.ChainChatRooms[0].Subscriptions) != 2 {
+			t.Fatalf("Expected 2 subscriptions, got %d", len(response.ChainChatRooms[0].Subscriptions))
+		}
+		if response.ChainChatRooms[0].Subscriptions[0].IsEnabled {
+			t.Errorf("Expected disabled chain subscription, got enabled")
+		}
+		if !response.ChainChatRooms[0].Subscriptions[1].IsEnabled {
+			t.Errorf("Expected enabled chain subscription, got disabled")
 		}
 	}
 }

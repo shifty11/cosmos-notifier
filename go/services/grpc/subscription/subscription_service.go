@@ -178,3 +178,22 @@ func (server *SubscriptionServer) DeleteDao(_ context.Context, req *pb.DeleteDao
 
 	return &emptypb.Empty{}, nil
 }
+
+func (server *SubscriptionServer) EnableChain(_ context.Context, req *pb.EnableChainRequest) (*emptypb.Empty, error) {
+	if req.GetChainId() == 0 {
+		log.Sugar.Error("invalid chain id")
+		return nil, status.Errorf(codes.InvalidArgument, "invalid chain id")
+	}
+
+	log.Sugar.Debugf("Delete DAO %v", req.ChainId)
+	err := server.chainManager.Enable(int(req.ChainId), req.IsEnabled)
+	if err != nil && ent.IsNotFound(err) {
+		return nil, status.Errorf(codes.NotFound, "chain not found")
+	}
+	if err != nil {
+		log.Sugar.Errorf("error while deleting dao: %v", err)
+		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+	}
+
+	return &emptypb.Empty{}, nil
+}

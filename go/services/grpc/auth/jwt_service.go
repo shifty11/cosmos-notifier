@@ -35,7 +35,8 @@ func AccessibleRoles() map[string][]Role {
 		subsService + "GetSubscriptions":           {User, Admin},
 		subsService + "ToggleChainSubscription":    {User, Admin},
 		subsService + "ToggleContractSubscription": {User, Admin},
-		subsService + "AddDao":                     {User, Admin},
+		subsService + "AddDao":                     {Admin},
+		subsService + "EnableChain":                {Admin},
 		subsService + "DeleteDao":                  {Admin},
 	}
 }

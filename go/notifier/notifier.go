@@ -67,8 +67,8 @@ func (n *ChainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) 
 	log.Sugar.Infof("Notifying for proposal %v on chain %v", entProp.ProposalID, entChain.PrettyName)
 
 	tgIds := n.telegramChatManager.GetSubscribedIds(entChain.QueryTelegramChats())
-	n.telegramNotifier.Notify(tgIds, entChain.Name, entProp.ProposalID, entProp.Title, entProp.Description)
+	n.telegramNotifier.Notify(tgIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 
 	discordIds := n.discordChannelManager.GetSubscribedIds(entChain.QueryDiscordChannels())
-	n.discordNotifier.Notify(discordIds, entChain.Name, entProp.ProposalID, entProp.Title, entProp.Description)
+	n.discordNotifier.Notify(discordIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 }

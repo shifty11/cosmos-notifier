@@ -42,14 +42,19 @@ func NewSubscriptionManager(
 	}
 }
 
-func (m *SubscriptionManager) getSubscriptions(ofUser []int, qType queryType) []*pb.Subscription {
+func (m *SubscriptionManager) getSubscriptions(ofUser []int, qType queryType, isAdmin bool) []*pb.Subscription {
 	var subs []*pb.Subscription
 	if qType == chainQuery {
-		for _, c := range m.chainManager.Enabled() {
+		query := m.chainManager.Enabled()
+		if isAdmin {
+			query = m.chainManager.All()
+		}
+		for _, c := range query {
 			var subscription = pb.Subscription{
 				Id:              int64(c.ID),
 				Name:            c.PrettyName,
 				IsSubscribed:    false,
+				IsEnabled:       c.IsEnabled,
 				ThumbnailUrl:    c.ThumbnailURL,
 				ContractAddress: "",
 			}
@@ -66,6 +71,7 @@ func (m *SubscriptionManager) getSubscriptions(ofUser []int, qType queryType) []
 				Id:              int64(c.ID),
 				Name:            c.Name,
 				IsSubscribed:    false,
+				IsEnabled:       true,
 				ThumbnailUrl:    c.ThumbnailURL,
 				ContractAddress: c.Address,
 			}
@@ -165,36 +171,36 @@ func (m *SubscriptionManager) getIdsOfDiscordChannel(discordChannel *ent.Discord
 	return ids
 }
 
-func (m *SubscriptionManager) telegramChatsToChatRoom(tgChats []*ent.TelegramChat, qType queryType, withStats bool) []*pb.ChatRoom {
+func (m *SubscriptionManager) telegramChatsToChatRoom(tgChats []*ent.TelegramChat, qType queryType, isAdmin bool) []*pb.ChatRoom {
 	var chats []*pb.ChatRoom
 	for _, tgChat := range tgChats {
 		chats = append(chats, &pb.ChatRoom{
 			Id:            tgChat.ChatID,
 			Name:          tgChat.Name,
 			TYPE:          pb.ChatRoom_TELEGRAM,
-			Subscriptions: m.getSubscriptions(m.getIdsOfTelegramChat(tgChat, qType), qType),
+			Subscriptions: m.getSubscriptions(m.getIdsOfTelegramChat(tgChat, qType), qType, isAdmin),
 		})
-		if withStats && qType == chainQuery {
+		if isAdmin && qType == chainQuery {
 			m.collectChainStats(chats)
-		} else if withStats && qType == contractQuery {
+		} else if isAdmin && qType == contractQuery {
 			m.collectContractStats(chats)
 		}
 	}
 	return chats
 }
 
-func (m *SubscriptionManager) discordChannelsToChatRoom(discordChannels []*ent.DiscordChannel, qType queryType, withStats bool) []*pb.ChatRoom {
+func (m *SubscriptionManager) discordChannelsToChatRoom(discordChannels []*ent.DiscordChannel, qType queryType, isAdmin bool) []*pb.ChatRoom {
 	var chats []*pb.ChatRoom
 	for _, dChannel := range discordChannels {
 		chats = append(chats, &pb.ChatRoom{
 			Id:            dChannel.ChannelID,
 			Name:          dChannel.Name,
 			TYPE:          pb.ChatRoom_DISCORD,
-			Subscriptions: m.getSubscriptions(m.getIdsOfDiscordChannel(dChannel, qType), qType),
+			Subscriptions: m.getSubscriptions(m.getIdsOfDiscordChannel(dChannel, qType), qType, isAdmin),
 		})
-		if withStats && qType == chainQuery {
+		if isAdmin && qType == chainQuery {
 			m.collectChainStats(chats)
-		} else if withStats && qType == contractQuery {
+		} else if isAdmin && qType == contractQuery {
 			m.collectContractStats(chats)
 		}
 	}
@@ -202,16 +208,16 @@ func (m *SubscriptionManager) discordChannelsToChatRoom(discordChannels []*ent.D
 }
 
 func (m *SubscriptionManager) GetSubscriptions(entUser *ent.User) *pb.GetSubscriptionsResponse {
-	withStats := entUser.Role == user.RoleAdmin
+	isAdmin := entUser.Role == user.RoleAdmin
 	if entUser.Type == user.TypeTelegram {
 		return &pb.GetSubscriptionsResponse{
-			ChainChatRooms:    m.telegramChatsToChatRoom(m.telegramQuery(entUser, chainQuery), chainQuery, withStats),
-			ContractChatRooms: m.telegramChatsToChatRoom(m.telegramQuery(entUser, contractQuery), contractQuery, withStats),
+			ChainChatRooms:    m.telegramChatsToChatRoom(m.telegramQuery(entUser, chainQuery), chainQuery, isAdmin),
+			ContractChatRooms: m.telegramChatsToChatRoom(m.telegramQuery(entUser, contractQuery), contractQuery, isAdmin),
 		}
 	} else {
 		return &pb.GetSubscriptionsResponse{
-			ChainChatRooms:    m.discordChannelsToChatRoom(m.discordQuery(entUser, chainQuery), chainQuery, withStats),
-			ContractChatRooms: m.discordChannelsToChatRoom(m.discordQuery(entUser, contractQuery), contractQuery, withStats),
+			ChainChatRooms:    m.discordChannelsToChatRoom(m.discordQuery(entUser, chainQuery), chainQuery, isAdmin),
+			ContractChatRooms: m.discordChannelsToChatRoom(m.discordQuery(entUser, contractQuery), contractQuery, isAdmin),
 		}
 	}
 }

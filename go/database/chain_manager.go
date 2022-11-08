@@ -24,6 +24,13 @@ func (manager *ChainManager) ByName(name string) (*ent.Chain, error) {
 		Only(manager.ctx)
 }
 
+func (manager *ChainManager) Enable(chainId int, isEnabled bool) error {
+	return manager.client.Chain.
+		UpdateOneID(chainId).
+		SetIsEnabled(isEnabled).
+		Exec(manager.ctx)
+}
+
 func (manager *ChainManager) Enabled() []*ent.Chain {
 	query := manager.client.Chain.
 		Query().

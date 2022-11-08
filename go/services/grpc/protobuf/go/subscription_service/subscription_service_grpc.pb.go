@@ -24,6 +24,7 @@ type SubscriptionServiceClient interface {
 	ToggleContractSubscription(ctx context.Context, in *ToggleContractSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error)
 	AddDao(ctx context.Context, in *AddDaoRequest, opts ...grpc.CallOption) (SubscriptionService_AddDaoClient, error)
 	DeleteDao(ctx context.Context, in *DeleteDaoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	EnableChain(ctx context.Context, in *EnableChainRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type subscriptionServiceClient struct {
@@ -102,6 +103,15 @@ func (c *subscriptionServiceClient) DeleteDao(ctx context.Context, in *DeleteDao
 	return out, nil
 }
 
+func (c *subscriptionServiceClient) EnableChain(ctx context.Context, in *EnableChainRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/EnableChain", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SubscriptionServiceServer is the server API for SubscriptionService service.
 // All implementations must embed UnimplementedSubscriptionServiceServer
 // for forward compatibility
@@ -111,6 +121,7 @@ type SubscriptionServiceServer interface {
 	ToggleContractSubscription(context.Context, *ToggleContractSubscriptionRequest) (*ToggleSubscriptionResponse, error)
 	AddDao(*AddDaoRequest, SubscriptionService_AddDaoServer) error
 	DeleteDao(context.Context, *DeleteDaoRequest) (*emptypb.Empty, error)
+	EnableChain(context.Context, *EnableChainRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedSubscriptionServiceServer()
 }
 
@@ -132,6 +143,9 @@ func (UnimplementedSubscriptionServiceServer) AddDao(*AddDaoRequest, Subscriptio
 }
 func (UnimplementedSubscriptionServiceServer) DeleteDao(context.Context, *DeleteDaoRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDao not implemented")
+}
+func (UnimplementedSubscriptionServiceServer) EnableChain(context.Context, *EnableChainRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnableChain not implemented")
 }
 func (UnimplementedSubscriptionServiceServer) mustEmbedUnimplementedSubscriptionServiceServer() {}
 
@@ -239,6 +253,24 @@ func _SubscriptionService_DeleteDao_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SubscriptionService_EnableChain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnableChainRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SubscriptionServiceServer).EnableChain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/daodao_notifier_grpc.SubscriptionService/EnableChain",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SubscriptionServiceServer).EnableChain(ctx, req.(*EnableChainRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SubscriptionService_ServiceDesc is the grpc.ServiceDesc for SubscriptionService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -261,6 +293,10 @@ var SubscriptionService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDao",
 			Handler:    _SubscriptionService_DeleteDao_Handler,
+		},
+		{
+			MethodName: "EnableChain",
+			Handler:    _SubscriptionService_EnableChain_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

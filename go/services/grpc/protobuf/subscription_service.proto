@@ -12,6 +12,7 @@ service SubscriptionService {
   rpc ToggleContractSubscription (ToggleContractSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
   rpc AddDao (AddDaoRequest) returns (stream AddDaoResponse) {}
   rpc DeleteDao (DeleteDaoRequest) returns (google.protobuf.Empty) {}
+  rpc EnableChain (EnableChainRequest) returns (google.protobuf.Empty) {}
 }
 
 message SubscriptionStats {
@@ -24,9 +25,10 @@ message Subscription {
   int64 id = 1;
   string name = 2;
   bool is_subscribed = 3;
-  string thumbnail_url = 4;
-  string contract_address = 5;
-  SubscriptionStats stats = 6;
+  bool is_enabled = 4;
+  string thumbnail_url = 5;
+  string contract_address = 6;
+  SubscriptionStats stats = 7;
 }
 
 message ChatRoom {
@@ -78,4 +80,9 @@ message AddDaoResponse {
 
 message DeleteDaoRequest {
   int64 contractId = 1;
+}
+
+message EnableChainRequest {
+  int64 chainId = 1;
+  bool isEnabled = 2;
 }
