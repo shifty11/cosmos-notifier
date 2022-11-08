@@ -13,6 +13,7 @@ class AdminPage extends StatelessWidget {
   AdminPage({Key? key, errorCode}) : super(key: key);
 
   final TextEditingController messageController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
 
   final String discordHelp = '''*italics* or _italics_
 **bold**
@@ -33,11 +34,17 @@ multiline
 
 <a href='https://telegram.org'>Telegram</a>''';
 
+  broadcastMessage(WidgetRef ref, BroadcastMessageRequest_MessageType type) {
+    if (formKey.currentState!.validate()) {
+      ref.read(adminProvider.notifier).broadcastMessage(messageController.text, type);
+    }
+  }
+
   Widget testButton(BuildContext context, IconData icon, String receiver, Color color, BroadcastMessageRequest_MessageType type) {
     const buttonWith = 170.0;
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
       return OutlinedButton.icon(
-        onPressed: () => ref.read(adminProvider.notifier).broadcastMessage(messageController.text, type),
+        onPressed: () => broadcastMessage(ref, type),
         icon: Icon(icon),
         label: Text(receiver),
         style: OutlinedButton.styleFrom(
@@ -134,17 +141,28 @@ multiline
                     constraints: BoxConstraints(
                       maxHeight: MediaQuery.of(context).size.height - 200,
                     ),
-                    child: TextField(
-                      controller: messageController,
-                      keyboardType: TextInputType.multiline,
-                      minLines: 1,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        // floatingLabelAlignment: FloatingLabelAlignment.center,
-                        alignLabelWithHint: true,
-                        labelText: 'Message',
-                        hintText: jwtManager.isTelegramUser ? telegramHelp : discordHelp,
+                    child: Form(
+                      key: formKey,
+                      child: TextFormField(
+                        controller: messageController,
+                        keyboardType: TextInputType.multiline,
+                        minLines: 1,
+                        maxLines: null,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(),
+                          alignLabelWithHint: true,
+                          labelText: 'Message',
+                          hintText: jwtManager.isTelegramUser ? telegramHelp : discordHelp,
+                        ),
+                        validator: (String? text) {
+                          if (text == null) {
+                            return null;
+                          }
+                          if (text.isEmpty) {
+                            return "Message cannot be empty";
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ),

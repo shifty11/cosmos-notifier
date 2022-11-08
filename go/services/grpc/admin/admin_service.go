@@ -34,8 +34,6 @@ func (server *AdminServer) BroadcastMessage(req *pb.BroadcastMessageRequest, str
 		return status.Errorf(codes.InvalidArgument, "message is empty")
 	}
 
-	log.Sugar.Debugf("Sending message to users: %v", req.Type)
-
 	waitc := make(chan notifier.BroadcastMessageResult)
 
 	go func() {
