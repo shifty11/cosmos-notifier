@@ -448,7 +448,7 @@ class SubscriptionPage extends StatelessWidget {
 
   Widget addDaoButton(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-      if (ref.watch(isChainsSelectedProvider)) {
+      if (ref.watch(isChainsSelectedProvider) || !jwtManager.isAdmin) {
         return Container();
       }
       return Center(
