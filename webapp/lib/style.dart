@@ -37,6 +37,7 @@ extension ColorBrightness on Color {
 }
 
 class Styles {
+  static const topPadding = 40.0;
   static const sidePadding = 40.0;
   static const selectCardBorderWidth = 1.5;
 

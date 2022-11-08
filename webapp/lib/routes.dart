@@ -1,3 +1,4 @@
+import 'package:cosmos_notifier/f_admin/widget/admin_page.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -48,6 +49,14 @@ class MyRouter {
           child: const SubscriptionPage(),
         ),
       ),
+      GoRoute(
+        name: rAdmin.name,
+        path: rAdmin.path,
+        pageBuilder: (context, state) => MaterialPage<void>(
+          key: state.pageKey,
+          child: const AdminPage(),
+        ),
+      ),
     ],
     errorPageBuilder: (context, state) => MaterialPage<void>(
       key: state.pageKey,
@@ -61,7 +70,12 @@ class MyRouter {
         initial: () => null,
         loading: () => state.subloc != rLoading.path ? state.namedLocation(rLoading.name) : null,
         authenticated: (redirect) {
+          // redirect to subscription if user becomes authenticated
           if (redirect && (state.subloc == rLoading.path || state.subloc == rLogin.path)) {
+            return state.namedLocation(rSubscriptions.name);
+          }
+          // non admins can not access the admin page
+          if (state.subloc == rAdmin.path && !jwtManager.isAdmin) {
             return state.namedLocation(rSubscriptions.name);
           }
           return null;

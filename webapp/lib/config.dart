@@ -25,6 +25,7 @@ const rRoot = RouteData("root", "/");
 const rLoading = RouteData("loading", "/loading");
 const rLogin = RouteData("login", "/login");
 const rSubscriptions = RouteData("subscriptions", "/subscriptions");
+const rAdmin = RouteData("admin", "/admin");
 
 const bool cDebugMode = true;
 
