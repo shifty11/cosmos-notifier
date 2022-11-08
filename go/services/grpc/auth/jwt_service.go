@@ -27,6 +27,7 @@ func AccessibleRoles() map[string][]Role {
 	const path = "/daodao_notifier_grpc"
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
+	const adminService = path + ".AdminService/"
 
 	return map[string][]Role{
 		authService + "TelegramLogin":              {Unauthenticated, User, Admin},
@@ -38,6 +39,7 @@ func AccessibleRoles() map[string][]Role {
 		subsService + "AddDao":                     {Admin},
 		subsService + "EnableChain":                {Admin},
 		subsService + "DeleteDao":                  {Admin},
+		adminService + "BroadcastMessage":          {Admin},
 	}
 }
 

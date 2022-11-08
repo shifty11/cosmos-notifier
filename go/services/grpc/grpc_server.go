@@ -3,8 +3,11 @@ package grpc
 import (
 	"github.com/shifty11/dao-dao-notifier/database"
 	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/dao-dao-notifier/notifier"
 	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
+	"github.com/shifty11/dao-dao-notifier/services/grpc/admin"
 	"github.com/shifty11/dao-dao-notifier/services/grpc/auth"
+	"github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/admin_service"
 	"github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/auth_service"
 	"github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
 	"github.com/shifty11/dao-dao-notifier/services/grpc/subscription"
@@ -25,13 +28,14 @@ type Config struct {
 
 //goland:noinspection GoNameStartsWithPackageName
 type GRPCServer struct {
-	dbManagers    *database.DbManagers
-	config        *Config
-	crawlerClient *contract_crawler.ContractCrawler
+	dbManagers      *database.DbManagers
+	config          *Config
+	crawlerClient   *contract_crawler.ContractCrawler
+	generalNotifier *notifier.GeneralNotifier
 }
 
-func NewGRPCServer(dbManagers *database.DbManagers, config *Config, crawlerClient *contract_crawler.ContractCrawler) *GRPCServer {
-	return &GRPCServer{dbManagers: dbManagers, config: config, crawlerClient: crawlerClient}
+func NewGRPCServer(dbManagers *database.DbManagers, config *Config, crawlerClient *contract_crawler.ContractCrawler, generalNotifier *notifier.GeneralNotifier) *GRPCServer {
+	return &GRPCServer{dbManagers: dbManagers, config: config, crawlerClient: crawlerClient, generalNotifier: generalNotifier}
 }
 
 func (s GRPCServer) Run() {
@@ -41,6 +45,7 @@ func (s GRPCServer) Run() {
 
 	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken, s.config.DiscordOAuth2Config)
 	subsServer := subscription.NewSubscriptionsServer(s.dbManagers, s.crawlerClient)
+	adminServer := admin.NewAdminServer(s.generalNotifier)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -49,6 +54,7 @@ func (s GRPCServer) Run() {
 
 	auth_service.RegisterAuthServiceServer(server, authServer)
 	subscription_service.RegisterSubscriptionServiceServer(server, subsServer)
+	admin_service.RegisterAdminServiceServer(server, adminServer)
 
 	lis, err := net.Listen("tcp", s.config.Port)
 	if err != nil {

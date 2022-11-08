@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package daodao_notifier_grpc;
+
+option go_package = "go/admin_service";
+
+service AdminService {
+  rpc BroadcastMessage (BroadcastMessageRequest) returns (stream BroadcastMessageResponse) {}
+}
+
+message BroadcastMessageRequest {
+  string message = 1;
+  enum MessageType {
+    TELEGRAM_TEST = 0;
+    DISCORD_TEST = 1;
+    TELEGRAM = 2;
+    DISCORD = 3;
+  }
+  MessageType type = 2;
+}
+
+message BroadcastMessageResponse {
+  enum Status {
+    SENDING = 0;
+    SENT = 1;
+    FAILED = 3;
+  }
+  Status status = 1;
+  string response = 2;
+}

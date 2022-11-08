@@ -19,12 +19,13 @@ var forbiddenErrors = []string{
 	"Bad Request: chat not found",
 }
 
-type TelegramNotifier struct {
+type telegramNotifier struct {
 	telegramApi         *tgbotapi.BotAPI
 	telegramChatManager database.ITelegramChatManager
+	maxMsgLength        int
 }
 
-func NewTelegramNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string) *TelegramNotifier {
+func newTelegramNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string) *telegramNotifier {
 	if telegramEndpoint == "" {
 		telegramEndpoint = tgbotapi.APIEndpoint
 	}
@@ -32,20 +33,21 @@ func NewTelegramNotifier(managers *database.DbManagers, telegramBotToken string,
 	if err != nil {
 		log.Sugar.Panicf("Cannot create telegram bot: %v", err)
 	}
-	return &TelegramNotifier{
+	return &telegramNotifier{
 		telegramApi:         telegramApi,
 		telegramChatManager: managers.TelegramChatManager,
+		maxMsgLength:        4096,
 	}
 }
 
-func (n *TelegramNotifier) shouldDeleteUser(err error) bool {
+func (n *telegramNotifier) shouldDeleteUser(err error) bool {
 	if err != nil {
 		return slices.Contains(forbiddenErrors, err.Error())
 	}
 	return false
 }
 
-func (n *TelegramNotifier) Notify(
+func (n *telegramNotifier) notify(
 	subscribedIds []types.TgChatQueryResult,
 	contractOrChainName string,
 	proposalId int,
@@ -55,18 +57,18 @@ func (n *TelegramNotifier) Notify(
 	p := bluemonday.StripTagsPolicy()
 
 	var textMsgs []string
-	text := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>",
+	message := fmt.Sprintf("🎉  <b>%v - Proposal %v\n\n%v</b>\n\n<i>%v</i>",
 		contractOrChainName,
 		proposalId,
 		p.Sanitize(proposalTitle),
 		p.Sanitize(proposalDescription),
 	)
-	if len(text) <= 4096 {
-		textMsgs = append(textMsgs, text)
+	if len(message) <= n.maxMsgLength {
+		textMsgs = append(textMsgs, message)
 	} else {
-		textMsgs = append(textMsgs, text[:4092]+"</i>")
-		text = text[:len(text)-1] // remove the last character which is a *
-		for _, chunk := range chunks(text[4092:], 4089) {
+		textMsgs = append(textMsgs, message[:n.maxMsgLength-4]+"</i>")
+		message = message[:len(message)-1] // remove the last character which is a *
+		for _, chunk := range chunks(message[n.maxMsgLength-4:], n.maxMsgLength-7) {
 			textMsgs = append(textMsgs, fmt.Sprintf("<i>%v</i>", chunk))
 		}
 	}
@@ -74,7 +76,7 @@ func (n *TelegramNotifier) Notify(
 	var errIds []int64
 	for _, tg := range subscribedIds {
 		log.Sugar.Debugf("Notifying telegram chat %v (%v)", tg.Name, tg.ChatId)
-		msg := tgbotapi.NewMessage(tg.ChatId, text)
+		msg := tgbotapi.NewMessage(tg.ChatId, message)
 		msg.ParseMode = "html"
 		msg.DisableWebPagePreview = true
 
@@ -91,4 +93,37 @@ func (n *TelegramNotifier) Notify(
 	if len(errIds) > 0 {
 		n.telegramChatManager.DeleteMultiple(errIds)
 	}
+}
+
+func (n *telegramNotifier) broadcastMessage(ids []types.TgChatQueryResult, message string) int {
+	var textMsgs []string
+	if len(message) <= n.maxMsgLength {
+		textMsgs = append(textMsgs, message)
+	} else {
+		for _, chunk := range chunks(message, n.maxMsgLength) {
+			textMsgs = append(textMsgs, chunk)
+		}
+	}
+
+	var errIds []int64
+	for _, tg := range ids {
+		log.Sugar.Debugf("Broadcasting message to telegram chat %v (%v)", tg.Name, tg.ChatId)
+		msg := tgbotapi.NewMessage(tg.ChatId, message)
+		msg.ParseMode = "html"
+		msg.DisableWebPagePreview = true
+
+		_, err := n.telegramApi.Send(msg)
+		if err != nil {
+			if n.shouldDeleteUser(err) {
+				errIds = append(errIds, tg.ChatId)
+			} else {
+				log.Sugar.Errorf("Error broadcasting message to telegram chat %v (%v): %v", tg.Name, tg.ChatId, err)
+			}
+		}
+	}
+
+	if len(errIds) > 0 {
+		n.telegramChatManager.DeleteMultiple(errIds)
+	}
+	return len(errIds)
 }

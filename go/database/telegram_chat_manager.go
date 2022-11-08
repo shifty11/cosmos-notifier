@@ -21,6 +21,7 @@ type ITelegramChatManager interface {
 	DeleteMultiple(chatIds []int64)
 	CountSubscriptions(chatId int64) int
 	GetChatUsers(chatId int64) []*ent.User
+	GetAllIds() []types.TgChatQueryResult
 }
 
 type TelegramChatManager struct {
@@ -198,6 +199,10 @@ func (m *TelegramChatManager) GetSubscribedIds(query *ent.TelegramChatQuery) []t
 		log.Sugar.Panicf("Error while querying Telegram chatIds: %v", err)
 	}
 	return v
+}
+
+func (m *TelegramChatManager) GetAllIds() []types.TgChatQueryResult {
+	return m.GetSubscribedIds(m.client.TelegramChat.Query())
 }
 
 // Delete deletes a telegram chat for a user

@@ -14,12 +14,14 @@ import (
 type DiscordNotifier struct {
 	discordBotToken       string
 	discordChannelManager database.IDiscordChannelManager
+	maxMsgLength          int
 }
 
-func NewDiscordNotifier(managers *database.DbManagers, discordBotToken string) *DiscordNotifier {
+func newDiscordNotifier(managers *database.DbManagers, discordBotToken string) *DiscordNotifier {
 	return &DiscordNotifier{
 		discordBotToken:       discordBotToken,
 		discordChannelManager: managers.DiscordChannelManager,
+		maxMsgLength:          2000,
 	}
 }
 
@@ -62,7 +64,7 @@ func (n *DiscordNotifier) sanitizeUrls(text string) string {
 	)
 }
 
-func (n *DiscordNotifier) Notify(
+func (n *DiscordNotifier) notify(
 	subscribedIds []types.DiscordChannelQueryResult,
 	contractOrChainName string,
 	proposalId int,
@@ -76,14 +78,13 @@ func (n *DiscordNotifier) Notify(
 		contractOrChainName,
 		proposalId,
 		p.Sanitize(proposalTitle),
-		n.sanitizeUrls(p.Sanitize(proposalDescription)),
-	)
-	if len(text) <= 2000 {
+		n.sanitizeUrls(p.Sanitize(proposalDescription)))
+	if len(text) <= n.maxMsgLength {
 		textMsgs = append(textMsgs, text)
 	} else {
-		textMsgs = append(textMsgs, text[:1999]+"*")
+		textMsgs = append(textMsgs, text[:n.maxMsgLength-1]+"*")
 		text = text[:len(text)-1] // remove the last character which is a *
-		for _, chunk := range chunks(text[1999:], 1998) {
+		for _, chunk := range chunks(text[n.maxMsgLength-1:], n.maxMsgLength-2) {
 			textMsgs = append(textMsgs, fmt.Sprintf("*%v*", chunk))
 		}
 	}
@@ -112,4 +113,41 @@ func (n *DiscordNotifier) Notify(
 	if len(errIds) > 0 {
 		n.discordChannelManager.DeleteMultiple(errIds)
 	}
+}
+
+func (n *DiscordNotifier) broadcastMessage(ids []types.DiscordChannelQueryResult, message string) int {
+	var textMsgs []string
+	if len(message) <= n.maxMsgLength {
+		textMsgs = append(textMsgs, message)
+	} else {
+		for _, chunk := range chunks(message, n.maxMsgLength) {
+			textMsgs = append(textMsgs, chunk)
+		}
+	}
+
+	session := n.startDiscordSession()
+	defer n.closeDiscordSession(session)
+
+	var errIds []int64
+	for _, dc := range ids {
+		log.Sugar.Debugf("Broadcasting message to discord channel %v (%v)", dc.Name, dc.ChannelId)
+		for _, textMsg := range textMsgs {
+			var _, err = session.ChannelMessageSendComplex(strconv.FormatInt(dc.ChannelId, 10), &discordgo.MessageSend{
+				Content: textMsg,
+			})
+			if err != nil {
+				if n.shouldDeleteUser(err) {
+					errIds = append(errIds, dc.ChannelId)
+				} else {
+					log.Sugar.Errorf("Error while broadcasting message to discord channel %v (%v): %v", dc.Name, dc.ChannelId, err)
+				}
+				break
+			}
+		}
+	}
+
+	if len(errIds) > 0 {
+		n.discordChannelManager.DeleteMultiple(errIds)
+	}
+	return len(errIds)
 }

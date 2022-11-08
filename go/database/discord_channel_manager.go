@@ -21,6 +21,7 @@ type IDiscordChannelManager interface {
 	CountSubscriptions(channelId int64) int
 	GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult
 	DeleteMultiple(channelIds []int64)
+	GetAllIds() []types.DiscordChannelQueryResult
 }
 
 type DiscordChannelManager struct {
@@ -291,4 +292,8 @@ func (m *DiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQuery)
 		log.Sugar.Panicf("Could not get discord channels: %v", err)
 	}
 	return v
+}
+
+func (m *DiscordChannelManager) GetAllIds() []types.DiscordChannelQueryResult {
+	return m.GetSubscribedIds(m.client.DiscordChannel.Query())
 }
