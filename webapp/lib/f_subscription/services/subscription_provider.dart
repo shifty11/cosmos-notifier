@@ -76,17 +76,20 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
     state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);
   }
 
-  Future<void> toggleSubscription(Int64 chatRoomId, Int64 subscriptionId) async {
+  Future<void> toggleSubscription(Int64 chatRoomId, Subscription subscription) async {
     try {
       ToggleSubscriptionResponse response;
       if (_ref.read(isChainsSelectedProvider)) {
         response =
-            await _subsService.toggleChainSubscription(ToggleChainSubscriptionRequest(chatRoomId: chatRoomId, chainId: subscriptionId));
+            await _subsService.toggleChainSubscription(ToggleChainSubscriptionRequest(chatRoomId: chatRoomId, chainId: subscription.id));
       } else {
         response = await _subsService
-            .toggleContractSubscription(ToggleContractSubscriptionRequest(chatRoomId: chatRoomId, contractId: subscriptionId));
+            .toggleContractSubscription(ToggleContractSubscriptionRequest(chatRoomId: chatRoomId, contractId: subscription.id));
       }
-      _updateSubscription(chatRoomId, subscriptionId, response);
+      _updateSubscription(chatRoomId, subscription.id, response);
+      if (response.isSubscribed) {
+        _ref.read(messageProvider.notifier).sendMsg(info: 'Subscribed to ${subscription.name}');
+      }
       if (jwtManager.isAdmin) {
         _loadSubscriptions(); // to update statistics
       }

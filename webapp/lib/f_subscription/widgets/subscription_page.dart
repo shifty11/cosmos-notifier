@@ -224,7 +224,7 @@ class SubscriptionPage extends StatelessWidget {
                         if (!currentFocus.hasPrimaryFocus) {
                           currentFocus.focusedChild?.unfocus();
                         }
-                        ref.read(chatroomListStateProvider.notifier).toggleSubscription(chatRoomId, subData.subscription.id);
+                        ref.read(chatroomListStateProvider.notifier).toggleSubscription(chatRoomId, subData.subscription);
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
