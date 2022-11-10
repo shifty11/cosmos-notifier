@@ -119,7 +119,8 @@ func (c *ChainCrawler) updateProposal(entChain *ent.Chain, url string) {
 }
 
 func (c *ChainCrawler) chainNeedsUpdate(entChain *ent.Chain, chainInfo *types.Chain) bool {
-	return entChain.Name != chainInfo.Name ||
+	return entChain.ChainID != chainInfo.ChainId ||
+		entChain.Name != chainInfo.Name ||
 		entChain.PrettyName != chainInfo.PrettyName ||
 		entChain.Path != chainInfo.Path ||
 		entChain.Display != chainInfo.Display ||
