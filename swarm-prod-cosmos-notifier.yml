@@ -54,7 +54,7 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-go:latest
     working_dir: /app
     volumes:
-      - images:/app/assets/images
+      - images:/app/assets/shared
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service contract-crawler --repeat"
@@ -68,7 +68,7 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-go:latest
     working_dir: /app
     volumes:
-      - images:/app/assets/images
+      - images:/app/assets/shared
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service chain-crawler --repeat"
@@ -89,7 +89,7 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
     volumes:
       - /var/www/daodao-notifier:/app/build/web
-      - images:/var/www/daodao-notifier/assets/images
+      - images:/var/www/daodao-notifier/assets/shared
     networks:
       - caddy
       - default

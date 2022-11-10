@@ -60,7 +60,7 @@ func (c *ChainCrawler) imageManager(chain *types.Chain) *common.ImageManager {
 		chain.PrettyName,
 		chain.Image,
 		c.assetsPath,
-		"images/chains/",
+		"shared/chains/",
 		100,
 		100,
 	)

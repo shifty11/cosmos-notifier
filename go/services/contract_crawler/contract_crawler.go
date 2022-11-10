@@ -69,7 +69,7 @@ func (c *ContractCrawler) UpdateContracts() {
 			updatedContract.Name,
 			updatedContract.ImageURL,
 			c.assetsPath,
-			"images/contracts/",
+			"shared/contracts/",
 			100,
 			100,
 		)
@@ -170,7 +170,7 @@ func (c *ContractCrawler) AddContract(chain *ent.Chain, contractAddr string, pro
 		contract.Name,
 		contract.ImageURL,
 		c.assetsPath,
-		"images/contracts/",
+		"shared/contracts/",
 		100,
 		100,
 	)

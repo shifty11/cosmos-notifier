@@ -31,7 +31,7 @@ const rAdmin = RouteData("admin", "/admin");
 
 const bool cDebugMode = true;
 
-final tgBotUrl = Uri.parse('https://t.me/DaoDaoNotifierBot');
+final tgBotUrl = Uri.parse('https://t.me/cosmos_gov_bot');
 final discordBotUrl = Uri.parse('https://discord.com/api/oauth2/authorize?client_id=953923165808107540&redirect_uri=https%3A%2F%2Fcosmos-notifier.decrypto.online&response_type=code&scope=identify');
 
 final tgContactUrl = Uri.parse('https://t.me/rapha_decrypto');
