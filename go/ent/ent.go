@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -44,6 +45,7 @@ func columnChecker(table string) func(string) error {
 		discordchannel.Table:   discordchannel.ValidColumn,
 		telegramchat.Table:     telegramchat.ValidColumn,
 		user.Table:             user.ValidColumn,
+		userwithzeroid.Table:   userwithzeroid.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

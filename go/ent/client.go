@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -42,6 +43,8 @@ type Client struct {
 	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// UserWithZeroId is the client for interacting with the UserWithZeroId builders.
+	UserWithZeroId *UserWithZeroIdClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -62,6 +65,7 @@ func (c *Client) init() {
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
 	c.TelegramChat = NewTelegramChatClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.UserWithZeroId = NewUserWithZeroIdClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -102,6 +106,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DiscordChannel:   NewDiscordChannelClient(cfg),
 		TelegramChat:     NewTelegramChatClient(cfg),
 		User:             NewUserClient(cfg),
+		UserWithZeroId:   NewUserWithZeroIdClient(cfg),
 	}, nil
 }
 
@@ -128,6 +133,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DiscordChannel:   NewDiscordChannelClient(cfg),
 		TelegramChat:     NewTelegramChatClient(cfg),
 		User:             NewUserClient(cfg),
+		UserWithZeroId:   NewUserWithZeroIdClient(cfg),
 	}, nil
 }
 
@@ -163,6 +169,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.DiscordChannel.Use(hooks...)
 	c.TelegramChat.Use(hooks...)
 	c.User.Use(hooks...)
+	c.UserWithZeroId.Use(hooks...)
 }
 
 // ChainClient is a client for the Chain schema.
@@ -1049,4 +1056,94 @@ func (c *UserClient) QueryDiscordChannels(u *User) *DiscordChannelQuery {
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
+}
+
+// UserWithZeroIdClient is a client for the UserWithZeroId schema.
+type UserWithZeroIdClient struct {
+	config
+}
+
+// NewUserWithZeroIdClient returns a client for the UserWithZeroId from the given config.
+func NewUserWithZeroIdClient(c config) *UserWithZeroIdClient {
+	return &UserWithZeroIdClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `userwithzeroid.Hooks(f(g(h())))`.
+func (c *UserWithZeroIdClient) Use(hooks ...Hook) {
+	c.hooks.UserWithZeroId = append(c.hooks.UserWithZeroId, hooks...)
+}
+
+// Create returns a builder for creating a UserWithZeroId entity.
+func (c *UserWithZeroIdClient) Create() *UserWithZeroIdCreate {
+	mutation := newUserWithZeroIdMutation(c.config, OpCreate)
+	return &UserWithZeroIdCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of UserWithZeroId entities.
+func (c *UserWithZeroIdClient) CreateBulk(builders ...*UserWithZeroIdCreate) *UserWithZeroIdCreateBulk {
+	return &UserWithZeroIdCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for UserWithZeroId.
+func (c *UserWithZeroIdClient) Update() *UserWithZeroIdUpdate {
+	mutation := newUserWithZeroIdMutation(c.config, OpUpdate)
+	return &UserWithZeroIdUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *UserWithZeroIdClient) UpdateOne(uwzi *UserWithZeroId) *UserWithZeroIdUpdateOne {
+	mutation := newUserWithZeroIdMutation(c.config, OpUpdateOne, withUserWithZeroId(uwzi))
+	return &UserWithZeroIdUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *UserWithZeroIdClient) UpdateOneID(id int) *UserWithZeroIdUpdateOne {
+	mutation := newUserWithZeroIdMutation(c.config, OpUpdateOne, withUserWithZeroIdID(id))
+	return &UserWithZeroIdUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for UserWithZeroId.
+func (c *UserWithZeroIdClient) Delete() *UserWithZeroIdDelete {
+	mutation := newUserWithZeroIdMutation(c.config, OpDelete)
+	return &UserWithZeroIdDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *UserWithZeroIdClient) DeleteOne(uwzi *UserWithZeroId) *UserWithZeroIdDeleteOne {
+	return c.DeleteOneID(uwzi.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *UserWithZeroIdClient) DeleteOneID(id int) *UserWithZeroIdDeleteOne {
+	builder := c.Delete().Where(userwithzeroid.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &UserWithZeroIdDeleteOne{builder}
+}
+
+// Query returns a query builder for UserWithZeroId.
+func (c *UserWithZeroIdClient) Query() *UserWithZeroIdQuery {
+	return &UserWithZeroIdQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a UserWithZeroId entity by its id.
+func (c *UserWithZeroIdClient) Get(ctx context.Context, id int) (*UserWithZeroId, error) {
+	return c.Query().Where(userwithzeroid.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *UserWithZeroIdClient) GetX(ctx context.Context, id int) *UserWithZeroId {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *UserWithZeroIdClient) Hooks() []Hook {
+	return c.hooks.UserWithZeroId
 }

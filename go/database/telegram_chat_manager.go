@@ -8,6 +8,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
 )
@@ -22,6 +23,7 @@ type ITelegramChatManager interface {
 	CountSubscriptions(chatId int64) int
 	GetChatUsers(chatId int64) []*ent.User
 	GetAllIds() []types.TgChatQueryResult
+	MigrateOldUsers(id int64)
 }
 
 type TelegramChatManager struct {
@@ -294,4 +296,54 @@ func (m *TelegramChatManager) GetChatUsers(chatId int64) []*ent.User {
 		log.Sugar.Errorf("Could not get users for telegram chat: %v", err)
 	}
 	return users
+}
+
+// TODO: remove after migration
+func (m *TelegramChatManager) MigrateOldUsers(userId int64) {
+	objects, err := m.client.UserWithZeroId.
+		Query().
+		Where(userwithzeroid.ChatOrChannelIDEQ(userId)).
+		All(m.ctx)
+	if err != nil {
+		return
+	}
+
+	for _, obj := range objects {
+		if obj.ChatOrChannelID == 0 || obj.ChainID == "" {
+			continue
+		}
+		tgChat, err := m.client.TelegramChat.
+			Query().
+			Where(telegramchat.ChatIDEQ(obj.ChatOrChannelID)).
+			Only(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Could not find telegram chat: %v", err)
+			continue
+		}
+		c, err := m.client.Chain.
+			Query().
+			Where(chain.ChainIDEQ(obj.ChainID)).
+			Only(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Could not find chain: %v", err)
+			continue
+		}
+		err = tgChat.
+			Update().
+			AddChains(c).
+			Exec(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Could not add chain to telegram chat: %v", err)
+			continue
+		}
+	}
+
+	for _, obj := range objects {
+		err := m.client.UserWithZeroId.
+			DeleteOne(obj).
+			Exec(m.ctx)
+		if err != nil {
+			log.Sugar.Errorf("Could not delete old user: %v", err)
+		}
+	}
 }

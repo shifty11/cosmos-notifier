@@ -13,6 +13,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/schema"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -152,4 +153,19 @@ func init() {
 	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
 	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
+	userwithzeroidMixin := schema.UserWithZeroId{}.Mixin()
+	userwithzeroidMixinFields0 := userwithzeroidMixin[0].Fields()
+	_ = userwithzeroidMixinFields0
+	userwithzeroidFields := schema.UserWithZeroId{}.Fields()
+	_ = userwithzeroidFields
+	// userwithzeroidDescCreateTime is the schema descriptor for create_time field.
+	userwithzeroidDescCreateTime := userwithzeroidMixinFields0[0].Descriptor()
+	// userwithzeroid.DefaultCreateTime holds the default value on creation for the create_time field.
+	userwithzeroid.DefaultCreateTime = userwithzeroidDescCreateTime.Default.(func() time.Time)
+	// userwithzeroidDescUpdateTime is the schema descriptor for update_time field.
+	userwithzeroidDescUpdateTime := userwithzeroidMixinFields0[1].Descriptor()
+	// userwithzeroid.DefaultUpdateTime holds the default value on creation for the update_time field.
+	userwithzeroid.DefaultUpdateTime = userwithzeroidDescUpdateTime.Default.(func() time.Time)
+	// userwithzeroid.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	userwithzeroid.UpdateDefaultUpdateTime = userwithzeroidDescUpdateTime.UpdateDefault.(func() time.Time)
 }

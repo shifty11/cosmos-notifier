@@ -75,8 +75,19 @@ func createMigrations(dbCon string) {
 	}
 }
 
+// TODO: remove after migration
+// importCmd represents the import command
+var importCmd = &cobra.Command{
+	Use:   "import",
+	Short: "import the database",
+	Run: func(cmd *cobra.Command, args []string) {
+		database.NewDefaultDbManagers().SubscriptionManager.ImportDb()
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(databaseCmd)
 	databaseCmd.AddCommand(migrateCmd)
 	databaseCmd.AddCommand(createMigrationsCmd)
+	databaseCmd.AddCommand(importCmd)
 }

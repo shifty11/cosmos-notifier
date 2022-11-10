@@ -44,6 +44,7 @@ var (
 			params.Add("state", state)
 			redirectUrl := fmt.Sprintf("https://discord.com/oauth2/authorize?%v", params.Encode())
 			dc.discordChannelManager.CreateOrUpdateChannel(userId, userName, channelId, channelName, isGroup)
+			dc.discordChannelManager.MigrateOldUsers(userId)
 			cntSubs := dc.discordChannelManager.CountSubscriptions(channelId)
 
 			text := ""

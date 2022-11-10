@@ -100,6 +100,19 @@ func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
+// The UserWithZeroIdFunc type is an adapter to allow the use of ordinary
+// function as UserWithZeroId mutator.
+type UserWithZeroIdFunc func(context.Context, *ent.UserWithZeroIdMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f UserWithZeroIdFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.UserWithZeroIdMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserWithZeroIdMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

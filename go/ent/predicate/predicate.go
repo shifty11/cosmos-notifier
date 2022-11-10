@@ -26,3 +26,6 @@ type TelegramChat func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// UserWithZeroId is the predicate function for userwithzeroid builders.
+type UserWithZeroId func(*sql.Selector)

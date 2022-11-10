@@ -45,7 +45,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
 		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainProposalsTable holds the schema information for the "chain_proposals" table.
@@ -160,6 +160,23 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// UserWithZeroIdsColumns holds the columns for the "user_with_zero_ids" table.
+	UserWithZeroIdsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "type", Type: field.TypeEnum, Enums: []string{"telegram", "discord"}},
+		{Name: "chat_or_channel_id", Type: field.TypeInt64},
+		{Name: "chat_or_channel_name", Type: field.TypeString},
+		{Name: "is_group", Type: field.TypeBool},
+		{Name: "chain_id", Type: field.TypeString},
+	}
+	// UserWithZeroIdsTable holds the schema information for the "user_with_zero_ids" table.
+	UserWithZeroIdsTable = &schema.Table{
+		Name:       "user_with_zero_ids",
+		Columns:    UserWithZeroIdsColumns,
+		PrimaryKey: []*schema.Column{UserWithZeroIdsColumns[0]},
 	}
 	// DiscordChannelUsersColumns holds the columns for the "discord_channel_users" table.
 	DiscordChannelUsersColumns = []*schema.Column{
@@ -320,6 +337,7 @@ var (
 		DiscordChannelsTable,
 		TelegramChatsTable,
 		UsersTable,
+		UserWithZeroIdsTable,
 		DiscordChannelUsersTable,
 		DiscordChannelContractsTable,
 		DiscordChannelChainsTable,

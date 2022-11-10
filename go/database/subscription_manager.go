@@ -2,14 +2,18 @@ package database
 
 import (
 	"context"
+	"encoding/json"
 	"entgo.io/ent/dialect/sql"
 	"github.com/shifty11/dao-dao-notifier/ent"
 	"github.com/shifty11/dao-dao-notifier/ent/chain"
 	"github.com/shifty11/dao-dao-notifier/ent/contract"
 	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
 	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 	"github.com/shifty11/dao-dao-notifier/log"
 	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
+	"io"
+	"os"
 )
 
 type SubscriptionManager struct {
@@ -327,5 +331,162 @@ func (m *SubscriptionManager) collectChainStats(chats []*pb.ChatRoom) {
 			}
 			sub.Stats.Total = sub.Stats.Telegram + sub.Stats.Discord
 		}
+	}
+}
+
+// TODO: remove after migration
+type TelegramUser struct {
+	UserId   int64  `json:"user_id"`
+	Name     string `json:"name"`
+	ChatId   int64  `json:"chat_id"`
+	ChatName string `json:"chat_name"`
+	IsGroup  bool   `json:"is_group"`
+	ChainId  string `json:"chain_id"`
+}
+
+// TODO: remove after migration
+type DiscordUser struct {
+	UserId      int64  `json:"user_id"`
+	Name        string `json:"name"`
+	ChannelId   int64  `json:"channel_id"`
+	ChannelName string `json:"channel_name"`
+	IsGroup     bool   `json:"is_group"`
+	ChainId     string `json:"chain_id"`
+}
+
+// TODO: remove after migration
+func (manager *SubscriptionManager) ImportDb() {
+	var tgUsers []TelegramUser
+	var discordUsers []DiscordUser
+	readFromFile("telegram_users.json", &tgUsers)
+	readFromFile("discord_users.json", &discordUsers)
+
+	chains := manager.chainManager.All()
+
+	for _, tgUser := range tgUsers {
+		if tgUser.ChatId != 0 {
+			tc, _ := manager.telegramChatManager.CreateOrUpdateChat(tgUser.UserId, tgUser.Name, tgUser.ChatId, tgUser.ChatName, tgUser.IsGroup)
+			if tgUser.ChainId != "" {
+				for _, c := range chains {
+					if c.ChainID == tgUser.ChainId {
+						err := tc.Update().AddChains(c).Exec(context.Background())
+						if err != nil && ent.IsConstraintError(err) {
+							log.Sugar.Infof("Telegram chat %v already in c %v", tc.ID, c.ID)
+						} else if err != nil {
+							log.Sugar.Panicf("Could not add c to telegram chat: %v", err)
+						}
+					}
+				}
+			}
+		}
+	}
+	for _, discordUser := range discordUsers {
+		if discordUser.ChannelId != 0 {
+			dc, _ := manager.discordChannelManager.CreateOrUpdateChannel(discordUser.UserId, discordUser.Name, discordUser.ChannelId, discordUser.ChannelName, discordUser.IsGroup)
+			if discordUser.ChainId != "" {
+				for _, c := range chains {
+					if c.ChainID == discordUser.ChainId {
+						err := dc.Update().AddChains(c).Exec(context.Background())
+						if err != nil && ent.IsConstraintError(err) {
+							log.Sugar.Infof("Discord channel %v already in c %v", dc.ID, c.ID)
+						} else if err != nil {
+							log.Sugar.Panicf("Could not add c to discord channel: %v", err)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for _, tgUser := range tgUsers {
+		exists, err := manager.client.UserWithZeroId.
+			Query().
+			Where(userwithzeroid.ChainIDEQ(tgUser.ChainId)).
+			Where(userwithzeroid.ChatOrChannelNameEQ(tgUser.ChatName)).
+			Where(userwithzeroid.ChatOrChannelIDEQ(tgUser.ChatId)).
+			Where(userwithzeroid.IsGroupEQ(tgUser.IsGroup)).
+			Where(userwithzeroid.TypeEQ(userwithzeroid.TypeTelegram)).
+			Exist(manager.ctx)
+		if err != nil {
+			log.Sugar.Panicf("Error while checking if user exists: %v", err)
+		}
+		if !exists {
+			_, err := manager.client.UserWithZeroId.
+				Create().
+				SetChainID(tgUser.ChainId).
+				SetChatOrChannelName(tgUser.ChatName).
+				SetChatOrChannelID(tgUser.ChatId).
+				SetChainID(tgUser.ChainId).
+				SetIsGroup(tgUser.IsGroup).
+				SetType(userwithzeroid.TypeTelegram).
+				Save(manager.ctx)
+			if err != nil {
+				log.Sugar.Panic(err)
+			}
+		}
+	}
+
+	for _, discordUser := range discordUsers {
+		exists, err := manager.client.UserWithZeroId.
+			Query().
+			Where(userwithzeroid.ChainIDEQ(discordUser.ChainId)).
+			Where(userwithzeroid.ChatOrChannelNameEQ(discordUser.ChannelName)).
+			Where(userwithzeroid.ChatOrChannelIDEQ(discordUser.ChannelId)).
+			Where(userwithzeroid.IsGroupEQ(discordUser.IsGroup)).
+			Where(userwithzeroid.TypeEQ(userwithzeroid.TypeDiscord)).
+			Exist(manager.ctx)
+		if err != nil {
+			log.Sugar.Panicf("Error while checking if user exists: %v", err)
+		}
+		if !exists {
+			_, err := manager.client.UserWithZeroId.
+				Create().
+				SetChainID(discordUser.ChainId).
+				SetChatOrChannelName(discordUser.ChannelName).
+				SetChatOrChannelID(discordUser.ChannelId).
+				SetChainID(discordUser.ChainId).
+				SetIsGroup(discordUser.IsGroup).
+				SetType(userwithzeroid.TypeDiscord).
+				Save(manager.ctx)
+			if err != nil {
+				log.Sugar.Panic(err)
+			}
+		}
+	}
+}
+
+// TODO: remove after migration
+func (manager *SubscriptionManager) ImportDbZeroIds() {
+	var zeroIdTgUsers []TelegramUser
+	var zeroIdDiscordUsers []DiscordUser
+	readFromFile("telegram_users_zero_id.json", &zeroIdTgUsers)
+	readFromFile("discord_users_zero_id.json", &zeroIdDiscordUsers)
+
+	for _, tgUser := range zeroIdTgUsers {
+		if tgUser.ChatId == 0 {
+			// TODO: send notification to user
+		}
+	}
+	for _, discordUser := range zeroIdDiscordUsers {
+		if discordUser.ChannelId == 0 {
+			// TODO: send notification to user
+		}
+	}
+}
+
+// TODO: remove after migration
+func readFromFile(fileName string, target interface{}) {
+	jsonFile, err := os.Open(fileName)
+	if err != nil {
+		log.Sugar.Panicf("Could not open file %s: %v", fileName, err)
+	}
+	defer jsonFile.Close()
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		log.Sugar.Panicf("Could not read file %s: %v", fileName, err)
+	}
+	err = json.Unmarshal(byteValue, &target)
+	if err != nil {
+		log.Sugar.Panicf("Could not unmarshal file %s: %v", fileName, err)
 	}
 }
