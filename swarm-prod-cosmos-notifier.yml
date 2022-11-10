@@ -105,7 +105,7 @@ services:
       - caddy
     deploy:
       labels:
-        caddy: daodao-notifier.decrypto.online
+        caddy: cosmos-notifier.decrypto.online
         caddy.reverse_proxy: "webapp:80"
       placement:
         constraints:

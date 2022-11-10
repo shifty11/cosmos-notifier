@@ -53,7 +53,7 @@ var (
 				for _, user := range dc.discordChannelManager.GetChannelUsers(channelId) {
 					adminText += fmt.Sprintf("- `%v`\n", user.Name)
 				}
-				text = fmt.Sprintf(":rocket: Cosmos Notifier started.\n\n") +
+				text = fmt.Sprintf(":rocket: Cosmos Notifier started\n\n") +
 					fmt.Sprintf(":police_officer: Bot admins in this channel:\n%v\n", adminText) +
 					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
 					fmt.Sprintf("Go to **[Cosmos Notifier](%v)** to change subscriptions for this channel.\n\n", redirectUrl) +
@@ -64,7 +64,7 @@ var (
 					"To register another user as admin he has to send the command `/start` to the bot.\n" +
 					"To stop the bot send the command `/stop`."
 			} else {
-				text = fmt.Sprintf(":rocket: Cosmos Notifier started.\n\n") +
+				text = fmt.Sprintf(":rocket: Cosmos Notifier started\n\n") +
 					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
 					fmt.Sprintf("Go to **[Cosmos Notifier](%v)** to change your subscriptions.\n\n", redirectUrl) +
 					"**How does it work?**\n" +
