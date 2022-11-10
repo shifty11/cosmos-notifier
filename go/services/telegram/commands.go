@@ -29,8 +29,8 @@ const subscriptionsMsg = `🚀 DaoDao Notifier started.
 🔔 Active subscriptions: %v
 
 *How does it work?*
-- You subscribe to a DAO (ex: [rawdao](https://www.rawdao.zone/vote))
-- A member of this DAO creates a governance proposal
+- You subscribe to a Chain or DAO
+- Someone creates a new proposal on this Chain or DAO
 - A notification that a new proposal is up for voting is sent to this chat
 
 To stop the bot send the command /stop

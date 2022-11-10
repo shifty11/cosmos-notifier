@@ -58,8 +58,8 @@ var (
 					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
 					fmt.Sprintf("Go to **[DaoDao Notifier](%v)** to change subscriptions for this channel.\n\n", redirectUrl) +
 					"**How does it work?**\n" +
-					"- You subscribe this channel to a DAO (ex: [rawdao](https://www.rawdao.zone/vote))\n" +
-					"- A member of this DAO creates a governance proposal\n" +
+					"- You subscribe this channel to a Chain or DAO\n" +
+					"- Someone creates a new proposal on this Chain or DAO\n" +
 					"- A notification that a new proposal is up for voting is sent to this channel\n\n" +
 					"To register another user as admin he has to send the command `/start` to the bot.\n" +
 					"To stop the bot send the command `/stop`."
@@ -68,8 +68,8 @@ var (
 					fmt.Sprintf(":bell: Active subscriptions: %v\n\n", cntSubs) +
 					fmt.Sprintf("Go to **[DaoDao Notifier](%v)** to change your subscriptions.\n\n", redirectUrl) +
 					"**How does it work?**\n" +
-					"- You subscribe to a DAO (ex: [rawdao](https://www.rawdao.zone/vote))\n" +
-					"- A member of this DAO creates a governance proposal\n" +
+					"- You subscribe to a Chain or DAO\n" +
+					"- Someone creates a new proposal on this Chain or DAO\n" +
 					"- A notification that a new proposal is up for voting is sent to you\n\n" +
 					"To stop the bot send the command `/stop`."
 			}
