@@ -15,6 +15,7 @@ import (
 
 type ContractCrawler struct {
 	contractManager database.IContractManager
+	chainManager    *database.ChainManager
 	proposalManager *database.ContractProposalManager
 	notifier        *notifier.ContractNotifier
 	apiUrl          string
@@ -24,6 +25,7 @@ type ContractCrawler struct {
 func NewContractCrawler(managers *database.DbManagers, notifier *notifier.ContractNotifier, apiUrl string, assetsPath string) *ContractCrawler {
 	return &ContractCrawler{
 		contractManager: managers.ContractManager,
+		chainManager:    managers.ChainManager,
 		proposalManager: managers.ProposalManager,
 		notifier:        notifier,
 		apiUrl:          apiUrl,
@@ -116,6 +118,11 @@ func (c *ContractCrawler) AddContracts() {
 		log.Sugar.Errorf("while querying daos: %v", err)
 	}
 
+	junoChain, err := c.chainManager.GetByName("juno")
+	if err != nil {
+		log.Sugar.Panicf("chain Juno not found")
+	}
+
 	contracts := c.contractManager.All()
 	for _, dao := range query.Daos.Nodes {
 		found := false
@@ -126,7 +133,7 @@ func (c *ContractCrawler) AddContracts() {
 			}
 		}
 		if !found {
-			_, err := c.AddContract(nil, dao.Address, "")
+			_, err := c.AddContract(junoChain, dao.Address, "")
 			if err != nil {
 				log.Sugar.Errorf("while adding contract %v: %v", dao.Address, err)
 			}

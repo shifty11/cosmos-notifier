@@ -61,6 +61,13 @@ func (manager *ChainManager) Get(id int) (*ent.Chain, error) {
 		Only(manager.ctx)
 }
 
+func (manager *ChainManager) GetByName(name string) (*ent.Chain, error) {
+	return manager.client.Chain.
+		Query().
+		Where(chain.NameEQ(name)).
+		Only(manager.ctx)
+}
+
 func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string) *ent.Chain {
 	log.Sugar.Infof("Create new chain: %v (%v)", chainData.PrettyName, chainData.ChainId)
 	c, err := manager.client.Chain.
