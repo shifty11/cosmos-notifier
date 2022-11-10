@@ -24,7 +24,7 @@ func (client TelegramClient) handleCommand(update *tgbotapi.Update) {
 	}
 }
 
-const subscriptionsMsg = `🚀 DaoDao Notifier started.
+const subscriptionsMsg = `🚀 Cosmos Notifier started.
 %v
 🔔 Active subscriptions: %v
 

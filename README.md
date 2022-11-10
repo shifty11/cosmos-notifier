@@ -1,5 +1,5 @@
-# DaoDao Notifier
-DaoDao Notifier is a subscription service that notifies about new governance proposals of [DaoDao's](https://daodao.zone/).
+# Cosmos Notifier
+Cosmos Notifier is a subscription service that notifies about new governance proposals of [Cosmos chains](https://cosmos.network/) and [DaoDao's](https://daodao.zone/).
 
 ## Setup
 
