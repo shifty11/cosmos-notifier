@@ -2,9 +2,6 @@
 
 */node_modules
 
-.env
-/.env.prod
-/.env.dev
-prod.env
+.env*
 
 ansible/inventory

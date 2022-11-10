@@ -21,8 +21,8 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-go:latest
     working_dir: /app
     secrets:
-      - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service telegram"
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service telegram"
     deploy:
       placement:
         constraints:
@@ -32,8 +32,8 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-go:latest
     working_dir: /app
     secrets:
-      - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service discord"
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service discord"
     deploy:
       placement:
         constraints:
@@ -43,8 +43,8 @@ services:
     image: ghcr.io/shifty11/dao-dao-notifier-go:latest
     working_dir: /app
     secrets:
-      - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier db migrate && /cosmos-notifier service grpc"
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier db migrate && /cosmos-notifier service grpc"
     deploy:
       placement:
         constraints:
@@ -56,8 +56,8 @@ services:
     volumes:
       - images:/app/assets/images
     secrets:
-      - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service contract-crawler --repeat"
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service contract-crawler --repeat"
     deploy:
       placement:
         constraints:
@@ -70,8 +70,8 @@ services:
     volumes:
       - images:/app/assets/images
     secrets:
-      - daodao-notifier-env
-    command: /bin/sh -c "source /run/secrets/daodao-notifier-env && /cosmos-notifier service chain-crawler --repeat"
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service chain-crawler --repeat"
     deploy:
       placement:
         constraints:
@@ -119,5 +119,5 @@ networks:
     external: true
 
 secrets:
-  daodao-notifier-env:
+  cosmos-notifier-env:
     external: true
