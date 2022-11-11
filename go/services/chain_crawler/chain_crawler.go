@@ -78,9 +78,7 @@ func (c *ChainCrawler) downloadThumbnail(chain *types.Chain) string {
 }
 
 func (c *ChainCrawler) doesThumbnailExist(chain *types.Chain) bool {
-	doesExist := c.imageManager(chain).DoesExist()
-	log.Sugar.Debugf("Thumbnail for chain %v exists: %v", chain.PrettyName, doesExist)
-	return doesExist
+	return c.imageManager(chain).DoesExist()
 }
 
 type ProposalInfo struct {
