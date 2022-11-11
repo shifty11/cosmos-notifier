@@ -274,15 +274,23 @@ func (m *DiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
 }
 
 func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
-	count, err := m.client.DiscordChannel.
+	countChains, err := m.client.DiscordChannel.
+		Query().
+		Where(discordchannel.ChannelIDEQ(channelId)).
+		QueryChains().
+		Count(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not count chain subscriptions for discord channel: %v", err)
+	}
+	countContracts, err := m.client.DiscordChannel.
 		Query().
 		Where(discordchannel.ChannelIDEQ(channelId)).
 		QueryContracts().
 		Count(m.ctx)
 	if err != nil {
-		log.Sugar.Errorf("Could not count subscriptions for discord channel: %v", err)
+		log.Sugar.Errorf("Could not count contract subscriptions for discord channel: %v", err)
 	}
-	return count
+	return countChains + countContracts
 }
 
 func (m *DiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult {

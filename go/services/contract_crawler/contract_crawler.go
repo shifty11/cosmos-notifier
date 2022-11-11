@@ -77,7 +77,7 @@ func (c *ContractCrawler) UpdateContracts() {
 			if updatedContract.ImageURL != "" {
 				err := im.DownloadAndCreateThumbnail()
 				if err != nil {
-					log.Sugar.Infof("while downloading image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, err)
+					log.Sugar.Infof("error while downloading image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, err)
 				} else {
 					c.contractManager.SaveThumbnailUrl(updatedContract, im.ThumbnailUrl)
 				}
@@ -85,7 +85,7 @@ func (c *ContractCrawler) UpdateContracts() {
 				c.contractManager.SaveThumbnailUrl(updatedContract, "")
 				e := os.RemoveAll(im.ThumbnailPath)
 				if e != nil {
-					log.Sugar.Errorf("while removing image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, e)
+					log.Sugar.Errorf("error while removing image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, e)
 				}
 			}
 		}

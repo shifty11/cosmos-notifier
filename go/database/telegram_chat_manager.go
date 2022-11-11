@@ -275,15 +275,23 @@ func (m *TelegramChatManager) DeleteMultiple(chatIds []int64) {
 }
 
 func (m *TelegramChatManager) CountSubscriptions(chatId int64) int {
-	count, err := m.client.TelegramChat.
+	countChains, err := m.client.TelegramChat.
+		Query().
+		Where(telegramchat.ChatIDEQ(chatId)).
+		QueryChains().
+		Count(m.ctx)
+	if err != nil {
+		log.Sugar.Errorf("Could not count chains subscriptions for telegram chat: %v", err)
+	}
+	countContracts, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(chatId)).
 		QueryContracts().
 		Count(m.ctx)
 	if err != nil {
-		log.Sugar.Errorf("Could not count subscriptions for telegram chat: %v", err)
+		log.Sugar.Errorf("Could not count contract subscriptions for telegram chat: %v", err)
 	}
-	return count
+	return countChains + countContracts
 }
 
 func (m *TelegramChatManager) GetChatUsers(chatId int64) []*ent.User {
