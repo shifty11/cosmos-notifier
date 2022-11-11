@@ -11,6 +11,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
+	"golang.org/x/exp/maps"
 )
 
 type IDiscordChannelManager interface {
@@ -24,6 +25,7 @@ type IDiscordChannelManager interface {
 	DeleteMultiple(channelIds []int64)
 	GetAllIds() []types.DiscordChannelQueryResult
 	MigrateOldUsers(id int64)
+	GetZeroIds() []types.DiscordChannelQueryResult
 }
 
 type DiscordChannelManager struct {
@@ -356,4 +358,30 @@ func (m *DiscordChannelManager) MigrateOldUsers(userId int64) {
 			log.Sugar.Errorf("Could not delete old user: %v", err)
 		}
 	}
+}
+
+// TODO: remove after migration
+func (m *DiscordChannelManager) GetZeroIds() []types.DiscordChannelQueryResult {
+	all, err := m.client.UserWithZeroId.
+		Query().
+		Where(userwithzeroid.TypeEQ(userwithzeroid.TypeTelegram)).
+		All(m.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Could not get zero ids: %v", err)
+	}
+
+	s := map[int]types.DiscordChannelQueryResult{}
+	for _, u := range all {
+		if u.ChatOrChannelID == 0 {
+			continue
+		}
+		_, ok := s[u.ID]
+		if !ok {
+			s[u.ID] = types.DiscordChannelQueryResult{
+				ChannelId: u.ChatOrChannelID,
+				Name:      u.ChatOrChannelName,
+			}
+		}
+	}
+	return maps.Values(s)
 }

@@ -128,3 +128,28 @@ func (n *GeneralNotifier) BroadcastMessage(message string, receiver pb.Broadcast
 	}
 	return BroadcastMessageResult{Error: errors.New("unknown receiver")}
 }
+
+// TODO: remove after migration
+func (n *GeneralNotifier) BroadcastMessageToZeroIds(message string, receiver pb.BroadcastMessageRequest_MessageType, entUser *ent.User) {
+	switch receiver {
+	case pb.BroadcastMessageRequest_TELEGRAM:
+		tgIds := n.telegramChatManager.GetZeroIds()
+		n.telegramNotifier.broadcastMessage(tgIds, message)
+	case pb.BroadcastMessageRequest_DISCORD:
+		tgIds := n.telegramChatManager.GetZeroIds()
+		n.telegramNotifier.broadcastMessage(tgIds, message)
+	case pb.BroadcastMessageRequest_TELEGRAM_TEST:
+		ids := n.telegramChatManager.GetSubscribedIds(entUser.QueryTelegramChats())
+		if len(ids) == 0 {
+			log.Sugar.Panicf("no telegram chats found")
+		}
+		n.telegramNotifier.broadcastMessage(ids[:1], message)
+	case pb.BroadcastMessageRequest_DISCORD_TEST:
+		ids := n.discordChannelManager.GetSubscribedIds(entUser.QueryDiscordChannels())
+		if len(ids) == 0 {
+			log.Sugar.Panicf("no discord channels found")
+		}
+		n.discordNotifier.broadcastMessage(ids[:1], message)
+	}
+	return
+}

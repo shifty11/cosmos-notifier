@@ -11,6 +11,7 @@ import (
 	"github.com/shifty11/dao-dao-notifier/ent/userwithzeroid"
 	"github.com/shifty11/dao-dao-notifier/log"
 	"github.com/shifty11/dao-dao-notifier/types"
+	"golang.org/x/exp/maps"
 )
 
 type ITelegramChatManager interface {
@@ -24,6 +25,7 @@ type ITelegramChatManager interface {
 	GetChatUsers(chatId int64) []*ent.User
 	GetAllIds() []types.TgChatQueryResult
 	MigrateOldUsers(id int64)
+	GetZeroIds() []types.TgChatQueryResult
 }
 
 type TelegramChatManager struct {
@@ -354,4 +356,30 @@ func (m *TelegramChatManager) MigrateOldUsers(userId int64) {
 			log.Sugar.Errorf("Could not delete old user: %v", err)
 		}
 	}
+}
+
+// TODO: remove after migration
+func (m *TelegramChatManager) GetZeroIds() []types.TgChatQueryResult {
+	all, err := m.client.UserWithZeroId.
+		Query().
+		Where(userwithzeroid.TypeEQ(userwithzeroid.TypeTelegram)).
+		All(m.ctx)
+	if err != nil {
+		log.Sugar.Panicf("Could not get zero ids: %v", err)
+	}
+
+	s := map[int]types.TgChatQueryResult{}
+	for _, u := range all {
+		if u.ChatOrChannelID == 0 {
+			continue
+		}
+		_, ok := s[u.ID]
+		if !ok {
+			s[u.ID] = types.TgChatQueryResult{
+				ChatId: u.ChatOrChannelID,
+				Name:   u.ChatOrChannelName,
+			}
+		}
+	}
+	return maps.Values(s)
 }
