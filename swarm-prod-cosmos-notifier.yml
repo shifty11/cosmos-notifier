@@ -201,3 +201,4 @@ secrets:
     external: true
   pgadmin-password:
     external: true
+
