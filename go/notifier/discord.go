@@ -103,7 +103,7 @@ func (n *DiscordNotifier) notify(
 				if n.shouldDeleteUser(err) {
 					errIds = append(errIds, dc.ChannelId)
 				} else {
-					log.Sugar.Errorf("Error while sending proposal to discord channel %v (%v): %v", dc.Name, dc.ChannelId, err)
+					log.Sugar.Errorf("Error sending proposal %v (%v) to discord channel %v (%v): %v", proposalId, contractOrChainName, dc.Name, dc.ChannelId, err)
 				}
 				break
 			}
