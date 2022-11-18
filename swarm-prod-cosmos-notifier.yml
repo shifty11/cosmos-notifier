@@ -88,7 +88,6 @@ services:
   webapp:
     image: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
     volumes:
-      - /var/www/daodao-notifier:/app/build/web
       - images:/var/www/daodao-notifier/assets/shared
     networks:
       - caddy
@@ -111,18 +110,33 @@ services:
         constraints:
           - node.role != manager
 
+  db:
+    image: postgres:14.5
+    volumes:
+      - data:/var/lib/postgresql/data/
+    secrets:
+      - cosmos-notifier-db-password-env
+    environment:
+      - POSTGRES_USER=doadmin
+      - POSTGRES_PASSWORD_FILE=/run/secrets/cosmos-notifier-db-password-env
+      - POSTGRES_DB=cosmosnotifier
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+          - node.labels.host == daodao-notifier
+
   pgbackups:
     image: prodrigestivill/postgres-backup-local
     volumes:
       - /var/opt/pgbackups:/backups
     secrets:
-      - cosmos-notifier-db-user-env
       - cosmos-notifier-db-password-env
     environment:
       - POSTGRES_HOST=psql-ams3-do-user-1234424-0.b.db.ondigitalocean.com
       - POSTGRES_PORT=25060
-      - POSTGRES_DB=daodaonotifier
-      - POSTGRES_USER_FILE=/run/secrets/cosmos-notifier-db-user-env
+      - POSTGRES_DB=cosmosnotifier
+      - POSTGRES_USER=doadmin
       - POSTGRES_PASSWORD_FILE=/run/secrets/cosmos-notifier-db-password-env
       - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
       - SCHEDULE=@daily
@@ -136,8 +150,45 @@ services:
           - node.role != manager
           - node.labels.host == daodao-notifier
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    secrets:
+      - pgadmin-password
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin-password
+#    logging:
+#      driver: "none"
+    networks:
+      - caddy
+      - default
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+      - /var/opt/pgbackups:/backups
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+          - node.labels.host == daodao-notifier
+
+  whoami-pgadmin:
+    image: jwilder/whoami
+    networks:
+      - caddy
+    deploy:
+      labels:
+        caddy: pgadmin.decrypto.online
+        caddy.reverse_proxy: "pgadmin:80"
+      placement:
+        constraints:
+          - node.role != manager
+
 volumes:
   images:
+  data:
+    name: cosmos_notifier_data
+  pgadmin:
+    name: pgadmin_data
 
 networks:
   caddy:
@@ -146,7 +197,7 @@ networks:
 secrets:
   cosmos-notifier-env:
     external: true
-  cosmos-notifier-db-user-env:
-    external: true
   cosmos-notifier-db-password-env:
+    external: true
+  pgadmin-password:
     external: true
