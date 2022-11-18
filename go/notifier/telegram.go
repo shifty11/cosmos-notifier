@@ -85,7 +85,7 @@ func (n *telegramNotifier) notify(
 			if n.shouldDeleteUser(err) {
 				errIds = append(errIds, tg.ChatId)
 			} else {
-				log.Sugar.Errorf("Error sending telegram message to %v (%v): %v", tg.Name, tg.ChatId, err)
+				log.Sugar.Errorf("Error sending proposal %v (%v) to telegram chat %v (%v): %v", proposalId, contractOrChainName, tg.Name, tg.ChatId, err)
 			}
 		}
 	}
