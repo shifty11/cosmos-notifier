@@ -72,7 +72,7 @@ services:
 
   contract-crawler:
     build: go
-    container_name: cosmos_notifier_crawler
+    container_name: cosmos_notifier_contract_crawler
     working_dir: /app
     volumes:
       - ./contracts.txt:/app/contracts.txt
@@ -89,7 +89,7 @@ services:
 
   chain-crawler:
     build: go
-    container_name: cosmos_notifier_crawler
+    container_name: cosmos_notifier_chain_crawler
     working_dir: /app
     volumes:
       - ./contracts.txt:/app/contracts.txt
