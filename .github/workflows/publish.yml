@@ -37,7 +37,7 @@ jobs:
         with:
           context: go/
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-go:latest
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-go:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push nodejs Docker image
@@ -45,7 +45,7 @@ jobs:
         with:
           context: nodejs/
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-nodejs:latest
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-nodejs:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push envoy Docker image
@@ -54,7 +54,7 @@ jobs:
           context: webapp/
           file: webapp/envoy.Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-envoy:latest
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-envoy:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push flutter Docker image
@@ -63,7 +63,7 @@ jobs:
           context: webapp/
           file: webapp/flutter.Dockerfile
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.actor }}/dao-dao-notifier-webapp:latest
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-webapp:latest
           labels: ${{ steps.meta.outputs.labels }}
           build-args: CONFIG_FILE=lib/env.dart
 

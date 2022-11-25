@@ -36,5 +36,5 @@ final discordBotUrl = Uri.parse('https://discord.com/api/oauth2/authorize?client
 
 final tgContactUrl = Uri.parse('https://t.me/rapha_decrypto');
 final discordContactUrl = Uri.parse('https://discord.com/users/228978159440232453');
-final githubUrl = Uri.parse('https://github.com/shifty11/dao-dao-notifier');
+final githubUrl = Uri.parse('https://github.com/shifty11/cosmos-notifier');
 final twitterUrl = Uri.parse('https://twitter.com/Rapha90');
