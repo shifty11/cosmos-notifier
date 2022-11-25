@@ -26,8 +26,6 @@ type Tx struct {
 	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
-	// UserWithZeroId is the client for interacting with the UserWithZeroId builders.
-	UserWithZeroId *UserWithZeroIdClient
 
 	// lazily loaded.
 	client     *Client
@@ -166,7 +164,6 @@ func (tx *Tx) init() {
 	tx.DiscordChannel = NewDiscordChannelClient(tx.config)
 	tx.TelegramChat = NewTelegramChatClient(tx.config)
 	tx.User = NewUserClient(tx.config)
-	tx.UserWithZeroId = NewUserWithZeroIdClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

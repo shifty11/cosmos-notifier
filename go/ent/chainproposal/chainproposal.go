@@ -89,12 +89,12 @@ type Status string
 
 // Status values.
 const (
-	StatusPROPOSAL_STATUS_UNSPECIFIED    Status = "PROPOSAL_STATUS_UNSPECIFIED"
-	StatusPROPOSAL_STATUS_DEPOSIT_PERIOD Status = "PROPOSAL_STATUS_DEPOSIT_PERIOD"
 	StatusPROPOSAL_STATUS_VOTING_PERIOD  Status = "PROPOSAL_STATUS_VOTING_PERIOD"
 	StatusPROPOSAL_STATUS_PASSED         Status = "PROPOSAL_STATUS_PASSED"
 	StatusPROPOSAL_STATUS_REJECTED       Status = "PROPOSAL_STATUS_REJECTED"
 	StatusPROPOSAL_STATUS_FAILED         Status = "PROPOSAL_STATUS_FAILED"
+	StatusPROPOSAL_STATUS_UNSPECIFIED    Status = "PROPOSAL_STATUS_UNSPECIFIED"
+	StatusPROPOSAL_STATUS_DEPOSIT_PERIOD Status = "PROPOSAL_STATUS_DEPOSIT_PERIOD"
 )
 
 func (s Status) String() string {
@@ -104,7 +104,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPROPOSAL_STATUS_UNSPECIFIED, StatusPROPOSAL_STATUS_DEPOSIT_PERIOD, StatusPROPOSAL_STATUS_VOTING_PERIOD, StatusPROPOSAL_STATUS_PASSED, StatusPROPOSAL_STATUS_REJECTED, StatusPROPOSAL_STATUS_FAILED:
+	case StatusPROPOSAL_STATUS_VOTING_PERIOD, StatusPROPOSAL_STATUS_PASSED, StatusPROPOSAL_STATUS_REJECTED, StatusPROPOSAL_STATUS_FAILED, StatusPROPOSAL_STATUS_UNSPECIFIED, StatusPROPOSAL_STATUS_DEPOSIT_PERIOD:
 		return nil
 	default:
 		return fmt.Errorf("chainproposal: invalid enum value for status field: %q", s)

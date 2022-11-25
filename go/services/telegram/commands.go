@@ -44,7 +44,6 @@ func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 	isGroup := isGroupX(update)
 
 	client.TelegramChatManager.CreateOrUpdateChat(userId, userName, chatId, chatName, isGroup)
-	client.TelegramChatManager.MigrateOldUsers(userId)
 
 	adminText := ""
 	if isGroup {

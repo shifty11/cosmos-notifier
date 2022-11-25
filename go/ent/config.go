@@ -31,7 +31,6 @@ type hooks struct {
 	DiscordChannel   []ent.Hook
 	TelegramChat     []ent.Hook
 	User             []ent.Hook
-	UserWithZeroId   []ent.Hook
 }
 
 // Options applies the options on the config object.
