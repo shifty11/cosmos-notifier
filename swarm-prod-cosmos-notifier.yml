@@ -133,8 +133,8 @@ services:
     secrets:
       - cosmos-notifier-db-password-env
     environment:
-      - POSTGRES_HOST=psql-ams3-do-user-1234424-0.b.db.ondigitalocean.com
-      - POSTGRES_PORT=25060
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
       - POSTGRES_DB=cosmosnotifier
       - POSTGRES_USER=doadmin
       - POSTGRES_PASSWORD_FILE=/run/secrets/cosmos-notifier-db-password-env

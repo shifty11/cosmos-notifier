@@ -67,7 +67,7 @@ func (n *telegramNotifier) notify(
 		textMsgs = append(textMsgs, message)
 	} else {
 		textMsgs = append(textMsgs, message[:n.maxMsgLength-4]+"</i>")
-		message = message[:len(message)-1] // remove the last character which is a *
+		message = message[:len(message)-4] // remove the last 4 characters which are "</i>"
 		for _, chunk := range chunks(message[n.maxMsgLength-4:], n.maxMsgLength-7) {
 			textMsgs = append(textMsgs, fmt.Sprintf("<i>%v</i>", chunk))
 		}
@@ -76,16 +76,19 @@ func (n *telegramNotifier) notify(
 	var errIds []int64
 	for _, tg := range subscribedIds {
 		log.Sugar.Debugf("Notifying telegram chat %v (%v)", tg.Name, tg.ChatId)
-		msg := tgbotapi.NewMessage(tg.ChatId, message)
-		msg.ParseMode = "html"
-		msg.DisableWebPagePreview = true
+		for _, textMsg := range textMsgs {
+			msg := tgbotapi.NewMessage(tg.ChatId, textMsg)
+			msg.ParseMode = "html"
+			msg.DisableWebPagePreview = true
 
-		_, err := n.telegramApi.Send(msg)
-		if err != nil {
-			if n.shouldDeleteUser(err) {
-				errIds = append(errIds, tg.ChatId)
-			} else {
-				log.Sugar.Errorf("Error sending proposal %v (%v) to telegram chat %v (%v): %v", proposalId, contractOrChainName, tg.Name, tg.ChatId, err)
+			_, err := n.telegramApi.Send(msg)
+			if err != nil {
+				if n.shouldDeleteUser(err) {
+					errIds = append(errIds, tg.ChatId)
+				} else {
+					log.Sugar.Errorf("Error sending proposal %v (%v) to telegram chat %v (%v): %v", proposalId, contractOrChainName, tg.Name, tg.ChatId, err)
+				}
+				break
 			}
 		}
 	}
