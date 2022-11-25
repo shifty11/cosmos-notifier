@@ -24,7 +24,7 @@ const (
 )
 
 func AccessibleRoles() map[string][]Role {
-	const path = "/daodao_notifier_grpc"
+	const path = "/cosmos_notifier_grpc"
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
 	const adminService = path + ".AdminService/"

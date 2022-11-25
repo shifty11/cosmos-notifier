@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package daodao_notifier_grpc;
+package cosmos_notifier_grpc;
 
 option go_package = "go/admin_service";
 

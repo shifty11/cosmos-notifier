@@ -48,7 +48,7 @@ class AuthInterceptor extends ClientInterceptor {
   }
 
   Map<String, bool> authMethod() {
-    const path = "/daodao_notifier_grpc.AuthService/";
+    const path = "/cosmos_notifier_grpc.AuthService/";
 
     return {"${path}TelegramLogin": false, "${path}TokenLogin": false, "${path}RefreshAccessToken": false};
   }

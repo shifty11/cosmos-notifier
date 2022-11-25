@@ -16,7 +16,7 @@
         # Enable the static file server.
         file_server
 
-        reverse_proxy /daodao_notifier_grpc* envoy:8090
+        reverse_proxy /cosmos_notifier_grpc* envoy:8090
 }
 
 # Refer to the Caddy docs for more information:

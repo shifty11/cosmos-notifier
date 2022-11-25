@@ -17,34 +17,34 @@ export 'subscription_service.pb.dart';
 class SubscriptionServiceClient extends $grpc.Client {
   static final _$getSubscriptions =
       $grpc.ClientMethod<$2.Empty, $3.GetSubscriptionsResponse>(
-          '/daodao_notifier_grpc.SubscriptionService/GetSubscriptions',
+          '/cosmos_notifier_grpc.SubscriptionService/GetSubscriptions',
           ($2.Empty value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $3.GetSubscriptionsResponse.fromBuffer(value));
   static final _$toggleChainSubscription = $grpc.ClientMethod<
           $3.ToggleChainSubscriptionRequest, $3.ToggleSubscriptionResponse>(
-      '/daodao_notifier_grpc.SubscriptionService/ToggleChainSubscription',
+      '/cosmos_notifier_grpc.SubscriptionService/ToggleChainSubscription',
       ($3.ToggleChainSubscriptionRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $3.ToggleSubscriptionResponse.fromBuffer(value));
   static final _$toggleContractSubscription = $grpc.ClientMethod<
           $3.ToggleContractSubscriptionRequest, $3.ToggleSubscriptionResponse>(
-      '/daodao_notifier_grpc.SubscriptionService/ToggleContractSubscription',
+      '/cosmos_notifier_grpc.SubscriptionService/ToggleContractSubscription',
       ($3.ToggleContractSubscriptionRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $3.ToggleSubscriptionResponse.fromBuffer(value));
   static final _$addDao =
       $grpc.ClientMethod<$3.AddDaoRequest, $3.AddDaoResponse>(
-          '/daodao_notifier_grpc.SubscriptionService/AddDao',
+          '/cosmos_notifier_grpc.SubscriptionService/AddDao',
           ($3.AddDaoRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $3.AddDaoResponse.fromBuffer(value));
   static final _$deleteDao = $grpc.ClientMethod<$3.DeleteDaoRequest, $2.Empty>(
-      '/daodao_notifier_grpc.SubscriptionService/DeleteDao',
+      '/cosmos_notifier_grpc.SubscriptionService/DeleteDao',
       ($3.DeleteDaoRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $2.Empty.fromBuffer(value));
   static final _$enableChain =
       $grpc.ClientMethod<$3.EnableChainRequest, $2.Empty>(
-          '/daodao_notifier_grpc.SubscriptionService/EnableChain',
+          '/cosmos_notifier_grpc.SubscriptionService/EnableChain',
           ($3.EnableChainRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $2.Empty.fromBuffer(value));
 
@@ -91,7 +91,7 @@ class SubscriptionServiceClient extends $grpc.Client {
 }
 
 abstract class SubscriptionServiceBase extends $grpc.Service {
-  $core.String get $name => 'daodao_notifier_grpc.SubscriptionService';
+  $core.String get $name => 'cosmos_notifier_grpc.SubscriptionService';
 
   SubscriptionServiceBase() {
     $addMethod($grpc.ServiceMethod<$2.Empty, $3.GetSubscriptionsResponse>(

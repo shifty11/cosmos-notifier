@@ -33,7 +33,7 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 
 func (c *authServiceClient) TelegramLogin(ctx context.Context, in *TelegramLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.AuthService/TelegramLogin", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.AuthService/TelegramLogin", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (c *authServiceClient) TelegramLogin(ctx context.Context, in *TelegramLogin
 
 func (c *authServiceClient) DiscordLogin(ctx context.Context, in *DiscordLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.AuthService/DiscordLogin", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.AuthService/DiscordLogin", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func (c *authServiceClient) DiscordLogin(ctx context.Context, in *DiscordLoginRe
 
 func (c *authServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshAccessTokenResponse, error) {
 	out := new(RefreshAccessTokenResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.AuthService/RefreshAccessToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.AuthService/RefreshAccessToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +104,7 @@ func _AuthService_TelegramLogin_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.AuthService/TelegramLogin",
+		FullMethod: "/cosmos_notifier_grpc.AuthService/TelegramLogin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).TelegramLogin(ctx, req.(*TelegramLoginRequest))
@@ -122,7 +122,7 @@ func _AuthService_DiscordLogin_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.AuthService/DiscordLogin",
+		FullMethod: "/cosmos_notifier_grpc.AuthService/DiscordLogin",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).DiscordLogin(ctx, req.(*DiscordLoginRequest))
@@ -140,7 +140,7 @@ func _AuthService_RefreshAccessToken_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.AuthService/RefreshAccessToken",
+		FullMethod: "/cosmos_notifier_grpc.AuthService/RefreshAccessToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).RefreshAccessToken(ctx, req.(*RefreshAccessTokenRequest))
@@ -152,7 +152,7 @@ func _AuthService_RefreshAccessToken_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AuthService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "daodao_notifier_grpc.AuthService",
+	ServiceName: "cosmos_notifier_grpc.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
