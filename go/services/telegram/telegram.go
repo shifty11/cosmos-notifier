@@ -2,8 +2,8 @@ package telegram
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/log"
 )
 
 // groups -> just admins and creators can interact with the bot

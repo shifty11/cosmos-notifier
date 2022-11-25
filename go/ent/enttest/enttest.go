@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/shifty11/dao-dao-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent"
 	// required by schema hooks.
-	_ "github.com/shifty11/dao-dao-notifier/ent/runtime"
+	_ "github.com/shifty11/cosmos-notifier/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/shifty11/dao-dao-notifier/ent/migrate"
+	"github.com/shifty11/cosmos-notifier/ent/migrate"
 )
 
 type (

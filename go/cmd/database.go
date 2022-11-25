@@ -8,9 +8,9 @@ import (
 	"context"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/ent/migrate"
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/ent/migrate"
+	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/spf13/cobra"
 	"strings"
 )

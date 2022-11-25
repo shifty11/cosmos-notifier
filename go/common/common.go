@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/log"
 	"os"
 	"strconv"
 )

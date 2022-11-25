@@ -4,9 +4,9 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/microcosm-cc/bluemonday"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/log"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/log"
+	"github.com/shifty11/cosmos-notifier/types"
 	"golang.org/x/exp/slices"
 )
 

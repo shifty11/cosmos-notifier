@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/shifty11/dao-dao-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent"
 )
 
 // The ChainFunc type is an adapter to allow the use of ordinary

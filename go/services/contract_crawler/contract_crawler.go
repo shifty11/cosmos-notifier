@@ -4,12 +4,12 @@ import (
 	"context"
 	"github.com/hasura/go-graphql-client"
 	"github.com/robfig/cron/v3"
-	"github.com/shifty11/dao-dao-notifier/common"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/log"
-	"github.com/shifty11/dao-dao-notifier/notifier"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/common"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/log"
+	"github.com/shifty11/cosmos-notifier/notifier"
+	"github.com/shifty11/cosmos-notifier/types"
 	"os"
 )
 

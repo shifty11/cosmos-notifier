@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/predicate"
+	"github.com/shifty11/cosmos-notifier/ent/contractproposal"
+	"github.com/shifty11/cosmos-notifier/ent/predicate"
 )
 
 // ContractProposalDelete is the builder for deleting a ContractProposal entity.

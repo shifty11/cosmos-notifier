@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/dao-dao-notifier/ent/chain"
-	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
+	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 )
 
 // ChainProposalCreate is the builder for creating a ChainProposal entity.

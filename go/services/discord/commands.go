@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/icza/gog"
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/log"
 	"net/url"
 )
 

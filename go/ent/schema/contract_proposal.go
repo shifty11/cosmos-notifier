@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/types"
 )
 
 // ContractProposal holds the schema definition for the ContractProposal entity.

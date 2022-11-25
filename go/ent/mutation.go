@@ -9,14 +9,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/shifty11/dao-dao-notifier/ent/chain"
-	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/contract"
-	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/predicate"
-	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
+	"github.com/shifty11/cosmos-notifier/ent/contract"
+	"github.com/shifty11/cosmos-notifier/ent/contractproposal"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/predicate"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/user"
 
 	"entgo.io/ent"
 )

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/user"
 )
 
 // User is the model entity for the User schema.

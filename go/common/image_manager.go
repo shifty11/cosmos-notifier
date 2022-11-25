@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"github.com/disintegration/imaging"
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/srwiley/oksvg"
 	"github.com/srwiley/rasterx"
 	"image"

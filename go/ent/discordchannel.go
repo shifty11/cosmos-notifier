@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 )
 
 // DiscordChannel is the model entity for the DiscordChannel schema.

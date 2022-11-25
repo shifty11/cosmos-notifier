@@ -2,10 +2,10 @@ package database
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/contract"
-	"github.com/shifty11/dao-dao-notifier/log"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/contract"
+	"github.com/shifty11/cosmos-notifier/log"
+	"github.com/shifty11/cosmos-notifier/types"
 )
 
 type IContractManager interface {

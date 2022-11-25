@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/shifty11/dao-dao-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/chain"
 )
 
 // Chain is the model entity for the Chain schema.

@@ -10,13 +10,13 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/shifty11/dao-dao-notifier/ent/chain"
-	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/contract"
-	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
+	"github.com/shifty11/cosmos-notifier/ent/contract"
+	"github.com/shifty11/cosmos-notifier/ent/contractproposal"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/user"
 )
 
 // ent aliases to avoid import conflicts in user's code.

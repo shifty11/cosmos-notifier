@@ -8,8 +8,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	ent "github.com/shifty11/dao-dao-notifier/ent"
-	types "github.com/shifty11/dao-dao-notifier/types"
+	ent "github.com/shifty11/cosmos-notifier/ent"
+	types "github.com/shifty11/cosmos-notifier/types"
 )
 
 // MockIDiscordChannelManager is a mock of IDiscordChannelManager interface.

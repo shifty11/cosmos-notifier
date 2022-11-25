@@ -2,9 +2,9 @@ package database
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 )
 
