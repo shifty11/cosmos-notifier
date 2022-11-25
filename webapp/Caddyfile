@@ -10,7 +10,7 @@
 
 :80 {
         # Set this path to your site's directory.
-        root * /var/www/daodao-notifier
+        root * /var/www/cosmos-notifier
         encode gzip
 
         # Enable the static file server.
