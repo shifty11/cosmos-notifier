@@ -37,7 +37,7 @@ func NewSubscriptionServiceClient(cc grpc.ClientConnInterface) SubscriptionServi
 
 func (c *subscriptionServiceClient) GetSubscriptions(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetSubscriptionsResponse, error) {
 	out := new(GetSubscriptionsResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/GetSubscriptions", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.SubscriptionService/GetSubscriptions", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *subscriptionServiceClient) GetSubscriptions(ctx context.Context, in *em
 
 func (c *subscriptionServiceClient) ToggleChainSubscription(ctx context.Context, in *ToggleChainSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error) {
 	out := new(ToggleSubscriptionResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/ToggleChainSubscription", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.SubscriptionService/ToggleChainSubscription", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *subscriptionServiceClient) ToggleChainSubscription(ctx context.Context,
 
 func (c *subscriptionServiceClient) ToggleContractSubscription(ctx context.Context, in *ToggleContractSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error) {
 	out := new(ToggleSubscriptionResponse)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/ToggleContractSubscription", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.SubscriptionService/ToggleContractSubscription", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func (c *subscriptionServiceClient) ToggleContractSubscription(ctx context.Conte
 }
 
 func (c *subscriptionServiceClient) AddDao(ctx context.Context, in *AddDaoRequest, opts ...grpc.CallOption) (SubscriptionService_AddDaoClient, error) {
-	stream, err := c.cc.NewStream(ctx, &SubscriptionService_ServiceDesc.Streams[0], "/daodao_notifier_grpc.SubscriptionService/AddDao", opts...)
+	stream, err := c.cc.NewStream(ctx, &SubscriptionService_ServiceDesc.Streams[0], "/cosmos_notifier_grpc.SubscriptionService/AddDao", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (x *subscriptionServiceAddDaoClient) Recv() (*AddDaoResponse, error) {
 
 func (c *subscriptionServiceClient) DeleteDao(ctx context.Context, in *DeleteDaoRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/DeleteDao", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.SubscriptionService/DeleteDao", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func (c *subscriptionServiceClient) DeleteDao(ctx context.Context, in *DeleteDao
 
 func (c *subscriptionServiceClient) EnableChain(ctx context.Context, in *EnableChainRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/daodao_notifier_grpc.SubscriptionService/EnableChain", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.SubscriptionService/EnableChain", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func _SubscriptionService_GetSubscriptions_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.SubscriptionService/GetSubscriptions",
+		FullMethod: "/cosmos_notifier_grpc.SubscriptionService/GetSubscriptions",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SubscriptionServiceServer).GetSubscriptions(ctx, req.(*emptypb.Empty))
@@ -188,7 +188,7 @@ func _SubscriptionService_ToggleChainSubscription_Handler(srv interface{}, ctx c
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.SubscriptionService/ToggleChainSubscription",
+		FullMethod: "/cosmos_notifier_grpc.SubscriptionService/ToggleChainSubscription",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SubscriptionServiceServer).ToggleChainSubscription(ctx, req.(*ToggleChainSubscriptionRequest))
@@ -206,7 +206,7 @@ func _SubscriptionService_ToggleContractSubscription_Handler(srv interface{}, ct
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.SubscriptionService/ToggleContractSubscription",
+		FullMethod: "/cosmos_notifier_grpc.SubscriptionService/ToggleContractSubscription",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SubscriptionServiceServer).ToggleContractSubscription(ctx, req.(*ToggleContractSubscriptionRequest))
@@ -245,7 +245,7 @@ func _SubscriptionService_DeleteDao_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.SubscriptionService/DeleteDao",
+		FullMethod: "/cosmos_notifier_grpc.SubscriptionService/DeleteDao",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SubscriptionServiceServer).DeleteDao(ctx, req.(*DeleteDaoRequest))
@@ -263,7 +263,7 @@ func _SubscriptionService_EnableChain_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/daodao_notifier_grpc.SubscriptionService/EnableChain",
+		FullMethod: "/cosmos_notifier_grpc.SubscriptionService/EnableChain",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(SubscriptionServiceServer).EnableChain(ctx, req.(*EnableChainRequest))
@@ -275,7 +275,7 @@ func _SubscriptionService_EnableChain_Handler(srv interface{}, ctx context.Conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var SubscriptionService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "daodao_notifier_grpc.SubscriptionService",
+	ServiceName: "cosmos_notifier_grpc.SubscriptionService",
 	HandlerType: (*SubscriptionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

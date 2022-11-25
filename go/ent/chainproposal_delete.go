@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/predicate"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
+	"github.com/shifty11/cosmos-notifier/ent/predicate"
 )
 
 // ChainProposalDelete is the builder for deleting a ChainProposal entity.

@@ -10,9 +10,9 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/user"
 )
 
 // UserCreate is the builder for creating a User entity.

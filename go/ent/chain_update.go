@@ -11,11 +11,11 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/shifty11/dao-dao-notifier/ent/chain"
-	"github.com/shifty11/dao-dao-notifier/ent/chainproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/discordchannel"
-	"github.com/shifty11/dao-dao-notifier/ent/predicate"
-	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/predicate"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 )
 
 // ChainUpdate is the builder for updating Chain entities.

@@ -3,13 +3,13 @@ package database
 import (
 	"context"
 	"entgo.io/ent/dialect/sql"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/chain"
-	"github.com/shifty11/dao-dao-notifier/ent/contract"
-	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
-	"github.com/shifty11/dao-dao-notifier/log"
-	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/contract"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/log"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/subscription_service"
 )
 
 type SubscriptionManager struct {

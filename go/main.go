@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/shifty11/dao-dao-notifier/cmd"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/cmd"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/log"
 )
 
 func main() {

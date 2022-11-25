@@ -13,7 +13,7 @@ const BroadcastMessageRequest$json = const {
   '1': 'BroadcastMessageRequest',
   '2': const [
     const {'1': 'message', '3': 1, '4': 1, '5': 9, '10': 'message'},
-    const {'1': 'type', '3': 2, '4': 1, '5': 14, '6': '.daodao_notifier_grpc.BroadcastMessageRequest.MessageType', '10': 'type'},
+    const {'1': 'type', '3': 2, '4': 1, '5': 14, '6': '.cosmos_notifier_grpc.BroadcastMessageRequest.MessageType', '10': 'type'},
   ],
   '4': const [BroadcastMessageRequest_MessageType$json],
 };
@@ -30,12 +30,12 @@ const BroadcastMessageRequest_MessageType$json = const {
 };
 
 /// Descriptor for `BroadcastMessageRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List broadcastMessageRequestDescriptor = $convert.base64Decode('ChdCcm9hZGNhc3RNZXNzYWdlUmVxdWVzdBIYCgdtZXNzYWdlGAEgASgJUgdtZXNzYWdlEk0KBHR5cGUYAiABKA4yOS5kYW9kYW9fbm90aWZpZXJfZ3JwYy5Ccm9hZGNhc3RNZXNzYWdlUmVxdWVzdC5NZXNzYWdlVHlwZVIEdHlwZSJNCgtNZXNzYWdlVHlwZRIRCg1URUxFR1JBTV9URVNUEAASEAoMRElTQ09SRF9URVNUEAESDAoIVEVMRUdSQU0QAhILCgdESVNDT1JEEAM=');
+final $typed_data.Uint8List broadcastMessageRequestDescriptor = $convert.base64Decode('ChdCcm9hZGNhc3RNZXNzYWdlUmVxdWVzdBIYCgdtZXNzYWdlGAEgASgJUgdtZXNzYWdlEk0KBHR5cGUYAiABKA4yOS5jb3Ntb3Nfbm90aWZpZXJfZ3JwYy5Ccm9hZGNhc3RNZXNzYWdlUmVxdWVzdC5NZXNzYWdlVHlwZVIEdHlwZSJNCgtNZXNzYWdlVHlwZRIRCg1URUxFR1JBTV9URVNUEAASEAoMRElTQ09SRF9URVNUEAESDAoIVEVMRUdSQU0QAhILCgdESVNDT1JEEAM=');
 @$core.Deprecated('Use broadcastMessageResponseDescriptor instead')
 const BroadcastMessageResponse$json = const {
   '1': 'BroadcastMessageResponse',
   '2': const [
-    const {'1': 'status', '3': 1, '4': 1, '5': 14, '6': '.daodao_notifier_grpc.BroadcastMessageResponse.Status', '10': 'status'},
+    const {'1': 'status', '3': 1, '4': 1, '5': 14, '6': '.cosmos_notifier_grpc.BroadcastMessageResponse.Status', '10': 'status'},
     const {'1': 'response', '3': 2, '4': 1, '5': 9, '10': 'response'},
   ],
   '4': const [BroadcastMessageResponse_Status$json],
@@ -52,4 +52,4 @@ const BroadcastMessageResponse_Status$json = const {
 };
 
 /// Descriptor for `BroadcastMessageResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List broadcastMessageResponseDescriptor = $convert.base64Decode('ChhCcm9hZGNhc3RNZXNzYWdlUmVzcG9uc2USTQoGc3RhdHVzGAEgASgOMjUuZGFvZGFvX25vdGlmaWVyX2dycGMuQnJvYWRjYXN0TWVzc2FnZVJlc3BvbnNlLlN0YXR1c1IGc3RhdHVzEhoKCHJlc3BvbnNlGAIgASgJUghyZXNwb25zZSIrCgZTdGF0dXMSCwoHU0VORElORxAAEggKBFNFTlQQARIKCgZGQUlMRUQQAw==');
+final $typed_data.Uint8List broadcastMessageResponseDescriptor = $convert.base64Decode('ChhCcm9hZGNhc3RNZXNzYWdlUmVzcG9uc2USTQoGc3RhdHVzGAEgASgOMjUuY29zbW9zX25vdGlmaWVyX2dycGMuQnJvYWRjYXN0TWVzc2FnZVJlc3BvbnNlLlN0YXR1c1IGc3RhdHVzEhoKCHJlc3BvbnNlGAIgASgJUghyZXNwb25zZSIrCgZTdGF0dXMSCwoHU0VORElORxAAEggKBFNFTlQQARIKCgZGQUlMRUQQAw==');

@@ -16,17 +16,17 @@ export 'auth_service.pb.dart';
 class AuthServiceClient extends $grpc.Client {
   static final _$telegramLogin =
       $grpc.ClientMethod<$1.TelegramLoginRequest, $1.LoginResponse>(
-          '/daodao_notifier_grpc.AuthService/TelegramLogin',
+          '/cosmos_notifier_grpc.AuthService/TelegramLogin',
           ($1.TelegramLoginRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $1.LoginResponse.fromBuffer(value));
   static final _$discordLogin =
       $grpc.ClientMethod<$1.DiscordLoginRequest, $1.LoginResponse>(
-          '/daodao_notifier_grpc.AuthService/DiscordLogin',
+          '/cosmos_notifier_grpc.AuthService/DiscordLogin',
           ($1.DiscordLoginRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $1.LoginResponse.fromBuffer(value));
   static final _$refreshAccessToken = $grpc.ClientMethod<
           $1.RefreshAccessTokenRequest, $1.RefreshAccessTokenResponse>(
-      '/daodao_notifier_grpc.AuthService/RefreshAccessToken',
+      '/cosmos_notifier_grpc.AuthService/RefreshAccessToken',
       ($1.RefreshAccessTokenRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $1.RefreshAccessTokenResponse.fromBuffer(value));
@@ -56,7 +56,7 @@ class AuthServiceClient extends $grpc.Client {
 }
 
 abstract class AuthServiceBase extends $grpc.Service {
-  $core.String get $name => 'daodao_notifier_grpc.AuthService';
+  $core.String get $name => 'cosmos_notifier_grpc.AuthService';
 
   AuthServiceBase() {
     $addMethod($grpc.ServiceMethod<$1.TelegramLoginRequest, $1.LoginResponse>(

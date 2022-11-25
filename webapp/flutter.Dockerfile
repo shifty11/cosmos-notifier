@@ -29,5 +29,5 @@ RUN flutter build web
 
 # Stage 2 - Create the run-time image
 FROM caddy:2.5.2-alpine
-COPY --from=build-env /app/build/web /var/www/daodao-notifier
+COPY --from=build-env /app/build/web /var/www/cosmos-notifier
 COPY Caddyfile /etc/caddy/Caddyfile

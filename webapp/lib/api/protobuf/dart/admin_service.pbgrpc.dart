@@ -16,7 +16,7 @@ export 'admin_service.pb.dart';
 class AdminServiceClient extends $grpc.Client {
   static final _$broadcastMessage = $grpc.ClientMethod<
           $0.BroadcastMessageRequest, $0.BroadcastMessageResponse>(
-      '/daodao_notifier_grpc.AdminService/BroadcastMessage',
+      '/cosmos_notifier_grpc.AdminService/BroadcastMessage',
       ($0.BroadcastMessageRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $0.BroadcastMessageResponse.fromBuffer(value));
@@ -36,7 +36,7 @@ class AdminServiceClient extends $grpc.Client {
 }
 
 abstract class AdminServiceBase extends $grpc.Service {
-  $core.String get $name => 'daodao_notifier_grpc.AdminService';
+  $core.String get $name => 'cosmos_notifier_grpc.AdminService';
 
   AdminServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.BroadcastMessageRequest,

@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   nodejs:
-    image: ghcr.io/shifty11/dao-dao-notifier-nodejs:latest
+    image: ghcr.io/shifty11/cosmos-notifier-nodejs:latest
     working_dir: /usr/src/app
     volumes:
       - /usr/app/node_modules
@@ -18,7 +18,7 @@ services:
           - node.role != manager
 
   telegram:
-    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    image: ghcr.io/shifty11/cosmos-notifier-go:latest
     working_dir: /app
     secrets:
       - cosmos-notifier-env
@@ -29,7 +29,7 @@ services:
           - node.role != manager
 
   discord:
-    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    image: ghcr.io/shifty11/cosmos-notifier-go:latest
     working_dir: /app
     secrets:
       - cosmos-notifier-env
@@ -40,7 +40,7 @@ services:
           - node.role != manager
 
   grpc:
-    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    image: ghcr.io/shifty11/cosmos-notifier-go:latest
     working_dir: /app
     secrets:
       - cosmos-notifier-env
@@ -51,7 +51,7 @@ services:
           - node.role != manager
 
   contract-crawler:
-    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    image: ghcr.io/shifty11/cosmos-notifier-go:latest
     working_dir: /app
     volumes:
       - images:/app/assets/shared
@@ -65,7 +65,7 @@ services:
           - node.labels.host == daodao-notifier
 
   chain-crawler:
-    image: ghcr.io/shifty11/dao-dao-notifier-go:latest
+    image: ghcr.io/shifty11/cosmos-notifier-go:latest
     working_dir: /app
     volumes:
       - images:/app/assets/shared
@@ -79,16 +79,16 @@ services:
           - node.labels.host == daodao-notifier
 
   envoy:
-    image: ghcr.io/shifty11/dao-dao-notifier-envoy:latest
+    image: ghcr.io/shifty11/cosmos-notifier-envoy:latest
     deploy:
       placement:
         constraints:
           - node.role != manager
 
   webapp:
-    image: ghcr.io/shifty11/dao-dao-notifier-webapp:latest
+    image: ghcr.io/shifty11/cosmos-notifier-webapp:latest
     volumes:
-      - images:/var/www/daodao-notifier/assets/shared
+      - images:/var/www/cosmos-notifier/assets/shared
     networks:
       - caddy
       - default

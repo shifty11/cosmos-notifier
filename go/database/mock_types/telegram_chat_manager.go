@@ -8,8 +8,8 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	ent "github.com/shifty11/dao-dao-notifier/ent"
-	types "github.com/shifty11/dao-dao-notifier/types"
+	ent "github.com/shifty11/cosmos-notifier/ent"
+	types "github.com/shifty11/cosmos-notifier/types"
 )
 
 // MockITelegramChatManager is a mock of ITelegramChatManager interface.
@@ -118,6 +118,20 @@ func (m *MockITelegramChatManager) DeleteMultiple(chatIds []int64) {
 func (mr *MockITelegramChatManagerMockRecorder) DeleteMultiple(chatIds interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMultiple", reflect.TypeOf((*MockITelegramChatManager)(nil).DeleteMultiple), chatIds)
+}
+
+// GetAllIds mocks base method.
+func (m *MockITelegramChatManager) GetAllIds() []types.TgChatQueryResult {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllIds")
+	ret0, _ := ret[0].([]types.TgChatQueryResult)
+	return ret0
+}
+
+// GetAllIds indicates an expected call of GetAllIds.
+func (mr *MockITelegramChatManagerMockRecorder) GetAllIds() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllIds", reflect.TypeOf((*MockITelegramChatManager)(nil).GetAllIds))
 }
 
 // GetChatUsers mocks base method.

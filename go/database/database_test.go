@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/enttest"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/enttest"
 	"testing"
 )
 

@@ -3,10 +3,10 @@ package database
 import (
 	"context"
 	"github.com/golang/mock/gomock"
-	mock_database "github.com/shifty11/dao-dao-notifier/database/mock_types"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
-	"github.com/shifty11/dao-dao-notifier/types"
+	mock_database "github.com/shifty11/cosmos-notifier/database/mock_types"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 )
 
@@ -62,16 +62,18 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.ContractData{
-		Address:     "0x123",
-		Name:        "contract1",
-		Description: "desc1",
-		ImageUrl:    "url1",
+		Address:         "0x123",
+		Name:            "contract1",
+		Description:     "desc1",
+		ImageUrl:        "url1",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	data2 := &types.ContractData{
-		Address:     "0x456",
-		Name:        "contract2",
-		Description: "desc2",
-		ImageUrl:    "url2",
+		Address:         "0x456",
+		Name:            "contract2",
+		Description:     "desc2",
+		ImageUrl:        "url2",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	c2, _ := m.contractManager.Create(data2)
 	c1, _ := m.contractManager.Create(data1)
@@ -111,16 +113,18 @@ func TestSubscriptionManager_GetSubscriptions_Contracts(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.ContractData{
-		Address:     "0x123",
-		Name:        "contract1",
-		Description: "desc1",
-		ImageUrl:    "url1",
+		Address:         "0x123",
+		Name:            "contract1",
+		Description:     "desc1",
+		ImageUrl:        "url1",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	data2 := &types.ContractData{
-		Address:     "0x456",
-		Name:        "contract2",
-		Description: "desc2",
-		ImageUrl:    "url2",
+		Address:         "0x456",
+		Name:            "contract2",
+		Description:     "desc2",
+		ImageUrl:        "url2",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	c2, _ := m.contractManager.Create(data2)
 	c1, _ := m.contractManager.Create(data1)
@@ -307,10 +311,11 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 		Image:       "https://image2.png",
 	}
 	data3 := &types.ContractData{
-		Address:     "0x123",
-		Name:        "contract1",
-		Description: "desc1",
-		ImageUrl:    "url1",
+		Address:         "0x123",
+		Name:            "contract1",
+		Description:     "desc1",
+		ImageUrl:        "url1",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	c2 := m.chainManager.Create(data2, data2.Image)
 	c1 := m.chainManager.Create(data1, data1.Image)
@@ -442,10 +447,11 @@ func TestSubscriptionManager_GetSubscriptions_WithStats(t *testing.T) {
 		Image:       "https://image2.png",
 	}
 	data3 := &types.ContractData{
-		Address:     "0x123",
-		Name:        "contract1",
-		Description: "desc1",
-		ImageUrl:    "url1",
+		Address:         "0x123",
+		Name:            "contract1",
+		Description:     "desc1",
+		ImageUrl:        "url1",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	chain2 := m.chainManager.Create(data2, data2.Image)
 	chain1 := m.chainManager.Create(data1, data1.Image)

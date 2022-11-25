@@ -2,11 +2,11 @@ package subscription
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/log"
-	"github.com/shifty11/dao-dao-notifier/services/contract_crawler"
-	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/subscription_service"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/log"
+	"github.com/shifty11/cosmos-notifier/services/contract_crawler"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/subscription_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"

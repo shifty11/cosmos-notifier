@@ -72,10 +72,8 @@ services:
 
   contract-crawler:
     build: go
-    container_name: cosmos_notifier_crawler
+    container_name: cosmos_notifier_contract_crawler
     working_dir: /app
-    volumes:
-      - ./contracts.txt:/app/contracts.txt
     env_file:
       - .env
     command: "/cosmos-notifier service contract-crawler --repeat"
@@ -89,10 +87,8 @@ services:
 
   chain-crawler:
     build: go
-    container_name: cosmos_notifier_crawler
+    container_name: cosmos_notifier_chain_crawler
     working_dir: /app
-    volumes:
-      - ./contracts.txt:/app/contracts.txt
     env_file:
       - .env
     command: "/cosmos-notifier service chain-crawler --repeat"

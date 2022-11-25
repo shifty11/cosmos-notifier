@@ -2,9 +2,9 @@ package database
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/ent/contractproposal"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/ent/contractproposal"
+	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 	"time"
 )
@@ -109,10 +109,11 @@ func TestContractManager_Update(t *testing.T) {
 	imageUrl := "https://image.com"
 
 	data := &types.ContractData{
-		Address:     address,
-		Name:        name,
-		Description: description,
-		ImageUrl:    imageUrl,
+		Address:         address,
+		Name:            name,
+		Description:     description,
+		ImageUrl:        imageUrl,
+		ContractVersion: types.ContractVersionUnknown,
 	}
 
 	contract, err := m.Create(data)
@@ -289,10 +290,11 @@ func TestContractManager_Delete_NotFound(t *testing.T) {
 func TestContractManager_Create(t *testing.T) {
 	m := newTestContractManager(t)
 	data := &types.ContractData{
-		Name:        "test",
-		Description: "description",
-		Address:     "0x123",
-		ImageUrl:    "https://image.com",
+		Address:         "0x123",
+		Name:            "test",
+		Description:     "description",
+		ImageUrl:        "https://image.com",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 	contract, err := m.Create(data)
 	if err != nil {

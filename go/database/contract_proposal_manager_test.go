@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 	"time"
 )
@@ -18,10 +18,11 @@ func TestProposalManager_CreateOrUpdate(t *testing.T) {
 	cm := newTestContractManager(t)
 
 	c, _ := cm.Create(&types.ContractData{
-		Address:     "0x123",
-		Name:        "name",
-		Description: "description",
-		ImageUrl:    "https://image.com",
+		Address:         "0x123",
+		Name:            "name",
+		Description:     "description",
+		ImageUrl:        "https://image.com",
+		ContractVersion: types.ContractVersionUnknown,
 	})
 
 	atTime, err := time.Parse(time.RFC3339, "2021-01-01T00:00:00Z")

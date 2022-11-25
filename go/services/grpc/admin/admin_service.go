@@ -2,10 +2,10 @@ package admin
 
 import (
 	"fmt"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/log"
-	"github.com/shifty11/dao-dao-notifier/notifier"
-	pb "github.com/shifty11/dao-dao-notifier/services/grpc/protobuf/go/admin_service"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/log"
+	"github.com/shifty11/cosmos-notifier/notifier"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

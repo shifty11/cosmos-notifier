@@ -30,7 +30,7 @@ func NewAdminServiceClient(cc grpc.ClientConnInterface) AdminServiceClient {
 }
 
 func (c *adminServiceClient) BroadcastMessage(ctx context.Context, in *BroadcastMessageRequest, opts ...grpc.CallOption) (AdminService_BroadcastMessageClient, error) {
-	stream, err := c.cc.NewStream(ctx, &AdminService_ServiceDesc.Streams[0], "/daodao_notifier_grpc.AdminService/BroadcastMessage", opts...)
+	stream, err := c.cc.NewStream(ctx, &AdminService_ServiceDesc.Streams[0], "/cosmos_notifier_grpc.AdminService/BroadcastMessage", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (x *adminServiceBroadcastMessageServer) Send(m *BroadcastMessageResponse) e
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var AdminService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "daodao_notifier_grpc.AdminService",
+	ServiceName: "cosmos_notifier_grpc.AdminService",
 	HandlerType: (*AdminServiceServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{

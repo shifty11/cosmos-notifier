@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"github.com/shifty11/dao-dao-notifier/types"
+	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 	"time"
 )

@@ -2,8 +2,8 @@ package discord
 
 import (
 	"github.com/bwmarrin/discordgo"
-	"github.com/shifty11/dao-dao-notifier/database"
-	"github.com/shifty11/dao-dao-notifier/log"
+	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/log"
 	"os"
 	"os/signal"
 	"syscall"

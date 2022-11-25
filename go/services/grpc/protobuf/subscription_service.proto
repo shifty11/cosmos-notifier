@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-package daodao_notifier_grpc;
+package cosmos_notifier_grpc;
 
 option go_package = "go/subscription_service";
 

@@ -3,8 +3,8 @@ package auth
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/shifty11/dao-dao-notifier/ent"
-	"github.com/shifty11/dao-dao-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/user"
 	"time"
 )
 
@@ -24,7 +24,7 @@ const (
 )
 
 func AccessibleRoles() map[string][]Role {
-	const path = "/daodao_notifier_grpc"
+	const path = "/cosmos_notifier_grpc"
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
 	const adminService = path + ".AdminService/"

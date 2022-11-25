@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/shifty11/dao-dao-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 )
 
 // TelegramChat is the model entity for the TelegramChat schema.
