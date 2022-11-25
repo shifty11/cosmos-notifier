@@ -85,10 +85,11 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 	}
 
 	data := &types.ContractData{
-		Address:     "0x123",
-		Name:        "test",
-		Description: "description",
-		ImageUrl:    "https://image.com",
+		Address:         "0x123",
+		Name:            "test",
+		Description:     "description",
+		ImageUrl:        "https://image.com",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 
 	c, _ := m.contractManager.Create(data)
@@ -157,10 +158,11 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 	m := newTestTelegramChatManager(t)
 
 	data := &types.ContractData{
-		Address:     "0x123",
-		Name:        "test",
-		Description: "description",
-		ImageUrl:    "https://image.com",
+		Address:         "0x123",
+		Name:            "test",
+		Description:     "description",
+		ImageUrl:        "https://image.com",
+		ContractVersion: types.ContractVersionUnknown,
 	}
 
 	c1, _ := m.contractManager.Create(data)

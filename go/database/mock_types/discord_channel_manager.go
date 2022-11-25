@@ -120,6 +120,20 @@ func (mr *MockIDiscordChannelManagerMockRecorder) DeleteMultiple(channelIds inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMultiple", reflect.TypeOf((*MockIDiscordChannelManager)(nil).DeleteMultiple), channelIds)
 }
 
+// GetAllIds mocks base method.
+func (m *MockIDiscordChannelManager) GetAllIds() []types.DiscordChannelQueryResult {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllIds")
+	ret0, _ := ret[0].([]types.DiscordChannelQueryResult)
+	return ret0
+}
+
+// GetAllIds indicates an expected call of GetAllIds.
+func (mr *MockIDiscordChannelManagerMockRecorder) GetAllIds() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllIds", reflect.TypeOf((*MockIDiscordChannelManager)(nil).GetAllIds))
+}
+
 // GetChannelUsers mocks base method.
 func (m *MockIDiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
 	m.ctrl.T.Helper()
