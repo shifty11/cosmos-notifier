@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	cosmossdktypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	"github.com/robfig/cron/v3"
 	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
@@ -95,6 +94,8 @@ func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []ProposalI
 			log.Sugar.Errorf("Error calling `%v`: %v", url, err)
 		}
 		return nil
+	} else {
+		c.errorCnt[entChain.ID] = 0
 	}
 
 	var props []ProposalInfo
