@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	cosmossdktypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"github.com/robfig/cron/v3"
 	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
