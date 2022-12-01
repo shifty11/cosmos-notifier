@@ -17,6 +17,7 @@ var forbiddenErrors = []string{
 	"Forbidden: bot is not a member of the supergroup chat",
 	"Forbidden: user is deactivated",
 	"Bad Request: chat not found",
+	"Bad Request: group chat was upgraded to a supergroup chat",
 }
 
 type telegramNotifier struct {
