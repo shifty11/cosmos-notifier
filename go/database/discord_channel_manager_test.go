@@ -278,8 +278,8 @@ func TestDiscordChannelManager_Delete(t *testing.T) {
 
 func TestDiscordChannelManager_DeleteMultiple(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeTelegram)
+	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.
 		Create().
@@ -300,4 +300,40 @@ func TestDiscordChannelManager_DeleteMultiple(t *testing.T) {
 		t.Fatalf("Expected 0, got %d", cnt)
 	}
 
+}
+
+func TestDiscordChannelManager_DeleteMultiple_KeepOneUser(t *testing.T) {
+	m := newTestDiscordChannelManager(t)
+	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeDiscord)
+
+	dc := m.client.DiscordChannel.
+		Create().
+		SetChannelID(1).
+		SetName("test").
+		SetIsGroup(false).
+		AddUsers(u1, u2).
+		SaveX(m.ctx)
+	m.client.DiscordChannel.
+		Create().
+		SetChannelID(2).
+		SetName("test").
+		SetIsGroup(false).
+		AddUsers(u2).
+		SaveX(m.ctx)
+
+	m.DeleteMultiple([]int64{dc.ChannelID})
+
+	cnt := m.client.DiscordChannel.Query().CountX(m.ctx)
+	if cnt != 1 {
+		t.Fatalf("Expected 1, got %d", cnt)
+	}
+	cnt = m.client.User.Query().CountX(m.ctx)
+	if cnt != 1 {
+		t.Fatalf("Expected 1, got %d", cnt)
+	}
+	u := m.client.User.Query().OnlyX(m.ctx)
+	if u.ID != u2.ID {
+		t.Fatalf("Expected %d, got %d", u2.ID, u.ID)
+	}
 }
