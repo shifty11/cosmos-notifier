@@ -89,6 +89,7 @@ func (manager *ChainManager) Update(entChain *ent.Chain, chainData *types.Chain,
 	log.Sugar.Infof("Update chain: %v", chainData.PrettyName)
 	c, err := entChain.
 		Update().
+		SetChainID(chainData.ChainId).
 		SetName(chainData.Name).
 		SetPrettyName(chainData.PrettyName).
 		SetPath(chainData.Path).

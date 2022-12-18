@@ -142,7 +142,7 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 	for _, chain := range chainInfo.Chains {
 		var found = false
 		for _, entChain := range c.chainManager.All() {
-			if entChain.ChainID == chain.ChainId {
+			if entChain.Name == chain.Name {
 				found = true
 				if c.chainNeedsUpdate(entChain, &chain) {
 					thumbnailUrl := entChain.ThumbnailURL
