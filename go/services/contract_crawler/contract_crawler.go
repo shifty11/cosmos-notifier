@@ -45,7 +45,7 @@ func (c *ContractCrawler) UpdateContracts() {
 			log.Sugar.Debugf("error while getting config for contract %v (%v): %v", contract.Name, contract.Address, err)
 			continue
 		}
-		proposals, err := client.proposals("")
+		proposals, err := client.proposals(contract.GetProposalsQuery)
 		if err != nil {
 			log.Sugar.Debugf("error while getting proposals for contract %v (%v): %v", contract.Name, contract.Address, err)
 			continue
