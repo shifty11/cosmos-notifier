@@ -2,6 +2,7 @@ import 'package:cosmos_notifier/api/protobuf/dart/admin_service.pbgrpc.dart';
 import 'package:cosmos_notifier/common/header_widget.dart';
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_admin/widget/services/admin_provider.dart';
+import 'package:cosmos_notifier/f_admin/widget/services/stats_provider.dart';
 import 'package:cosmos_notifier/f_home/services/message_provider.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/bottom_navigation_bar_widget.dart';
 import 'package:cosmos_notifier/style.dart';
@@ -25,7 +26,7 @@ __underline__
 ```
 multiline
 ```''';
-  final String telegramHelp = '''<b>bold</b>
+  final String telegramHelp = '''<!--suppress HtmlUnknownAttribute --><b>bold</b>
 <i>italic</i>
 <code>code</code>
 <s>strike</s>
@@ -49,7 +50,7 @@ multiline
         label: Text(receiver),
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(buttonWith, 50),
-          primary: color,
+          foregroundColor: color,
           side: BorderSide(color: color),
         ),
       );
@@ -64,8 +65,8 @@ multiline
       label: Text(receiver),
       style: ElevatedButton.styleFrom(
         minimumSize: const Size(buttonWith, 50),
-        primary: color,
-        onPrimary: Colors.white,
+        backgroundColor: color,
+        foregroundColor: Colors.white,
       ),
     );
   }
@@ -108,7 +109,7 @@ multiline
                 child: const Text('Cancel'),
               ),
               ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: Styles.dangerBgColor, onPrimary: Styles.dangerTextColor),
+                style: ElevatedButton.styleFrom(backgroundColor: Styles.dangerBgColor, foregroundColor: Styles.dangerTextColor),
                 onPressed: () {
                   ref.read(adminProvider.notifier).broadcastMessage(messageController.text, type);
                   Navigator.pop(context);
@@ -120,6 +121,68 @@ multiline
         });
       },
     );
+  }
+
+  Widget stats(BuildContext context) {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      return FutureBuilder(
+        future: ref.watch(statsProvider.future),
+        builder: (BuildContext context, AsyncSnapshot<GetStatsResponse> snapshot) {
+          if (snapshot.hasData) {
+            return DataTable(
+              columns: const [
+                DataColumn(label: Text("Name")),
+                DataColumn(label: Text("Count")),
+              ],
+              rows: [
+                DataRow(cells: [
+                  const DataCell(Text("Total chains")),
+                  DataCell(Text("${snapshot.data!.chains}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Total DAO's")),
+                  DataCell(Text("${snapshot.data!.contracts}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Total users")),
+                  DataCell(Text("${snapshot.data!.users}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Discord users")),
+                  DataCell(Text("${snapshot.data!.discordUsers}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Telegram users")),
+                  DataCell(Text("${snapshot.data!.telegramUsers}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Discord channels")),
+                  DataCell(Text("${snapshot.data!.discordChannels}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Telegram chats")),
+                  DataCell(Text("${snapshot.data!.telegramChats}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Total subscriptions")),
+                  DataCell(Text("${snapshot.data!.subscriptions}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Discord subscriptions")),
+                  DataCell(Text("${snapshot.data!.discordSubscriptions}")),
+                ]),
+                DataRow(cells: [
+                  const DataCell(Text("Telegram subscriptions")),
+                  DataCell(Text("${snapshot.data!.telegramSubscriptions}")),
+                ]),
+              ],
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        },
+      );
+    });
   }
 
   @override
@@ -168,6 +231,8 @@ multiline
                   ),
                   const SizedBox(height: 10),
                   buttons(context),
+                  const SizedBox(height: 50),
+                  Center(child: stats(context)),
                 ],
               ),
             ),

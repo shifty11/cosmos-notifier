@@ -1,4 +1,4 @@
-import 'package:badges/badges.dart';
+import 'package:badges/badges.dart' as badges;
 import 'package:cosmos_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:cosmos_notifier/common/header_widget.dart';
 import 'package:cosmos_notifier/config.dart';
@@ -50,7 +50,7 @@ class SubscriptionPage extends StatelessWidget {
             ),
             Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
               return ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: Styles.dangerBgColor, onPrimary: Styles.dangerTextColor),
+                style: ElevatedButton.styleFrom(backgroundColor: Styles.dangerBgColor, foregroundColor: Styles.dangerTextColor),
                 onPressed: () {
                   ref.read(chatroomListStateProvider.notifier).enableChain(subscription.id, subscription.name, !subscription.isEnabled);
                   Navigator.pop(context);
@@ -85,7 +85,7 @@ class SubscriptionPage extends StatelessWidget {
             ),
             Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
               return ElevatedButton(
-                style: ElevatedButton.styleFrom(primary: Styles.dangerBgColor, onPrimary: Styles.dangerTextColor),
+                style: ElevatedButton.styleFrom(backgroundColor: Styles.dangerBgColor, foregroundColor: Styles.dangerTextColor),
                 onPressed: () {
                   ref.read(chatroomListStateProvider.notifier).deleteDao(subscription.id, subscription.name);
                   Navigator.pop(context);
@@ -146,7 +146,7 @@ class SubscriptionPage extends StatelessWidget {
         const Spacer(),
         Tooltip(
           message: "Subscribed Telegram chats",
-          child: Badge(
+          child: badges.Badge(
             toAnimate: false,
             badgeColor: Styles.telegramColor.withOpacity(0.5),
             badgeContent: Text(
@@ -158,7 +158,7 @@ class SubscriptionPage extends StatelessWidget {
         const SizedBox(width: 3),
         Tooltip(
           message: "Subscribed Discord channels",
-          child: Badge(
+          child: badges.Badge(
             toAnimate: false,
             badgeColor: Styles.discordColor.withOpacity(0.5),
             badgeContent: Text(
@@ -170,7 +170,7 @@ class SubscriptionPage extends StatelessWidget {
         const SizedBox(width: 3),
         Tooltip(
           message: "Total subscriptions",
-          child: Badge(
+          child: badges.Badge(
             toAnimate: false,
             badgeColor: Colors.black.withOpacity(0.5),
             badgeContent: Text(
@@ -431,7 +431,7 @@ class SubscriptionPage extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text("Subscriptions", style: Theme.of(context).textTheme.headline2),
+            Text("Subscriptions", style: Theme.of(context).textTheme.headlineMedium),
             Tooltip(
                 triggerMode: TooltipTriggerMode.tap,
                 showDuration: const Duration(seconds: 5),

@@ -3,7 +3,7 @@
 //  source: admin_service.proto
 //
 // @dart = 2.12
-// ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields,deprecated_member_use_from_same_package
+// ignore_for_file: annotate_overrides,camel_case_types,constant_identifier_names,deprecated_member_use_from_same_package,directives_ordering,library_prefixes,non_constant_identifier_names,prefer_final_fields,return_of_invalid_type,unnecessary_const,unnecessary_import,unnecessary_this,unused_import,unused_shown_name
 
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
@@ -53,3 +53,22 @@ const BroadcastMessageResponse_Status$json = const {
 
 /// Descriptor for `BroadcastMessageResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List broadcastMessageResponseDescriptor = $convert.base64Decode('ChhCcm9hZGNhc3RNZXNzYWdlUmVzcG9uc2USTQoGc3RhdHVzGAEgASgOMjUuY29zbW9zX25vdGlmaWVyX2dycGMuQnJvYWRjYXN0TWVzc2FnZVJlc3BvbnNlLlN0YXR1c1IGc3RhdHVzEhoKCHJlc3BvbnNlGAIgASgJUghyZXNwb25zZSIrCgZTdGF0dXMSCwoHU0VORElORxAAEggKBFNFTlQQARIKCgZGQUlMRUQQAw==');
+@$core.Deprecated('Use getStatsResponseDescriptor instead')
+const GetStatsResponse$json = const {
+  '1': 'GetStatsResponse',
+  '2': const [
+    const {'1': 'chains', '3': 1, '4': 1, '5': 5, '10': 'chains'},
+    const {'1': 'contracts', '3': 2, '4': 1, '5': 5, '10': 'contracts'},
+    const {'1': 'users', '3': 3, '4': 1, '5': 5, '10': 'users'},
+    const {'1': 'telegram_users', '3': 4, '4': 1, '5': 5, '10': 'telegramUsers'},
+    const {'1': 'discord_users', '3': 5, '4': 1, '5': 5, '10': 'discordUsers'},
+    const {'1': 'telegram_chats', '3': 6, '4': 1, '5': 5, '10': 'telegramChats'},
+    const {'1': 'discord_channels', '3': 7, '4': 1, '5': 5, '10': 'discordChannels'},
+    const {'1': 'subscriptions', '3': 8, '4': 1, '5': 5, '10': 'subscriptions'},
+    const {'1': 'telegram_subscriptions', '3': 9, '4': 1, '5': 5, '10': 'telegramSubscriptions'},
+    const {'1': 'discord_subscriptions', '3': 10, '4': 1, '5': 5, '10': 'discordSubscriptions'},
+  ],
+};
+
+/// Descriptor for `GetStatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List getStatsResponseDescriptor = $convert.base64Decode('ChBHZXRTdGF0c1Jlc3BvbnNlEhYKBmNoYWlucxgBIAEoBVIGY2hhaW5zEhwKCWNvbnRyYWN0cxgCIAEoBVIJY29udHJhY3RzEhQKBXVzZXJzGAMgASgFUgV1c2VycxIlCg50ZWxlZ3JhbV91c2VycxgEIAEoBVINdGVsZWdyYW1Vc2VycxIjCg1kaXNjb3JkX3VzZXJzGAUgASgFUgxkaXNjb3JkVXNlcnMSJQoOdGVsZWdyYW1fY2hhdHMYBiABKAVSDXRlbGVncmFtQ2hhdHMSKQoQZGlzY29yZF9jaGFubmVscxgHIAEoBVIPZGlzY29yZENoYW5uZWxzEiQKDXN1YnNjcmlwdGlvbnMYCCABKAVSDXN1YnNjcmlwdGlvbnMSNQoWdGVsZWdyYW1fc3Vic2NyaXB0aW9ucxgJIAEoBVIVdGVsZWdyYW1TdWJzY3JpcHRpb25zEjMKFWRpc2NvcmRfc3Vic2NyaXB0aW9ucxgKIAEoBVIUZGlzY29yZFN1YnNjcmlwdGlvbnM=');
