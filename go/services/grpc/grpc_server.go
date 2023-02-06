@@ -45,7 +45,7 @@ func (s GRPCServer) Run() {
 
 	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken, s.config.DiscordOAuth2Config)
 	subsServer := subscription.NewSubscriptionsServer(s.dbManagers, s.crawlerClient)
-	adminServer := admin.NewAdminServer(s.generalNotifier)
+	adminServer := admin.NewAdminServer(s.generalNotifier, s.dbManagers)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),

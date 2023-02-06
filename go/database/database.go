@@ -101,6 +101,7 @@ type DbManagers struct {
 	SubscriptionManager   *SubscriptionManager
 	ChainManager          *ChainManager
 	ChainProposalManager  *ChainProposalManager
+	StatsManager          *StatsManager
 }
 
 func NewDefaultDbManagers() *DbManagers {
@@ -117,6 +118,7 @@ func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 	telegramChatManager := NewTelegramChatManager(client, ctx, chainManager, contractManager, userManager)
 	subscriptionManager := NewSubscriptionManager(client, ctx, userManager, chainManager, contractManager, telegramChatManager, discordChannelManager)
 	chainProposalManager := NewChainProposalManager(client, ctx)
+	statsManager := NewStatsManager(client, ctx)
 	return &DbManagers{
 		ContractManager:       contractManager,
 		ProposalManager:       proposalManager,
@@ -126,5 +128,6 @@ func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 		SubscriptionManager:   subscriptionManager,
 		ChainManager:          chainManager,
 		ChainProposalManager:  chainProposalManager,
+		StatsManager:          statsManager,
 	}
 }

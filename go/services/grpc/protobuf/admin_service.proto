@@ -1,11 +1,14 @@
 syntax = "proto3";
 
+import "google/protobuf/empty.proto";
+
 package cosmos_notifier_grpc;
 
 option go_package = "go/admin_service";
 
 service AdminService {
   rpc BroadcastMessage (BroadcastMessageRequest) returns (stream BroadcastMessageResponse) {}
+  rpc GetStats (google.protobuf.Empty) returns (GetStatsResponse) {}
 }
 
 message BroadcastMessageRequest {
@@ -27,4 +30,17 @@ message BroadcastMessageResponse {
   }
   Status status = 1;
   string response = 2;
+}
+
+message GetStatsResponse {
+  int32 chains = 1;
+  int32 contracts = 2;
+  int32 users = 3;
+  int32 telegram_users = 4;
+  int32 discord_users = 5;
+  int32 telegram_chats = 6;
+  int32 discord_channels = 7;
+  int32 subscriptions = 8;
+  int32 telegram_subscriptions = 9;
+  int32 discord_subscriptions = 10;
 }

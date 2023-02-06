@@ -40,6 +40,7 @@ func AccessibleRoles() map[string][]Role {
 		subsService + "EnableChain":                {Admin},
 		subsService + "DeleteDao":                  {Admin},
 		adminService + "BroadcastMessage":          {Admin},
+		adminService + "GetStats":                  {Admin},
 	}
 }
 
