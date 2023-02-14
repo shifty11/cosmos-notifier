@@ -23,7 +23,7 @@ class LogoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = _getSize(context);
-    final double fontSize = size / 360 * (Theme.of(context).textTheme.headline3!.fontSize ?? 1);
+    final double fontSize = size / 360 * (Theme.of(context).textTheme.headlineSmall!.fontSize ?? 1);
     return Stack(children: [
       CircleAvatar(
         radius: size / 2,
@@ -43,8 +43,8 @@ class LogoWidget extends StatelessWidget {
           child: Center(
               child: Column(
             children: [
-              Text("Cosmos", style: Theme.of(context).textTheme.headline3?.copyWith(fontSize: fontSize, fontFamily: "Alienated")),
-              Text("Notifier", style: Theme.of(context).textTheme.headline3!.copyWith(fontSize: fontSize, fontFamily: "Alien Robot")),
+              Text("Cosmos", style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: fontSize, fontFamily: "Alienated")),
+              Text("Notifier", style: Theme.of(context).textTheme.displaySmall!.copyWith(fontSize: fontSize, fontFamily: "Alien Robot")),
             ],
           )),
         ),

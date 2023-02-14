@@ -1,6 +1,5 @@
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/auth_service.dart';
-import 'package:cosmos_notifier/f_home/services/canny_query_param_provider.dart';
 import 'package:cosmos_notifier/f_home/services/state/auth_state.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/footer_widget.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/logo_widget.dart';
@@ -63,23 +62,20 @@ class LoginPage extends StatelessWidget {
     }
   }
 
-  Widget cannyButton(BuildContext context, WidgetRef ref) {
-    final cannySSO = ref.watch(cannySSOProvider);
-    return cannySSO.isCannySSO
-        ? ElevatedButton.icon(
-            onPressed: () async => await _launchExternalURL(cannySSO),
-            icon: const Icon(Icons.reviews),
-            label: const Text("Go back to Canny"),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size(170, 50),
-              foregroundColor: Colors.white,
-              backgroundColor: Styles.cannyColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-            ),
-          )
-        : Container();
+  Widget cannyButton(BuildContext context, CannySSO cannySSO) {
+    return ElevatedButton.icon(
+      onPressed: () async => await _launchExternalURL(cannySSO),
+      icon: const Icon(Icons.rate_review_outlined),
+      label: const Text("Go back to Canny"),
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(170, 50),
+        foregroundColor: Colors.white,
+        backgroundColor: Styles.cannyColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32.0),
+        ),
+      ),
+    );
   }
 
   Widget errorMsg() {
@@ -109,7 +105,8 @@ class LoginPage extends StatelessWidget {
                     ],
                   ),
                   child: Text(text,
-                      textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Styles.dangerTextColor)));
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Styles.dangerTextColor)));
             },
           ) ??
           Container();
@@ -154,14 +151,13 @@ class LoginPage extends StatelessWidget {
                 return Text(getHeadlineText(ref), textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall);
               }),
             ),
-            // isCannySSO(context, ref) ? const Text("Canny SSO") : const Text("Not Canny SSO"),
             const Spacer(flex: 1),
             Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
               return ref.watch(loginStateProvider).when(loading: () {
                 return const CircularProgressIndicator();
               }, authenticated: (cannySSO) {
                 if (cannySSO.isCannySSO) {
-                  return cannyButton(context, ref);
+                  return cannyButton(context, cannySSO);
                 } else {
                   return botButtons(context);
                 }

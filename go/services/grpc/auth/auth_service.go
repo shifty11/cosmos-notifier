@@ -187,19 +187,18 @@ func (s *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccess
 }
 
 func (s *AuthServer) CannySSO(ctx context.Context, _ *emptypb.Empty) (*pb.CannySSOResponse, error) {
-	//entUser, ok := ctx.Value("user").(*ent.User)
-	//if !ok {
-	//	log.Sugar.Error("invalid user")
-	//	return nil, status.Errorf(codes.NotFound, "invalid user")
-	//}
+	entUser, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		//"email": fmt.Sprintf("%v-%v@annonymous.com", entUser.Type, entUser.UserID),
 		//"id":    entUser.UserID,
-		//"name":  entUser.Name,
+		"name":  entUser.Name,
 		"email": "raphael.thurnherr1990@gmail.com",
 		"id":    "6111ae303ab6ab4927a638f8",
-		"name":  "Raphael Thurnherr",
 	})
 	signedToken, err := token.SignedString([]byte(s.cannyPrivateKey))
 	if err != nil {

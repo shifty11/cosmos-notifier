@@ -14,7 +14,11 @@ class LoginNotifier extends StateNotifier<LoginState> {
 
   LoginNotifier(this._ref) : super(const LoginState.loading()) {
     _ref.watch(authStateProvider).maybeWhen(authenticated: (_, cannySSO) {
-      state = LoginState.authenticated(cannySSO);
+      if (cannySSO.ssoToken.isEmpty) {
+        state = const LoginState.loading();
+      } else {
+        state = LoginState.authenticated(cannySSO);
+      }
     }, unauthenticated: (cannySSO) {
       state = LoginState.unauthenticated(cannySSO);
     }, orElse: () {
