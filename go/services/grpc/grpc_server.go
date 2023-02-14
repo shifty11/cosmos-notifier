@@ -24,6 +24,7 @@ type Config struct {
 	JwtSecretKey         string
 	TelegramToken        string
 	DiscordOAuth2Config  *oauth2.Config
+	CannyPrivateKey      string
 }
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -43,7 +44,7 @@ func (s GRPCServer) Run() {
 	jwtManager := auth.NewJWTManager([]byte(s.config.JwtSecretKey), s.config.AccessTokenDuration, s.config.RefreshTokenDuration)
 	interceptor := auth.NewAuthInterceptor(jwtManager, s.dbManagers.UserManager, auth.AccessibleRoles())
 
-	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken, s.config.DiscordOAuth2Config)
+	authServer := auth.NewAuthServer(s.dbManagers.UserManager, jwtManager, s.config.TelegramToken, s.config.DiscordOAuth2Config, s.config.CannyPrivateKey)
 	subsServer := subscription.NewSubscriptionsServer(s.dbManagers, s.crawlerClient)
 	adminServer := admin.NewAdminServer(s.generalNotifier, s.dbManagers)
 

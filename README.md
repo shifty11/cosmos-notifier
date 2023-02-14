@@ -71,3 +71,12 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ## Frontend
 
 **[Flutter](webapp/README.md)**
+
+
+## Secrets
+Needs to be recreated if there is a new environment variable.
+
+```bash
+docker secret rm cosmos-notifier-db-user-env
+cat .env.prod | docker secret create cosmos-notifier-db-user-env  -
+```

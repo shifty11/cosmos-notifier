@@ -8,6 +8,7 @@ package auth_service
 
 import (
 	context "context"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -25,6 +26,7 @@ type AuthServiceClient interface {
 	TelegramLogin(ctx context.Context, in *TelegramLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	DiscordLogin(ctx context.Context, in *DiscordLoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	RefreshAccessToken(ctx context.Context, in *RefreshAccessTokenRequest, opts ...grpc.CallOption) (*RefreshAccessTokenResponse, error)
+	CannySSO(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CannySSOResponse, error)
 }
 
 type authServiceClient struct {
@@ -62,6 +64,15 @@ func (c *authServiceClient) RefreshAccessToken(ctx context.Context, in *RefreshA
 	return out, nil
 }
 
+func (c *authServiceClient) CannySSO(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CannySSOResponse, error) {
+	out := new(CannySSOResponse)
+	err := c.cc.Invoke(ctx, "/cosmos_notifier_grpc.AuthService/CannySSO", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
@@ -69,6 +80,7 @@ type AuthServiceServer interface {
 	TelegramLogin(context.Context, *TelegramLoginRequest) (*LoginResponse, error)
 	DiscordLogin(context.Context, *DiscordLoginRequest) (*LoginResponse, error)
 	RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*RefreshAccessTokenResponse, error)
+	CannySSO(context.Context, *empty.Empty) (*CannySSOResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -84,6 +96,9 @@ func (UnimplementedAuthServiceServer) DiscordLogin(context.Context, *DiscordLogi
 }
 func (UnimplementedAuthServiceServer) RefreshAccessToken(context.Context, *RefreshAccessTokenRequest) (*RefreshAccessTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshAccessToken not implemented")
+}
+func (UnimplementedAuthServiceServer) CannySSO(context.Context, *empty.Empty) (*CannySSOResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CannySSO not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -152,6 +167,24 @@ func _AuthService_RefreshAccessToken_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_CannySSO_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).CannySSO(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/cosmos_notifier_grpc.AuthService/CannySSO",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).CannySSO(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +203,10 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RefreshAccessToken",
 			Handler:    _AuthService_RefreshAccessToken_Handler,
+		},
+		{
+			MethodName: "CannySSO",
+			Handler:    _AuthService_CannySSO_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

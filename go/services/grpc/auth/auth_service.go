@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/user"
@@ -14,6 +15,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"time"
 )
@@ -25,6 +27,7 @@ type AuthServer struct {
 	jwtManager          *JWTManager
 	telegramToken       string
 	discordOAuth2Config *oauth2.Config
+	cannyPrivateKey     string
 }
 
 type DiscordIdentity struct {
@@ -37,12 +40,14 @@ func NewAuthServer(
 	jwtManager *JWTManager,
 	telegramToken string,
 	discordOAuth2Config *oauth2.Config,
+	cannyPrivateKey string,
 ) pb.AuthServiceServer {
 	return &AuthServer{
 		userManager:         userManager,
 		jwtManager:          jwtManager,
 		telegramToken:       telegramToken,
 		discordOAuth2Config: discordOAuth2Config,
+		cannyPrivateKey:     cannyPrivateKey,
 	}
 }
 
@@ -179,4 +184,28 @@ func (s *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccess
 
 	res := &pb.RefreshAccessTokenResponse{AccessToken: accessToken}
 	return res, nil
+}
+
+func (s *AuthServer) CannySSO(ctx context.Context, _ *emptypb.Empty) (*pb.CannySSOResponse, error) {
+	//entUser, ok := ctx.Value("user").(*ent.User)
+	//if !ok {
+	//	log.Sugar.Error("invalid user")
+	//	return nil, status.Errorf(codes.NotFound, "invalid user")
+	//}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		//"email": fmt.Sprintf("%v-%v@annonymous.com", entUser.Type, entUser.UserID),
+		//"id":    entUser.UserID,
+		//"name":  entUser.Name,
+		"email": "raphael.thurnherr1990@gmail.com",
+		"id":    "6111ae303ab6ab4927a638f8",
+		"name":  "Raphael Thurnherr",
+	})
+	signedToken, err := token.SignedString([]byte(s.cannyPrivateKey))
+	if err != nil {
+		log.Sugar.Errorf("Could not sign token: %v", err)
+		return nil, ErrorInternal
+	}
+
+	return &pb.CannySSOResponse{AccessToken: signedToken}, nil
 }

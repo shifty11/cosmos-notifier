@@ -145,6 +145,7 @@ var startGrpcServerCmd = &cobra.Command{
 		discordClientSecret := common.GetEnvX("DISCORD_CLIENT_SECRET")
 		nodejsUrl := common.GetEnvX("NODEJS_URL")
 		assetsPath := common.GetEnvX("ASSETS_PATH")
+		cannyPrivateKey := common.GetEnvX("CANNY_PRIVATE_KEY")
 		var config = &grpc.Config{
 			Port:                 ":50051",
 			AccessTokenDuration:  time.Minute * 15,
@@ -158,6 +159,7 @@ var startGrpcServerCmd = &cobra.Command{
 				Scopes:       []string{discord.ScopeIdentify},
 				Endpoint:     discord.Endpoint,
 			},
+			CannyPrivateKey: cannyPrivateKey,
 		}
 		dbManagers := database.NewDefaultDbManagers()
 		not := notifier.NewContractNotifier(dbManagers, telegramBotToken, telegramApiEndpoint, discordBotToken)

@@ -33,6 +33,7 @@ func AccessibleRoles() map[string][]Role {
 		authService + "TelegramLogin":              {Unauthenticated, User, Admin},
 		authService + "DiscordLogin":               {Unauthenticated, User, Admin},
 		authService + "RefreshAccessToken":         {Unauthenticated, User, Admin},
+		authService + "CannySSO":                   {User, Admin},
 		subsService + "GetSubscriptions":           {User, Admin},
 		subsService + "ToggleChainSubscription":    {User, Admin},
 		subsService + "ToggleContractSubscription": {User, Admin},
