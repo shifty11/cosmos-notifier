@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
@@ -194,11 +195,11 @@ func (s *AuthServer) CannySSO(ctx context.Context, _ *emptypb.Empty) (*pb.CannyS
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		//"email": fmt.Sprintf("%v-%v@annonymous.com", entUser.Type, entUser.UserID),
-		//"id":    entUser.UserID,
+		"email": fmt.Sprintf("%v-%v@annonymous.com", entUser.Type, entUser.UserID),
+		"id":    entUser.UserID,
 		"name":  entUser.Name,
-		"email": "raphael.thurnherr1990@gmail.com",
-		"id":    "6111ae303ab6ab4927a638f8",
+		//"email": "raphael.thurnherr1990@gmail.com",	# uncomment to set up SSO in canny
+		//"id":    "6111ae303ab6ab4927a638f8",			# uncomment to set up SSO in canny
 	})
 	signedToken, err := token.SignedString([]byte(s.cannyPrivateKey))
 	if err != nil {
