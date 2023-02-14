@@ -195,7 +195,7 @@ func (s *AuthServer) CannySSO(ctx context.Context, _ *emptypb.Empty) (*pb.CannyS
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"email": fmt.Sprintf("%v-%v@annonymous.com", entUser.Type, entUser.UserID),
+		"email": fmt.Sprintf("%v-%v@cosmos-notifier.com", entUser.Type, entUser.UserID),
 		"id":    entUser.UserID,
 		"name":  entUser.Name,
 		//"email": "raphael.thurnherr1990@gmail.com",	# uncomment to set up SSO in canny
