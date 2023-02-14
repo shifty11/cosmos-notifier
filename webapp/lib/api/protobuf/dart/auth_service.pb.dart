@@ -315,3 +315,50 @@ class RefreshAccessTokenResponse extends $pb.GeneratedMessage {
   void clearAccessToken() => clearField(1);
 }
 
+class CannySSOResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CannySSOResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'accessToken')
+    ..hasRequiredFields = false
+  ;
+
+  CannySSOResponse._() : super();
+  factory CannySSOResponse({
+    $core.String? accessToken,
+  }) {
+    final _result = create();
+    if (accessToken != null) {
+      _result.accessToken = accessToken;
+    }
+    return _result;
+  }
+  factory CannySSOResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CannySSOResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  CannySSOResponse clone() => CannySSOResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  CannySSOResponse copyWith(void Function(CannySSOResponse) updates) => super.copyWith((message) => updates(message as CannySSOResponse)) as CannySSOResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static CannySSOResponse create() => CannySSOResponse._();
+  CannySSOResponse createEmptyInstance() => create();
+  static $pb.PbList<CannySSOResponse> createRepeated() => $pb.PbList<CannySSOResponse>();
+  @$core.pragma('dart2js:noInline')
+  static CannySSOResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CannySSOResponse>(create);
+  static CannySSOResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get accessToken => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set accessToken($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasAccessToken() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearAccessToken() => clearField(1);
+}
+

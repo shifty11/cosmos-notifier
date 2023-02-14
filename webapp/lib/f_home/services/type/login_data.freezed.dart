@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'login_data.dart';
 
@@ -27,29 +27,32 @@ mixin _$TelegramLoginData {
 abstract class $TelegramLoginDataCopyWith<$Res> {
   factory $TelegramLoginDataCopyWith(
           TelegramLoginData value, $Res Function(TelegramLoginData) then) =
-      _$TelegramLoginDataCopyWithImpl<$Res>;
+      _$TelegramLoginDataCopyWithImpl<$Res, TelegramLoginData>;
+  @useResult
   $Res call({String dataStr});
 }
 
 /// @nodoc
-class _$TelegramLoginDataCopyWithImpl<$Res>
+class _$TelegramLoginDataCopyWithImpl<$Res, $Val extends TelegramLoginData>
     implements $TelegramLoginDataCopyWith<$Res> {
   _$TelegramLoginDataCopyWithImpl(this._value, this._then);
 
-  final TelegramLoginData _value;
   // ignore: unused_field
-  final $Res Function(TelegramLoginData) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? dataStr = freezed,
+    Object? dataStr = null,
   }) {
     return _then(_value.copyWith(
-      dataStr: dataStr == freezed
+      dataStr: null == dataStr
           ? _value.dataStr
           : dataStr // ignore: cast_nullable_to_non_nullable
               as String,
-    ));
+    ) as $Val);
   }
 }
 
@@ -60,26 +63,25 @@ abstract class _$$_TelegramLoginDataCopyWith<$Res>
           $Res Function(_$_TelegramLoginData) then) =
       __$$_TelegramLoginDataCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call({String dataStr});
 }
 
 /// @nodoc
 class __$$_TelegramLoginDataCopyWithImpl<$Res>
-    extends _$TelegramLoginDataCopyWithImpl<$Res>
+    extends _$TelegramLoginDataCopyWithImpl<$Res, _$_TelegramLoginData>
     implements _$$_TelegramLoginDataCopyWith<$Res> {
   __$$_TelegramLoginDataCopyWithImpl(
       _$_TelegramLoginData _value, $Res Function(_$_TelegramLoginData) _then)
-      : super(_value, (v) => _then(v as _$_TelegramLoginData));
+      : super(_value, _then);
 
-  @override
-  _$_TelegramLoginData get _value => super._value as _$_TelegramLoginData;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? dataStr = freezed,
+    Object? dataStr = null,
   }) {
     return _then(_$_TelegramLoginData(
-      dataStr == freezed
+      null == dataStr
           ? _value.dataStr
           : dataStr // ignore: cast_nullable_to_non_nullable
               as String,
@@ -105,15 +107,15 @@ class _$_TelegramLoginData extends _TelegramLoginData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_TelegramLoginData &&
-            const DeepCollectionEquality().equals(other.dataStr, dataStr));
+            (identical(other.dataStr, dataStr) || other.dataStr == dataStr));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(dataStr));
+  int get hashCode => Object.hash(runtimeType, dataStr);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_TelegramLoginDataCopyWith<_$_TelegramLoginData> get copyWith =>
       __$$_TelegramLoginDataCopyWithImpl<_$_TelegramLoginData>(
           this, _$identity);
@@ -144,29 +146,32 @@ mixin _$DiscordLoginData {
 abstract class $DiscordLoginDataCopyWith<$Res> {
   factory $DiscordLoginDataCopyWith(
           DiscordLoginData value, $Res Function(DiscordLoginData) then) =
-      _$DiscordLoginDataCopyWithImpl<$Res>;
+      _$DiscordLoginDataCopyWithImpl<$Res, DiscordLoginData>;
+  @useResult
   $Res call({String dataStr});
 }
 
 /// @nodoc
-class _$DiscordLoginDataCopyWithImpl<$Res>
+class _$DiscordLoginDataCopyWithImpl<$Res, $Val extends DiscordLoginData>
     implements $DiscordLoginDataCopyWith<$Res> {
   _$DiscordLoginDataCopyWithImpl(this._value, this._then);
 
-  final DiscordLoginData _value;
   // ignore: unused_field
-  final $Res Function(DiscordLoginData) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? dataStr = freezed,
+    Object? dataStr = null,
   }) {
     return _then(_value.copyWith(
-      dataStr: dataStr == freezed
+      dataStr: null == dataStr
           ? _value.dataStr
           : dataStr // ignore: cast_nullable_to_non_nullable
               as String,
-    ));
+    ) as $Val);
   }
 }
 
@@ -177,26 +182,25 @@ abstract class _$$_DiscordLoginDataCopyWith<$Res>
           _$_DiscordLoginData value, $Res Function(_$_DiscordLoginData) then) =
       __$$_DiscordLoginDataCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call({String dataStr});
 }
 
 /// @nodoc
 class __$$_DiscordLoginDataCopyWithImpl<$Res>
-    extends _$DiscordLoginDataCopyWithImpl<$Res>
+    extends _$DiscordLoginDataCopyWithImpl<$Res, _$_DiscordLoginData>
     implements _$$_DiscordLoginDataCopyWith<$Res> {
   __$$_DiscordLoginDataCopyWithImpl(
       _$_DiscordLoginData _value, $Res Function(_$_DiscordLoginData) _then)
-      : super(_value, (v) => _then(v as _$_DiscordLoginData));
+      : super(_value, _then);
 
-  @override
-  _$_DiscordLoginData get _value => super._value as _$_DiscordLoginData;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? dataStr = freezed,
+    Object? dataStr = null,
   }) {
     return _then(_$_DiscordLoginData(
-      dataStr == freezed
+      null == dataStr
           ? _value.dataStr
           : dataStr // ignore: cast_nullable_to_non_nullable
               as String,
@@ -222,15 +226,15 @@ class _$_DiscordLoginData extends _DiscordLoginData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_DiscordLoginData &&
-            const DeepCollectionEquality().equals(other.dataStr, dataStr));
+            (identical(other.dataStr, dataStr) || other.dataStr == dataStr));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(dataStr));
+  int get hashCode => Object.hash(runtimeType, dataStr);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_DiscordLoginDataCopyWith<_$_DiscordLoginData> get copyWith =>
       __$$_DiscordLoginDataCopyWithImpl<_$_DiscordLoginData>(this, _$identity);
 }

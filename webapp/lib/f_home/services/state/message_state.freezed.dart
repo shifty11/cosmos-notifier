@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'message_state.dart';
 
@@ -24,8 +24,8 @@ mixin _$MessageState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(String? info, String? error)? received,
+    TResult? Function()? initial,
+    TResult? Function(String? info, String? error)? received,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -43,8 +43,8 @@ mixin _$MessageState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Received value)? received,
+    TResult? Function(Initial value)? initial,
+    TResult? Function(Received value)? received,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -60,16 +60,18 @@ mixin _$MessageState {
 abstract class $MessageStateCopyWith<$Res> {
   factory $MessageStateCopyWith(
           MessageState value, $Res Function(MessageState) then) =
-      _$MessageStateCopyWithImpl<$Res>;
+      _$MessageStateCopyWithImpl<$Res, MessageState>;
 }
 
 /// @nodoc
-class _$MessageStateCopyWithImpl<$Res> implements $MessageStateCopyWith<$Res> {
+class _$MessageStateCopyWithImpl<$Res, $Val extends MessageState>
+    implements $MessageStateCopyWith<$Res> {
   _$MessageStateCopyWithImpl(this._value, this._then);
 
-  final MessageState _value;
   // ignore: unused_field
-  final $Res Function(MessageState) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 }
 
 /// @nodoc
@@ -79,13 +81,11 @@ abstract class _$$InitialCopyWith<$Res> {
 }
 
 /// @nodoc
-class __$$InitialCopyWithImpl<$Res> extends _$MessageStateCopyWithImpl<$Res>
+class __$$InitialCopyWithImpl<$Res>
+    extends _$MessageStateCopyWithImpl<$Res, _$Initial>
     implements _$$InitialCopyWith<$Res> {
   __$$InitialCopyWithImpl(_$Initial _value, $Res Function(_$Initial) _then)
-      : super(_value, (v) => _then(v as _$Initial));
-
-  @override
-  _$Initial get _value => super._value as _$Initial;
+      : super(_value, _then);
 }
 
 /// @nodoc
@@ -119,8 +119,8 @@ class _$Initial extends Initial {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(String? info, String? error)? received,
+    TResult? Function()? initial,
+    TResult? Function(String? info, String? error)? received,
   }) {
     return initial?.call();
   }
@@ -150,8 +150,8 @@ class _$Initial extends Initial {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Received value)? received,
+    TResult? Function(Initial value)? initial,
+    TResult? Function(Received value)? received,
   }) {
     return initial?.call(this);
   }
@@ -180,29 +180,29 @@ abstract class _$$ReceivedCopyWith<$Res> {
   factory _$$ReceivedCopyWith(
           _$Received value, $Res Function(_$Received) then) =
       __$$ReceivedCopyWithImpl<$Res>;
+  @useResult
   $Res call({String? info, String? error});
 }
 
 /// @nodoc
-class __$$ReceivedCopyWithImpl<$Res> extends _$MessageStateCopyWithImpl<$Res>
+class __$$ReceivedCopyWithImpl<$Res>
+    extends _$MessageStateCopyWithImpl<$Res, _$Received>
     implements _$$ReceivedCopyWith<$Res> {
   __$$ReceivedCopyWithImpl(_$Received _value, $Res Function(_$Received) _then)
-      : super(_value, (v) => _then(v as _$Received));
+      : super(_value, _then);
 
-  @override
-  _$Received get _value => super._value as _$Received;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? info = freezed,
     Object? error = freezed,
   }) {
     return _then(_$Received(
-      info: info == freezed
+      info: freezed == info
           ? _value.info
           : info // ignore: cast_nullable_to_non_nullable
               as String?,
-      error: error == freezed
+      error: freezed == error
           ? _value.error
           : error // ignore: cast_nullable_to_non_nullable
               as String?,
@@ -230,18 +230,16 @@ class _$Received extends Received {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$Received &&
-            const DeepCollectionEquality().equals(other.info, info) &&
-            const DeepCollectionEquality().equals(other.error, error));
+            (identical(other.info, info) || other.info == info) &&
+            (identical(other.error, error) || other.error == error));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(info),
-      const DeepCollectionEquality().hash(error));
+  int get hashCode => Object.hash(runtimeType, info, error);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$ReceivedCopyWith<_$Received> get copyWith =>
       __$$ReceivedCopyWithImpl<_$Received>(this, _$identity);
 
@@ -257,8 +255,8 @@ class _$Received extends Received {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? initial,
-    TResult Function(String? info, String? error)? received,
+    TResult? Function()? initial,
+    TResult? Function(String? info, String? error)? received,
   }) {
     return received?.call(info, error);
   }
@@ -288,8 +286,8 @@ class _$Received extends Received {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Received value)? received,
+    TResult? Function(Initial value)? initial,
+    TResult? Function(Received value)? received,
   }) {
     return received?.call(this);
   }

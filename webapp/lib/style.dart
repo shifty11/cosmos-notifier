@@ -45,6 +45,7 @@ class Styles {
   static const dangerTextColor = Colors.white;
   static const telegramColor = Color(0xFF54A9E9);
   static const discordColor = Color(0xFF6C89E0);
+  static const cannyColor = Color(0xFF525DF9);
 
   static ThemeData customTheme(CustomThemeData themeParams, bool isDarkTheme) {
     return _defaultTheme(
@@ -84,7 +85,6 @@ class Styles {
       canvasColor: bgColor,
       bottomNavigationBarTheme: BottomNavigationBarThemeData(backgroundColor: bgColorLight, unselectedItemColor: borderColor),
       unselectedWidgetColor: borderColor,
-      toggleableActiveColor: primaryColor,
       inputDecorationTheme: InputDecorationTheme(
           labelStyle: TextStyle(color: textColor),
           hintStyle: const TextStyle(color: borderColor),
@@ -92,32 +92,32 @@ class Styles {
           enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: borderColor))),
       dialogBackgroundColor: bgColor,
       textTheme: TextTheme(
-        headline1: const TextStyle().copyWith(fontSize: 64),
-        headline2: const TextStyle().copyWith(fontSize: 40),
-        headline3: const TextStyle().copyWith(fontSize: 24),
-        headline4: const TextStyle().copyWith(fontSize: 22),
-        headline5: const TextStyle().copyWith(fontSize: 20),
-        headline6: const TextStyle().copyWith(fontSize: 18),
-        bodyText1: const TextStyle(),
-        bodyText2: const TextStyle(),
-        subtitle1: const TextStyle(),
-        subtitle2: const TextStyle(),
-        caption: const TextStyle(),
-        overline: const TextStyle(),
-        button: const TextStyle(),
+        displayMedium: const TextStyle().copyWith(fontSize: 64),
+        displaySmall: const TextStyle().copyWith(fontSize: 40),
+        headlineMedium: const TextStyle().copyWith(fontSize: 24),
+        headlineSmall: const TextStyle().copyWith(fontSize: 22),
+        titleLarge: const TextStyle().copyWith(fontSize: 20),
+        titleMedium: const TextStyle().copyWith(fontSize: 18),
+        bodyMedium: const TextStyle(),
+        bodySmall: const TextStyle(),
+        titleSmall: const TextStyle(),
+        bodyLarge: const TextStyle(),
+        labelLarge: const TextStyle(),
+        labelMedium: const TextStyle(),
+        labelSmall: const TextStyle(),
       ).apply(
         bodyColor: textColor,
         displayColor: textColor,
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          primary: textColor,
+          foregroundColor: textColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-            primary: primaryColor,
+            foregroundColor: primaryColor,
             side: BorderSide(color: primaryColor),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -125,8 +125,8 @@ class Styles {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-            primary: primaryColor, // Button color
-            onPrimary: textColor, // Text color
+            backgroundColor: primaryColor, // Button color
+            foregroundColor: textColor, // Text color
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(5)),
             )),

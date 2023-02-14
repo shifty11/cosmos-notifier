@@ -63,3 +63,13 @@ const RefreshAccessTokenResponse$json = const {
 
 /// Descriptor for `RefreshAccessTokenResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List refreshAccessTokenResponseDescriptor = $convert.base64Decode('ChpSZWZyZXNoQWNjZXNzVG9rZW5SZXNwb25zZRIhCgxhY2Nlc3NfdG9rZW4YASABKAlSC2FjY2Vzc1Rva2Vu');
+@$core.Deprecated('Use cannySSOResponseDescriptor instead')
+const CannySSOResponse$json = const {
+  '1': 'CannySSOResponse',
+  '2': const [
+    const {'1': 'access_token', '3': 1, '4': 1, '5': 9, '10': 'accessToken'},
+  ],
+};
+
+/// Descriptor for `CannySSOResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List cannySSOResponseDescriptor = $convert.base64Decode('ChBDYW5ueVNTT1Jlc3BvbnNlEiEKDGFjY2Vzc190b2tlbhgBIAEoCVILYWNjZXNzVG9rZW4=');

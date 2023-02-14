@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'subscription_list_state.dart';
 
@@ -26,8 +26,8 @@ mixin _$SubscriptionListState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? loading,
-    TResult Function(
+    TResult? Function()? loading,
+    TResult? Function(
             List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
         data,
   }) =>
@@ -49,8 +49,8 @@ mixin _$SubscriptionListState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Loading value)? loading,
-    TResult Function(Data value)? data,
+    TResult? Function(Loading value)? loading,
+    TResult? Function(Data value)? data,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -66,17 +66,19 @@ mixin _$SubscriptionListState {
 abstract class $SubscriptionListStateCopyWith<$Res> {
   factory $SubscriptionListStateCopyWith(SubscriptionListState value,
           $Res Function(SubscriptionListState) then) =
-      _$SubscriptionListStateCopyWithImpl<$Res>;
+      _$SubscriptionListStateCopyWithImpl<$Res, SubscriptionListState>;
 }
 
 /// @nodoc
-class _$SubscriptionListStateCopyWithImpl<$Res>
+class _$SubscriptionListStateCopyWithImpl<$Res,
+        $Val extends SubscriptionListState>
     implements $SubscriptionListStateCopyWith<$Res> {
   _$SubscriptionListStateCopyWithImpl(this._value, this._then);
 
-  final SubscriptionListState _value;
   // ignore: unused_field
-  final $Res Function(SubscriptionListState) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 }
 
 /// @nodoc
@@ -87,13 +89,10 @@ abstract class _$$LoadingCopyWith<$Res> {
 
 /// @nodoc
 class __$$LoadingCopyWithImpl<$Res>
-    extends _$SubscriptionListStateCopyWithImpl<$Res>
+    extends _$SubscriptionListStateCopyWithImpl<$Res, _$Loading>
     implements _$$LoadingCopyWith<$Res> {
   __$$LoadingCopyWithImpl(_$Loading _value, $Res Function(_$Loading) _then)
-      : super(_value, (v) => _then(v as _$Loading));
-
-  @override
-  _$Loading get _value => super._value as _$Loading;
+      : super(_value, _then);
 }
 
 /// @nodoc
@@ -129,8 +128,8 @@ class _$Loading extends Loading {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? loading,
-    TResult Function(
+    TResult? Function()? loading,
+    TResult? Function(
             List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
         data,
   }) {
@@ -164,8 +163,8 @@ class _$Loading extends Loading {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Loading value)? loading,
-    TResult Function(Data value)? data,
+    TResult? Function(Loading value)? loading,
+    TResult? Function(Data value)? data,
   }) {
     return loading?.call(this);
   }
@@ -193,30 +192,29 @@ abstract class Loading extends SubscriptionListState {
 abstract class _$$DataCopyWith<$Res> {
   factory _$$DataCopyWith(_$Data value, $Res Function(_$Data) then) =
       __$$DataCopyWithImpl<$Res>;
+  @useResult
   $Res call({List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms});
 }
 
 /// @nodoc
 class __$$DataCopyWithImpl<$Res>
-    extends _$SubscriptionListStateCopyWithImpl<$Res>
+    extends _$SubscriptionListStateCopyWithImpl<$Res, _$Data>
     implements _$$DataCopyWith<$Res> {
   __$$DataCopyWithImpl(_$Data _value, $Res Function(_$Data) _then)
-      : super(_value, (v) => _then(v as _$Data));
+      : super(_value, _then);
 
-  @override
-  _$Data get _value => super._value as _$Data;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? chainChatRooms = freezed,
-    Object? contractChatRooms = freezed,
+    Object? chainChatRooms = null,
+    Object? contractChatRooms = null,
   }) {
     return _then(_$Data(
-      chainChatRooms: chainChatRooms == freezed
+      chainChatRooms: null == chainChatRooms
           ? _value._chainChatRooms
           : chainChatRooms // ignore: cast_nullable_to_non_nullable
               as List<ChatRoom>,
-      contractChatRooms: contractChatRooms == freezed
+      contractChatRooms: null == contractChatRooms
           ? _value._contractChatRooms
           : contractChatRooms // ignore: cast_nullable_to_non_nullable
               as List<ChatRoom>,
@@ -237,6 +235,7 @@ class _$Data extends Data {
   final List<ChatRoom> _chainChatRooms;
   @override
   List<ChatRoom> get chainChatRooms {
+    if (_chainChatRooms is EqualUnmodifiableListView) return _chainChatRooms;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_chainChatRooms);
   }
@@ -244,6 +243,8 @@ class _$Data extends Data {
   final List<ChatRoom> _contractChatRooms;
   @override
   List<ChatRoom> get contractChatRooms {
+    if (_contractChatRooms is EqualUnmodifiableListView)
+      return _contractChatRooms;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_contractChatRooms);
   }
@@ -272,6 +273,7 @@ class _$Data extends Data {
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$DataCopyWith<_$Data> get copyWith =>
       __$$DataCopyWithImpl<_$Data>(this, _$identity);
 
@@ -289,8 +291,8 @@ class _$Data extends Data {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function()? loading,
-    TResult Function(
+    TResult? Function()? loading,
+    TResult? Function(
             List<ChatRoom> chainChatRooms, List<ChatRoom> contractChatRooms)?
         data,
   }) {
@@ -324,8 +326,8 @@ class _$Data extends Data {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Loading value)? loading,
-    TResult Function(Data value)? data,
+    TResult? Function(Loading value)? loading,
+    TResult? Function(Data value)? data,
   }) {
     return data?.call(this);
   }

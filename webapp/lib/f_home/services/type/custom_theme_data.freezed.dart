@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'custom_theme_data.dart';
 
@@ -44,7 +44,8 @@ mixin _$CustomThemeData {
 abstract class $CustomThemeDataCopyWith<$Res> {
   factory $CustomThemeDataCopyWith(
           CustomThemeData value, $Res Function(CustomThemeData) then) =
-      _$CustomThemeDataCopyWithImpl<$Res>;
+      _$CustomThemeDataCopyWithImpl<$Res, CustomThemeData>;
+  @useResult
   $Res call(
       {@JsonKey(name: 'bg_color', fromJson: colorFromJson, toJson: colorToJson)
           Color bgColor,
@@ -61,49 +62,51 @@ abstract class $CustomThemeDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$CustomThemeDataCopyWithImpl<$Res>
+class _$CustomThemeDataCopyWithImpl<$Res, $Val extends CustomThemeData>
     implements $CustomThemeDataCopyWith<$Res> {
   _$CustomThemeDataCopyWithImpl(this._value, this._then);
 
-  final CustomThemeData _value;
   // ignore: unused_field
-  final $Res Function(CustomThemeData) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? bgColor = freezed,
-    Object? textColor = freezed,
-    Object? hintColor = freezed,
-    Object? linkColor = freezed,
-    Object? buttonColor = freezed,
-    Object? buttonTextColor = freezed,
+    Object? bgColor = null,
+    Object? textColor = null,
+    Object? hintColor = null,
+    Object? linkColor = null,
+    Object? buttonColor = null,
+    Object? buttonTextColor = null,
   }) {
     return _then(_value.copyWith(
-      bgColor: bgColor == freezed
+      bgColor: null == bgColor
           ? _value.bgColor
           : bgColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      textColor: textColor == freezed
+      textColor: null == textColor
           ? _value.textColor
           : textColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      hintColor: hintColor == freezed
+      hintColor: null == hintColor
           ? _value.hintColor
           : hintColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      linkColor: linkColor == freezed
+      linkColor: null == linkColor
           ? _value.linkColor
           : linkColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      buttonColor: buttonColor == freezed
+      buttonColor: null == buttonColor
           ? _value.buttonColor
           : buttonColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      buttonTextColor: buttonTextColor == freezed
+      buttonTextColor: null == buttonTextColor
           ? _value.buttonTextColor
           : buttonTextColor // ignore: cast_nullable_to_non_nullable
               as Color,
-    ));
+    ) as $Val);
   }
 }
 
@@ -114,6 +117,7 @@ abstract class _$$_CustomThemeDataCopyWith<$Res>
           _$_CustomThemeData value, $Res Function(_$_CustomThemeData) then) =
       __$$_CustomThemeDataCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call(
       {@JsonKey(name: 'bg_color', fromJson: colorFromJson, toJson: colorToJson)
           Color bgColor,
@@ -131,46 +135,44 @@ abstract class _$$_CustomThemeDataCopyWith<$Res>
 
 /// @nodoc
 class __$$_CustomThemeDataCopyWithImpl<$Res>
-    extends _$CustomThemeDataCopyWithImpl<$Res>
+    extends _$CustomThemeDataCopyWithImpl<$Res, _$_CustomThemeData>
     implements _$$_CustomThemeDataCopyWith<$Res> {
   __$$_CustomThemeDataCopyWithImpl(
       _$_CustomThemeData _value, $Res Function(_$_CustomThemeData) _then)
-      : super(_value, (v) => _then(v as _$_CustomThemeData));
+      : super(_value, _then);
 
-  @override
-  _$_CustomThemeData get _value => super._value as _$_CustomThemeData;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? bgColor = freezed,
-    Object? textColor = freezed,
-    Object? hintColor = freezed,
-    Object? linkColor = freezed,
-    Object? buttonColor = freezed,
-    Object? buttonTextColor = freezed,
+    Object? bgColor = null,
+    Object? textColor = null,
+    Object? hintColor = null,
+    Object? linkColor = null,
+    Object? buttonColor = null,
+    Object? buttonTextColor = null,
   }) {
     return _then(_$_CustomThemeData(
-      bgColor: bgColor == freezed
+      bgColor: null == bgColor
           ? _value.bgColor
           : bgColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      textColor: textColor == freezed
+      textColor: null == textColor
           ? _value.textColor
           : textColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      hintColor: hintColor == freezed
+      hintColor: null == hintColor
           ? _value.hintColor
           : hintColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      linkColor: linkColor == freezed
+      linkColor: null == linkColor
           ? _value.linkColor
           : linkColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      buttonColor: buttonColor == freezed
+      buttonColor: null == buttonColor
           ? _value.buttonColor
           : buttonColor // ignore: cast_nullable_to_non_nullable
               as Color,
-      buttonTextColor: buttonTextColor == freezed
+      buttonTextColor: null == buttonTextColor
           ? _value.buttonTextColor
           : buttonTextColor // ignore: cast_nullable_to_non_nullable
               as Color,
@@ -228,29 +230,27 @@ class _$_CustomThemeData implements _CustomThemeData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_CustomThemeData &&
-            const DeepCollectionEquality().equals(other.bgColor, bgColor) &&
-            const DeepCollectionEquality().equals(other.textColor, textColor) &&
-            const DeepCollectionEquality().equals(other.hintColor, hintColor) &&
-            const DeepCollectionEquality().equals(other.linkColor, linkColor) &&
-            const DeepCollectionEquality()
-                .equals(other.buttonColor, buttonColor) &&
-            const DeepCollectionEquality()
-                .equals(other.buttonTextColor, buttonTextColor));
+            (identical(other.bgColor, bgColor) || other.bgColor == bgColor) &&
+            (identical(other.textColor, textColor) ||
+                other.textColor == textColor) &&
+            (identical(other.hintColor, hintColor) ||
+                other.hintColor == hintColor) &&
+            (identical(other.linkColor, linkColor) ||
+                other.linkColor == linkColor) &&
+            (identical(other.buttonColor, buttonColor) ||
+                other.buttonColor == buttonColor) &&
+            (identical(other.buttonTextColor, buttonTextColor) ||
+                other.buttonTextColor == buttonTextColor));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(bgColor),
-      const DeepCollectionEquality().hash(textColor),
-      const DeepCollectionEquality().hash(hintColor),
-      const DeepCollectionEquality().hash(linkColor),
-      const DeepCollectionEquality().hash(buttonColor),
-      const DeepCollectionEquality().hash(buttonTextColor));
+  int get hashCode => Object.hash(runtimeType, bgColor, textColor, hintColor,
+      linkColor, buttonColor, buttonTextColor);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_CustomThemeDataCopyWith<_$_CustomThemeData> get copyWith =>
       __$$_CustomThemeDataCopyWithImpl<_$_CustomThemeData>(this, _$identity);
 

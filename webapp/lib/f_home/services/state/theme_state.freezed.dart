@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'theme_state.dart';
 
@@ -25,8 +25,8 @@ mixin _$ThemeState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function(ThemeData darkStyle, ThemeData lightStyle)? initial,
-    TResult Function(ThemeData style)? custom,
+    TResult? Function(ThemeData darkStyle, ThemeData lightStyle)? initial,
+    TResult? Function(ThemeData style)? custom,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -44,8 +44,8 @@ mixin _$ThemeState {
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Custom value)? custom,
+    TResult? Function(Initial value)? initial,
+    TResult? Function(Custom value)? custom,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -61,45 +61,47 @@ mixin _$ThemeState {
 abstract class $ThemeStateCopyWith<$Res> {
   factory $ThemeStateCopyWith(
           ThemeState value, $Res Function(ThemeState) then) =
-      _$ThemeStateCopyWithImpl<$Res>;
+      _$ThemeStateCopyWithImpl<$Res, ThemeState>;
 }
 
 /// @nodoc
-class _$ThemeStateCopyWithImpl<$Res> implements $ThemeStateCopyWith<$Res> {
+class _$ThemeStateCopyWithImpl<$Res, $Val extends ThemeState>
+    implements $ThemeStateCopyWith<$Res> {
   _$ThemeStateCopyWithImpl(this._value, this._then);
 
-  final ThemeState _value;
   // ignore: unused_field
-  final $Res Function(ThemeState) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 }
 
 /// @nodoc
 abstract class _$$InitialCopyWith<$Res> {
   factory _$$InitialCopyWith(_$Initial value, $Res Function(_$Initial) then) =
       __$$InitialCopyWithImpl<$Res>;
+  @useResult
   $Res call({ThemeData darkStyle, ThemeData lightStyle});
 }
 
 /// @nodoc
-class __$$InitialCopyWithImpl<$Res> extends _$ThemeStateCopyWithImpl<$Res>
+class __$$InitialCopyWithImpl<$Res>
+    extends _$ThemeStateCopyWithImpl<$Res, _$Initial>
     implements _$$InitialCopyWith<$Res> {
   __$$InitialCopyWithImpl(_$Initial _value, $Res Function(_$Initial) _then)
-      : super(_value, (v) => _then(v as _$Initial));
+      : super(_value, _then);
 
-  @override
-  _$Initial get _value => super._value as _$Initial;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? darkStyle = freezed,
-    Object? lightStyle = freezed,
+    Object? darkStyle = null,
+    Object? lightStyle = null,
   }) {
     return _then(_$Initial(
-      darkStyle: darkStyle == freezed
+      darkStyle: null == darkStyle
           ? _value.darkStyle
           : darkStyle // ignore: cast_nullable_to_non_nullable
               as ThemeData,
-      lightStyle: lightStyle == freezed
+      lightStyle: null == lightStyle
           ? _value.lightStyle
           : lightStyle // ignore: cast_nullable_to_non_nullable
               as ThemeData,
@@ -109,7 +111,7 @@ class __$$InitialCopyWithImpl<$Res> extends _$ThemeStateCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$Initial extends Initial with DiagnosticableTreeMixin {
+class _$Initial extends Initial {
   const _$Initial({required this.darkStyle, required this.lightStyle})
       : super._();
 
@@ -119,17 +121,8 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
   final ThemeData lightStyle;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString() {
     return 'ThemeState.initial(darkStyle: $darkStyle, lightStyle: $lightStyle)';
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('type', 'ThemeState.initial'))
-      ..add(DiagnosticsProperty('darkStyle', darkStyle))
-      ..add(DiagnosticsProperty('lightStyle', lightStyle));
   }
 
   @override
@@ -137,19 +130,18 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$Initial &&
-            const DeepCollectionEquality().equals(other.darkStyle, darkStyle) &&
-            const DeepCollectionEquality()
-                .equals(other.lightStyle, lightStyle));
+            (identical(other.darkStyle, darkStyle) ||
+                other.darkStyle == darkStyle) &&
+            (identical(other.lightStyle, lightStyle) ||
+                other.lightStyle == lightStyle));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(darkStyle),
-      const DeepCollectionEquality().hash(lightStyle));
+  int get hashCode => Object.hash(runtimeType, darkStyle, lightStyle);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$InitialCopyWith<_$Initial> get copyWith =>
       __$$InitialCopyWithImpl<_$Initial>(this, _$identity);
 
@@ -166,8 +158,8 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function(ThemeData darkStyle, ThemeData lightStyle)? initial,
-    TResult Function(ThemeData style)? custom,
+    TResult? Function(ThemeData darkStyle, ThemeData lightStyle)? initial,
+    TResult? Function(ThemeData style)? custom,
   }) {
     return initial?.call(darkStyle, lightStyle);
   }
@@ -197,8 +189,8 @@ class _$Initial extends Initial with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Custom value)? custom,
+    TResult? Function(Initial value)? initial,
+    TResult? Function(Custom value)? custom,
   }) {
     return initial?.call(this);
   }
@@ -234,24 +226,24 @@ abstract class Initial extends ThemeState {
 abstract class _$$CustomCopyWith<$Res> {
   factory _$$CustomCopyWith(_$Custom value, $Res Function(_$Custom) then) =
       __$$CustomCopyWithImpl<$Res>;
+  @useResult
   $Res call({ThemeData style});
 }
 
 /// @nodoc
-class __$$CustomCopyWithImpl<$Res> extends _$ThemeStateCopyWithImpl<$Res>
+class __$$CustomCopyWithImpl<$Res>
+    extends _$ThemeStateCopyWithImpl<$Res, _$Custom>
     implements _$$CustomCopyWith<$Res> {
   __$$CustomCopyWithImpl(_$Custom _value, $Res Function(_$Custom) _then)
-      : super(_value, (v) => _then(v as _$Custom));
+      : super(_value, _then);
 
-  @override
-  _$Custom get _value => super._value as _$Custom;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? style = freezed,
+    Object? style = null,
   }) {
     return _then(_$Custom(
-      style: style == freezed
+      style: null == style
           ? _value.style
           : style // ignore: cast_nullable_to_non_nullable
               as ThemeData,
@@ -261,23 +253,15 @@ class __$$CustomCopyWithImpl<$Res> extends _$ThemeStateCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$Custom extends Custom with DiagnosticableTreeMixin {
+class _$Custom extends Custom {
   const _$Custom({required this.style}) : super._();
 
   @override
   final ThemeData style;
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+  String toString() {
     return 'ThemeState.custom(style: $style)';
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties
-      ..add(DiagnosticsProperty('type', 'ThemeState.custom'))
-      ..add(DiagnosticsProperty('style', style));
   }
 
   @override
@@ -285,15 +269,15 @@ class _$Custom extends Custom with DiagnosticableTreeMixin {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$Custom &&
-            const DeepCollectionEquality().equals(other.style, style));
+            (identical(other.style, style) || other.style == style));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(style));
+  int get hashCode => Object.hash(runtimeType, style);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$CustomCopyWith<_$Custom> get copyWith =>
       __$$CustomCopyWithImpl<_$Custom>(this, _$identity);
 
@@ -310,8 +294,8 @@ class _$Custom extends Custom with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult Function(ThemeData darkStyle, ThemeData lightStyle)? initial,
-    TResult Function(ThemeData style)? custom,
+    TResult? Function(ThemeData darkStyle, ThemeData lightStyle)? initial,
+    TResult? Function(ThemeData style)? custom,
   }) {
     return custom?.call(style);
   }
@@ -341,8 +325,8 @@ class _$Custom extends Custom with DiagnosticableTreeMixin {
   @override
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>({
-    TResult Function(Initial value)? initial,
-    TResult Function(Custom value)? custom,
+    TResult? Function(Initial value)? initial,
+    TResult? Function(Custom value)? custom,
   }) {
     return custom?.call(this);
   }

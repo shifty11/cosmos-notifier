@@ -1,7 +1,7 @@
 // coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint
-// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'subscription_data_type.dart';
 
@@ -28,34 +28,37 @@ mixin _$SubscriptionData {
 abstract class $SubscriptionDataCopyWith<$Res> {
   factory $SubscriptionDataCopyWith(
           SubscriptionData value, $Res Function(SubscriptionData) then) =
-      _$SubscriptionDataCopyWithImpl<$Res>;
+      _$SubscriptionDataCopyWithImpl<$Res, SubscriptionData>;
+  @useResult
   $Res call({Subscription subscription, int index});
 }
 
 /// @nodoc
-class _$SubscriptionDataCopyWithImpl<$Res>
+class _$SubscriptionDataCopyWithImpl<$Res, $Val extends SubscriptionData>
     implements $SubscriptionDataCopyWith<$Res> {
   _$SubscriptionDataCopyWithImpl(this._value, this._then);
 
-  final SubscriptionData _value;
   // ignore: unused_field
-  final $Res Function(SubscriptionData) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? subscription = freezed,
-    Object? index = freezed,
+    Object? subscription = null,
+    Object? index = null,
   }) {
     return _then(_value.copyWith(
-      subscription: subscription == freezed
+      subscription: null == subscription
           ? _value.subscription
           : subscription // ignore: cast_nullable_to_non_nullable
               as Subscription,
-      index: index == freezed
+      index: null == index
           ? _value.index
           : index // ignore: cast_nullable_to_non_nullable
               as int,
-    ));
+    ) as $Val);
   }
 }
 
@@ -66,31 +69,30 @@ abstract class _$$_SubscriptionDataCopyWith<$Res>
           _$_SubscriptionData value, $Res Function(_$_SubscriptionData) then) =
       __$$_SubscriptionDataCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call({Subscription subscription, int index});
 }
 
 /// @nodoc
 class __$$_SubscriptionDataCopyWithImpl<$Res>
-    extends _$SubscriptionDataCopyWithImpl<$Res>
+    extends _$SubscriptionDataCopyWithImpl<$Res, _$_SubscriptionData>
     implements _$$_SubscriptionDataCopyWith<$Res> {
   __$$_SubscriptionDataCopyWithImpl(
       _$_SubscriptionData _value, $Res Function(_$_SubscriptionData) _then)
-      : super(_value, (v) => _then(v as _$_SubscriptionData));
+      : super(_value, _then);
 
-  @override
-  _$_SubscriptionData get _value => super._value as _$_SubscriptionData;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? subscription = freezed,
-    Object? index = freezed,
+    Object? subscription = null,
+    Object? index = null,
   }) {
     return _then(_$_SubscriptionData(
-      subscription == freezed
+      null == subscription
           ? _value.subscription
           : subscription // ignore: cast_nullable_to_non_nullable
               as Subscription,
-      index == freezed
+      null == index
           ? _value.index
           : index // ignore: cast_nullable_to_non_nullable
               as int,
@@ -118,19 +120,17 @@ class _$_SubscriptionData implements _SubscriptionData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_SubscriptionData &&
-            const DeepCollectionEquality()
-                .equals(other.subscription, subscription) &&
-            const DeepCollectionEquality().equals(other.index, index));
+            (identical(other.subscription, subscription) ||
+                other.subscription == subscription) &&
+            (identical(other.index, index) || other.index == index));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      const DeepCollectionEquality().hash(subscription),
-      const DeepCollectionEquality().hash(index));
+  int get hashCode => Object.hash(runtimeType, subscription, index);
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_SubscriptionDataCopyWith<_$_SubscriptionData> get copyWith =>
       __$$_SubscriptionDataCopyWithImpl<_$_SubscriptionData>(this, _$identity);
 }
@@ -165,7 +165,8 @@ mixin _$ChatroomData {
 abstract class $ChatroomDataCopyWith<$Res> {
   factory $ChatroomDataCopyWith(
           ChatroomData value, $Res Function(ChatroomData) then) =
-      _$ChatroomDataCopyWithImpl<$Res>;
+      _$ChatroomDataCopyWithImpl<$Res, ChatroomData>;
+  @useResult
   $Res call(
       {fixnum.Int64 chatRoomId,
       String username,
@@ -174,38 +175,41 @@ abstract class $ChatroomDataCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$ChatroomDataCopyWithImpl<$Res> implements $ChatroomDataCopyWith<$Res> {
+class _$ChatroomDataCopyWithImpl<$Res, $Val extends ChatroomData>
+    implements $ChatroomDataCopyWith<$Res> {
   _$ChatroomDataCopyWithImpl(this._value, this._then);
 
-  final ChatroomData _value;
   // ignore: unused_field
-  final $Res Function(ChatroomData) _then;
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
 
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? chatRoomId = freezed,
-    Object? username = freezed,
-    Object? subscriptions = freezed,
-    Object? filtered = freezed,
+    Object? chatRoomId = null,
+    Object? username = null,
+    Object? subscriptions = null,
+    Object? filtered = null,
   }) {
     return _then(_value.copyWith(
-      chatRoomId: chatRoomId == freezed
+      chatRoomId: null == chatRoomId
           ? _value.chatRoomId
           : chatRoomId // ignore: cast_nullable_to_non_nullable
               as fixnum.Int64,
-      username: username == freezed
+      username: null == username
           ? _value.username
           : username // ignore: cast_nullable_to_non_nullable
               as String,
-      subscriptions: subscriptions == freezed
+      subscriptions: null == subscriptions
           ? _value.subscriptions
           : subscriptions // ignore: cast_nullable_to_non_nullable
               as List<Subscription>,
-      filtered: filtered == freezed
+      filtered: null == filtered
           ? _value.filtered
           : filtered // ignore: cast_nullable_to_non_nullable
               as List<SubscriptionData>,
-    ));
+    ) as $Val);
   }
 }
 
@@ -216,6 +220,7 @@ abstract class _$$_ChatroomDataCopyWith<$Res>
           _$_ChatroomData value, $Res Function(_$_ChatroomData) then) =
       __$$_ChatroomDataCopyWithImpl<$Res>;
   @override
+  @useResult
   $Res call(
       {fixnum.Int64 chatRoomId,
       String username,
@@ -225,36 +230,34 @@ abstract class _$$_ChatroomDataCopyWith<$Res>
 
 /// @nodoc
 class __$$_ChatroomDataCopyWithImpl<$Res>
-    extends _$ChatroomDataCopyWithImpl<$Res>
+    extends _$ChatroomDataCopyWithImpl<$Res, _$_ChatroomData>
     implements _$$_ChatroomDataCopyWith<$Res> {
   __$$_ChatroomDataCopyWithImpl(
       _$_ChatroomData _value, $Res Function(_$_ChatroomData) _then)
-      : super(_value, (v) => _then(v as _$_ChatroomData));
+      : super(_value, _then);
 
-  @override
-  _$_ChatroomData get _value => super._value as _$_ChatroomData;
-
+  @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? chatRoomId = freezed,
-    Object? username = freezed,
-    Object? subscriptions = freezed,
-    Object? filtered = freezed,
+    Object? chatRoomId = null,
+    Object? username = null,
+    Object? subscriptions = null,
+    Object? filtered = null,
   }) {
     return _then(_$_ChatroomData(
-      chatRoomId == freezed
+      null == chatRoomId
           ? _value.chatRoomId
           : chatRoomId // ignore: cast_nullable_to_non_nullable
               as fixnum.Int64,
-      username == freezed
+      null == username
           ? _value.username
           : username // ignore: cast_nullable_to_non_nullable
               as String,
-      subscriptions == freezed
+      null == subscriptions
           ? _value._subscriptions
           : subscriptions // ignore: cast_nullable_to_non_nullable
               as List<Subscription>,
-      filtered == freezed
+      null == filtered
           ? _value._filtered
           : filtered // ignore: cast_nullable_to_non_nullable
               as List<SubscriptionData>,
@@ -281,6 +284,7 @@ class _$_ChatroomData extends _ChatroomData {
   final List<Subscription> _subscriptions;
   @override
   List<Subscription> get subscriptions {
+    if (_subscriptions is EqualUnmodifiableListView) return _subscriptions;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_subscriptions);
   }
@@ -288,6 +292,7 @@ class _$_ChatroomData extends _ChatroomData {
   final List<SubscriptionData> _filtered;
   @override
   List<SubscriptionData> get filtered {
+    if (_filtered is EqualUnmodifiableListView) return _filtered;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_filtered);
   }
@@ -302,9 +307,10 @@ class _$_ChatroomData extends _ChatroomData {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$_ChatroomData &&
-            const DeepCollectionEquality()
-                .equals(other.chatRoomId, chatRoomId) &&
-            const DeepCollectionEquality().equals(other.username, username) &&
+            (identical(other.chatRoomId, chatRoomId) ||
+                other.chatRoomId == chatRoomId) &&
+            (identical(other.username, username) ||
+                other.username == username) &&
             const DeepCollectionEquality()
                 .equals(other._subscriptions, _subscriptions) &&
             const DeepCollectionEquality().equals(other._filtered, _filtered));
@@ -313,13 +319,14 @@ class _$_ChatroomData extends _ChatroomData {
   @override
   int get hashCode => Object.hash(
       runtimeType,
-      const DeepCollectionEquality().hash(chatRoomId),
-      const DeepCollectionEquality().hash(username),
+      chatRoomId,
+      username,
       const DeepCollectionEquality().hash(_subscriptions),
       const DeepCollectionEquality().hash(_filtered));
 
   @JsonKey(ignore: true)
   @override
+  @pragma('vm:prefer-inline')
   _$$_ChatroomDataCopyWith<_$_ChatroomData> get copyWith =>
       __$$_ChatroomDataCopyWithImpl<_$_ChatroomData>(this, _$identity);
 }

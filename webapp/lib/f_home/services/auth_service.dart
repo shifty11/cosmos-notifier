@@ -3,14 +3,14 @@ library script.js;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
-import 'package:grpc/grpc.dart';
-import 'package:grpc/grpc_connection_interface.dart';
-import 'package:js/js.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/auth_service.pbgrpc.dart';
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/jwt_manager.dart';
 import 'package:cosmos_notifier/f_home/services/type/login_data.dart';
+import 'package:flutter/foundation.dart';
+import 'package:grpc/grpc.dart';
+import 'package:grpc/grpc_connection_interface.dart';
+import 'package:js/js.dart';
 
 @JS()
 external String getTelegramInitData();

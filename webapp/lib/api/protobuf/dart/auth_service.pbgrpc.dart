@@ -11,6 +11,7 @@ import 'dart:core' as $core;
 
 import 'package:grpc/service_api.dart' as $grpc;
 import 'auth_service.pb.dart' as $2;
+import 'google/protobuf/empty.pb.dart' as $1;
 export 'auth_service.pb.dart';
 
 class AuthServiceClient extends $grpc.Client {
@@ -30,6 +31,10 @@ class AuthServiceClient extends $grpc.Client {
       ($2.RefreshAccessTokenRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
           $2.RefreshAccessTokenResponse.fromBuffer(value));
+  static final _$cannySSO = $grpc.ClientMethod<$1.Empty, $2.CannySSOResponse>(
+      '/cosmos_notifier_grpc.AuthService/CannySSO',
+      ($1.Empty value) => value.writeToBuffer(),
+      ($core.List<$core.int> value) => $2.CannySSOResponse.fromBuffer(value));
 
   AuthServiceClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -52,6 +57,11 @@ class AuthServiceClient extends $grpc.Client {
       $2.RefreshAccessTokenRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$refreshAccessToken, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$2.CannySSOResponse> cannySSO($1.Empty request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$cannySSO, request, options: options);
   }
 }
 
@@ -84,6 +94,13 @@ abstract class AuthServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $2.RefreshAccessTokenRequest.fromBuffer(value),
         ($2.RefreshAccessTokenResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$1.Empty, $2.CannySSOResponse>(
+        'CannySSO',
+        cannySSO_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
+        ($2.CannySSOResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$2.LoginResponse> telegramLogin_Pre($grpc.ServiceCall call,
@@ -102,10 +119,17 @@ abstract class AuthServiceBase extends $grpc.Service {
     return refreshAccessToken(call, await request);
   }
 
+  $async.Future<$2.CannySSOResponse> cannySSO_Pre(
+      $grpc.ServiceCall call, $async.Future<$1.Empty> request) async {
+    return cannySSO(call, await request);
+  }
+
   $async.Future<$2.LoginResponse> telegramLogin(
       $grpc.ServiceCall call, $2.TelegramLoginRequest request);
   $async.Future<$2.LoginResponse> discordLogin(
       $grpc.ServiceCall call, $2.DiscordLoginRequest request);
   $async.Future<$2.RefreshAccessTokenResponse> refreshAccessToken(
       $grpc.ServiceCall call, $2.RefreshAccessTokenRequest request);
+  $async.Future<$2.CannySSOResponse> cannySSO(
+      $grpc.ServiceCall call, $1.Empty request);
 }

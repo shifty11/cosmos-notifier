@@ -1,3 +1,5 @@
+import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
+import 'package:cosmos_notifier/f_home/services/canny_query_param_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cosmos_notifier/config.dart';
@@ -8,7 +10,7 @@ import 'auth_service.dart';
 final authProvider = Provider<AuthService>((ref) => authService);
 
 final authStateProvider = StateNotifierProvider<AuthNotifier, AuthState>(
-  (ref) => AuthNotifier(ref.watch(authProvider)),
+  (ref) => AuthNotifier(ref.watch(authProvider), ref.watch(cannySSOProvider)),
 );
 
 final authStateValueProvider = Provider<ValueNotifier<AuthState>>((ref) {
@@ -22,8 +24,9 @@ final authStateValueProvider = Provider<ValueNotifier<AuthState>>((ref) {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final AuthService _authService;
+  final CannySSO _cannySSO;
 
-  AuthNotifier(this._authService) : super(const AuthState.initial()) {
+  AuthNotifier(this._authService, this._cannySSO) : super(const AuthState.initial()) {
     if (_authService.hasLoginData) {
       login();
       _authService.addListener(() {
@@ -32,20 +35,30 @@ class AuthNotifier extends StateNotifier<AuthState> {
         }
       });
     } else {
-      state = const AuthState.unauthenticated();
-      _authService.backgroundInit().then((isAuthenticated) {
+      state = AuthState.unauthenticated(_cannySSO);
+      _authService.backgroundInit().then((isAuthenticated) async {
         if (isAuthenticated) {
-          state = const AuthState.authenticated(false);
+          var cannySSOResult = await _getCannySSO();
+          state = AuthState.authenticated(false, cannySSOResult);
         }
       });
     }
+  }
+
+  Future<CannySSO> _getCannySSO() async {
+    if (_cannySSO.isCannySSO) {
+      var response = await _authService.cannySSO(Empty());
+      return _cannySSO.copyWith(ssoToken: response.accessToken);
+    }
+    return const CannySSO(false, "", "", "");
   }
 
   Future<void> login() async {
     try {
       state = const AuthState.loading();
       await _authService.init();
-      state = const AuthState.authenticated(true);
+      var cannySSOResult = await _getCannySSO();
+      state = AuthState.authenticated(true, cannySSOResult);
     } catch (e) {
       if (cDebugMode) {
         print("AuthNotifier: error -> $e");
