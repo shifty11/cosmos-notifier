@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/log"
@@ -69,7 +70,7 @@ func (manager *ChainManager) GetByName(name string) (*ent.Chain, error) {
 }
 
 func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string) *ent.Chain {
-	log.Sugar.Infof("Create new chain: %v (%v)", chainData.PrettyName, chainData.ChainId)
+	log.Sugar.Infof("Create new chain: %v (%v)", chainData.Name, chainData.ChainId)
 	c, err := manager.client.Chain.
 		Create().
 		SetChainID(chainData.ChainId).
