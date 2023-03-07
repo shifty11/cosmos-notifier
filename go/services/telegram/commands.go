@@ -28,7 +28,7 @@ const subscriptionsMsg = `🚀 Cosmos Notifier started.
 %v
 🔔 Active subscriptions: %v
 
-*How does it work?*
+<b>How does it work?</b>
 - You subscribe to a Chain or DAO
 - Someone creates a new proposal on this Chain or DAO
 - A notification that a new proposal is up for voting is sent to this chat
@@ -62,7 +62,7 @@ func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 	cnt := client.TelegramChatManager.CountSubscriptions(chatId)
 	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf(subscriptionsMsg, adminText, cnt))
 	msg.ReplyMarkup = replyMarkup
-	msg.ParseMode = "markdown"
+	msg.ParseMode = "html"
 	msg.DisableWebPagePreview = true
 	_, err := client.api.Send(msg)
 	if err != nil {
