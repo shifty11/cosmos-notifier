@@ -68,8 +68,8 @@ jobs:
         uses: docker/build-push-action@v4.0.0
         if: steps.changes.outputs.envoy == 'true'
         with:
-          context: webapp/
-          file: webapp/envoy.Dockerfile
+          context: docker/envoy/
+          file: docker/envoy/envoy.Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-envoy:latest
           labels: ${{ steps.meta.outputs.labels }}
