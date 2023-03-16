@@ -80,6 +80,8 @@ services:
 
   envoy:
     image: ghcr.io/shifty11/cosmos-notifier-envoy:latest
+    volumes:
+      - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
     deploy:
       placement:
         constraints:

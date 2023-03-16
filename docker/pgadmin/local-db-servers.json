@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Cosmos Notifier (dev)",
+      "Group": "Cosmos Notifier",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "cosmos-notifier-db",
+      "Username": "postgres",
+      "PassFile": "/pgpass",
+      "SSLMode": "prefer"
+    }
+  }
+}

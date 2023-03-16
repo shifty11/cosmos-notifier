@@ -26,8 +26,8 @@ services:
       - POSTGRES_DB=cosmos-notifier-db
 
   pgadmin:
-    image: dpage/pgadmin4:5.4
-    container_name: pgadmin
+    image: dpage/pgadmin4:6.21
+    container_name: cosmos_notifier_pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
@@ -35,10 +35,20 @@ services:
       driver: "none"
     volumes:
        - pgadmin:/root/.pgadmin
-       - ./local-db-servers.json:/pgadmin4/servers.json
+       - ./docker/pgadmin/local-db-servers.json:/pgadmin4/servers.json
     ports:
-      - "5051:80"
+      - "5050:80"
     restart: unless-stopped
+
+  envoy:
+    image: envoyproxy/envoy-dev
+    container_name: cosmos_notifier_envoy
+    extra_hosts:
+      - "grpc:host-gateway"
+    ports:
+      - "8090:8090"
+    volumes:
+      - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
 
 volumes:
   data:
@@ -46,4 +56,4 @@ volumes:
   test_data:
     name: cosmos_notifier_test_data
   pgadmin:
-    name: pgadmin
+    name: cosmos_notifier_pgadmin
