@@ -26,6 +26,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            envoy:
+              - 'docker/envoy/**'
+            go:
+              - 'go/**'
+            nodejs:
+              - 'nodejs/**'
+            webapp:
+              - 'webapp/**'
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
@@ -34,6 +47,7 @@ jobs:
 
       - name: Build and push go Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        if: steps.changes.outputs.go == 'true'
         with:
           context: go/
           push: true
@@ -45,6 +59,7 @@ jobs:
 
       - name: Build and push nodejs Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        if: steps.changes.outputs.nodejs == 'true'
         with:
           context: nodejs/
           push: true
@@ -56,6 +71,7 @@ jobs:
 
       - name: Build and push envoy Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        if: steps.changes.outputs.envoy == 'true'
         with:
           context: webapp/
           file: webapp/envoy.Dockerfile
@@ -68,6 +84,7 @@ jobs:
 
       - name: Build and push flutter Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        if: steps.changes.outputs.webapp == 'true'
         with:
           context: webapp/
           file: webapp/flutter.Dockerfile
