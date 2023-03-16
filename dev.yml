@@ -103,10 +103,12 @@ services:
   envoy:
     image: envoyproxy/envoy-dev
     container_name: cosmos_notifier_envoy
+    extra_hosts:
+      - "grpc:host-gateway"
     ports:
       - "8090:8090"
     volumes:
-      - ./webapp/envoy.yaml:/etc/envoy/envoy.yaml
+      - ./docker/envoy/envoy.yaml:/etc/envoy/envoy.yaml
 
   webapp:
     env_file:
