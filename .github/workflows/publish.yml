@@ -39,6 +39,9 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-go:latest
           labels: ${{ steps.meta.outputs.labels }}
+        only:
+          changes:
+            - go/**/*
 
       - name: Build and push nodejs Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -47,6 +50,9 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-nodejs:latest
           labels: ${{ steps.meta.outputs.labels }}
+        only:
+          changes:
+            - nodejs/**/*
 
       - name: Build and push flutter Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
@@ -57,6 +63,9 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-webapp:latest
           labels: ${{ steps.meta.outputs.labels }}
           build-args: CONFIG_FILE=lib/env.dart
+        only:
+          changes:
+            - webapp/**/*
 
       - name: Deploy to swarm
         uses: wshihadeh/docker-deployment-action@v1
