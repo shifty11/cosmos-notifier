@@ -26,7 +26,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: dorny/paths-filter@v2
+      - name: Detect changes
+        uses: dorny/paths-filter@v2.11.1
         id: changes
         with:
           filters: |
