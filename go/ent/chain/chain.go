@@ -31,12 +31,16 @@ const (
 	FieldImageURL = "image_url"
 	// FieldThumbnailURL holds the string denoting the thumbnail_url field in the database.
 	FieldThumbnailURL = "thumbnail_url"
+	// FieldBech32Prefix holds the string denoting the bech32_prefix field in the database.
+	FieldBech32Prefix = "bech32_prefix"
 	// EdgeChainProposals holds the string denoting the chain_proposals edge name in mutations.
 	EdgeChainProposals = "chain_proposals"
 	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
 	EdgeTelegramChats = "telegram_chats"
 	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
 	EdgeDiscordChannels = "discord_channels"
+	// EdgeAddressTrackers holds the string denoting the address_trackers edge name in mutations.
+	EdgeAddressTrackers = "address_trackers"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
 	// ChainProposalsTable is the table that holds the chain_proposals relation/edge.
@@ -56,6 +60,13 @@ const (
 	// DiscordChannelsInverseTable is the table name for the DiscordChannel entity.
 	// It exists in this package in order to avoid circular dependency with the "discordchannel" package.
 	DiscordChannelsInverseTable = "discord_channels"
+	// AddressTrackersTable is the table that holds the address_trackers relation/edge.
+	AddressTrackersTable = "address_trackers"
+	// AddressTrackersInverseTable is the table name for the AddressTracker entity.
+	// It exists in this package in order to avoid circular dependency with the "addresstracker" package.
+	AddressTrackersInverseTable = "address_trackers"
+	// AddressTrackersColumn is the table column denoting the address_trackers relation/edge.
+	AddressTrackersColumn = "chain_address_trackers"
 )
 
 // Columns holds all SQL columns for chain fields.
@@ -71,6 +82,7 @@ var Columns = []string{
 	FieldIsEnabled,
 	FieldImageURL,
 	FieldThumbnailURL,
+	FieldBech32Prefix,
 }
 
 var (
@@ -107,4 +119,6 @@ var (
 	DefaultIsEnabled bool
 	// DefaultThumbnailURL holds the default value on creation for the "thumbnail_url" field.
 	DefaultThumbnailURL string
+	// DefaultBech32Prefix holds the default value on creation for the "bech32_prefix" field.
+	DefaultBech32Prefix string
 )

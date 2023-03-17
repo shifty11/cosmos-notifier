@@ -10,6 +10,11 @@ import (
 
 	"github.com/shifty11/cosmos-notifier/ent/migrate"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
@@ -17,10 +22,6 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
-
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -28,6 +29,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// AddressTracker is the client for interacting with the AddressTracker builders.
+	AddressTracker *AddressTrackerClient
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
 	// ChainProposal is the client for interacting with the ChainProposal builders.
@@ -46,7 +49,7 @@ type Client struct {
 
 // NewClient creates a new client configured with the given options.
 func NewClient(opts ...Option) *Client {
-	cfg := config{log: log.Println, hooks: &hooks{}}
+	cfg := config{log: log.Println, hooks: &hooks{}, inters: &inters{}}
 	cfg.options(opts...)
 	client := &Client{config: cfg}
 	client.init()
@@ -55,6 +58,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.AddressTracker = NewAddressTrackerClient(c.config)
 	c.Chain = NewChainClient(c.config)
 	c.ChainProposal = NewChainProposalClient(c.config)
 	c.Contract = NewContractClient(c.config)
@@ -62,6 +66,55 @@ func (c *Client) init() {
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
 	c.TelegramChat = NewTelegramChatClient(c.config)
 	c.User = NewUserClient(c.config)
+}
+
+type (
+	// config is the configuration for the client and its builder.
+	config struct {
+		// driver used for executing database requests.
+		driver dialect.Driver
+		// debug enable a debug logging.
+		debug bool
+		// log used for logging on debug mode.
+		log func(...any)
+		// hooks to execute on mutations.
+		hooks *hooks
+		// interceptors to execute on queries.
+		inters *inters
+	}
+	// Option function to configure the client.
+	Option func(*config)
+)
+
+// options applies the options on the config object.
+func (c *config) options(opts ...Option) {
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.debug {
+		c.driver = dialect.Debug(c.driver, c.log)
+	}
+}
+
+// Debug enables debug logging on the ent.Driver.
+func Debug() Option {
+	return func(c *config) {
+		c.debug = true
+	}
+}
+
+// Log sets the logging function for debug mode.
+func Log(fn func(...any)) Option {
+	return func(c *config) {
+		c.log = fn
+	}
+}
+
+// Driver configures the client driver.
+func Driver(driver dialect.Driver) Option {
+	return func(c *config) {
+		c.driver = driver
+	}
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -95,6 +148,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
+		AddressTracker:   NewAddressTrackerClient(cfg),
 		Chain:            NewChainClient(cfg),
 		ChainProposal:    NewChainProposalClient(cfg),
 		Contract:         NewContractClient(cfg),
@@ -121,6 +175,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:              ctx,
 		config:           cfg,
+		AddressTracker:   NewAddressTrackerClient(cfg),
 		Chain:            NewChainClient(cfg),
 		ChainProposal:    NewChainProposalClient(cfg),
 		Contract:         NewContractClient(cfg),
@@ -134,7 +189,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Chain.
+//		AddressTracker.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -156,13 +211,229 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Chain.Use(hooks...)
-	c.ChainProposal.Use(hooks...)
-	c.Contract.Use(hooks...)
-	c.ContractProposal.Use(hooks...)
-	c.DiscordChannel.Use(hooks...)
-	c.TelegramChat.Use(hooks...)
-	c.User.Use(hooks...)
+	for _, n := range []interface{ Use(...Hook) }{
+		c.AddressTracker, c.Chain, c.ChainProposal, c.Contract, c.ContractProposal,
+		c.DiscordChannel, c.TelegramChat, c.User,
+	} {
+		n.Use(hooks...)
+	}
+}
+
+// Intercept adds the query interceptors to all the entity clients.
+// In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
+func (c *Client) Intercept(interceptors ...Interceptor) {
+	for _, n := range []interface{ Intercept(...Interceptor) }{
+		c.AddressTracker, c.Chain, c.ChainProposal, c.Contract, c.ContractProposal,
+		c.DiscordChannel, c.TelegramChat, c.User,
+	} {
+		n.Intercept(interceptors...)
+	}
+}
+
+// Mutate implements the ent.Mutator interface.
+func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
+	switch m := m.(type) {
+	case *AddressTrackerMutation:
+		return c.AddressTracker.mutate(ctx, m)
+	case *ChainMutation:
+		return c.Chain.mutate(ctx, m)
+	case *ChainProposalMutation:
+		return c.ChainProposal.mutate(ctx, m)
+	case *ContractMutation:
+		return c.Contract.mutate(ctx, m)
+	case *ContractProposalMutation:
+		return c.ContractProposal.mutate(ctx, m)
+	case *DiscordChannelMutation:
+		return c.DiscordChannel.mutate(ctx, m)
+	case *TelegramChatMutation:
+		return c.TelegramChat.mutate(ctx, m)
+	case *UserMutation:
+		return c.User.mutate(ctx, m)
+	default:
+		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AddressTrackerClient is a client for the AddressTracker schema.
+type AddressTrackerClient struct {
+	config
+}
+
+// NewAddressTrackerClient returns a client for the AddressTracker from the given config.
+func NewAddressTrackerClient(c config) *AddressTrackerClient {
+	return &AddressTrackerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `addresstracker.Hooks(f(g(h())))`.
+func (c *AddressTrackerClient) Use(hooks ...Hook) {
+	c.hooks.AddressTracker = append(c.hooks.AddressTracker, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `addresstracker.Intercept(f(g(h())))`.
+func (c *AddressTrackerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AddressTracker = append(c.inters.AddressTracker, interceptors...)
+}
+
+// Create returns a builder for creating a AddressTracker entity.
+func (c *AddressTrackerClient) Create() *AddressTrackerCreate {
+	mutation := newAddressTrackerMutation(c.config, OpCreate)
+	return &AddressTrackerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AddressTracker entities.
+func (c *AddressTrackerClient) CreateBulk(builders ...*AddressTrackerCreate) *AddressTrackerCreateBulk {
+	return &AddressTrackerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AddressTracker.
+func (c *AddressTrackerClient) Update() *AddressTrackerUpdate {
+	mutation := newAddressTrackerMutation(c.config, OpUpdate)
+	return &AddressTrackerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AddressTrackerClient) UpdateOne(at *AddressTracker) *AddressTrackerUpdateOne {
+	mutation := newAddressTrackerMutation(c.config, OpUpdateOne, withAddressTracker(at))
+	return &AddressTrackerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AddressTrackerClient) UpdateOneID(id int) *AddressTrackerUpdateOne {
+	mutation := newAddressTrackerMutation(c.config, OpUpdateOne, withAddressTrackerID(id))
+	return &AddressTrackerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AddressTracker.
+func (c *AddressTrackerClient) Delete() *AddressTrackerDelete {
+	mutation := newAddressTrackerMutation(c.config, OpDelete)
+	return &AddressTrackerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AddressTrackerClient) DeleteOne(at *AddressTracker) *AddressTrackerDeleteOne {
+	return c.DeleteOneID(at.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AddressTrackerClient) DeleteOneID(id int) *AddressTrackerDeleteOne {
+	builder := c.Delete().Where(addresstracker.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AddressTrackerDeleteOne{builder}
+}
+
+// Query returns a query builder for AddressTracker.
+func (c *AddressTrackerClient) Query() *AddressTrackerQuery {
+	return &AddressTrackerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAddressTracker},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AddressTracker entity by its id.
+func (c *AddressTrackerClient) Get(ctx context.Context, id int) (*AddressTracker, error) {
+	return c.Query().Where(addresstracker.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AddressTrackerClient) GetX(ctx context.Context, id int) *AddressTracker {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChain queries the chain edge of a AddressTracker.
+func (c *AddressTrackerClient) QueryChain(at *AddressTracker) *ChainQuery {
+	query := (&ChainClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, addresstracker.ChainTable, addresstracker.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannel queries the discord_channel edge of a AddressTracker.
+func (c *AddressTrackerClient) QueryDiscordChannel(at *AddressTracker) *DiscordChannelQuery {
+	query := (&DiscordChannelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, addresstracker.DiscordChannelTable, addresstracker.DiscordChannelColumn),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTelegramChat queries the telegram_chat edge of a AddressTracker.
+func (c *AddressTrackerClient) QueryTelegramChat(at *AddressTracker) *TelegramChatQuery {
+	query := (&TelegramChatClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, addresstracker.TelegramChatTable, addresstracker.TelegramChatColumn),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryChainProposals queries the chain_proposals edge of a AddressTracker.
+func (c *AddressTrackerClient) QueryChainProposals(at *AddressTracker) *ChainProposalQuery {
+	query := (&ChainProposalClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, id),
+			sqlgraph.To(chainproposal.Table, chainproposal.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, addresstracker.ChainProposalsTable, addresstracker.ChainProposalsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AddressTrackerClient) Hooks() []Hook {
+	return c.hooks.AddressTracker
+}
+
+// Interceptors returns the client interceptors.
+func (c *AddressTrackerClient) Interceptors() []Interceptor {
+	return c.inters.AddressTracker
+}
+
+func (c *AddressTrackerClient) mutate(ctx context.Context, m *AddressTrackerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AddressTrackerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AddressTrackerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AddressTrackerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AddressTrackerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AddressTracker mutation op: %q", m.Op())
+	}
 }
 
 // ChainClient is a client for the Chain schema.
@@ -179,6 +450,12 @@ func NewChainClient(c config) *ChainClient {
 // A call to `Use(f, g, h)` equals to `chain.Hooks(f(g(h())))`.
 func (c *ChainClient) Use(hooks ...Hook) {
 	c.hooks.Chain = append(c.hooks.Chain, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `chain.Intercept(f(g(h())))`.
+func (c *ChainClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Chain = append(c.inters.Chain, interceptors...)
 }
 
 // Create returns a builder for creating a Chain entity.
@@ -233,6 +510,8 @@ func (c *ChainClient) DeleteOneID(id int) *ChainDeleteOne {
 func (c *ChainClient) Query() *ChainQuery {
 	return &ChainQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeChain},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -252,7 +531,7 @@ func (c *ChainClient) GetX(ctx context.Context, id int) *Chain {
 
 // QueryChainProposals queries the chain_proposals edge of a Chain.
 func (c *ChainClient) QueryChainProposals(ch *Chain) *ChainProposalQuery {
-	query := &ChainProposalQuery{config: c.config}
+	query := (&ChainProposalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
@@ -268,7 +547,7 @@ func (c *ChainClient) QueryChainProposals(ch *Chain) *ChainProposalQuery {
 
 // QueryTelegramChats queries the telegram_chats edge of a Chain.
 func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
-	query := &TelegramChatQuery{config: c.config}
+	query := (&TelegramChatClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
@@ -284,7 +563,7 @@ func (c *ChainClient) QueryTelegramChats(ch *Chain) *TelegramChatQuery {
 
 // QueryDiscordChannels queries the discord_channels edge of a Chain.
 func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
-	query := &DiscordChannelQuery{config: c.config}
+	query := (&DiscordChannelClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ch.ID
 		step := sqlgraph.NewStep(
@@ -298,9 +577,45 @@ func (c *ChainClient) QueryDiscordChannels(ch *Chain) *DiscordChannelQuery {
 	return query
 }
 
+// QueryAddressTrackers queries the address_trackers edge of a Chain.
+func (c *ChainClient) QueryAddressTrackers(ch *Chain) *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.AddressTrackersTable, chain.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChainClient) Hooks() []Hook {
 	return c.hooks.Chain
+}
+
+// Interceptors returns the client interceptors.
+func (c *ChainClient) Interceptors() []Interceptor {
+	return c.inters.Chain
+}
+
+func (c *ChainClient) mutate(ctx context.Context, m *ChainMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ChainCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ChainUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ChainUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ChainDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Chain mutation op: %q", m.Op())
+	}
 }
 
 // ChainProposalClient is a client for the ChainProposal schema.
@@ -317,6 +632,12 @@ func NewChainProposalClient(c config) *ChainProposalClient {
 // A call to `Use(f, g, h)` equals to `chainproposal.Hooks(f(g(h())))`.
 func (c *ChainProposalClient) Use(hooks ...Hook) {
 	c.hooks.ChainProposal = append(c.hooks.ChainProposal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `chainproposal.Intercept(f(g(h())))`.
+func (c *ChainProposalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ChainProposal = append(c.inters.ChainProposal, interceptors...)
 }
 
 // Create returns a builder for creating a ChainProposal entity.
@@ -371,6 +692,8 @@ func (c *ChainProposalClient) DeleteOneID(id int) *ChainProposalDeleteOne {
 func (c *ChainProposalClient) Query() *ChainProposalQuery {
 	return &ChainProposalQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeChainProposal},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -390,7 +713,7 @@ func (c *ChainProposalClient) GetX(ctx context.Context, id int) *ChainProposal {
 
 // QueryChain queries the chain edge of a ChainProposal.
 func (c *ChainProposalClient) QueryChain(cp *ChainProposal) *ChainQuery {
-	query := &ChainQuery{config: c.config}
+	query := (&ChainClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cp.ID
 		step := sqlgraph.NewStep(
@@ -404,9 +727,45 @@ func (c *ChainProposalClient) QueryChain(cp *ChainProposal) *ChainQuery {
 	return query
 }
 
+// QueryAddressTracker queries the address_tracker edge of a ChainProposal.
+func (c *ChainProposalClient) QueryAddressTracker(cp *ChainProposal) *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chainproposal.Table, chainproposal.FieldID, id),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chainproposal.AddressTrackerTable, chainproposal.AddressTrackerPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(cp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ChainProposalClient) Hooks() []Hook {
 	return c.hooks.ChainProposal
+}
+
+// Interceptors returns the client interceptors.
+func (c *ChainProposalClient) Interceptors() []Interceptor {
+	return c.inters.ChainProposal
+}
+
+func (c *ChainProposalClient) mutate(ctx context.Context, m *ChainProposalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ChainProposalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ChainProposalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ChainProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ChainProposalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ChainProposal mutation op: %q", m.Op())
+	}
 }
 
 // ContractClient is a client for the Contract schema.
@@ -423,6 +782,12 @@ func NewContractClient(c config) *ContractClient {
 // A call to `Use(f, g, h)` equals to `contract.Hooks(f(g(h())))`.
 func (c *ContractClient) Use(hooks ...Hook) {
 	c.hooks.Contract = append(c.hooks.Contract, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `contract.Intercept(f(g(h())))`.
+func (c *ContractClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Contract = append(c.inters.Contract, interceptors...)
 }
 
 // Create returns a builder for creating a Contract entity.
@@ -477,6 +842,8 @@ func (c *ContractClient) DeleteOneID(id int) *ContractDeleteOne {
 func (c *ContractClient) Query() *ContractQuery {
 	return &ContractQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeContract},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -496,7 +863,7 @@ func (c *ContractClient) GetX(ctx context.Context, id int) *Contract {
 
 // QueryProposals queries the proposals edge of a Contract.
 func (c *ContractClient) QueryProposals(co *Contract) *ContractProposalQuery {
-	query := &ContractProposalQuery{config: c.config}
+	query := (&ContractProposalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
@@ -512,7 +879,7 @@ func (c *ContractClient) QueryProposals(co *Contract) *ContractProposalQuery {
 
 // QueryTelegramChats queries the telegram_chats edge of a Contract.
 func (c *ContractClient) QueryTelegramChats(co *Contract) *TelegramChatQuery {
-	query := &TelegramChatQuery{config: c.config}
+	query := (&TelegramChatClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
@@ -528,7 +895,7 @@ func (c *ContractClient) QueryTelegramChats(co *Contract) *TelegramChatQuery {
 
 // QueryDiscordChannels queries the discord_channels edge of a Contract.
 func (c *ContractClient) QueryDiscordChannels(co *Contract) *DiscordChannelQuery {
-	query := &DiscordChannelQuery{config: c.config}
+	query := (&DiscordChannelClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
@@ -547,6 +914,26 @@ func (c *ContractClient) Hooks() []Hook {
 	return c.hooks.Contract
 }
 
+// Interceptors returns the client interceptors.
+func (c *ContractClient) Interceptors() []Interceptor {
+	return c.inters.Contract
+}
+
+func (c *ContractClient) mutate(ctx context.Context, m *ContractMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ContractCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ContractUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ContractUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ContractDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Contract mutation op: %q", m.Op())
+	}
+}
+
 // ContractProposalClient is a client for the ContractProposal schema.
 type ContractProposalClient struct {
 	config
@@ -561,6 +948,12 @@ func NewContractProposalClient(c config) *ContractProposalClient {
 // A call to `Use(f, g, h)` equals to `contractproposal.Hooks(f(g(h())))`.
 func (c *ContractProposalClient) Use(hooks ...Hook) {
 	c.hooks.ContractProposal = append(c.hooks.ContractProposal, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `contractproposal.Intercept(f(g(h())))`.
+func (c *ContractProposalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.ContractProposal = append(c.inters.ContractProposal, interceptors...)
 }
 
 // Create returns a builder for creating a ContractProposal entity.
@@ -615,6 +1008,8 @@ func (c *ContractProposalClient) DeleteOneID(id int) *ContractProposalDeleteOne 
 func (c *ContractProposalClient) Query() *ContractProposalQuery {
 	return &ContractProposalQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeContractProposal},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -634,7 +1029,7 @@ func (c *ContractProposalClient) GetX(ctx context.Context, id int) *ContractProp
 
 // QueryContract queries the contract edge of a ContractProposal.
 func (c *ContractProposalClient) QueryContract(cp *ContractProposal) *ContractQuery {
-	query := &ContractQuery{config: c.config}
+	query := (&ContractClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := cp.ID
 		step := sqlgraph.NewStep(
@@ -653,6 +1048,26 @@ func (c *ContractProposalClient) Hooks() []Hook {
 	return c.hooks.ContractProposal
 }
 
+// Interceptors returns the client interceptors.
+func (c *ContractProposalClient) Interceptors() []Interceptor {
+	return c.inters.ContractProposal
+}
+
+func (c *ContractProposalClient) mutate(ctx context.Context, m *ContractProposalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ContractProposalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ContractProposalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ContractProposalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ContractProposalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown ContractProposal mutation op: %q", m.Op())
+	}
+}
+
 // DiscordChannelClient is a client for the DiscordChannel schema.
 type DiscordChannelClient struct {
 	config
@@ -667,6 +1082,12 @@ func NewDiscordChannelClient(c config) *DiscordChannelClient {
 // A call to `Use(f, g, h)` equals to `discordchannel.Hooks(f(g(h())))`.
 func (c *DiscordChannelClient) Use(hooks ...Hook) {
 	c.hooks.DiscordChannel = append(c.hooks.DiscordChannel, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `discordchannel.Intercept(f(g(h())))`.
+func (c *DiscordChannelClient) Intercept(interceptors ...Interceptor) {
+	c.inters.DiscordChannel = append(c.inters.DiscordChannel, interceptors...)
 }
 
 // Create returns a builder for creating a DiscordChannel entity.
@@ -721,6 +1142,8 @@ func (c *DiscordChannelClient) DeleteOneID(id int) *DiscordChannelDeleteOne {
 func (c *DiscordChannelClient) Query() *DiscordChannelQuery {
 	return &DiscordChannelQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeDiscordChannel},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -740,7 +1163,7 @@ func (c *DiscordChannelClient) GetX(ctx context.Context, id int) *DiscordChannel
 
 // QueryUsers queries the users edge of a DiscordChannel.
 func (c *DiscordChannelClient) QueryUsers(dc *DiscordChannel) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
@@ -756,7 +1179,7 @@ func (c *DiscordChannelClient) QueryUsers(dc *DiscordChannel) *UserQuery {
 
 // QueryContracts queries the contracts edge of a DiscordChannel.
 func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery {
-	query := &ContractQuery{config: c.config}
+	query := (&ContractClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
@@ -772,7 +1195,7 @@ func (c *DiscordChannelClient) QueryContracts(dc *DiscordChannel) *ContractQuery
 
 // QueryChains queries the chains edge of a DiscordChannel.
 func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
-	query := &ChainQuery{config: c.config}
+	query := (&ChainClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := dc.ID
 		step := sqlgraph.NewStep(
@@ -786,9 +1209,45 @@ func (c *DiscordChannelClient) QueryChains(dc *DiscordChannel) *ChainQuery {
 	return query
 }
 
+// QueryAddressTrackers queries the address_trackers edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryAddressTrackers(dc *DiscordChannel) *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.AddressTrackersTable, discordchannel.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DiscordChannelClient) Hooks() []Hook {
 	return c.hooks.DiscordChannel
+}
+
+// Interceptors returns the client interceptors.
+func (c *DiscordChannelClient) Interceptors() []Interceptor {
+	return c.inters.DiscordChannel
+}
+
+func (c *DiscordChannelClient) mutate(ctx context.Context, m *DiscordChannelMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&DiscordChannelCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&DiscordChannelUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&DiscordChannelUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&DiscordChannelDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown DiscordChannel mutation op: %q", m.Op())
+	}
 }
 
 // TelegramChatClient is a client for the TelegramChat schema.
@@ -805,6 +1264,12 @@ func NewTelegramChatClient(c config) *TelegramChatClient {
 // A call to `Use(f, g, h)` equals to `telegramchat.Hooks(f(g(h())))`.
 func (c *TelegramChatClient) Use(hooks ...Hook) {
 	c.hooks.TelegramChat = append(c.hooks.TelegramChat, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `telegramchat.Intercept(f(g(h())))`.
+func (c *TelegramChatClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TelegramChat = append(c.inters.TelegramChat, interceptors...)
 }
 
 // Create returns a builder for creating a TelegramChat entity.
@@ -859,6 +1324,8 @@ func (c *TelegramChatClient) DeleteOneID(id int) *TelegramChatDeleteOne {
 func (c *TelegramChatClient) Query() *TelegramChatQuery {
 	return &TelegramChatQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeTelegramChat},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -878,7 +1345,7 @@ func (c *TelegramChatClient) GetX(ctx context.Context, id int) *TelegramChat {
 
 // QueryUsers queries the users edge of a TelegramChat.
 func (c *TelegramChatClient) QueryUsers(tc *TelegramChat) *UserQuery {
-	query := &UserQuery{config: c.config}
+	query := (&UserClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
@@ -894,7 +1361,7 @@ func (c *TelegramChatClient) QueryUsers(tc *TelegramChat) *UserQuery {
 
 // QueryContracts queries the contracts edge of a TelegramChat.
 func (c *TelegramChatClient) QueryContracts(tc *TelegramChat) *ContractQuery {
-	query := &ContractQuery{config: c.config}
+	query := (&ContractClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
@@ -910,7 +1377,7 @@ func (c *TelegramChatClient) QueryContracts(tc *TelegramChat) *ContractQuery {
 
 // QueryChains queries the chains edge of a TelegramChat.
 func (c *TelegramChatClient) QueryChains(tc *TelegramChat) *ChainQuery {
-	query := &ChainQuery{config: c.config}
+	query := (&ChainClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := tc.ID
 		step := sqlgraph.NewStep(
@@ -924,9 +1391,45 @@ func (c *TelegramChatClient) QueryChains(tc *TelegramChat) *ChainQuery {
 	return query
 }
 
+// QueryAddressTrackers queries the address_trackers edge of a TelegramChat.
+func (c *TelegramChatClient) QueryAddressTrackers(tc *TelegramChat) *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, telegramchat.AddressTrackersTable, telegramchat.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TelegramChatClient) Hooks() []Hook {
 	return c.hooks.TelegramChat
+}
+
+// Interceptors returns the client interceptors.
+func (c *TelegramChatClient) Interceptors() []Interceptor {
+	return c.inters.TelegramChat
+}
+
+func (c *TelegramChatClient) mutate(ctx context.Context, m *TelegramChatMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TelegramChatCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TelegramChatUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TelegramChatUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TelegramChatDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TelegramChat mutation op: %q", m.Op())
+	}
 }
 
 // UserClient is a client for the User schema.
@@ -943,6 +1446,12 @@ func NewUserClient(c config) *UserClient {
 // A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
 func (c *UserClient) Use(hooks ...Hook) {
 	c.hooks.User = append(c.hooks.User, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `user.Intercept(f(g(h())))`.
+func (c *UserClient) Intercept(interceptors ...Interceptor) {
+	c.inters.User = append(c.inters.User, interceptors...)
 }
 
 // Create returns a builder for creating a User entity.
@@ -997,6 +1506,8 @@ func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
 func (c *UserClient) Query() *UserQuery {
 	return &UserQuery{
 		config: c.config,
+		ctx:    &QueryContext{Type: TypeUser},
+		inters: c.Interceptors(),
 	}
 }
 
@@ -1016,7 +1527,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 
 // QueryTelegramChats queries the telegram_chats edge of a User.
 func (c *UserClient) QueryTelegramChats(u *User) *TelegramChatQuery {
-	query := &TelegramChatQuery{config: c.config}
+	query := (&TelegramChatClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1032,7 +1543,7 @@ func (c *UserClient) QueryTelegramChats(u *User) *TelegramChatQuery {
 
 // QueryDiscordChannels queries the discord_channels edge of a User.
 func (c *UserClient) QueryDiscordChannels(u *User) *DiscordChannelQuery {
-	query := &DiscordChannelQuery{config: c.config}
+	query := (&DiscordChannelClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
@@ -1050,3 +1561,35 @@ func (c *UserClient) QueryDiscordChannels(u *User) *DiscordChannelQuery {
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
 }
+
+// Interceptors returns the client interceptors.
+func (c *UserClient) Interceptors() []Interceptor {
+	return c.inters.User
+}
+
+func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&UserCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&UserUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&UserDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown User mutation op: %q", m.Op())
+	}
+}
+
+// hooks and interceptors per client, for fast access.
+type (
+	hooks struct {
+		AddressTracker, Chain, ChainProposal, Contract, ContractProposal,
+		DiscordChannel, TelegramChat, User []ent.Hook
+	}
+	inters struct {
+		AddressTracker, Chain, ChainProposal, Contract, ContractProposal,
+		DiscordChannel, TelegramChat, User []ent.Interceptor
+	}
+)

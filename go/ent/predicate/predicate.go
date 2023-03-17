@@ -6,6 +6,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AddressTracker is the predicate function for addresstracker builders.
+type AddressTracker func(*sql.Selector)
+
 // Chain is the predicate function for chain builders.
 type Chain func(*sql.Selector)
 

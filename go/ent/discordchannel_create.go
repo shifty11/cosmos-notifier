@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
@@ -114,6 +115,21 @@ func (dcc *DiscordChannelCreate) AddChains(c ...*Chain) *DiscordChannelCreate {
 	return dcc.AddChainIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (dcc *DiscordChannelCreate) AddAddressTrackerIDs(ids ...int) *DiscordChannelCreate {
+	dcc.mutation.AddAddressTrackerIDs(ids...)
+	return dcc
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (dcc *DiscordChannelCreate) AddAddressTrackers(a ...*AddressTracker) *DiscordChannelCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return dcc.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcc *DiscordChannelCreate) Mutation() *DiscordChannelMutation {
 	return dcc.mutation
@@ -121,50 +137,8 @@ func (dcc *DiscordChannelCreate) Mutation() *DiscordChannelMutation {
 
 // Save creates the DiscordChannel in the database.
 func (dcc *DiscordChannelCreate) Save(ctx context.Context) (*DiscordChannel, error) {
-	var (
-		err  error
-		node *DiscordChannel
-	)
 	dcc.defaults()
-	if len(dcc.hooks) == 0 {
-		if err = dcc.check(); err != nil {
-			return nil, err
-		}
-		node, err = dcc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*DiscordChannelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = dcc.check(); err != nil {
-				return nil, err
-			}
-			dcc.mutation = mutation
-			if node, err = dcc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(dcc.hooks) - 1; i >= 0; i-- {
-			if dcc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = dcc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, dcc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*DiscordChannel)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from DiscordChannelMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*DiscordChannel, DiscordChannelMutation](ctx, dcc.sqlSave, dcc.mutation, dcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -225,6 +199,9 @@ func (dcc *DiscordChannelCreate) check() error {
 }
 
 func (dcc *DiscordChannelCreate) sqlSave(ctx context.Context) (*DiscordChannel, error) {
+	if err := dcc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := dcc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, dcc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -234,19 +211,15 @@ func (dcc *DiscordChannelCreate) sqlSave(ctx context.Context) (*DiscordChannel, 
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	dcc.mutation.id = &_node.ID
+	dcc.mutation.done = true
 	return _node, nil
 }
 
 func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.CreateSpec) {
 	var (
 		_node = &DiscordChannel{config: dcc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: discordchannel.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: discordchannel.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(discordchannel.Table, sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt))
 	)
 	if value, ok := dcc.mutation.CreateTime(); ok {
 		_spec.SetField(discordchannel.FieldCreateTime, field.TypeTime, value)
@@ -276,10 +249,7 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -295,10 +265,7 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -314,10 +281,23 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dcc.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

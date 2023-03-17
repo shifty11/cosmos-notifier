@@ -105,50 +105,8 @@ func (cpc *ContractProposalCreate) Mutation() *ContractProposalMutation {
 
 // Save creates the ContractProposal in the database.
 func (cpc *ContractProposalCreate) Save(ctx context.Context) (*ContractProposal, error) {
-	var (
-		err  error
-		node *ContractProposal
-	)
 	cpc.defaults()
-	if len(cpc.hooks) == 0 {
-		if err = cpc.check(); err != nil {
-			return nil, err
-		}
-		node, err = cpc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ContractProposalMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cpc.check(); err != nil {
-				return nil, err
-			}
-			cpc.mutation = mutation
-			if node, err = cpc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cpc.hooks) - 1; i >= 0; i-- {
-			if cpc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cpc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cpc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*ContractProposal)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ContractProposalMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*ContractProposal, ContractProposalMutation](ctx, cpc.sqlSave, cpc.mutation, cpc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -217,6 +175,9 @@ func (cpc *ContractProposalCreate) check() error {
 }
 
 func (cpc *ContractProposalCreate) sqlSave(ctx context.Context) (*ContractProposal, error) {
+	if err := cpc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := cpc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cpc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -226,19 +187,15 @@ func (cpc *ContractProposalCreate) sqlSave(ctx context.Context) (*ContractPropos
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	cpc.mutation.id = &_node.ID
+	cpc.mutation.done = true
 	return _node, nil
 }
 
 func (cpc *ContractProposalCreate) createSpec() (*ContractProposal, *sqlgraph.CreateSpec) {
 	var (
 		_node = &ContractProposal{config: cpc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: contractproposal.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: contractproposal.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(contractproposal.Table, sqlgraph.NewFieldSpec(contractproposal.FieldID, field.TypeInt))
 	)
 	if value, ok := cpc.mutation.CreateTime(); ok {
 		_spec.SetField(contractproposal.FieldCreateTime, field.TypeTime, value)
@@ -276,10 +233,7 @@ func (cpc *ContractProposalCreate) createSpec() (*ContractProposal, *sqlgraph.Cr
 			Columns: []string{contractproposal.ContractColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

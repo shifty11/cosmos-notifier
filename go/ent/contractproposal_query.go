@@ -18,11 +18,9 @@ import (
 // ContractProposalQuery is the builder for querying ContractProposal entities.
 type ContractProposalQuery struct {
 	config
-	limit        *int
-	offset       *int
-	unique       *bool
+	ctx          *QueryContext
 	order        []OrderFunc
-	fields       []string
+	inters       []Interceptor
 	predicates   []predicate.ContractProposal
 	withContract *ContractQuery
 	withFKs      bool
@@ -37,26 +35,26 @@ func (cpq *ContractProposalQuery) Where(ps ...predicate.ContractProposal) *Contr
 	return cpq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cpq *ContractProposalQuery) Limit(limit int) *ContractProposalQuery {
-	cpq.limit = &limit
+	cpq.ctx.Limit = &limit
 	return cpq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cpq *ContractProposalQuery) Offset(offset int) *ContractProposalQuery {
-	cpq.offset = &offset
+	cpq.ctx.Offset = &offset
 	return cpq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (cpq *ContractProposalQuery) Unique(unique bool) *ContractProposalQuery {
-	cpq.unique = &unique
+	cpq.ctx.Unique = &unique
 	return cpq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cpq *ContractProposalQuery) Order(o ...OrderFunc) *ContractProposalQuery {
 	cpq.order = append(cpq.order, o...)
 	return cpq
@@ -64,7 +62,7 @@ func (cpq *ContractProposalQuery) Order(o ...OrderFunc) *ContractProposalQuery {
 
 // QueryContract chains the current query on the "contract" edge.
 func (cpq *ContractProposalQuery) QueryContract() *ContractQuery {
-	query := &ContractQuery{config: cpq.config}
+	query := (&ContractClient{config: cpq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cpq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -87,7 +85,7 @@ func (cpq *ContractProposalQuery) QueryContract() *ContractQuery {
 // First returns the first ContractProposal entity from the query.
 // Returns a *NotFoundError when no ContractProposal was found.
 func (cpq *ContractProposalQuery) First(ctx context.Context) (*ContractProposal, error) {
-	nodes, err := cpq.Limit(1).All(ctx)
+	nodes, err := cpq.Limit(1).All(setContextOp(ctx, cpq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +108,7 @@ func (cpq *ContractProposalQuery) FirstX(ctx context.Context) *ContractProposal 
 // Returns a *NotFoundError when no ContractProposal ID was found.
 func (cpq *ContractProposalQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cpq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cpq.Limit(1).IDs(setContextOp(ctx, cpq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -133,7 +131,7 @@ func (cpq *ContractProposalQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one ContractProposal entity is found.
 // Returns a *NotFoundError when no ContractProposal entities are found.
 func (cpq *ContractProposalQuery) Only(ctx context.Context) (*ContractProposal, error) {
-	nodes, err := cpq.Limit(2).All(ctx)
+	nodes, err := cpq.Limit(2).All(setContextOp(ctx, cpq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +159,7 @@ func (cpq *ContractProposalQuery) OnlyX(ctx context.Context) *ContractProposal {
 // Returns a *NotFoundError when no entities are found.
 func (cpq *ContractProposalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cpq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cpq.Limit(2).IDs(setContextOp(ctx, cpq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -186,10 +184,12 @@ func (cpq *ContractProposalQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of ContractProposals.
 func (cpq *ContractProposalQuery) All(ctx context.Context) ([]*ContractProposal, error) {
+	ctx = setContextOp(ctx, cpq.ctx, "All")
 	if err := cpq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cpq.sqlAll(ctx)
+	qr := querierAll[[]*ContractProposal, *ContractProposalQuery]()
+	return withInterceptors[[]*ContractProposal](ctx, cpq, qr, cpq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -202,9 +202,12 @@ func (cpq *ContractProposalQuery) AllX(ctx context.Context) []*ContractProposal 
 }
 
 // IDs executes the query and returns a list of ContractProposal IDs.
-func (cpq *ContractProposalQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := cpq.Select(contractproposal.FieldID).Scan(ctx, &ids); err != nil {
+func (cpq *ContractProposalQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if cpq.ctx.Unique == nil && cpq.path != nil {
+		cpq.Unique(true)
+	}
+	ctx = setContextOp(ctx, cpq.ctx, "IDs")
+	if err = cpq.Select(contractproposal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -221,10 +224,11 @@ func (cpq *ContractProposalQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cpq *ContractProposalQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, cpq.ctx, "Count")
 	if err := cpq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cpq.sqlCount(ctx)
+	return withInterceptors[int](ctx, cpq, querierCount[*ContractProposalQuery](), cpq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -238,10 +242,15 @@ func (cpq *ContractProposalQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cpq *ContractProposalQuery) Exist(ctx context.Context) (bool, error) {
-	if err := cpq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, cpq.ctx, "Exist")
+	switch _, err := cpq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return cpq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -261,22 +270,21 @@ func (cpq *ContractProposalQuery) Clone() *ContractProposalQuery {
 	}
 	return &ContractProposalQuery{
 		config:       cpq.config,
-		limit:        cpq.limit,
-		offset:       cpq.offset,
+		ctx:          cpq.ctx.Clone(),
 		order:        append([]OrderFunc{}, cpq.order...),
+		inters:       append([]Interceptor{}, cpq.inters...),
 		predicates:   append([]predicate.ContractProposal{}, cpq.predicates...),
 		withContract: cpq.withContract.Clone(),
 		// clone intermediate query.
-		sql:    cpq.sql.Clone(),
-		path:   cpq.path,
-		unique: cpq.unique,
+		sql:  cpq.sql.Clone(),
+		path: cpq.path,
 	}
 }
 
 // WithContract tells the query-builder to eager-load the nodes that are connected to
 // the "contract" edge. The optional arguments are used to configure the query builder of the edge.
 func (cpq *ContractProposalQuery) WithContract(opts ...func(*ContractQuery)) *ContractProposalQuery {
-	query := &ContractQuery{config: cpq.config}
+	query := (&ContractClient{config: cpq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -299,16 +307,11 @@ func (cpq *ContractProposalQuery) WithContract(opts ...func(*ContractQuery)) *Co
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cpq *ContractProposalQuery) GroupBy(field string, fields ...string) *ContractProposalGroupBy {
-	grbuild := &ContractProposalGroupBy{config: cpq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cpq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cpq.sqlQuery(ctx), nil
-	}
+	cpq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ContractProposalGroupBy{build: cpq}
+	grbuild.flds = &cpq.ctx.Fields
 	grbuild.label = contractproposal.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -325,11 +328,11 @@ func (cpq *ContractProposalQuery) GroupBy(field string, fields ...string) *Contr
 //		Select(contractproposal.FieldCreateTime).
 //		Scan(ctx, &v)
 func (cpq *ContractProposalQuery) Select(fields ...string) *ContractProposalSelect {
-	cpq.fields = append(cpq.fields, fields...)
-	selbuild := &ContractProposalSelect{ContractProposalQuery: cpq}
-	selbuild.label = contractproposal.Label
-	selbuild.flds, selbuild.scan = &cpq.fields, selbuild.Scan
-	return selbuild
+	cpq.ctx.Fields = append(cpq.ctx.Fields, fields...)
+	sbuild := &ContractProposalSelect{ContractProposalQuery: cpq}
+	sbuild.label = contractproposal.Label
+	sbuild.flds, sbuild.scan = &cpq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a ContractProposalSelect configured with the given aggregations.
@@ -338,7 +341,17 @@ func (cpq *ContractProposalQuery) Aggregate(fns ...AggregateFunc) *ContractPropo
 }
 
 func (cpq *ContractProposalQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range cpq.fields {
+	for _, inter := range cpq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cpq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range cpq.ctx.Fields {
 		if !contractproposal.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -408,6 +421,9 @@ func (cpq *ContractProposalQuery) loadContract(ctx context.Context, query *Contr
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
+	if len(ids) == 0 {
+		return nil
+	}
 	query.Where(contract.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
@@ -427,41 +443,22 @@ func (cpq *ContractProposalQuery) loadContract(ctx context.Context, query *Contr
 
 func (cpq *ContractProposalQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cpq.querySpec()
-	_spec.Node.Columns = cpq.fields
-	if len(cpq.fields) > 0 {
-		_spec.Unique = cpq.unique != nil && *cpq.unique
+	_spec.Node.Columns = cpq.ctx.Fields
+	if len(cpq.ctx.Fields) > 0 {
+		_spec.Unique = cpq.ctx.Unique != nil && *cpq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, cpq.driver, _spec)
 }
 
-func (cpq *ContractProposalQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := cpq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (cpq *ContractProposalQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   contractproposal.Table,
-			Columns: contractproposal.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: contractproposal.FieldID,
-			},
-		},
-		From:   cpq.sql,
-		Unique: true,
-	}
-	if unique := cpq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(contractproposal.Table, contractproposal.Columns, sqlgraph.NewFieldSpec(contractproposal.FieldID, field.TypeInt))
+	_spec.From = cpq.sql
+	if unique := cpq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if cpq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := cpq.fields; len(fields) > 0 {
+	if fields := cpq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, contractproposal.FieldID)
 		for i := range fields {
@@ -477,10 +474,10 @@ func (cpq *ContractProposalQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := cpq.limit; limit != nil {
+	if limit := cpq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cpq.offset; offset != nil {
+	if offset := cpq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := cpq.order; len(ps) > 0 {
@@ -496,7 +493,7 @@ func (cpq *ContractProposalQuery) querySpec() *sqlgraph.QuerySpec {
 func (cpq *ContractProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cpq.driver.Dialect())
 	t1 := builder.Table(contractproposal.Table)
-	columns := cpq.fields
+	columns := cpq.ctx.Fields
 	if len(columns) == 0 {
 		columns = contractproposal.Columns
 	}
@@ -505,7 +502,7 @@ func (cpq *ContractProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cpq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cpq.unique != nil && *cpq.unique {
+	if cpq.ctx.Unique != nil && *cpq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range cpq.predicates {
@@ -514,12 +511,12 @@ func (cpq *ContractProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range cpq.order {
 		p(selector)
 	}
-	if offset := cpq.offset; offset != nil {
+	if offset := cpq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cpq.limit; limit != nil {
+	if limit := cpq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -527,13 +524,8 @@ func (cpq *ContractProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // ContractProposalGroupBy is the group-by builder for ContractProposal entities.
 type ContractProposalGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *ContractProposalQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -542,58 +534,46 @@ func (cpgb *ContractProposalGroupBy) Aggregate(fns ...AggregateFunc) *ContractPr
 	return cpgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cpgb *ContractProposalGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cpgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, cpgb.build.ctx, "GroupBy")
+	if err := cpgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cpgb.sql = query
-	return cpgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*ContractProposalQuery, *ContractProposalGroupBy](ctx, cpgb.build, cpgb, cpgb.build.inters, v)
 }
 
-func (cpgb *ContractProposalGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range cpgb.fields {
-		if !contractproposal.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (cpgb *ContractProposalGroupBy) sqlScan(ctx context.Context, root *ContractProposalQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(cpgb.fns))
+	for _, fn := range cpgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := cpgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*cpgb.flds)+len(cpgb.fns))
+		for _, f := range *cpgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*cpgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cpgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := cpgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (cpgb *ContractProposalGroupBy) sqlQuery() *sql.Selector {
-	selector := cpgb.sql.Select()
-	aggregation := make([]string, 0, len(cpgb.fns))
-	for _, fn := range cpgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(cpgb.fields)+len(cpgb.fns))
-		for _, f := range cpgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(cpgb.fields...)...)
-}
-
 // ContractProposalSelect is the builder for selecting fields of ContractProposal entities.
 type ContractProposalSelect struct {
 	*ContractProposalQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -604,26 +584,27 @@ func (cps *ContractProposalSelect) Aggregate(fns ...AggregateFunc) *ContractProp
 
 // Scan applies the selector query and scans the result into the given value.
 func (cps *ContractProposalSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, cps.ctx, "Select")
 	if err := cps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cps.sql = cps.ContractProposalQuery.sqlQuery(ctx)
-	return cps.sqlScan(ctx, v)
+	return scanWithInterceptors[*ContractProposalQuery, *ContractProposalSelect](ctx, cps.ContractProposalQuery, cps, cps.inters, v)
 }
 
-func (cps *ContractProposalSelect) sqlScan(ctx context.Context, v any) error {
+func (cps *ContractProposalSelect) sqlScan(ctx context.Context, root *ContractProposalQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cps.fns))
 	for _, fn := range cps.fns {
-		aggregation = append(aggregation, fn(cps.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cps.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cps.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cps.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cps.sql.Query()
+	query, args := selector.Query()
 	if err := cps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

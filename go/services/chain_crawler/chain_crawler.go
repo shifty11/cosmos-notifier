@@ -126,6 +126,7 @@ func (c *ChainCrawler) chainNeedsUpdate(entChain *ent.Chain, chainInfo *types.Ch
 		entChain.PrettyName != chainInfo.PrettyName ||
 		entChain.Path != chainInfo.Path ||
 		entChain.Display != chainInfo.Display ||
+		entChain.Bech32Prefix != chainInfo.Bech32Prefix ||
 		entChain.ImageURL != chainInfo.Image ||
 		(chainInfo.Image != "" && entChain.ThumbnailURL == "") ||
 		!c.doesThumbnailExist(chainInfo)

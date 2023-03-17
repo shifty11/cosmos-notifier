@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
@@ -114,6 +115,21 @@ func (tcc *TelegramChatCreate) AddChains(c ...*Chain) *TelegramChatCreate {
 	return tcc.AddChainIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (tcc *TelegramChatCreate) AddAddressTrackerIDs(ids ...int) *TelegramChatCreate {
+	tcc.mutation.AddAddressTrackerIDs(ids...)
+	return tcc
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (tcc *TelegramChatCreate) AddAddressTrackers(a ...*AddressTracker) *TelegramChatCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tcc.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcc *TelegramChatCreate) Mutation() *TelegramChatMutation {
 	return tcc.mutation
@@ -121,50 +137,8 @@ func (tcc *TelegramChatCreate) Mutation() *TelegramChatMutation {
 
 // Save creates the TelegramChat in the database.
 func (tcc *TelegramChatCreate) Save(ctx context.Context) (*TelegramChat, error) {
-	var (
-		err  error
-		node *TelegramChat
-	)
 	tcc.defaults()
-	if len(tcc.hooks) == 0 {
-		if err = tcc.check(); err != nil {
-			return nil, err
-		}
-		node, err = tcc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TelegramChatMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = tcc.check(); err != nil {
-				return nil, err
-			}
-			tcc.mutation = mutation
-			if node, err = tcc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tcc.hooks) - 1; i >= 0; i-- {
-			if tcc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tcc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TelegramChat)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TelegramChatMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TelegramChat, TelegramChatMutation](ctx, tcc.sqlSave, tcc.mutation, tcc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -225,6 +199,9 @@ func (tcc *TelegramChatCreate) check() error {
 }
 
 func (tcc *TelegramChatCreate) sqlSave(ctx context.Context) (*TelegramChat, error) {
+	if err := tcc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := tcc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, tcc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -234,19 +211,15 @@ func (tcc *TelegramChatCreate) sqlSave(ctx context.Context) (*TelegramChat, erro
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	tcc.mutation.id = &_node.ID
+	tcc.mutation.done = true
 	return _node, nil
 }
 
 func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec) {
 	var (
 		_node = &TelegramChat{config: tcc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: telegramchat.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: telegramchat.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(telegramchat.Table, sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt))
 	)
 	if value, ok := tcc.mutation.CreateTime(); ok {
 		_spec.SetField(telegramchat.FieldCreateTime, field.TypeTime, value)
@@ -276,10 +249,7 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -295,10 +265,7 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -314,10 +281,23 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tcc.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

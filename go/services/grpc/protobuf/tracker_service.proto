@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package cosmos_notifier_grpc;
+
+option go_package = "go/tracker_service";
+
+service TrackerService {
+  rpc IsAddressValid (IsAddressValidRequest) returns (IsAddressValidResponse) {}
+  rpc AddTracker (AddTrackerRequest) returns (AddTrackerResponse) {}
+  rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
+}
+
+message IsAddressValidRequest {
+  string address = 1;
+}
+
+message IsAddressValidResponse {
+  bool isValid = 1;
+}
+
+message AddTrackerRequest {
+  string address = 1;
+  int64 notificationInterval = 2;
+  int64 discordChannelId = 3;
+  int64 telegramChatId = 4;
+}
+
+message AddTrackerResponse {
+  string address = 1;
+  int64 notificationInterval = 2;
+  int64 discordChannelId = 3;
+  int64 telegramChatId = 4;
+  int32 trackerId = 5;
+}
+
+message DeleteTrackerRequest {
+  int64 trackerId = 1;
+}

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/mixin"
@@ -36,5 +37,9 @@ func (TelegramChat) Edges() []ent.Edge {
 			Required(),
 		edge.To("contracts", Contract.Type),
 		edge.To("chains", Chain.Type),
+		edge.To("address_trackers", AddressTracker.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 	}
 }

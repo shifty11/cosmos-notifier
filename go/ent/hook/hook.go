@@ -9,17 +9,28 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent"
 )
 
+// The AddressTrackerFunc type is an adapter to allow the use of ordinary
+// function as AddressTracker mutator.
+type AddressTrackerFunc func(context.Context, *ent.AddressTrackerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AddressTrackerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AddressTrackerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AddressTrackerMutation", m)
+}
+
 // The ChainFunc type is an adapter to allow the use of ordinary
 // function as Chain mutator.
 type ChainFunc func(context.Context, *ent.ChainMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f ChainFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ChainMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChainMutation", m)
+	if mv, ok := m.(*ent.ChainMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChainMutation", m)
 }
 
 // The ChainProposalFunc type is an adapter to allow the use of ordinary
@@ -28,11 +39,10 @@ type ChainProposalFunc func(context.Context, *ent.ChainProposalMutation) (ent.Va
 
 // Mutate calls f(ctx, m).
 func (f ChainProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ChainProposalMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChainProposalMutation", m)
+	if mv, ok := m.(*ent.ChainProposalMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ChainProposalMutation", m)
 }
 
 // The ContractFunc type is an adapter to allow the use of ordinary
@@ -41,11 +51,10 @@ type ContractFunc func(context.Context, *ent.ContractMutation) (ent.Value, error
 
 // Mutate calls f(ctx, m).
 func (f ContractFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ContractMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContractMutation", m)
+	if mv, ok := m.(*ent.ContractMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContractMutation", m)
 }
 
 // The ContractProposalFunc type is an adapter to allow the use of ordinary
@@ -54,11 +63,10 @@ type ContractProposalFunc func(context.Context, *ent.ContractProposalMutation) (
 
 // Mutate calls f(ctx, m).
 func (f ContractProposalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ContractProposalMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContractProposalMutation", m)
+	if mv, ok := m.(*ent.ContractProposalMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ContractProposalMutation", m)
 }
 
 // The DiscordChannelFunc type is an adapter to allow the use of ordinary
@@ -67,11 +75,10 @@ type DiscordChannelFunc func(context.Context, *ent.DiscordChannelMutation) (ent.
 
 // Mutate calls f(ctx, m).
 func (f DiscordChannelFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.DiscordChannelMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiscordChannelMutation", m)
+	if mv, ok := m.(*ent.DiscordChannelMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DiscordChannelMutation", m)
 }
 
 // The TelegramChatFunc type is an adapter to allow the use of ordinary
@@ -80,11 +87,10 @@ type TelegramChatFunc func(context.Context, *ent.TelegramChatMutation) (ent.Valu
 
 // Mutate calls f(ctx, m).
 func (f TelegramChatFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.TelegramChatMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TelegramChatMutation", m)
+	if mv, ok := m.(*ent.TelegramChatMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TelegramChatMutation", m)
 }
 
 // The UserFunc type is an adapter to allow the use of ordinary
@@ -93,11 +99,10 @@ type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
 func (f UserFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.UserMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
+	if mv, ok := m.(*ent.UserMutation); ok {
+		return f(ctx, mv)
 	}
-	return f(ctx, mv)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserMutation", m)
 }
 
 // Condition is a hook condition function.

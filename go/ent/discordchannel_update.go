@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
@@ -101,6 +102,21 @@ func (dcu *DiscordChannelUpdate) AddChains(c ...*Chain) *DiscordChannelUpdate {
 	return dcu.AddChainIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (dcu *DiscordChannelUpdate) AddAddressTrackerIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.AddAddressTrackerIDs(ids...)
+	return dcu
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (dcu *DiscordChannelUpdate) AddAddressTrackers(a ...*AddressTracker) *DiscordChannelUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return dcu.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcu *DiscordChannelUpdate) Mutation() *DiscordChannelMutation {
 	return dcu.mutation
@@ -169,37 +185,31 @@ func (dcu *DiscordChannelUpdate) RemoveChains(c ...*Chain) *DiscordChannelUpdate
 	return dcu.RemoveChainIDs(ids...)
 }
 
+// ClearAddressTrackers clears all "address_trackers" edges to the AddressTracker entity.
+func (dcu *DiscordChannelUpdate) ClearAddressTrackers() *DiscordChannelUpdate {
+	dcu.mutation.ClearAddressTrackers()
+	return dcu
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to AddressTracker entities by IDs.
+func (dcu *DiscordChannelUpdate) RemoveAddressTrackerIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.RemoveAddressTrackerIDs(ids...)
+	return dcu
+}
+
+// RemoveAddressTrackers removes "address_trackers" edges to AddressTracker entities.
+func (dcu *DiscordChannelUpdate) RemoveAddressTrackers(a ...*AddressTracker) *DiscordChannelUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return dcu.RemoveAddressTrackerIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (dcu *DiscordChannelUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	dcu.defaults()
-	if len(dcu.hooks) == 0 {
-		affected, err = dcu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*DiscordChannelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			dcu.mutation = mutation
-			affected, err = dcu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(dcu.hooks) - 1; i >= 0; i-- {
-			if dcu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = dcu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, dcu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, DiscordChannelMutation](ctx, dcu.sqlSave, dcu.mutation, dcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -233,16 +243,7 @@ func (dcu *DiscordChannelUpdate) defaults() {
 }
 
 func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   discordchannel.Table,
-			Columns: discordchannel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: discordchannel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(discordchannel.Table, discordchannel.Columns, sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt))
 	if ps := dcu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -270,10 +271,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -286,10 +284,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -305,10 +300,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -324,10 +316,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -340,10 +329,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -359,10 +345,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -378,10 +361,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -394,10 +374,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -413,10 +390,52 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if dcu.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.RemovedAddressTrackersIDs(); len(nodes) > 0 && !dcu.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -432,6 +451,7 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		return 0, err
 	}
+	dcu.mutation.done = true
 	return n, nil
 }
 
@@ -513,6 +533,21 @@ func (dcuo *DiscordChannelUpdateOne) AddChains(c ...*Chain) *DiscordChannelUpdat
 	return dcuo.AddChainIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (dcuo *DiscordChannelUpdateOne) AddAddressTrackerIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.AddAddressTrackerIDs(ids...)
+	return dcuo
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (dcuo *DiscordChannelUpdateOne) AddAddressTrackers(a ...*AddressTracker) *DiscordChannelUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return dcuo.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcuo *DiscordChannelUpdateOne) Mutation() *DiscordChannelMutation {
 	return dcuo.mutation
@@ -581,6 +616,33 @@ func (dcuo *DiscordChannelUpdateOne) RemoveChains(c ...*Chain) *DiscordChannelUp
 	return dcuo.RemoveChainIDs(ids...)
 }
 
+// ClearAddressTrackers clears all "address_trackers" edges to the AddressTracker entity.
+func (dcuo *DiscordChannelUpdateOne) ClearAddressTrackers() *DiscordChannelUpdateOne {
+	dcuo.mutation.ClearAddressTrackers()
+	return dcuo
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to AddressTracker entities by IDs.
+func (dcuo *DiscordChannelUpdateOne) RemoveAddressTrackerIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.RemoveAddressTrackerIDs(ids...)
+	return dcuo
+}
+
+// RemoveAddressTrackers removes "address_trackers" edges to AddressTracker entities.
+func (dcuo *DiscordChannelUpdateOne) RemoveAddressTrackers(a ...*AddressTracker) *DiscordChannelUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return dcuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// Where appends a list predicates to the DiscordChannelUpdate builder.
+func (dcuo *DiscordChannelUpdateOne) Where(ps ...predicate.DiscordChannel) *DiscordChannelUpdateOne {
+	dcuo.mutation.Where(ps...)
+	return dcuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (dcuo *DiscordChannelUpdateOne) Select(field string, fields ...string) *DiscordChannelUpdateOne {
@@ -590,41 +652,8 @@ func (dcuo *DiscordChannelUpdateOne) Select(field string, fields ...string) *Dis
 
 // Save executes the query and returns the updated DiscordChannel entity.
 func (dcuo *DiscordChannelUpdateOne) Save(ctx context.Context) (*DiscordChannel, error) {
-	var (
-		err  error
-		node *DiscordChannel
-	)
 	dcuo.defaults()
-	if len(dcuo.hooks) == 0 {
-		node, err = dcuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*DiscordChannelMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			dcuo.mutation = mutation
-			node, err = dcuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(dcuo.hooks) - 1; i >= 0; i-- {
-			if dcuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = dcuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, dcuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*DiscordChannel)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from DiscordChannelMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*DiscordChannel, DiscordChannelMutation](ctx, dcuo.sqlSave, dcuo.mutation, dcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -658,16 +687,7 @@ func (dcuo *DiscordChannelUpdateOne) defaults() {
 }
 
 func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *DiscordChannel, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   discordchannel.Table,
-			Columns: discordchannel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: discordchannel.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(discordchannel.Table, discordchannel.Columns, sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt))
 	id, ok := dcuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "DiscordChannel.id" for update`)}
@@ -712,10 +732,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -728,10 +745,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -747,10 +761,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -766,10 +777,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -782,10 +790,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -801,10 +806,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -820,10 +822,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -836,10 +835,7 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -855,10 +851,52 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Columns: discordchannel.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if dcuo.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.RemovedAddressTrackersIDs(); len(nodes) > 0 && !dcuo.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   discordchannel.AddressTrackersTable,
+			Columns: []string{discordchannel.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -877,5 +915,6 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 		}
 		return nil, err
 	}
+	dcuo.mutation.done = true
 	return _node, nil
 }

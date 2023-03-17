@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
@@ -117,6 +118,20 @@ func (cu *ChainUpdate) SetNillableThumbnailURL(s *string) *ChainUpdate {
 	return cu
 }
 
+// SetBech32Prefix sets the "bech32_prefix" field.
+func (cu *ChainUpdate) SetBech32Prefix(s string) *ChainUpdate {
+	cu.mutation.SetBech32Prefix(s)
+	return cu
+}
+
+// SetNillableBech32Prefix sets the "bech32_prefix" field if the given value is not nil.
+func (cu *ChainUpdate) SetNillableBech32Prefix(s *string) *ChainUpdate {
+	if s != nil {
+		cu.SetBech32Prefix(*s)
+	}
+	return cu
+}
+
 // AddChainProposalIDs adds the "chain_proposals" edge to the ChainProposal entity by IDs.
 func (cu *ChainUpdate) AddChainProposalIDs(ids ...int) *ChainUpdate {
 	cu.mutation.AddChainProposalIDs(ids...)
@@ -160,6 +175,21 @@ func (cu *ChainUpdate) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate {
 		ids[i] = d[i].ID
 	}
 	return cu.AddDiscordChannelIDs(ids...)
+}
+
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (cu *ChainUpdate) AddAddressTrackerIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddAddressTrackerIDs(ids...)
+	return cu
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (cu *ChainUpdate) AddAddressTrackers(a ...*AddressTracker) *ChainUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cu.AddAddressTrackerIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -230,37 +260,31 @@ func (cu *ChainUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpdate 
 	return cu.RemoveDiscordChannelIDs(ids...)
 }
 
+// ClearAddressTrackers clears all "address_trackers" edges to the AddressTracker entity.
+func (cu *ChainUpdate) ClearAddressTrackers() *ChainUpdate {
+	cu.mutation.ClearAddressTrackers()
+	return cu
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to AddressTracker entities by IDs.
+func (cu *ChainUpdate) RemoveAddressTrackerIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveAddressTrackerIDs(ids...)
+	return cu
+}
+
+// RemoveAddressTrackers removes "address_trackers" edges to AddressTracker entities.
+func (cu *ChainUpdate) RemoveAddressTrackers(a ...*AddressTracker) *ChainUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cu.RemoveAddressTrackerIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *ChainUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	cu.defaults()
-	if len(cu.hooks) == 0 {
-		affected, err = cu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ChainMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cu.mutation = mutation
-			affected, err = cu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cu.hooks) - 1; i >= 0; i-- {
-			if cu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ChainMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -294,16 +318,7 @@ func (cu *ChainUpdate) defaults() {
 }
 
 func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   chain.Table,
-			Columns: chain.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chain.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(chain.Table, chain.Columns, sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt))
 	if ps := cu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -338,6 +353,9 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.ThumbnailURL(); ok {
 		_spec.SetField(chain.FieldThumbnailURL, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.Bech32Prefix(); ok {
+		_spec.SetField(chain.FieldBech32Prefix, field.TypeString, value)
+	}
 	if cu.mutation.ChainProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -346,10 +364,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -362,10 +377,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -381,10 +393,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -400,10 +409,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -416,10 +422,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -435,10 +438,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -454,10 +454,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -470,10 +467,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -489,10 +483,52 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cu.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedAddressTrackersIDs(); len(nodes) > 0 && !cu.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -508,6 +544,7 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	cu.mutation.done = true
 	return n, nil
 }
 
@@ -605,6 +642,20 @@ func (cuo *ChainUpdateOne) SetNillableThumbnailURL(s *string) *ChainUpdateOne {
 	return cuo
 }
 
+// SetBech32Prefix sets the "bech32_prefix" field.
+func (cuo *ChainUpdateOne) SetBech32Prefix(s string) *ChainUpdateOne {
+	cuo.mutation.SetBech32Prefix(s)
+	return cuo
+}
+
+// SetNillableBech32Prefix sets the "bech32_prefix" field if the given value is not nil.
+func (cuo *ChainUpdateOne) SetNillableBech32Prefix(s *string) *ChainUpdateOne {
+	if s != nil {
+		cuo.SetBech32Prefix(*s)
+	}
+	return cuo
+}
+
 // AddChainProposalIDs adds the "chain_proposals" edge to the ChainProposal entity by IDs.
 func (cuo *ChainUpdateOne) AddChainProposalIDs(ids ...int) *ChainUpdateOne {
 	cuo.mutation.AddChainProposalIDs(ids...)
@@ -648,6 +699,21 @@ func (cuo *ChainUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ChainUpdate
 		ids[i] = d[i].ID
 	}
 	return cuo.AddDiscordChannelIDs(ids...)
+}
+
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (cuo *ChainUpdateOne) AddAddressTrackerIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddAddressTrackerIDs(ids...)
+	return cuo
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (cuo *ChainUpdateOne) AddAddressTrackers(a ...*AddressTracker) *ChainUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cuo.AddAddressTrackerIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -718,6 +784,33 @@ func (cuo *ChainUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ChainUpd
 	return cuo.RemoveDiscordChannelIDs(ids...)
 }
 
+// ClearAddressTrackers clears all "address_trackers" edges to the AddressTracker entity.
+func (cuo *ChainUpdateOne) ClearAddressTrackers() *ChainUpdateOne {
+	cuo.mutation.ClearAddressTrackers()
+	return cuo
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to AddressTracker entities by IDs.
+func (cuo *ChainUpdateOne) RemoveAddressTrackerIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveAddressTrackerIDs(ids...)
+	return cuo
+}
+
+// RemoveAddressTrackers removes "address_trackers" edges to AddressTracker entities.
+func (cuo *ChainUpdateOne) RemoveAddressTrackers(a ...*AddressTracker) *ChainUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// Where appends a list predicates to the ChainUpdate builder.
+func (cuo *ChainUpdateOne) Where(ps ...predicate.Chain) *ChainUpdateOne {
+	cuo.mutation.Where(ps...)
+	return cuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cuo *ChainUpdateOne) Select(field string, fields ...string) *ChainUpdateOne {
@@ -727,41 +820,8 @@ func (cuo *ChainUpdateOne) Select(field string, fields ...string) *ChainUpdateOn
 
 // Save executes the query and returns the updated Chain entity.
 func (cuo *ChainUpdateOne) Save(ctx context.Context) (*Chain, error) {
-	var (
-		err  error
-		node *Chain
-	)
 	cuo.defaults()
-	if len(cuo.hooks) == 0 {
-		node, err = cuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ChainMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cuo.mutation = mutation
-			node, err = cuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cuo.hooks) - 1; i >= 0; i-- {
-			if cuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Chain)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ChainMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Chain, ChainMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -795,16 +855,7 @@ func (cuo *ChainUpdateOne) defaults() {
 }
 
 func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   chain.Table,
-			Columns: chain.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chain.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(chain.Table, chain.Columns, sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt))
 	id, ok := cuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Chain.id" for update`)}
@@ -856,6 +907,9 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 	if value, ok := cuo.mutation.ThumbnailURL(); ok {
 		_spec.SetField(chain.FieldThumbnailURL, field.TypeString, value)
 	}
+	if value, ok := cuo.mutation.Bech32Prefix(); ok {
+		_spec.SetField(chain.FieldBech32Prefix, field.TypeString, value)
+	}
 	if cuo.mutation.ChainProposalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -864,10 +918,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -880,10 +931,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -899,10 +947,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -918,10 +963,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -934,10 +976,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -953,10 +992,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -972,10 +1008,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -988,10 +1021,7 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1007,10 +1037,52 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedAddressTrackersIDs(); len(nodes) > 0 && !cuo.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1029,5 +1101,6 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 		}
 		return nil, err
 	}
+	cuo.mutation.done = true
 	return _node, nil
 }

@@ -30,6 +30,8 @@ const (
 	FieldStatus = "status"
 	// EdgeChain holds the string denoting the chain edge name in mutations.
 	EdgeChain = "chain"
+	// EdgeAddressTracker holds the string denoting the address_tracker edge name in mutations.
+	EdgeAddressTracker = "address_tracker"
 	// Table holds the table name of the chainproposal in the database.
 	Table = "chain_proposals"
 	// ChainTable is the table that holds the chain relation/edge.
@@ -39,6 +41,11 @@ const (
 	ChainInverseTable = "chains"
 	// ChainColumn is the table column denoting the chain relation/edge.
 	ChainColumn = "chain_chain_proposals"
+	// AddressTrackerTable is the table that holds the address_tracker relation/edge. The primary key declared below.
+	AddressTrackerTable = "address_tracker_chain_proposals"
+	// AddressTrackerInverseTable is the table name for the AddressTracker entity.
+	// It exists in this package in order to avoid circular dependency with the "addresstracker" package.
+	AddressTrackerInverseTable = "address_trackers"
 )
 
 // Columns holds all SQL columns for chainproposal fields.
@@ -59,6 +66,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"chain_chain_proposals",
 }
+
+var (
+	// AddressTrackerPrimaryKey and AddressTrackerColumn2 are the table columns denoting the
+	// primary key for the address_tracker relation (M2M).
+	AddressTrackerPrimaryKey = []string{"address_tracker_id", "chain_proposal_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -89,12 +102,12 @@ type Status string
 
 // Status values.
 const (
-	StatusPROPOSAL_STATUS_VOTING_PERIOD  Status = "PROPOSAL_STATUS_VOTING_PERIOD"
 	StatusPROPOSAL_STATUS_PASSED         Status = "PROPOSAL_STATUS_PASSED"
 	StatusPROPOSAL_STATUS_REJECTED       Status = "PROPOSAL_STATUS_REJECTED"
 	StatusPROPOSAL_STATUS_FAILED         Status = "PROPOSAL_STATUS_FAILED"
 	StatusPROPOSAL_STATUS_UNSPECIFIED    Status = "PROPOSAL_STATUS_UNSPECIFIED"
 	StatusPROPOSAL_STATUS_DEPOSIT_PERIOD Status = "PROPOSAL_STATUS_DEPOSIT_PERIOD"
+	StatusPROPOSAL_STATUS_VOTING_PERIOD  Status = "PROPOSAL_STATUS_VOTING_PERIOD"
 )
 
 func (s Status) String() string {
@@ -104,7 +117,7 @@ func (s Status) String() string {
 // StatusValidator is a validator for the "status" field enum values. It is called by the builders before save.
 func StatusValidator(s Status) error {
 	switch s {
-	case StatusPROPOSAL_STATUS_VOTING_PERIOD, StatusPROPOSAL_STATUS_PASSED, StatusPROPOSAL_STATUS_REJECTED, StatusPROPOSAL_STATUS_FAILED, StatusPROPOSAL_STATUS_UNSPECIFIED, StatusPROPOSAL_STATUS_DEPOSIT_PERIOD:
+	case StatusPROPOSAL_STATUS_PASSED, StatusPROPOSAL_STATUS_REJECTED, StatusPROPOSAL_STATUS_FAILED, StatusPROPOSAL_STATUS_UNSPECIFIED, StatusPROPOSAL_STATUS_DEPOSIT_PERIOD, StatusPROPOSAL_STATUS_VOTING_PERIOD:
 		return nil
 	default:
 		return fmt.Errorf("chainproposal: invalid enum value for status field: %q", s)

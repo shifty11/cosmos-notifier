@@ -29,10 +29,12 @@ Edit ent/schema/*.go and run:
 ```bash
 # generate models
 go generate ./ent
-
+```
+```bash
 # generate migrations
 go run main.go create-migrations
-
+```
+```bash
 # or combined
 go generate ./ent && go run main.go create-migrations
 ```

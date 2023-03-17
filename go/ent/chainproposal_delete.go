@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (cpd *ChainProposalDelete) Where(ps ...predicate.ChainProposal) *ChainPropo
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (cpd *ChainProposalDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(cpd.hooks) == 0 {
-		affected, err = cpd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ChainProposalMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			cpd.mutation = mutation
-			affected, err = cpd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cpd.hooks) - 1; i >= 0; i-- {
-			if cpd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cpd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cpd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ChainProposalMutation](ctx, cpd.sqlExec, cpd.mutation, cpd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (cpd *ChainProposalDelete) ExecX(ctx context.Context) int {
 }
 
 func (cpd *ChainProposalDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: chainproposal.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chainproposal.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(chainproposal.Table, sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt))
 	if ps := cpd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (cpd *ChainProposalDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	cpd.mutation.done = true
 	return affected, err
 }
 
 // ChainProposalDeleteOne is the builder for deleting a single ChainProposal entity.
 type ChainProposalDeleteOne struct {
 	cpd *ChainProposalDelete
+}
+
+// Where appends a list predicates to the ChainProposalDelete builder.
+func (cpdo *ChainProposalDeleteOne) Where(ps ...predicate.ChainProposal) *ChainProposalDeleteOne {
+	cpdo.cpd.mutation.Where(ps...)
+	return cpdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (cpdo *ChainProposalDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (cpdo *ChainProposalDeleteOne) ExecX(ctx context.Context) {
-	cpdo.cpd.ExecX(ctx)
+	if err := cpdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
@@ -101,6 +102,21 @@ func (tcu *TelegramChatUpdate) AddChains(c ...*Chain) *TelegramChatUpdate {
 	return tcu.AddChainIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (tcu *TelegramChatUpdate) AddAddressTrackerIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.AddAddressTrackerIDs(ids...)
+	return tcu
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (tcu *TelegramChatUpdate) AddAddressTrackers(a ...*AddressTracker) *TelegramChatUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tcu.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcu *TelegramChatUpdate) Mutation() *TelegramChatMutation {
 	return tcu.mutation
@@ -169,37 +185,31 @@ func (tcu *TelegramChatUpdate) RemoveChains(c ...*Chain) *TelegramChatUpdate {
 	return tcu.RemoveChainIDs(ids...)
 }
 
+// ClearAddressTrackers clears all "address_trackers" edges to the AddressTracker entity.
+func (tcu *TelegramChatUpdate) ClearAddressTrackers() *TelegramChatUpdate {
+	tcu.mutation.ClearAddressTrackers()
+	return tcu
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to AddressTracker entities by IDs.
+func (tcu *TelegramChatUpdate) RemoveAddressTrackerIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.RemoveAddressTrackerIDs(ids...)
+	return tcu
+}
+
+// RemoveAddressTrackers removes "address_trackers" edges to AddressTracker entities.
+func (tcu *TelegramChatUpdate) RemoveAddressTrackers(a ...*AddressTracker) *TelegramChatUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tcu.RemoveAddressTrackerIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tcu *TelegramChatUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	tcu.defaults()
-	if len(tcu.hooks) == 0 {
-		affected, err = tcu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TelegramChatMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tcu.mutation = mutation
-			affected, err = tcu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tcu.hooks) - 1; i >= 0; i-- {
-			if tcu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tcu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TelegramChatMutation](ctx, tcu.sqlSave, tcu.mutation, tcu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -233,16 +243,7 @@ func (tcu *TelegramChatUpdate) defaults() {
 }
 
 func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   telegramchat.Table,
-			Columns: telegramchat.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: telegramchat.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(telegramchat.Table, telegramchat.Columns, sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt))
 	if ps := tcu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -270,10 +271,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -286,10 +284,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -305,10 +300,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -324,10 +316,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -340,10 +329,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -359,10 +345,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -378,10 +361,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -394,10 +374,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -413,10 +390,52 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tcu.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.RemovedAddressTrackersIDs(); len(nodes) > 0 && !tcu.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -432,6 +451,7 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
+	tcu.mutation.done = true
 	return n, nil
 }
 
@@ -513,6 +533,21 @@ func (tcuo *TelegramChatUpdateOne) AddChains(c ...*Chain) *TelegramChatUpdateOne
 	return tcuo.AddChainIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (tcuo *TelegramChatUpdateOne) AddAddressTrackerIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.AddAddressTrackerIDs(ids...)
+	return tcuo
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (tcuo *TelegramChatUpdateOne) AddAddressTrackers(a ...*AddressTracker) *TelegramChatUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tcuo.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcuo *TelegramChatUpdateOne) Mutation() *TelegramChatMutation {
 	return tcuo.mutation
@@ -581,6 +616,33 @@ func (tcuo *TelegramChatUpdateOne) RemoveChains(c ...*Chain) *TelegramChatUpdate
 	return tcuo.RemoveChainIDs(ids...)
 }
 
+// ClearAddressTrackers clears all "address_trackers" edges to the AddressTracker entity.
+func (tcuo *TelegramChatUpdateOne) ClearAddressTrackers() *TelegramChatUpdateOne {
+	tcuo.mutation.ClearAddressTrackers()
+	return tcuo
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to AddressTracker entities by IDs.
+func (tcuo *TelegramChatUpdateOne) RemoveAddressTrackerIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.RemoveAddressTrackerIDs(ids...)
+	return tcuo
+}
+
+// RemoveAddressTrackers removes "address_trackers" edges to AddressTracker entities.
+func (tcuo *TelegramChatUpdateOne) RemoveAddressTrackers(a ...*AddressTracker) *TelegramChatUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tcuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// Where appends a list predicates to the TelegramChatUpdate builder.
+func (tcuo *TelegramChatUpdateOne) Where(ps ...predicate.TelegramChat) *TelegramChatUpdateOne {
+	tcuo.mutation.Where(ps...)
+	return tcuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (tcuo *TelegramChatUpdateOne) Select(field string, fields ...string) *TelegramChatUpdateOne {
@@ -590,41 +652,8 @@ func (tcuo *TelegramChatUpdateOne) Select(field string, fields ...string) *Teleg
 
 // Save executes the query and returns the updated TelegramChat entity.
 func (tcuo *TelegramChatUpdateOne) Save(ctx context.Context) (*TelegramChat, error) {
-	var (
-		err  error
-		node *TelegramChat
-	)
 	tcuo.defaults()
-	if len(tcuo.hooks) == 0 {
-		node, err = tcuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TelegramChatMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tcuo.mutation = mutation
-			node, err = tcuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(tcuo.hooks) - 1; i >= 0; i-- {
-			if tcuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, tcuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*TelegramChat)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from TelegramChatMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*TelegramChat, TelegramChatMutation](ctx, tcuo.sqlSave, tcuo.mutation, tcuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -658,16 +687,7 @@ func (tcuo *TelegramChatUpdateOne) defaults() {
 }
 
 func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *TelegramChat, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   telegramchat.Table,
-			Columns: telegramchat.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: telegramchat.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewUpdateSpec(telegramchat.Table, telegramchat.Columns, sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt))
 	id, ok := tcuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "TelegramChat.id" for update`)}
@@ -712,10 +732,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -728,10 +745,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -747,10 +761,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.UsersPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -766,10 +777,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -782,10 +790,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -801,10 +806,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.ContractsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -820,10 +822,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -836,10 +835,7 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -855,10 +851,52 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Columns: telegramchat.ChainsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tcuo.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.RemovedAddressTrackersIDs(); len(nodes) > 0 && !tcuo.mutation.AddressTrackersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   telegramchat.AddressTrackersTable,
+			Columns: []string{telegramchat.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -877,5 +915,6 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 		}
 		return nil, err
 	}
+	tcuo.mutation.done = true
 	return _node, nil
 }

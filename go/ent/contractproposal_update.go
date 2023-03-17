@@ -104,41 +104,8 @@ func (cpu *ContractProposalUpdate) ClearContract() *ContractProposalUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cpu *ContractProposalUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	cpu.defaults()
-	if len(cpu.hooks) == 0 {
-		if err = cpu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = cpu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ContractProposalMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cpu.check(); err != nil {
-				return 0, err
-			}
-			cpu.mutation = mutation
-			affected, err = cpu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cpu.hooks) - 1; i >= 0; i-- {
-			if cpu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cpu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cpu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ContractProposalMutation](ctx, cpu.sqlSave, cpu.mutation, cpu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -182,16 +149,10 @@ func (cpu *ContractProposalUpdate) check() error {
 }
 
 func (cpu *ContractProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   contractproposal.Table,
-			Columns: contractproposal.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: contractproposal.FieldID,
-			},
-		},
+	if err := cpu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(contractproposal.Table, contractproposal.Columns, sqlgraph.NewFieldSpec(contractproposal.FieldID, field.TypeInt))
 	if ps := cpu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -228,10 +189,7 @@ func (cpu *ContractProposalUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{contractproposal.ContractColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -244,10 +202,7 @@ func (cpu *ContractProposalUpdate) sqlSave(ctx context.Context) (n int, err erro
 			Columns: []string{contractproposal.ContractColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -263,6 +218,7 @@ func (cpu *ContractProposalUpdate) sqlSave(ctx context.Context) (n int, err erro
 		}
 		return 0, err
 	}
+	cpu.mutation.done = true
 	return n, nil
 }
 
@@ -347,6 +303,12 @@ func (cpuo *ContractProposalUpdateOne) ClearContract() *ContractProposalUpdateOn
 	return cpuo
 }
 
+// Where appends a list predicates to the ContractProposalUpdate builder.
+func (cpuo *ContractProposalUpdateOne) Where(ps ...predicate.ContractProposal) *ContractProposalUpdateOne {
+	cpuo.mutation.Where(ps...)
+	return cpuo
+}
+
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
 func (cpuo *ContractProposalUpdateOne) Select(field string, fields ...string) *ContractProposalUpdateOne {
@@ -356,47 +318,8 @@ func (cpuo *ContractProposalUpdateOne) Select(field string, fields ...string) *C
 
 // Save executes the query and returns the updated ContractProposal entity.
 func (cpuo *ContractProposalUpdateOne) Save(ctx context.Context) (*ContractProposal, error) {
-	var (
-		err  error
-		node *ContractProposal
-	)
 	cpuo.defaults()
-	if len(cpuo.hooks) == 0 {
-		if err = cpuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = cpuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ContractProposalMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cpuo.check(); err != nil {
-				return nil, err
-			}
-			cpuo.mutation = mutation
-			node, err = cpuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cpuo.hooks) - 1; i >= 0; i-- {
-			if cpuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cpuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cpuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*ContractProposal)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ContractProposalMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*ContractProposal, ContractProposalMutation](ctx, cpuo.sqlSave, cpuo.mutation, cpuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -440,16 +363,10 @@ func (cpuo *ContractProposalUpdateOne) check() error {
 }
 
 func (cpuo *ContractProposalUpdateOne) sqlSave(ctx context.Context) (_node *ContractProposal, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   contractproposal.Table,
-			Columns: contractproposal.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: contractproposal.FieldID,
-			},
-		},
+	if err := cpuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(contractproposal.Table, contractproposal.Columns, sqlgraph.NewFieldSpec(contractproposal.FieldID, field.TypeInt))
 	id, ok := cpuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ContractProposal.id" for update`)}
@@ -503,10 +420,7 @@ func (cpuo *ContractProposalUpdateOne) sqlSave(ctx context.Context) (_node *Cont
 			Columns: []string{contractproposal.ContractColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -519,10 +433,7 @@ func (cpuo *ContractProposalUpdateOne) sqlSave(ctx context.Context) (_node *Cont
 			Columns: []string{contractproposal.ContractColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: contract.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(contract.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -541,5 +452,6 @@ func (cpuo *ContractProposalUpdateOne) sqlSave(ctx context.Context) (_node *Cont
 		}
 		return nil, err
 	}
+	cpuo.mutation.done = true
 	return _node, nil
 }

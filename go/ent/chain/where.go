@@ -12,978 +12,712 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // ChainID applies equality check predicate on the "chain_id" field. It's identical to ChainIDEQ.
 func ChainID(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldChainID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldName, v))
 }
 
 // PrettyName applies equality check predicate on the "pretty_name" field. It's identical to PrettyNameEQ.
 func PrettyName(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldPrettyName, v))
 }
 
 // Path applies equality check predicate on the "path" field. It's identical to PathEQ.
 func Path(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldPath, v))
 }
 
 // Display applies equality check predicate on the "display" field. It's identical to DisplayEQ.
 func Display(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldDisplay, v))
 }
 
 // IsEnabled applies equality check predicate on the "is_enabled" field. It's identical to IsEnabledEQ.
 func IsEnabled(v bool) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsEnabled), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldIsEnabled, v))
 }
 
 // ImageURL applies equality check predicate on the "image_url" field. It's identical to ImageURLEQ.
 func ImageURL(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldImageURL, v))
 }
 
 // ThumbnailURL applies equality check predicate on the "thumbnail_url" field. It's identical to ThumbnailURLEQ.
 func ThumbnailURL(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldThumbnailURL, v))
+}
+
+// Bech32Prefix applies equality check predicate on the "bech32_prefix" field. It's identical to Bech32PrefixEQ.
+func Bech32Prefix(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldEQ(FieldBech32Prefix, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // ChainIDEQ applies the EQ predicate on the "chain_id" field.
 func ChainIDEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldChainID, v))
 }
 
 // ChainIDNEQ applies the NEQ predicate on the "chain_id" field.
 func ChainIDNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldChainID, v))
 }
 
 // ChainIDIn applies the In predicate on the "chain_id" field.
 func ChainIDIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldChainID), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldChainID, vs...))
 }
 
 // ChainIDNotIn applies the NotIn predicate on the "chain_id" field.
 func ChainIDNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldChainID), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldChainID, vs...))
 }
 
 // ChainIDGT applies the GT predicate on the "chain_id" field.
 func ChainIDGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldChainID, v))
 }
 
 // ChainIDGTE applies the GTE predicate on the "chain_id" field.
 func ChainIDGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldChainID, v))
 }
 
 // ChainIDLT applies the LT predicate on the "chain_id" field.
 func ChainIDLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldChainID, v))
 }
 
 // ChainIDLTE applies the LTE predicate on the "chain_id" field.
 func ChainIDLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldChainID, v))
 }
 
 // ChainIDContains applies the Contains predicate on the "chain_id" field.
 func ChainIDContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldChainID, v))
 }
 
 // ChainIDHasPrefix applies the HasPrefix predicate on the "chain_id" field.
 func ChainIDHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldChainID, v))
 }
 
 // ChainIDHasSuffix applies the HasSuffix predicate on the "chain_id" field.
 func ChainIDHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldChainID, v))
 }
 
 // ChainIDEqualFold applies the EqualFold predicate on the "chain_id" field.
 func ChainIDEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldChainID, v))
 }
 
 // ChainIDContainsFold applies the ContainsFold predicate on the "chain_id" field.
 func ChainIDContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldChainID), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldChainID, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldName, v))
 }
 
 // PrettyNameEQ applies the EQ predicate on the "pretty_name" field.
 func PrettyNameEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldPrettyName, v))
 }
 
 // PrettyNameNEQ applies the NEQ predicate on the "pretty_name" field.
 func PrettyNameNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldPrettyName, v))
 }
 
 // PrettyNameIn applies the In predicate on the "pretty_name" field.
 func PrettyNameIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPrettyName), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldPrettyName, vs...))
 }
 
 // PrettyNameNotIn applies the NotIn predicate on the "pretty_name" field.
 func PrettyNameNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPrettyName), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldPrettyName, vs...))
 }
 
 // PrettyNameGT applies the GT predicate on the "pretty_name" field.
 func PrettyNameGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldPrettyName, v))
 }
 
 // PrettyNameGTE applies the GTE predicate on the "pretty_name" field.
 func PrettyNameGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldPrettyName, v))
 }
 
 // PrettyNameLT applies the LT predicate on the "pretty_name" field.
 func PrettyNameLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldPrettyName, v))
 }
 
 // PrettyNameLTE applies the LTE predicate on the "pretty_name" field.
 func PrettyNameLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldPrettyName, v))
 }
 
 // PrettyNameContains applies the Contains predicate on the "pretty_name" field.
 func PrettyNameContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldPrettyName, v))
 }
 
 // PrettyNameHasPrefix applies the HasPrefix predicate on the "pretty_name" field.
 func PrettyNameHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldPrettyName, v))
 }
 
 // PrettyNameHasSuffix applies the HasSuffix predicate on the "pretty_name" field.
 func PrettyNameHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldPrettyName, v))
 }
 
 // PrettyNameEqualFold applies the EqualFold predicate on the "pretty_name" field.
 func PrettyNameEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldPrettyName, v))
 }
 
 // PrettyNameContainsFold applies the ContainsFold predicate on the "pretty_name" field.
 func PrettyNameContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPrettyName), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldPrettyName, v))
 }
 
 // PathEQ applies the EQ predicate on the "path" field.
 func PathEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldPath, v))
 }
 
 // PathNEQ applies the NEQ predicate on the "path" field.
 func PathNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldPath, v))
 }
 
 // PathIn applies the In predicate on the "path" field.
 func PathIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPath), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldPath, vs...))
 }
 
 // PathNotIn applies the NotIn predicate on the "path" field.
 func PathNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPath), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldPath, vs...))
 }
 
 // PathGT applies the GT predicate on the "path" field.
 func PathGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldPath, v))
 }
 
 // PathGTE applies the GTE predicate on the "path" field.
 func PathGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldPath, v))
 }
 
 // PathLT applies the LT predicate on the "path" field.
 func PathLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldPath, v))
 }
 
 // PathLTE applies the LTE predicate on the "path" field.
 func PathLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldPath, v))
 }
 
 // PathContains applies the Contains predicate on the "path" field.
 func PathContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldPath, v))
 }
 
 // PathHasPrefix applies the HasPrefix predicate on the "path" field.
 func PathHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldPath, v))
 }
 
 // PathHasSuffix applies the HasSuffix predicate on the "path" field.
 func PathHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldPath, v))
 }
 
 // PathEqualFold applies the EqualFold predicate on the "path" field.
 func PathEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldPath, v))
 }
 
 // PathContainsFold applies the ContainsFold predicate on the "path" field.
 func PathContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldPath), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldPath, v))
 }
 
 // DisplayEQ applies the EQ predicate on the "display" field.
 func DisplayEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldDisplay, v))
 }
 
 // DisplayNEQ applies the NEQ predicate on the "display" field.
 func DisplayNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldDisplay, v))
 }
 
 // DisplayIn applies the In predicate on the "display" field.
 func DisplayIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDisplay), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldDisplay, vs...))
 }
 
 // DisplayNotIn applies the NotIn predicate on the "display" field.
 func DisplayNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDisplay), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldDisplay, vs...))
 }
 
 // DisplayGT applies the GT predicate on the "display" field.
 func DisplayGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldDisplay, v))
 }
 
 // DisplayGTE applies the GTE predicate on the "display" field.
 func DisplayGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldDisplay, v))
 }
 
 // DisplayLT applies the LT predicate on the "display" field.
 func DisplayLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldDisplay, v))
 }
 
 // DisplayLTE applies the LTE predicate on the "display" field.
 func DisplayLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldDisplay, v))
 }
 
 // DisplayContains applies the Contains predicate on the "display" field.
 func DisplayContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldDisplay, v))
 }
 
 // DisplayHasPrefix applies the HasPrefix predicate on the "display" field.
 func DisplayHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldDisplay, v))
 }
 
 // DisplayHasSuffix applies the HasSuffix predicate on the "display" field.
 func DisplayHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldDisplay, v))
 }
 
 // DisplayEqualFold applies the EqualFold predicate on the "display" field.
 func DisplayEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldDisplay, v))
 }
 
 // DisplayContainsFold applies the ContainsFold predicate on the "display" field.
 func DisplayContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldDisplay), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldDisplay, v))
 }
 
 // IsEnabledEQ applies the EQ predicate on the "is_enabled" field.
 func IsEnabledEQ(v bool) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsEnabled), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldIsEnabled, v))
 }
 
 // IsEnabledNEQ applies the NEQ predicate on the "is_enabled" field.
 func IsEnabledNEQ(v bool) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIsEnabled), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldIsEnabled, v))
 }
 
 // ImageURLEQ applies the EQ predicate on the "image_url" field.
 func ImageURLEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldImageURL, v))
 }
 
 // ImageURLNEQ applies the NEQ predicate on the "image_url" field.
 func ImageURLNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldImageURL, v))
 }
 
 // ImageURLIn applies the In predicate on the "image_url" field.
 func ImageURLIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImageURL), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldImageURL, vs...))
 }
 
 // ImageURLNotIn applies the NotIn predicate on the "image_url" field.
 func ImageURLNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImageURL), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldImageURL, vs...))
 }
 
 // ImageURLGT applies the GT predicate on the "image_url" field.
 func ImageURLGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldImageURL, v))
 }
 
 // ImageURLGTE applies the GTE predicate on the "image_url" field.
 func ImageURLGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldImageURL, v))
 }
 
 // ImageURLLT applies the LT predicate on the "image_url" field.
 func ImageURLLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldImageURL, v))
 }
 
 // ImageURLLTE applies the LTE predicate on the "image_url" field.
 func ImageURLLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldImageURL, v))
 }
 
 // ImageURLContains applies the Contains predicate on the "image_url" field.
 func ImageURLContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldImageURL, v))
 }
 
 // ImageURLHasPrefix applies the HasPrefix predicate on the "image_url" field.
 func ImageURLHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldImageURL, v))
 }
 
 // ImageURLHasSuffix applies the HasSuffix predicate on the "image_url" field.
 func ImageURLHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldImageURL, v))
 }
 
 // ImageURLEqualFold applies the EqualFold predicate on the "image_url" field.
 func ImageURLEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldImageURL, v))
 }
 
 // ImageURLContainsFold applies the ContainsFold predicate on the "image_url" field.
 func ImageURLContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldImageURL), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldImageURL, v))
 }
 
 // ThumbnailURLEQ applies the EQ predicate on the "thumbnail_url" field.
 func ThumbnailURLEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldEQ(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLNEQ applies the NEQ predicate on the "thumbnail_url" field.
 func ThumbnailURLNEQ(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldNEQ(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLIn applies the In predicate on the "thumbnail_url" field.
 func ThumbnailURLIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldThumbnailURL), v...))
-	})
+	return predicate.Chain(sql.FieldIn(FieldThumbnailURL, vs...))
 }
 
 // ThumbnailURLNotIn applies the NotIn predicate on the "thumbnail_url" field.
 func ThumbnailURLNotIn(vs ...string) predicate.Chain {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldThumbnailURL), v...))
-	})
+	return predicate.Chain(sql.FieldNotIn(FieldThumbnailURL, vs...))
 }
 
 // ThumbnailURLGT applies the GT predicate on the "thumbnail_url" field.
 func ThumbnailURLGT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldGT(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLGTE applies the GTE predicate on the "thumbnail_url" field.
 func ThumbnailURLGTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldGTE(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLLT applies the LT predicate on the "thumbnail_url" field.
 func ThumbnailURLLT(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldLT(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLLTE applies the LTE predicate on the "thumbnail_url" field.
 func ThumbnailURLLTE(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldLTE(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLContains applies the Contains predicate on the "thumbnail_url" field.
 func ThumbnailURLContains(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldContains(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLHasPrefix applies the HasPrefix predicate on the "thumbnail_url" field.
 func ThumbnailURLHasPrefix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldHasPrefix(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLHasSuffix applies the HasSuffix predicate on the "thumbnail_url" field.
 func ThumbnailURLHasSuffix(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldHasSuffix(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLEqualFold applies the EqualFold predicate on the "thumbnail_url" field.
 func ThumbnailURLEqualFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldEqualFold(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLContainsFold applies the ContainsFold predicate on the "thumbnail_url" field.
 func ThumbnailURLContainsFold(v string) predicate.Chain {
-	return predicate.Chain(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Chain(sql.FieldContainsFold(FieldThumbnailURL, v))
+}
+
+// Bech32PrefixEQ applies the EQ predicate on the "bech32_prefix" field.
+func Bech32PrefixEQ(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldEQ(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixNEQ applies the NEQ predicate on the "bech32_prefix" field.
+func Bech32PrefixNEQ(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldNEQ(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixIn applies the In predicate on the "bech32_prefix" field.
+func Bech32PrefixIn(vs ...string) predicate.Chain {
+	return predicate.Chain(sql.FieldIn(FieldBech32Prefix, vs...))
+}
+
+// Bech32PrefixNotIn applies the NotIn predicate on the "bech32_prefix" field.
+func Bech32PrefixNotIn(vs ...string) predicate.Chain {
+	return predicate.Chain(sql.FieldNotIn(FieldBech32Prefix, vs...))
+}
+
+// Bech32PrefixGT applies the GT predicate on the "bech32_prefix" field.
+func Bech32PrefixGT(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldGT(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixGTE applies the GTE predicate on the "bech32_prefix" field.
+func Bech32PrefixGTE(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldGTE(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixLT applies the LT predicate on the "bech32_prefix" field.
+func Bech32PrefixLT(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldLT(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixLTE applies the LTE predicate on the "bech32_prefix" field.
+func Bech32PrefixLTE(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldLTE(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixContains applies the Contains predicate on the "bech32_prefix" field.
+func Bech32PrefixContains(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldContains(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixHasPrefix applies the HasPrefix predicate on the "bech32_prefix" field.
+func Bech32PrefixHasPrefix(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldHasPrefix(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixHasSuffix applies the HasSuffix predicate on the "bech32_prefix" field.
+func Bech32PrefixHasSuffix(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldHasSuffix(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixEqualFold applies the EqualFold predicate on the "bech32_prefix" field.
+func Bech32PrefixEqualFold(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldEqualFold(FieldBech32Prefix, v))
+}
+
+// Bech32PrefixContainsFold applies the ContainsFold predicate on the "bech32_prefix" field.
+func Bech32PrefixContainsFold(v string) predicate.Chain {
+	return predicate.Chain(sql.FieldContainsFold(FieldBech32Prefix, v))
 }
 
 // HasChainProposals applies the HasEdge predicate on the "chain_proposals" edge.
@@ -991,7 +725,6 @@ func HasChainProposals() predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainProposalsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ChainProposalsTable, ChainProposalsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1019,7 +752,6 @@ func HasTelegramChats() predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TelegramChatsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1047,7 +779,6 @@ func HasDiscordChannels() predicate.Chain {
 	return predicate.Chain(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(DiscordChannelsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1061,6 +792,33 @@ func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.Chain {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(DiscordChannelsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAddressTrackers applies the HasEdge predicate on the "address_trackers" edge.
+func HasAddressTrackers() predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AddressTrackersTable, AddressTrackersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAddressTrackersWith applies the HasEdge predicate on the "address_trackers" edge with a given conditions (other predicates).
+func HasAddressTrackersWith(preds ...predicate.AddressTracker) predicate.Chain {
+	return predicate.Chain(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AddressTrackersInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AddressTrackersTable, AddressTrackersColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

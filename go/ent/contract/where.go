@@ -12,993 +12,647 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
 func Address(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldAddress, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldName, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldDescription, v))
 }
 
 // ImageURL applies equality check predicate on the "image_url" field. It's identical to ImageURLEQ.
 func ImageURL(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldImageURL, v))
 }
 
 // ThumbnailURL applies equality check predicate on the "thumbnail_url" field. It's identical to ThumbnailURLEQ.
 func ThumbnailURL(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldThumbnailURL, v))
 }
 
 // RPCEndpoint applies equality check predicate on the "rpc_endpoint" field. It's identical to RPCEndpointEQ.
 func RPCEndpoint(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldRPCEndpoint, v))
 }
 
 // GetProposalsQuery applies equality check predicate on the "get_proposals_query" field. It's identical to GetProposalsQueryEQ.
 func GetProposalsQuery(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldGetProposalsQuery, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // AddressEQ applies the EQ predicate on the "address" field.
 func AddressEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldAddress, v))
 }
 
 // AddressNEQ applies the NEQ predicate on the "address" field.
 func AddressNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldAddress, v))
 }
 
 // AddressIn applies the In predicate on the "address" field.
 func AddressIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldAddress), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldAddress, vs...))
 }
 
 // AddressNotIn applies the NotIn predicate on the "address" field.
 func AddressNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldAddress), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldAddress, vs...))
 }
 
 // AddressGT applies the GT predicate on the "address" field.
 func AddressGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldAddress, v))
 }
 
 // AddressGTE applies the GTE predicate on the "address" field.
 func AddressGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldAddress, v))
 }
 
 // AddressLT applies the LT predicate on the "address" field.
 func AddressLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldAddress, v))
 }
 
 // AddressLTE applies the LTE predicate on the "address" field.
 func AddressLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldAddress, v))
 }
 
 // AddressContains applies the Contains predicate on the "address" field.
 func AddressContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldAddress, v))
 }
 
 // AddressHasPrefix applies the HasPrefix predicate on the "address" field.
 func AddressHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldAddress, v))
 }
 
 // AddressHasSuffix applies the HasSuffix predicate on the "address" field.
 func AddressHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldAddress, v))
 }
 
 // AddressEqualFold applies the EqualFold predicate on the "address" field.
 func AddressEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldAddress, v))
 }
 
 // AddressContainsFold applies the ContainsFold predicate on the "address" field.
 func AddressContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldAddress), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldAddress, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldName, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldDescription, v))
 }
 
 // DescriptionNEQ applies the NEQ predicate on the "description" field.
 func DescriptionNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldDescription, v))
 }
 
 // DescriptionIn applies the In predicate on the "description" field.
 func DescriptionIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDescription), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldDescription, vs...))
 }
 
 // DescriptionNotIn applies the NotIn predicate on the "description" field.
 func DescriptionNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDescription), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldDescription, vs...))
 }
 
 // DescriptionGT applies the GT predicate on the "description" field.
 func DescriptionGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldDescription, v))
 }
 
 // DescriptionGTE applies the GTE predicate on the "description" field.
 func DescriptionGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldDescription, v))
 }
 
 // DescriptionLT applies the LT predicate on the "description" field.
 func DescriptionLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldDescription, v))
 }
 
 // DescriptionLTE applies the LTE predicate on the "description" field.
 func DescriptionLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldDescription, v))
 }
 
 // DescriptionContains applies the Contains predicate on the "description" field.
 func DescriptionContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldDescription, v))
 }
 
 // DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
 func DescriptionHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldDescription, v))
 }
 
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldDescription, v))
 }
 
 // DescriptionEqualFold applies the EqualFold predicate on the "description" field.
 func DescriptionEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldDescription, v))
 }
 
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldDescription), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // ImageURLEQ applies the EQ predicate on the "image_url" field.
 func ImageURLEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldImageURL, v))
 }
 
 // ImageURLNEQ applies the NEQ predicate on the "image_url" field.
 func ImageURLNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldImageURL, v))
 }
 
 // ImageURLIn applies the In predicate on the "image_url" field.
 func ImageURLIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldImageURL), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldImageURL, vs...))
 }
 
 // ImageURLNotIn applies the NotIn predicate on the "image_url" field.
 func ImageURLNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldImageURL), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldImageURL, vs...))
 }
 
 // ImageURLGT applies the GT predicate on the "image_url" field.
 func ImageURLGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldImageURL, v))
 }
 
 // ImageURLGTE applies the GTE predicate on the "image_url" field.
 func ImageURLGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldImageURL, v))
 }
 
 // ImageURLLT applies the LT predicate on the "image_url" field.
 func ImageURLLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldImageURL, v))
 }
 
 // ImageURLLTE applies the LTE predicate on the "image_url" field.
 func ImageURLLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldImageURL, v))
 }
 
 // ImageURLContains applies the Contains predicate on the "image_url" field.
 func ImageURLContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldImageURL, v))
 }
 
 // ImageURLHasPrefix applies the HasPrefix predicate on the "image_url" field.
 func ImageURLHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldImageURL, v))
 }
 
 // ImageURLHasSuffix applies the HasSuffix predicate on the "image_url" field.
 func ImageURLHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldImageURL, v))
 }
 
 // ImageURLEqualFold applies the EqualFold predicate on the "image_url" field.
 func ImageURLEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldImageURL, v))
 }
 
 // ImageURLContainsFold applies the ContainsFold predicate on the "image_url" field.
 func ImageURLContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldImageURL), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldImageURL, v))
 }
 
 // ThumbnailURLEQ applies the EQ predicate on the "thumbnail_url" field.
 func ThumbnailURLEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLNEQ applies the NEQ predicate on the "thumbnail_url" field.
 func ThumbnailURLNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLIn applies the In predicate on the "thumbnail_url" field.
 func ThumbnailURLIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldThumbnailURL), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldThumbnailURL, vs...))
 }
 
 // ThumbnailURLNotIn applies the NotIn predicate on the "thumbnail_url" field.
 func ThumbnailURLNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldThumbnailURL), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldThumbnailURL, vs...))
 }
 
 // ThumbnailURLGT applies the GT predicate on the "thumbnail_url" field.
 func ThumbnailURLGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLGTE applies the GTE predicate on the "thumbnail_url" field.
 func ThumbnailURLGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLLT applies the LT predicate on the "thumbnail_url" field.
 func ThumbnailURLLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLLTE applies the LTE predicate on the "thumbnail_url" field.
 func ThumbnailURLLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLContains applies the Contains predicate on the "thumbnail_url" field.
 func ThumbnailURLContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLHasPrefix applies the HasPrefix predicate on the "thumbnail_url" field.
 func ThumbnailURLHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLHasSuffix applies the HasSuffix predicate on the "thumbnail_url" field.
 func ThumbnailURLHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLEqualFold applies the EqualFold predicate on the "thumbnail_url" field.
 func ThumbnailURLEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldThumbnailURL, v))
 }
 
 // ThumbnailURLContainsFold applies the ContainsFold predicate on the "thumbnail_url" field.
 func ThumbnailURLContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldThumbnailURL), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldThumbnailURL, v))
 }
 
 // RPCEndpointEQ applies the EQ predicate on the "rpc_endpoint" field.
 func RPCEndpointEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointNEQ applies the NEQ predicate on the "rpc_endpoint" field.
 func RPCEndpointNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointIn applies the In predicate on the "rpc_endpoint" field.
 func RPCEndpointIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldRPCEndpoint), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldRPCEndpoint, vs...))
 }
 
 // RPCEndpointNotIn applies the NotIn predicate on the "rpc_endpoint" field.
 func RPCEndpointNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldRPCEndpoint), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldRPCEndpoint, vs...))
 }
 
 // RPCEndpointGT applies the GT predicate on the "rpc_endpoint" field.
 func RPCEndpointGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointGTE applies the GTE predicate on the "rpc_endpoint" field.
 func RPCEndpointGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointLT applies the LT predicate on the "rpc_endpoint" field.
 func RPCEndpointLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointLTE applies the LTE predicate on the "rpc_endpoint" field.
 func RPCEndpointLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointContains applies the Contains predicate on the "rpc_endpoint" field.
 func RPCEndpointContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointHasPrefix applies the HasPrefix predicate on the "rpc_endpoint" field.
 func RPCEndpointHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointHasSuffix applies the HasSuffix predicate on the "rpc_endpoint" field.
 func RPCEndpointHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointEqualFold applies the EqualFold predicate on the "rpc_endpoint" field.
 func RPCEndpointEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldRPCEndpoint, v))
 }
 
 // RPCEndpointContainsFold applies the ContainsFold predicate on the "rpc_endpoint" field.
 func RPCEndpointContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldRPCEndpoint), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldRPCEndpoint, v))
 }
 
 // ConfigVersionEQ applies the EQ predicate on the "config_version" field.
 func ConfigVersionEQ(v ConfigVersion) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldConfigVersion), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldConfigVersion, v))
 }
 
 // ConfigVersionNEQ applies the NEQ predicate on the "config_version" field.
 func ConfigVersionNEQ(v ConfigVersion) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldConfigVersion), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldConfigVersion, v))
 }
 
 // ConfigVersionIn applies the In predicate on the "config_version" field.
 func ConfigVersionIn(vs ...ConfigVersion) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldConfigVersion), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldConfigVersion, vs...))
 }
 
 // ConfigVersionNotIn applies the NotIn predicate on the "config_version" field.
 func ConfigVersionNotIn(vs ...ConfigVersion) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldConfigVersion), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldConfigVersion, vs...))
 }
 
 // GetProposalsQueryEQ applies the EQ predicate on the "get_proposals_query" field.
 func GetProposalsQueryEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldEQ(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryNEQ applies the NEQ predicate on the "get_proposals_query" field.
 func GetProposalsQueryNEQ(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldNEQ(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryIn applies the In predicate on the "get_proposals_query" field.
 func GetProposalsQueryIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldGetProposalsQuery), v...))
-	})
+	return predicate.Contract(sql.FieldIn(FieldGetProposalsQuery, vs...))
 }
 
 // GetProposalsQueryNotIn applies the NotIn predicate on the "get_proposals_query" field.
 func GetProposalsQueryNotIn(vs ...string) predicate.Contract {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldGetProposalsQuery), v...))
-	})
+	return predicate.Contract(sql.FieldNotIn(FieldGetProposalsQuery, vs...))
 }
 
 // GetProposalsQueryGT applies the GT predicate on the "get_proposals_query" field.
 func GetProposalsQueryGT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldGT(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryGTE applies the GTE predicate on the "get_proposals_query" field.
 func GetProposalsQueryGTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldGTE(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryLT applies the LT predicate on the "get_proposals_query" field.
 func GetProposalsQueryLT(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldLT(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryLTE applies the LTE predicate on the "get_proposals_query" field.
 func GetProposalsQueryLTE(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldLTE(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryContains applies the Contains predicate on the "get_proposals_query" field.
 func GetProposalsQueryContains(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldContains(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryHasPrefix applies the HasPrefix predicate on the "get_proposals_query" field.
 func GetProposalsQueryHasPrefix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldHasPrefix(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryHasSuffix applies the HasSuffix predicate on the "get_proposals_query" field.
 func GetProposalsQueryHasSuffix(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldHasSuffix(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryEqualFold applies the EqualFold predicate on the "get_proposals_query" field.
 func GetProposalsQueryEqualFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldEqualFold(FieldGetProposalsQuery, v))
 }
 
 // GetProposalsQueryContainsFold applies the ContainsFold predicate on the "get_proposals_query" field.
 func GetProposalsQueryContainsFold(v string) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldGetProposalsQuery), v))
-	})
+	return predicate.Contract(sql.FieldContainsFold(FieldGetProposalsQuery, v))
 }
 
 // HasProposals applies the HasEdge predicate on the "proposals" edge.
@@ -1006,7 +660,6 @@ func HasProposals() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ProposalsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, ProposalsTable, ProposalsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1034,7 +687,6 @@ func HasTelegramChats() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(TelegramChatsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, TelegramChatsTable, TelegramChatsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -1062,7 +714,6 @@ func HasDiscordChannels() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(DiscordChannelsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
