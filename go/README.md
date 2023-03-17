@@ -1,5 +1,19 @@
 # Go backend
 
+## Services
+
+```bash
+source ../.env.dev  # set environment variables
+```
+
+| Service          | Command                                 | Description                        |
+|------------------|:----------------------------------------|------------------------------------|
+| Telegram         | go run main.go service telegram         | Telegram bot                       |
+| Discord          | go run main.go service discord          | Discord bot                        |
+| GRPC             | go run main.go service grpc             | GRPC server                        |
+| Chain Crawler    | go run main.go service chain-crawler    | Crawler to update chains           |
+| Contract Crawler | go run main.go service contract-crawler | Crawler to update DAODAO contracts |
+
 ## Database
 
 ### Install CLI
@@ -38,6 +52,7 @@ go run -mod=mod ariga.io/entviz ./ent/schema/
 ## API
 
 ### Protoc Installation
+
 ```bash
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```
