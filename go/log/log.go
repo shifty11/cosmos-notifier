@@ -19,16 +19,12 @@ func addSentryToLogger(log *zap.Logger) *zap.Logger {
 
 	cfg := zapsentry.Configuration{
 		Level:             zapcore.ErrorLevel, // when to send message to sentry
-		EnableBreadcrumbs: true,               // enable sending breadcrumbs to Sentry
-		BreadcrumbLevel:   zapcore.InfoLevel,  // at what level should we sent breadcrumbs to sentry
+		DisableStacktrace: false,              // disable stacktrace
 		Tags: map[string]string{
 			"component": "system",
 		},
 	}
 	core, err := zapsentry.NewCore(cfg, zapsentry.NewSentryClientFromDSN(os.Getenv("SENTRY_DSN")))
-
-	// to use breadcrumbs feature - create new scope explicitly
-	log = log.With(zapsentry.NewScope())
 
 	// in case of err it will return noop core. so we can safely attach it
 	if err != nil {
