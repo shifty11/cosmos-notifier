@@ -76,6 +76,7 @@ func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string)
 		SetChainID(chainData.ChainId).
 		SetName(chainData.Name).
 		SetPrettyName(chainData.PrettyName).
+		SetBech32Prefix(chainData.Bech32Prefix).
 		SetImageURL(chainData.Image).
 		SetThumbnailURL(thumbnailUrl).
 		SetIsEnabled(true).
@@ -93,6 +94,7 @@ func (manager *ChainManager) Update(entChain *ent.Chain, chainData *types.Chain,
 		SetChainID(chainData.ChainId).
 		SetName(chainData.Name).
 		SetPrettyName(chainData.PrettyName).
+		SetBech32Prefix(chainData.Bech32Prefix).
 		SetPath(chainData.Path).
 		SetDisplay(chainData.Display).
 		SetImageURL(chainData.Image).
