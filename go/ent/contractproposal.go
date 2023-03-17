@@ -149,14 +149,14 @@ func (cp *ContractProposal) assignValues(columns []string, values []any) error {
 
 // QueryContract queries the "contract" edge of the ContractProposal entity.
 func (cp *ContractProposal) QueryContract() *ContractQuery {
-	return (&ContractProposalClient{config: cp.config}).QueryContract(cp)
+	return NewContractProposalClient(cp.config).QueryContract(cp)
 }
 
 // Update returns a builder for updating this ContractProposal.
 // Note that you need to call ContractProposal.Unwrap() before calling this method if this ContractProposal
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (cp *ContractProposal) Update() *ContractProposalUpdateOne {
-	return (&ContractProposalClient{config: cp.config}).UpdateOne(cp)
+	return NewContractProposalClient(cp.config).UpdateOne(cp)
 }
 
 // Unwrap unwraps the ContractProposal entity that was returned from a transaction after it was closed,
@@ -201,9 +201,3 @@ func (cp *ContractProposal) String() string {
 
 // ContractProposals is a parsable slice of ContractProposal.
 type ContractProposals []*ContractProposal
-
-func (cp ContractProposals) config(cfg config) {
-	for _i := range cp {
-		cp[_i].config = cfg
-	}
-}

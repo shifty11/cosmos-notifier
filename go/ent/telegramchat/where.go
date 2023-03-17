@@ -12,413 +12,267 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.TelegramChat(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.TelegramChat(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.TelegramChat(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // ChatID applies equality check predicate on the "chat_id" field. It's identical to ChatIDEQ.
 func ChatID(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldChatID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldName, v))
 }
 
 // IsGroup applies equality check predicate on the "is_group" field. It's identical to IsGroupEQ.
 func IsGroup(v bool) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsGroup), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldIsGroup, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.TelegramChat(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.TelegramChat(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.TelegramChat(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.TelegramChat(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.TelegramChat(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // ChatIDEQ applies the EQ predicate on the "chat_id" field.
 func ChatIDEQ(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldChatID, v))
 }
 
 // ChatIDNEQ applies the NEQ predicate on the "chat_id" field.
 func ChatIDNEQ(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldNEQ(FieldChatID, v))
 }
 
 // ChatIDIn applies the In predicate on the "chat_id" field.
 func ChatIDIn(vs ...int64) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldChatID), v...))
-	})
+	return predicate.TelegramChat(sql.FieldIn(FieldChatID, vs...))
 }
 
 // ChatIDNotIn applies the NotIn predicate on the "chat_id" field.
 func ChatIDNotIn(vs ...int64) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldChatID), v...))
-	})
+	return predicate.TelegramChat(sql.FieldNotIn(FieldChatID, vs...))
 }
 
 // ChatIDGT applies the GT predicate on the "chat_id" field.
 func ChatIDGT(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldGT(FieldChatID, v))
 }
 
 // ChatIDGTE applies the GTE predicate on the "chat_id" field.
 func ChatIDGTE(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldGTE(FieldChatID, v))
 }
 
 // ChatIDLT applies the LT predicate on the "chat_id" field.
 func ChatIDLT(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldLT(FieldChatID, v))
 }
 
 // ChatIDLTE applies the LTE predicate on the "chat_id" field.
 func ChatIDLTE(v int64) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldChatID), v))
-	})
+	return predicate.TelegramChat(sql.FieldLTE(FieldChatID, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldName, v))
 }
 
 // NameNEQ applies the NEQ predicate on the "name" field.
 func NameNEQ(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldNEQ(FieldName, v))
 }
 
 // NameIn applies the In predicate on the "name" field.
 func NameIn(vs ...string) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldName), v...))
-	})
+	return predicate.TelegramChat(sql.FieldIn(FieldName, vs...))
 }
 
 // NameNotIn applies the NotIn predicate on the "name" field.
 func NameNotIn(vs ...string) predicate.TelegramChat {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldName), v...))
-	})
+	return predicate.TelegramChat(sql.FieldNotIn(FieldName, vs...))
 }
 
 // NameGT applies the GT predicate on the "name" field.
 func NameGT(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldGT(FieldName, v))
 }
 
 // NameGTE applies the GTE predicate on the "name" field.
 func NameGTE(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldGTE(FieldName, v))
 }
 
 // NameLT applies the LT predicate on the "name" field.
 func NameLT(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldLT(FieldName, v))
 }
 
 // NameLTE applies the LTE predicate on the "name" field.
 func NameLTE(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldLTE(FieldName, v))
 }
 
 // NameContains applies the Contains predicate on the "name" field.
 func NameContains(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldContains(FieldName, v))
 }
 
 // NameHasPrefix applies the HasPrefix predicate on the "name" field.
 func NameHasPrefix(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldHasPrefix(FieldName, v))
 }
 
 // NameHasSuffix applies the HasSuffix predicate on the "name" field.
 func NameHasSuffix(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldHasSuffix(FieldName, v))
 }
 
 // NameEqualFold applies the EqualFold predicate on the "name" field.
 func NameEqualFold(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldEqualFold(FieldName, v))
 }
 
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldName), v))
-	})
+	return predicate.TelegramChat(sql.FieldContainsFold(FieldName, v))
 }
 
 // IsGroupEQ applies the EQ predicate on the "is_group" field.
 func IsGroupEQ(v bool) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsGroup), v))
-	})
+	return predicate.TelegramChat(sql.FieldEQ(FieldIsGroup, v))
 }
 
 // IsGroupNEQ applies the NEQ predicate on the "is_group" field.
 func IsGroupNEQ(v bool) predicate.TelegramChat {
-	return predicate.TelegramChat(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIsGroup), v))
-	})
+	return predicate.TelegramChat(sql.FieldNEQ(FieldIsGroup, v))
 }
 
 // HasUsers applies the HasEdge predicate on the "users" edge.
@@ -426,7 +280,6 @@ func HasUsers() predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(UsersTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, UsersTable, UsersPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -454,7 +307,6 @@ func HasContracts() predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ContractsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, ContractsTable, ContractsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -482,7 +334,6 @@ func HasChains() predicate.TelegramChat {
 	return predicate.TelegramChat(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainsTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -496,6 +347,33 @@ func HasChainsWith(preds ...predicate.Chain) predicate.TelegramChat {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ChainsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, ChainsTable, ChainsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAddressTrackers applies the HasEdge predicate on the "address_trackers" edge.
+func HasAddressTrackers() predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AddressTrackersTable, AddressTrackersColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAddressTrackersWith applies the HasEdge predicate on the "address_trackers" edge with a given conditions (other predicates).
+func HasAddressTrackersWith(preds ...predicate.AddressTracker) predicate.TelegramChat {
+	return predicate.TelegramChat(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AddressTrackersInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AddressTrackersTable, AddressTrackersColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

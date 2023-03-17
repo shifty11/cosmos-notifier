@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -28,34 +27,7 @@ func (tcd *TelegramChatDelete) Where(ps ...predicate.TelegramChat) *TelegramChat
 
 // Exec executes the deletion query and returns how many vertices were deleted.
 func (tcd *TelegramChatDelete) Exec(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
-	if len(tcd.hooks) == 0 {
-		affected, err = tcd.sqlExec(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*TelegramChatMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			tcd.mutation = mutation
-			affected, err = tcd.sqlExec(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(tcd.hooks) - 1; i >= 0; i-- {
-			if tcd.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = tcd.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, tcd.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, TelegramChatMutation](ctx, tcd.sqlExec, tcd.mutation, tcd.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
@@ -68,15 +40,7 @@ func (tcd *TelegramChatDelete) ExecX(ctx context.Context) int {
 }
 
 func (tcd *TelegramChatDelete) sqlExec(ctx context.Context) (int, error) {
-	_spec := &sqlgraph.DeleteSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table: telegramchat.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: telegramchat.FieldID,
-			},
-		},
-	}
+	_spec := sqlgraph.NewDeleteSpec(telegramchat.Table, sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt))
 	if ps := tcd.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -88,12 +52,19 @@ func (tcd *TelegramChatDelete) sqlExec(ctx context.Context) (int, error) {
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
+	tcd.mutation.done = true
 	return affected, err
 }
 
 // TelegramChatDeleteOne is the builder for deleting a single TelegramChat entity.
 type TelegramChatDeleteOne struct {
 	tcd *TelegramChatDelete
+}
+
+// Where appends a list predicates to the TelegramChatDelete builder.
+func (tcdo *TelegramChatDeleteOne) Where(ps ...predicate.TelegramChat) *TelegramChatDeleteOne {
+	tcdo.tcd.mutation.Where(ps...)
+	return tcdo
 }
 
 // Exec executes the deletion query.
@@ -111,5 +82,7 @@ func (tcdo *TelegramChatDeleteOne) Exec(ctx context.Context) error {
 
 // ExecX is like Exec, but panics if an error occurs.
 func (tcdo *TelegramChatDeleteOne) ExecX(ctx context.Context) {
-	tcdo.tcd.ExecX(ctx)
+	if err := tcdo.Exec(ctx); err != nil {
+		panic(err)
+	}
 }

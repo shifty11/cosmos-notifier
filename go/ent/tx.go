@@ -12,6 +12,8 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AddressTracker is the client for interacting with the AddressTracker builders.
+	AddressTracker *AddressTrackerClient
 	// Chain is the client for interacting with the Chain builders.
 	Chain *ChainClient
 	// ChainProposal is the client for interacting with the ChainProposal builders.
@@ -157,6 +159,7 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AddressTracker = NewAddressTrackerClient(tx.config)
 	tx.Chain = NewChainClient(tx.config)
 	tx.ChainProposal = NewChainProposalClient(tx.config)
 	tx.Contract = NewContractClient(tx.config)
@@ -173,7 +176,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Chain.QueryXXX(), the query will be executed
+// applies a query, for example: AddressTracker.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

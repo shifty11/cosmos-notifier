@@ -180,24 +180,24 @@ func (c *Contract) assignValues(columns []string, values []any) error {
 
 // QueryProposals queries the "proposals" edge of the Contract entity.
 func (c *Contract) QueryProposals() *ContractProposalQuery {
-	return (&ContractClient{config: c.config}).QueryProposals(c)
+	return NewContractClient(c.config).QueryProposals(c)
 }
 
 // QueryTelegramChats queries the "telegram_chats" edge of the Contract entity.
 func (c *Contract) QueryTelegramChats() *TelegramChatQuery {
-	return (&ContractClient{config: c.config}).QueryTelegramChats(c)
+	return NewContractClient(c.config).QueryTelegramChats(c)
 }
 
 // QueryDiscordChannels queries the "discord_channels" edge of the Contract entity.
 func (c *Contract) QueryDiscordChannels() *DiscordChannelQuery {
-	return (&ContractClient{config: c.config}).QueryDiscordChannels(c)
+	return NewContractClient(c.config).QueryDiscordChannels(c)
 }
 
 // Update returns a builder for updating this Contract.
 // Note that you need to call Contract.Unwrap() before calling this method if this Contract
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Contract) Update() *ContractUpdateOne {
-	return (&ContractClient{config: c.config}).UpdateOne(c)
+	return NewContractClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Contract entity that was returned from a transaction after it was closed,
@@ -251,9 +251,3 @@ func (c *Contract) String() string {
 
 // Contracts is a parsable slice of Contract.
 type Contracts []*Contract
-
-func (c Contracts) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

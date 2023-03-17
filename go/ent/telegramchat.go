@@ -39,9 +39,11 @@ type TelegramChatEdges struct {
 	Contracts []*Contract `json:"contracts,omitempty"`
 	// Chains holds the value of the chains edge.
 	Chains []*Chain `json:"chains,omitempty"`
+	// AddressTrackers holds the value of the address_trackers edge.
+	AddressTrackers []*AddressTracker `json:"address_trackers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -69,6 +71,15 @@ func (e TelegramChatEdges) ChainsOrErr() ([]*Chain, error) {
 		return e.Chains, nil
 	}
 	return nil, &NotLoadedError{edge: "chains"}
+}
+
+// AddressTrackersOrErr returns the AddressTrackers value or an error if the edge
+// was not loaded in eager-loading.
+func (e TelegramChatEdges) AddressTrackersOrErr() ([]*AddressTracker, error) {
+	if e.loadedTypes[3] {
+		return e.AddressTrackers, nil
+	}
+	return nil, &NotLoadedError{edge: "address_trackers"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -142,24 +153,29 @@ func (tc *TelegramChat) assignValues(columns []string, values []any) error {
 
 // QueryUsers queries the "users" edge of the TelegramChat entity.
 func (tc *TelegramChat) QueryUsers() *UserQuery {
-	return (&TelegramChatClient{config: tc.config}).QueryUsers(tc)
+	return NewTelegramChatClient(tc.config).QueryUsers(tc)
 }
 
 // QueryContracts queries the "contracts" edge of the TelegramChat entity.
 func (tc *TelegramChat) QueryContracts() *ContractQuery {
-	return (&TelegramChatClient{config: tc.config}).QueryContracts(tc)
+	return NewTelegramChatClient(tc.config).QueryContracts(tc)
 }
 
 // QueryChains queries the "chains" edge of the TelegramChat entity.
 func (tc *TelegramChat) QueryChains() *ChainQuery {
-	return (&TelegramChatClient{config: tc.config}).QueryChains(tc)
+	return NewTelegramChatClient(tc.config).QueryChains(tc)
+}
+
+// QueryAddressTrackers queries the "address_trackers" edge of the TelegramChat entity.
+func (tc *TelegramChat) QueryAddressTrackers() *AddressTrackerQuery {
+	return NewTelegramChatClient(tc.config).QueryAddressTrackers(tc)
 }
 
 // Update returns a builder for updating this TelegramChat.
 // Note that you need to call TelegramChat.Unwrap() before calling this method if this TelegramChat
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (tc *TelegramChat) Update() *TelegramChatUpdateOne {
-	return (&TelegramChatClient{config: tc.config}).UpdateOne(tc)
+	return NewTelegramChatClient(tc.config).UpdateOne(tc)
 }
 
 // Unwrap unwraps the TelegramChat entity that was returned from a transaction after it was closed,
@@ -198,9 +214,3 @@ func (tc *TelegramChat) String() string {
 
 // TelegramChats is a parsable slice of TelegramChat.
 type TelegramChats []*TelegramChat
-
-func (tc TelegramChats) config(cfg config) {
-	for _i := range tc {
-		tc[_i].config = cfg
-	}
-}

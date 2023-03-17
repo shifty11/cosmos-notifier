@@ -9,6 +9,9 @@ import (
 	"sync"
 	"time"
 
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
@@ -17,8 +20,6 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
-
-	"entgo.io/ent"
 )
 
 const (
@@ -30,6 +31,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
+	TypeAddressTracker   = "AddressTracker"
 	TypeChain            = "Chain"
 	TypeChainProposal    = "ChainProposal"
 	TypeContract         = "Contract"
@@ -38,6 +40,710 @@ const (
 	TypeTelegramChat     = "TelegramChat"
 	TypeUser             = "User"
 )
+
+// AddressTrackerMutation represents an operation that mutates the AddressTracker nodes in the graph.
+type AddressTrackerMutation struct {
+	config
+	op                     Op
+	typ                    string
+	id                     *int
+	create_time            *time.Time
+	update_time            *time.Time
+	address                *string
+	clearedFields          map[string]struct{}
+	chain                  *int
+	clearedchain           bool
+	discord_channel        *int
+	cleareddiscord_channel bool
+	telegram_chat          *int
+	clearedtelegram_chat   bool
+	chain_proposals        map[int]struct{}
+	removedchain_proposals map[int]struct{}
+	clearedchain_proposals bool
+	done                   bool
+	oldValue               func(context.Context) (*AddressTracker, error)
+	predicates             []predicate.AddressTracker
+}
+
+var _ ent.Mutation = (*AddressTrackerMutation)(nil)
+
+// addresstrackerOption allows management of the mutation configuration using functional options.
+type addresstrackerOption func(*AddressTrackerMutation)
+
+// newAddressTrackerMutation creates new mutation for the AddressTracker entity.
+func newAddressTrackerMutation(c config, op Op, opts ...addresstrackerOption) *AddressTrackerMutation {
+	m := &AddressTrackerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeAddressTracker,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withAddressTrackerID sets the ID field of the mutation.
+func withAddressTrackerID(id int) addresstrackerOption {
+	return func(m *AddressTrackerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *AddressTracker
+		)
+		m.oldValue = func(ctx context.Context) (*AddressTracker, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().AddressTracker.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withAddressTracker sets the old AddressTracker of the mutation.
+func withAddressTracker(node *AddressTracker) addresstrackerOption {
+	return func(m *AddressTrackerMutation) {
+		m.oldValue = func(context.Context) (*AddressTracker, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m AddressTrackerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m AddressTrackerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *AddressTrackerMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *AddressTrackerMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().AddressTracker.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreateTime sets the "create_time" field.
+func (m *AddressTrackerMutation) SetCreateTime(t time.Time) {
+	m.create_time = &t
+}
+
+// CreateTime returns the value of the "create_time" field in the mutation.
+func (m *AddressTrackerMutation) CreateTime() (r time.Time, exists bool) {
+	v := m.create_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateTime returns the old "create_time" field's value of the AddressTracker entity.
+// If the AddressTracker object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AddressTrackerMutation) OldCreateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateTime: %w", err)
+	}
+	return oldValue.CreateTime, nil
+}
+
+// ResetCreateTime resets all changes to the "create_time" field.
+func (m *AddressTrackerMutation) ResetCreateTime() {
+	m.create_time = nil
+}
+
+// SetUpdateTime sets the "update_time" field.
+func (m *AddressTrackerMutation) SetUpdateTime(t time.Time) {
+	m.update_time = &t
+}
+
+// UpdateTime returns the value of the "update_time" field in the mutation.
+func (m *AddressTrackerMutation) UpdateTime() (r time.Time, exists bool) {
+	v := m.update_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdateTime returns the old "update_time" field's value of the AddressTracker entity.
+// If the AddressTracker object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AddressTrackerMutation) OldUpdateTime(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdateTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdateTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdateTime: %w", err)
+	}
+	return oldValue.UpdateTime, nil
+}
+
+// ResetUpdateTime resets all changes to the "update_time" field.
+func (m *AddressTrackerMutation) ResetUpdateTime() {
+	m.update_time = nil
+}
+
+// SetAddress sets the "address" field.
+func (m *AddressTrackerMutation) SetAddress(s string) {
+	m.address = &s
+}
+
+// Address returns the value of the "address" field in the mutation.
+func (m *AddressTrackerMutation) Address() (r string, exists bool) {
+	v := m.address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAddress returns the old "address" field's value of the AddressTracker entity.
+// If the AddressTracker object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AddressTrackerMutation) OldAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAddress: %w", err)
+	}
+	return oldValue.Address, nil
+}
+
+// ResetAddress resets all changes to the "address" field.
+func (m *AddressTrackerMutation) ResetAddress() {
+	m.address = nil
+}
+
+// SetChainID sets the "chain" edge to the Chain entity by id.
+func (m *AddressTrackerMutation) SetChainID(id int) {
+	m.chain = &id
+}
+
+// ClearChain clears the "chain" edge to the Chain entity.
+func (m *AddressTrackerMutation) ClearChain() {
+	m.clearedchain = true
+}
+
+// ChainCleared reports if the "chain" edge to the Chain entity was cleared.
+func (m *AddressTrackerMutation) ChainCleared() bool {
+	return m.clearedchain
+}
+
+// ChainID returns the "chain" edge ID in the mutation.
+func (m *AddressTrackerMutation) ChainID() (id int, exists bool) {
+	if m.chain != nil {
+		return *m.chain, true
+	}
+	return
+}
+
+// ChainIDs returns the "chain" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ChainID instead. It exists only for internal usage by the builders.
+func (m *AddressTrackerMutation) ChainIDs() (ids []int) {
+	if id := m.chain; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetChain resets all changes to the "chain" edge.
+func (m *AddressTrackerMutation) ResetChain() {
+	m.chain = nil
+	m.clearedchain = false
+}
+
+// SetDiscordChannelID sets the "discord_channel" edge to the DiscordChannel entity by id.
+func (m *AddressTrackerMutation) SetDiscordChannelID(id int) {
+	m.discord_channel = &id
+}
+
+// ClearDiscordChannel clears the "discord_channel" edge to the DiscordChannel entity.
+func (m *AddressTrackerMutation) ClearDiscordChannel() {
+	m.cleareddiscord_channel = true
+}
+
+// DiscordChannelCleared reports if the "discord_channel" edge to the DiscordChannel entity was cleared.
+func (m *AddressTrackerMutation) DiscordChannelCleared() bool {
+	return m.cleareddiscord_channel
+}
+
+// DiscordChannelID returns the "discord_channel" edge ID in the mutation.
+func (m *AddressTrackerMutation) DiscordChannelID() (id int, exists bool) {
+	if m.discord_channel != nil {
+		return *m.discord_channel, true
+	}
+	return
+}
+
+// DiscordChannelIDs returns the "discord_channel" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// DiscordChannelID instead. It exists only for internal usage by the builders.
+func (m *AddressTrackerMutation) DiscordChannelIDs() (ids []int) {
+	if id := m.discord_channel; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetDiscordChannel resets all changes to the "discord_channel" edge.
+func (m *AddressTrackerMutation) ResetDiscordChannel() {
+	m.discord_channel = nil
+	m.cleareddiscord_channel = false
+}
+
+// SetTelegramChatID sets the "telegram_chat" edge to the TelegramChat entity by id.
+func (m *AddressTrackerMutation) SetTelegramChatID(id int) {
+	m.telegram_chat = &id
+}
+
+// ClearTelegramChat clears the "telegram_chat" edge to the TelegramChat entity.
+func (m *AddressTrackerMutation) ClearTelegramChat() {
+	m.clearedtelegram_chat = true
+}
+
+// TelegramChatCleared reports if the "telegram_chat" edge to the TelegramChat entity was cleared.
+func (m *AddressTrackerMutation) TelegramChatCleared() bool {
+	return m.clearedtelegram_chat
+}
+
+// TelegramChatID returns the "telegram_chat" edge ID in the mutation.
+func (m *AddressTrackerMutation) TelegramChatID() (id int, exists bool) {
+	if m.telegram_chat != nil {
+		return *m.telegram_chat, true
+	}
+	return
+}
+
+// TelegramChatIDs returns the "telegram_chat" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TelegramChatID instead. It exists only for internal usage by the builders.
+func (m *AddressTrackerMutation) TelegramChatIDs() (ids []int) {
+	if id := m.telegram_chat; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTelegramChat resets all changes to the "telegram_chat" edge.
+func (m *AddressTrackerMutation) ResetTelegramChat() {
+	m.telegram_chat = nil
+	m.clearedtelegram_chat = false
+}
+
+// AddChainProposalIDs adds the "chain_proposals" edge to the ChainProposal entity by ids.
+func (m *AddressTrackerMutation) AddChainProposalIDs(ids ...int) {
+	if m.chain_proposals == nil {
+		m.chain_proposals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.chain_proposals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearChainProposals clears the "chain_proposals" edge to the ChainProposal entity.
+func (m *AddressTrackerMutation) ClearChainProposals() {
+	m.clearedchain_proposals = true
+}
+
+// ChainProposalsCleared reports if the "chain_proposals" edge to the ChainProposal entity was cleared.
+func (m *AddressTrackerMutation) ChainProposalsCleared() bool {
+	return m.clearedchain_proposals
+}
+
+// RemoveChainProposalIDs removes the "chain_proposals" edge to the ChainProposal entity by IDs.
+func (m *AddressTrackerMutation) RemoveChainProposalIDs(ids ...int) {
+	if m.removedchain_proposals == nil {
+		m.removedchain_proposals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.chain_proposals, ids[i])
+		m.removedchain_proposals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedChainProposals returns the removed IDs of the "chain_proposals" edge to the ChainProposal entity.
+func (m *AddressTrackerMutation) RemovedChainProposalsIDs() (ids []int) {
+	for id := range m.removedchain_proposals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ChainProposalsIDs returns the "chain_proposals" edge IDs in the mutation.
+func (m *AddressTrackerMutation) ChainProposalsIDs() (ids []int) {
+	for id := range m.chain_proposals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetChainProposals resets all changes to the "chain_proposals" edge.
+func (m *AddressTrackerMutation) ResetChainProposals() {
+	m.chain_proposals = nil
+	m.clearedchain_proposals = false
+	m.removedchain_proposals = nil
+}
+
+// Where appends a list predicates to the AddressTrackerMutation builder.
+func (m *AddressTrackerMutation) Where(ps ...predicate.AddressTracker) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the AddressTrackerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *AddressTrackerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.AddressTracker, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *AddressTrackerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *AddressTrackerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (AddressTracker).
+func (m *AddressTrackerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *AddressTrackerMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.create_time != nil {
+		fields = append(fields, addresstracker.FieldCreateTime)
+	}
+	if m.update_time != nil {
+		fields = append(fields, addresstracker.FieldUpdateTime)
+	}
+	if m.address != nil {
+		fields = append(fields, addresstracker.FieldAddress)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *AddressTrackerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case addresstracker.FieldCreateTime:
+		return m.CreateTime()
+	case addresstracker.FieldUpdateTime:
+		return m.UpdateTime()
+	case addresstracker.FieldAddress:
+		return m.Address()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *AddressTrackerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case addresstracker.FieldCreateTime:
+		return m.OldCreateTime(ctx)
+	case addresstracker.FieldUpdateTime:
+		return m.OldUpdateTime(ctx)
+	case addresstracker.FieldAddress:
+		return m.OldAddress(ctx)
+	}
+	return nil, fmt.Errorf("unknown AddressTracker field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AddressTrackerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case addresstracker.FieldCreateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateTime(v)
+		return nil
+	case addresstracker.FieldUpdateTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdateTime(v)
+		return nil
+	case addresstracker.FieldAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAddress(v)
+		return nil
+	}
+	return fmt.Errorf("unknown AddressTracker field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *AddressTrackerMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *AddressTrackerMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *AddressTrackerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown AddressTracker numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *AddressTrackerMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *AddressTrackerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *AddressTrackerMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown AddressTracker nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *AddressTrackerMutation) ResetField(name string) error {
+	switch name {
+	case addresstracker.FieldCreateTime:
+		m.ResetCreateTime()
+		return nil
+	case addresstracker.FieldUpdateTime:
+		m.ResetUpdateTime()
+		return nil
+	case addresstracker.FieldAddress:
+		m.ResetAddress()
+		return nil
+	}
+	return fmt.Errorf("unknown AddressTracker field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *AddressTrackerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.chain != nil {
+		edges = append(edges, addresstracker.EdgeChain)
+	}
+	if m.discord_channel != nil {
+		edges = append(edges, addresstracker.EdgeDiscordChannel)
+	}
+	if m.telegram_chat != nil {
+		edges = append(edges, addresstracker.EdgeTelegramChat)
+	}
+	if m.chain_proposals != nil {
+		edges = append(edges, addresstracker.EdgeChainProposals)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *AddressTrackerMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case addresstracker.EdgeChain:
+		if id := m.chain; id != nil {
+			return []ent.Value{*id}
+		}
+	case addresstracker.EdgeDiscordChannel:
+		if id := m.discord_channel; id != nil {
+			return []ent.Value{*id}
+		}
+	case addresstracker.EdgeTelegramChat:
+		if id := m.telegram_chat; id != nil {
+			return []ent.Value{*id}
+		}
+	case addresstracker.EdgeChainProposals:
+		ids := make([]ent.Value, 0, len(m.chain_proposals))
+		for id := range m.chain_proposals {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *AddressTrackerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.removedchain_proposals != nil {
+		edges = append(edges, addresstracker.EdgeChainProposals)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *AddressTrackerMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case addresstracker.EdgeChainProposals:
+		ids := make([]ent.Value, 0, len(m.removedchain_proposals))
+		for id := range m.removedchain_proposals {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *AddressTrackerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 4)
+	if m.clearedchain {
+		edges = append(edges, addresstracker.EdgeChain)
+	}
+	if m.cleareddiscord_channel {
+		edges = append(edges, addresstracker.EdgeDiscordChannel)
+	}
+	if m.clearedtelegram_chat {
+		edges = append(edges, addresstracker.EdgeTelegramChat)
+	}
+	if m.clearedchain_proposals {
+		edges = append(edges, addresstracker.EdgeChainProposals)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *AddressTrackerMutation) EdgeCleared(name string) bool {
+	switch name {
+	case addresstracker.EdgeChain:
+		return m.clearedchain
+	case addresstracker.EdgeDiscordChannel:
+		return m.cleareddiscord_channel
+	case addresstracker.EdgeTelegramChat:
+		return m.clearedtelegram_chat
+	case addresstracker.EdgeChainProposals:
+		return m.clearedchain_proposals
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *AddressTrackerMutation) ClearEdge(name string) error {
+	switch name {
+	case addresstracker.EdgeChain:
+		m.ClearChain()
+		return nil
+	case addresstracker.EdgeDiscordChannel:
+		m.ClearDiscordChannel()
+		return nil
+	case addresstracker.EdgeTelegramChat:
+		m.ClearTelegramChat()
+		return nil
+	}
+	return fmt.Errorf("unknown AddressTracker unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *AddressTrackerMutation) ResetEdge(name string) error {
+	switch name {
+	case addresstracker.EdgeChain:
+		m.ResetChain()
+		return nil
+	case addresstracker.EdgeDiscordChannel:
+		m.ResetDiscordChannel()
+		return nil
+	case addresstracker.EdgeTelegramChat:
+		m.ResetTelegramChat()
+		return nil
+	case addresstracker.EdgeChainProposals:
+		m.ResetChainProposals()
+		return nil
+	}
+	return fmt.Errorf("unknown AddressTracker edge %s", name)
+}
 
 // ChainMutation represents an operation that mutates the Chain nodes in the graph.
 type ChainMutation struct {
@@ -55,6 +761,7 @@ type ChainMutation struct {
 	is_enabled              *bool
 	image_url               *string
 	thumbnail_url           *string
+	bech32_prefix           *string
 	clearedFields           map[string]struct{}
 	chain_proposals         map[int]struct{}
 	removedchain_proposals  map[int]struct{}
@@ -65,6 +772,9 @@ type ChainMutation struct {
 	discord_channels        map[int]struct{}
 	removeddiscord_channels map[int]struct{}
 	cleareddiscord_channels bool
+	address_trackers        map[int]struct{}
+	removedaddress_trackers map[int]struct{}
+	clearedaddress_trackers bool
 	done                    bool
 	oldValue                func(context.Context) (*Chain, error)
 	predicates              []predicate.Chain
@@ -528,6 +1238,42 @@ func (m *ChainMutation) ResetThumbnailURL() {
 	m.thumbnail_url = nil
 }
 
+// SetBech32Prefix sets the "bech32_prefix" field.
+func (m *ChainMutation) SetBech32Prefix(s string) {
+	m.bech32_prefix = &s
+}
+
+// Bech32Prefix returns the value of the "bech32_prefix" field in the mutation.
+func (m *ChainMutation) Bech32Prefix() (r string, exists bool) {
+	v := m.bech32_prefix
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBech32Prefix returns the old "bech32_prefix" field's value of the Chain entity.
+// If the Chain object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ChainMutation) OldBech32Prefix(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBech32Prefix is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBech32Prefix requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBech32Prefix: %w", err)
+	}
+	return oldValue.Bech32Prefix, nil
+}
+
+// ResetBech32Prefix resets all changes to the "bech32_prefix" field.
+func (m *ChainMutation) ResetBech32Prefix() {
+	m.bech32_prefix = nil
+}
+
 // AddChainProposalIDs adds the "chain_proposals" edge to the ChainProposal entity by ids.
 func (m *ChainMutation) AddChainProposalIDs(ids ...int) {
 	if m.chain_proposals == nil {
@@ -690,14 +1436,83 @@ func (m *ChainMutation) ResetDiscordChannels() {
 	m.removeddiscord_channels = nil
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by ids.
+func (m *ChainMutation) AddAddressTrackerIDs(ids ...int) {
+	if m.address_trackers == nil {
+		m.address_trackers = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.address_trackers[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAddressTrackers clears the "address_trackers" edge to the AddressTracker entity.
+func (m *ChainMutation) ClearAddressTrackers() {
+	m.clearedaddress_trackers = true
+}
+
+// AddressTrackersCleared reports if the "address_trackers" edge to the AddressTracker entity was cleared.
+func (m *ChainMutation) AddressTrackersCleared() bool {
+	return m.clearedaddress_trackers
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to the AddressTracker entity by IDs.
+func (m *ChainMutation) RemoveAddressTrackerIDs(ids ...int) {
+	if m.removedaddress_trackers == nil {
+		m.removedaddress_trackers = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.address_trackers, ids[i])
+		m.removedaddress_trackers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAddressTrackers returns the removed IDs of the "address_trackers" edge to the AddressTracker entity.
+func (m *ChainMutation) RemovedAddressTrackersIDs() (ids []int) {
+	for id := range m.removedaddress_trackers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AddressTrackersIDs returns the "address_trackers" edge IDs in the mutation.
+func (m *ChainMutation) AddressTrackersIDs() (ids []int) {
+	for id := range m.address_trackers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAddressTrackers resets all changes to the "address_trackers" edge.
+func (m *ChainMutation) ResetAddressTrackers() {
+	m.address_trackers = nil
+	m.clearedaddress_trackers = false
+	m.removedaddress_trackers = nil
+}
+
 // Where appends a list predicates to the ChainMutation builder.
 func (m *ChainMutation) Where(ps ...predicate.Chain) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ChainMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ChainMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Chain, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ChainMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ChainMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Chain).
@@ -709,7 +1524,7 @@ func (m *ChainMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ChainMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.create_time != nil {
 		fields = append(fields, chain.FieldCreateTime)
 	}
@@ -740,6 +1555,9 @@ func (m *ChainMutation) Fields() []string {
 	if m.thumbnail_url != nil {
 		fields = append(fields, chain.FieldThumbnailURL)
 	}
+	if m.bech32_prefix != nil {
+		fields = append(fields, chain.FieldBech32Prefix)
+	}
 	return fields
 }
 
@@ -768,6 +1586,8 @@ func (m *ChainMutation) Field(name string) (ent.Value, bool) {
 		return m.ImageURL()
 	case chain.FieldThumbnailURL:
 		return m.ThumbnailURL()
+	case chain.FieldBech32Prefix:
+		return m.Bech32Prefix()
 	}
 	return nil, false
 }
@@ -797,6 +1617,8 @@ func (m *ChainMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldImageURL(ctx)
 	case chain.FieldThumbnailURL:
 		return m.OldThumbnailURL(ctx)
+	case chain.FieldBech32Prefix:
+		return m.OldBech32Prefix(ctx)
 	}
 	return nil, fmt.Errorf("unknown Chain field %s", name)
 }
@@ -875,6 +1697,13 @@ func (m *ChainMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetThumbnailURL(v)
+		return nil
+	case chain.FieldBech32Prefix:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBech32Prefix(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)
@@ -955,13 +1784,16 @@ func (m *ChainMutation) ResetField(name string) error {
 	case chain.FieldThumbnailURL:
 		m.ResetThumbnailURL()
 		return nil
+	case chain.FieldBech32Prefix:
+		m.ResetBech32Prefix()
+		return nil
 	}
 	return fmt.Errorf("unknown Chain field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChainMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.chain_proposals != nil {
 		edges = append(edges, chain.EdgeChainProposals)
 	}
@@ -970,6 +1802,9 @@ func (m *ChainMutation) AddedEdges() []string {
 	}
 	if m.discord_channels != nil {
 		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	if m.address_trackers != nil {
+		edges = append(edges, chain.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -996,13 +1831,19 @@ func (m *ChainMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case chain.EdgeAddressTrackers:
+		ids := make([]ent.Value, 0, len(m.address_trackers))
+		for id := range m.address_trackers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChainMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedchain_proposals != nil {
 		edges = append(edges, chain.EdgeChainProposals)
 	}
@@ -1011,6 +1852,9 @@ func (m *ChainMutation) RemovedEdges() []string {
 	}
 	if m.removeddiscord_channels != nil {
 		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	if m.removedaddress_trackers != nil {
+		edges = append(edges, chain.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -1037,13 +1881,19 @@ func (m *ChainMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case chain.EdgeAddressTrackers:
+		ids := make([]ent.Value, 0, len(m.removedaddress_trackers))
+		for id := range m.removedaddress_trackers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChainMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedchain_proposals {
 		edges = append(edges, chain.EdgeChainProposals)
 	}
@@ -1052,6 +1902,9 @@ func (m *ChainMutation) ClearedEdges() []string {
 	}
 	if m.cleareddiscord_channels {
 		edges = append(edges, chain.EdgeDiscordChannels)
+	}
+	if m.clearedaddress_trackers {
+		edges = append(edges, chain.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -1066,6 +1919,8 @@ func (m *ChainMutation) EdgeCleared(name string) bool {
 		return m.clearedtelegram_chats
 	case chain.EdgeDiscordChannels:
 		return m.cleareddiscord_channels
+	case chain.EdgeAddressTrackers:
+		return m.clearedaddress_trackers
 	}
 	return false
 }
@@ -1091,6 +1946,9 @@ func (m *ChainMutation) ResetEdge(name string) error {
 	case chain.EdgeDiscordChannels:
 		m.ResetDiscordChannels()
 		return nil
+	case chain.EdgeAddressTrackers:
+		m.ResetAddressTrackers()
+		return nil
 	}
 	return fmt.Errorf("unknown Chain edge %s", name)
 }
@@ -1098,24 +1956,27 @@ func (m *ChainMutation) ResetEdge(name string) error {
 // ChainProposalMutation represents an operation that mutates the ChainProposal nodes in the graph.
 type ChainProposalMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	create_time       *time.Time
-	update_time       *time.Time
-	proposal_id       *int
-	addproposal_id    *int
-	title             *string
-	description       *string
-	voting_start_time *time.Time
-	voting_end_time   *time.Time
-	status            *chainproposal.Status
-	clearedFields     map[string]struct{}
-	chain             *int
-	clearedchain      bool
-	done              bool
-	oldValue          func(context.Context) (*ChainProposal, error)
-	predicates        []predicate.ChainProposal
+	op                     Op
+	typ                    string
+	id                     *int
+	create_time            *time.Time
+	update_time            *time.Time
+	proposal_id            *int
+	addproposal_id         *int
+	title                  *string
+	description            *string
+	voting_start_time      *time.Time
+	voting_end_time        *time.Time
+	status                 *chainproposal.Status
+	clearedFields          map[string]struct{}
+	chain                  *int
+	clearedchain           bool
+	address_tracker        map[int]struct{}
+	removedaddress_tracker map[int]struct{}
+	clearedaddress_tracker bool
+	done                   bool
+	oldValue               func(context.Context) (*ChainProposal, error)
+	predicates             []predicate.ChainProposal
 }
 
 var _ ent.Mutation = (*ChainProposalMutation)(nil)
@@ -1563,14 +2424,83 @@ func (m *ChainProposalMutation) ResetChain() {
 	m.clearedchain = false
 }
 
+// AddAddressTrackerIDs adds the "address_tracker" edge to the AddressTracker entity by ids.
+func (m *ChainProposalMutation) AddAddressTrackerIDs(ids ...int) {
+	if m.address_tracker == nil {
+		m.address_tracker = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.address_tracker[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAddressTracker clears the "address_tracker" edge to the AddressTracker entity.
+func (m *ChainProposalMutation) ClearAddressTracker() {
+	m.clearedaddress_tracker = true
+}
+
+// AddressTrackerCleared reports if the "address_tracker" edge to the AddressTracker entity was cleared.
+func (m *ChainProposalMutation) AddressTrackerCleared() bool {
+	return m.clearedaddress_tracker
+}
+
+// RemoveAddressTrackerIDs removes the "address_tracker" edge to the AddressTracker entity by IDs.
+func (m *ChainProposalMutation) RemoveAddressTrackerIDs(ids ...int) {
+	if m.removedaddress_tracker == nil {
+		m.removedaddress_tracker = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.address_tracker, ids[i])
+		m.removedaddress_tracker[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAddressTracker returns the removed IDs of the "address_tracker" edge to the AddressTracker entity.
+func (m *ChainProposalMutation) RemovedAddressTrackerIDs() (ids []int) {
+	for id := range m.removedaddress_tracker {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AddressTrackerIDs returns the "address_tracker" edge IDs in the mutation.
+func (m *ChainProposalMutation) AddressTrackerIDs() (ids []int) {
+	for id := range m.address_tracker {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAddressTracker resets all changes to the "address_tracker" edge.
+func (m *ChainProposalMutation) ResetAddressTracker() {
+	m.address_tracker = nil
+	m.clearedaddress_tracker = false
+	m.removedaddress_tracker = nil
+}
+
 // Where appends a list predicates to the ChainProposalMutation builder.
 func (m *ChainProposalMutation) Where(ps ...predicate.ChainProposal) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ChainProposalMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ChainProposalMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ChainProposal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ChainProposalMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ChainProposalMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (ChainProposal).
@@ -1815,9 +2745,12 @@ func (m *ChainProposalMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ChainProposalMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.chain != nil {
 		edges = append(edges, chainproposal.EdgeChain)
+	}
+	if m.address_tracker != nil {
+		edges = append(edges, chainproposal.EdgeAddressTracker)
 	}
 	return edges
 }
@@ -1830,27 +2763,47 @@ func (m *ChainProposalMutation) AddedIDs(name string) []ent.Value {
 		if id := m.chain; id != nil {
 			return []ent.Value{*id}
 		}
+	case chainproposal.EdgeAddressTracker:
+		ids := make([]ent.Value, 0, len(m.address_tracker))
+		for id := range m.address_tracker {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ChainProposalMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
+	if m.removedaddress_tracker != nil {
+		edges = append(edges, chainproposal.EdgeAddressTracker)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *ChainProposalMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case chainproposal.EdgeAddressTracker:
+		ids := make([]ent.Value, 0, len(m.removedaddress_tracker))
+		for id := range m.removedaddress_tracker {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ChainProposalMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedchain {
 		edges = append(edges, chainproposal.EdgeChain)
+	}
+	if m.clearedaddress_tracker {
+		edges = append(edges, chainproposal.EdgeAddressTracker)
 	}
 	return edges
 }
@@ -1861,6 +2814,8 @@ func (m *ChainProposalMutation) EdgeCleared(name string) bool {
 	switch name {
 	case chainproposal.EdgeChain:
 		return m.clearedchain
+	case chainproposal.EdgeAddressTracker:
+		return m.clearedaddress_tracker
 	}
 	return false
 }
@@ -1882,6 +2837,9 @@ func (m *ChainProposalMutation) ResetEdge(name string) error {
 	switch name {
 	case chainproposal.EdgeChain:
 		m.ResetChain()
+		return nil
+	case chainproposal.EdgeAddressTracker:
+		m.ResetAddressTracker()
 		return nil
 	}
 	return fmt.Errorf("unknown ChainProposal edge %s", name)
@@ -2543,9 +3501,24 @@ func (m *ContractMutation) Where(ps ...predicate.Contract) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ContractMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ContractMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Contract, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ContractMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ContractMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (Contract).
@@ -3379,9 +4352,24 @@ func (m *ContractProposalMutation) Where(ps ...predicate.ContractProposal) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the ContractProposalMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *ContractProposalMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.ContractProposal, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *ContractProposalMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *ContractProposalMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (ContractProposal).
@@ -3684,28 +4672,31 @@ func (m *ContractProposalMutation) ResetEdge(name string) error {
 // DiscordChannelMutation represents an operation that mutates the DiscordChannel nodes in the graph.
 type DiscordChannelMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	create_time      *time.Time
-	update_time      *time.Time
-	channel_id       *int64
-	addchannel_id    *int64
-	name             *string
-	is_group         *bool
-	clearedFields    map[string]struct{}
-	users            map[int]struct{}
-	removedusers     map[int]struct{}
-	clearedusers     bool
-	contracts        map[int]struct{}
-	removedcontracts map[int]struct{}
-	clearedcontracts bool
-	chains           map[int]struct{}
-	removedchains    map[int]struct{}
-	clearedchains    bool
-	done             bool
-	oldValue         func(context.Context) (*DiscordChannel, error)
-	predicates       []predicate.DiscordChannel
+	op                      Op
+	typ                     string
+	id                      *int
+	create_time             *time.Time
+	update_time             *time.Time
+	channel_id              *int64
+	addchannel_id           *int64
+	name                    *string
+	is_group                *bool
+	clearedFields           map[string]struct{}
+	users                   map[int]struct{}
+	removedusers            map[int]struct{}
+	clearedusers            bool
+	contracts               map[int]struct{}
+	removedcontracts        map[int]struct{}
+	clearedcontracts        bool
+	chains                  map[int]struct{}
+	removedchains           map[int]struct{}
+	clearedchains           bool
+	address_trackers        map[int]struct{}
+	removedaddress_trackers map[int]struct{}
+	clearedaddress_trackers bool
+	done                    bool
+	oldValue                func(context.Context) (*DiscordChannel, error)
+	predicates              []predicate.DiscordChannel
 }
 
 var _ ent.Mutation = (*DiscordChannelMutation)(nil)
@@ -4168,14 +5159,83 @@ func (m *DiscordChannelMutation) ResetChains() {
 	m.removedchains = nil
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by ids.
+func (m *DiscordChannelMutation) AddAddressTrackerIDs(ids ...int) {
+	if m.address_trackers == nil {
+		m.address_trackers = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.address_trackers[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAddressTrackers clears the "address_trackers" edge to the AddressTracker entity.
+func (m *DiscordChannelMutation) ClearAddressTrackers() {
+	m.clearedaddress_trackers = true
+}
+
+// AddressTrackersCleared reports if the "address_trackers" edge to the AddressTracker entity was cleared.
+func (m *DiscordChannelMutation) AddressTrackersCleared() bool {
+	return m.clearedaddress_trackers
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to the AddressTracker entity by IDs.
+func (m *DiscordChannelMutation) RemoveAddressTrackerIDs(ids ...int) {
+	if m.removedaddress_trackers == nil {
+		m.removedaddress_trackers = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.address_trackers, ids[i])
+		m.removedaddress_trackers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAddressTrackers returns the removed IDs of the "address_trackers" edge to the AddressTracker entity.
+func (m *DiscordChannelMutation) RemovedAddressTrackersIDs() (ids []int) {
+	for id := range m.removedaddress_trackers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AddressTrackersIDs returns the "address_trackers" edge IDs in the mutation.
+func (m *DiscordChannelMutation) AddressTrackersIDs() (ids []int) {
+	for id := range m.address_trackers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAddressTrackers resets all changes to the "address_trackers" edge.
+func (m *DiscordChannelMutation) ResetAddressTrackers() {
+	m.address_trackers = nil
+	m.clearedaddress_trackers = false
+	m.removedaddress_trackers = nil
+}
+
 // Where appends a list predicates to the DiscordChannelMutation builder.
 func (m *DiscordChannelMutation) Where(ps ...predicate.DiscordChannel) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the DiscordChannelMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *DiscordChannelMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.DiscordChannel, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *DiscordChannelMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *DiscordChannelMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (DiscordChannel).
@@ -4369,7 +5429,7 @@ func (m *DiscordChannelMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DiscordChannelMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.users != nil {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
@@ -4378,6 +5438,9 @@ func (m *DiscordChannelMutation) AddedEdges() []string {
 	}
 	if m.chains != nil {
 		edges = append(edges, discordchannel.EdgeChains)
+	}
+	if m.address_trackers != nil {
+		edges = append(edges, discordchannel.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -4404,13 +5467,19 @@ func (m *DiscordChannelMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case discordchannel.EdgeAddressTrackers:
+		ids := make([]ent.Value, 0, len(m.address_trackers))
+		for id := range m.address_trackers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DiscordChannelMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedusers != nil {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
@@ -4419,6 +5488,9 @@ func (m *DiscordChannelMutation) RemovedEdges() []string {
 	}
 	if m.removedchains != nil {
 		edges = append(edges, discordchannel.EdgeChains)
+	}
+	if m.removedaddress_trackers != nil {
+		edges = append(edges, discordchannel.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -4445,13 +5517,19 @@ func (m *DiscordChannelMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case discordchannel.EdgeAddressTrackers:
+		ids := make([]ent.Value, 0, len(m.removedaddress_trackers))
+		for id := range m.removedaddress_trackers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DiscordChannelMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedusers {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
@@ -4460,6 +5538,9 @@ func (m *DiscordChannelMutation) ClearedEdges() []string {
 	}
 	if m.clearedchains {
 		edges = append(edges, discordchannel.EdgeChains)
+	}
+	if m.clearedaddress_trackers {
+		edges = append(edges, discordchannel.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -4474,6 +5555,8 @@ func (m *DiscordChannelMutation) EdgeCleared(name string) bool {
 		return m.clearedcontracts
 	case discordchannel.EdgeChains:
 		return m.clearedchains
+	case discordchannel.EdgeAddressTrackers:
+		return m.clearedaddress_trackers
 	}
 	return false
 }
@@ -4499,6 +5582,9 @@ func (m *DiscordChannelMutation) ResetEdge(name string) error {
 	case discordchannel.EdgeChains:
 		m.ResetChains()
 		return nil
+	case discordchannel.EdgeAddressTrackers:
+		m.ResetAddressTrackers()
+		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel edge %s", name)
 }
@@ -4506,28 +5592,31 @@ func (m *DiscordChannelMutation) ResetEdge(name string) error {
 // TelegramChatMutation represents an operation that mutates the TelegramChat nodes in the graph.
 type TelegramChatMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	create_time      *time.Time
-	update_time      *time.Time
-	chat_id          *int64
-	addchat_id       *int64
-	name             *string
-	is_group         *bool
-	clearedFields    map[string]struct{}
-	users            map[int]struct{}
-	removedusers     map[int]struct{}
-	clearedusers     bool
-	contracts        map[int]struct{}
-	removedcontracts map[int]struct{}
-	clearedcontracts bool
-	chains           map[int]struct{}
-	removedchains    map[int]struct{}
-	clearedchains    bool
-	done             bool
-	oldValue         func(context.Context) (*TelegramChat, error)
-	predicates       []predicate.TelegramChat
+	op                      Op
+	typ                     string
+	id                      *int
+	create_time             *time.Time
+	update_time             *time.Time
+	chat_id                 *int64
+	addchat_id              *int64
+	name                    *string
+	is_group                *bool
+	clearedFields           map[string]struct{}
+	users                   map[int]struct{}
+	removedusers            map[int]struct{}
+	clearedusers            bool
+	contracts               map[int]struct{}
+	removedcontracts        map[int]struct{}
+	clearedcontracts        bool
+	chains                  map[int]struct{}
+	removedchains           map[int]struct{}
+	clearedchains           bool
+	address_trackers        map[int]struct{}
+	removedaddress_trackers map[int]struct{}
+	clearedaddress_trackers bool
+	done                    bool
+	oldValue                func(context.Context) (*TelegramChat, error)
+	predicates              []predicate.TelegramChat
 }
 
 var _ ent.Mutation = (*TelegramChatMutation)(nil)
@@ -4990,14 +6079,83 @@ func (m *TelegramChatMutation) ResetChains() {
 	m.removedchains = nil
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by ids.
+func (m *TelegramChatMutation) AddAddressTrackerIDs(ids ...int) {
+	if m.address_trackers == nil {
+		m.address_trackers = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.address_trackers[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAddressTrackers clears the "address_trackers" edge to the AddressTracker entity.
+func (m *TelegramChatMutation) ClearAddressTrackers() {
+	m.clearedaddress_trackers = true
+}
+
+// AddressTrackersCleared reports if the "address_trackers" edge to the AddressTracker entity was cleared.
+func (m *TelegramChatMutation) AddressTrackersCleared() bool {
+	return m.clearedaddress_trackers
+}
+
+// RemoveAddressTrackerIDs removes the "address_trackers" edge to the AddressTracker entity by IDs.
+func (m *TelegramChatMutation) RemoveAddressTrackerIDs(ids ...int) {
+	if m.removedaddress_trackers == nil {
+		m.removedaddress_trackers = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.address_trackers, ids[i])
+		m.removedaddress_trackers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAddressTrackers returns the removed IDs of the "address_trackers" edge to the AddressTracker entity.
+func (m *TelegramChatMutation) RemovedAddressTrackersIDs() (ids []int) {
+	for id := range m.removedaddress_trackers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AddressTrackersIDs returns the "address_trackers" edge IDs in the mutation.
+func (m *TelegramChatMutation) AddressTrackersIDs() (ids []int) {
+	for id := range m.address_trackers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAddressTrackers resets all changes to the "address_trackers" edge.
+func (m *TelegramChatMutation) ResetAddressTrackers() {
+	m.address_trackers = nil
+	m.clearedaddress_trackers = false
+	m.removedaddress_trackers = nil
+}
+
 // Where appends a list predicates to the TelegramChatMutation builder.
 func (m *TelegramChatMutation) Where(ps ...predicate.TelegramChat) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the TelegramChatMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TelegramChatMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TelegramChat, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *TelegramChatMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TelegramChatMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (TelegramChat).
@@ -5191,7 +6349,7 @@ func (m *TelegramChatMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TelegramChatMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.users != nil {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
@@ -5200,6 +6358,9 @@ func (m *TelegramChatMutation) AddedEdges() []string {
 	}
 	if m.chains != nil {
 		edges = append(edges, telegramchat.EdgeChains)
+	}
+	if m.address_trackers != nil {
+		edges = append(edges, telegramchat.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -5226,13 +6387,19 @@ func (m *TelegramChatMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case telegramchat.EdgeAddressTrackers:
+		ids := make([]ent.Value, 0, len(m.address_trackers))
+		for id := range m.address_trackers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TelegramChatMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedusers != nil {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
@@ -5241,6 +6408,9 @@ func (m *TelegramChatMutation) RemovedEdges() []string {
 	}
 	if m.removedchains != nil {
 		edges = append(edges, telegramchat.EdgeChains)
+	}
+	if m.removedaddress_trackers != nil {
+		edges = append(edges, telegramchat.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -5267,13 +6437,19 @@ func (m *TelegramChatMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case telegramchat.EdgeAddressTrackers:
+		ids := make([]ent.Value, 0, len(m.removedaddress_trackers))
+		for id := range m.removedaddress_trackers {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TelegramChatMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedusers {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
@@ -5282,6 +6458,9 @@ func (m *TelegramChatMutation) ClearedEdges() []string {
 	}
 	if m.clearedchains {
 		edges = append(edges, telegramchat.EdgeChains)
+	}
+	if m.clearedaddress_trackers {
+		edges = append(edges, telegramchat.EdgeAddressTrackers)
 	}
 	return edges
 }
@@ -5296,6 +6475,8 @@ func (m *TelegramChatMutation) EdgeCleared(name string) bool {
 		return m.clearedcontracts
 	case telegramchat.EdgeChains:
 		return m.clearedchains
+	case telegramchat.EdgeAddressTrackers:
+		return m.clearedaddress_trackers
 	}
 	return false
 }
@@ -5320,6 +6501,9 @@ func (m *TelegramChatMutation) ResetEdge(name string) error {
 		return nil
 	case telegramchat.EdgeChains:
 		m.ResetChains()
+		return nil
+	case telegramchat.EdgeAddressTrackers:
+		m.ResetAddressTrackers()
 		return nil
 	}
 	return fmt.Errorf("unknown TelegramChat edge %s", name)
@@ -5797,9 +6981,24 @@ func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
+// WhereP appends storage-level predicates to the UserMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *UserMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.User, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *UserMutation) SetOp(op Op) {
+	m.op = op
 }
 
 // Type returns the node type of this mutation (User).

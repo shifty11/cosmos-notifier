@@ -10,6 +10,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
@@ -131,6 +132,20 @@ func (cc *ChainCreate) SetNillableThumbnailURL(s *string) *ChainCreate {
 	return cc
 }
 
+// SetBech32Prefix sets the "bech32_prefix" field.
+func (cc *ChainCreate) SetBech32Prefix(s string) *ChainCreate {
+	cc.mutation.SetBech32Prefix(s)
+	return cc
+}
+
+// SetNillableBech32Prefix sets the "bech32_prefix" field if the given value is not nil.
+func (cc *ChainCreate) SetNillableBech32Prefix(s *string) *ChainCreate {
+	if s != nil {
+		cc.SetBech32Prefix(*s)
+	}
+	return cc
+}
+
 // AddChainProposalIDs adds the "chain_proposals" edge to the ChainProposal entity by IDs.
 func (cc *ChainCreate) AddChainProposalIDs(ids ...int) *ChainCreate {
 	cc.mutation.AddChainProposalIDs(ids...)
@@ -176,6 +191,21 @@ func (cc *ChainCreate) AddDiscordChannels(d ...*DiscordChannel) *ChainCreate {
 	return cc.AddDiscordChannelIDs(ids...)
 }
 
+// AddAddressTrackerIDs adds the "address_trackers" edge to the AddressTracker entity by IDs.
+func (cc *ChainCreate) AddAddressTrackerIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddAddressTrackerIDs(ids...)
+	return cc
+}
+
+// AddAddressTrackers adds the "address_trackers" edges to the AddressTracker entity.
+func (cc *ChainCreate) AddAddressTrackers(a ...*AddressTracker) *ChainCreate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cc.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cc *ChainCreate) Mutation() *ChainMutation {
 	return cc.mutation
@@ -183,50 +213,8 @@ func (cc *ChainCreate) Mutation() *ChainMutation {
 
 // Save creates the Chain in the database.
 func (cc *ChainCreate) Save(ctx context.Context) (*Chain, error) {
-	var (
-		err  error
-		node *Chain
-	)
 	cc.defaults()
-	if len(cc.hooks) == 0 {
-		if err = cc.check(); err != nil {
-			return nil, err
-		}
-		node, err = cc.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ChainMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cc.check(); err != nil {
-				return nil, err
-			}
-			cc.mutation = mutation
-			if node, err = cc.sqlSave(ctx); err != nil {
-				return nil, err
-			}
-			mutation.id = &node.ID
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cc.hooks) - 1; i >= 0; i-- {
-			if cc.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cc.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cc.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*Chain)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ChainMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*Chain, ChainMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
@@ -277,6 +265,10 @@ func (cc *ChainCreate) defaults() {
 		v := chain.DefaultThumbnailURL
 		cc.mutation.SetThumbnailURL(v)
 	}
+	if _, ok := cc.mutation.Bech32Prefix(); !ok {
+		v := chain.DefaultBech32Prefix
+		cc.mutation.SetBech32Prefix(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -311,10 +303,16 @@ func (cc *ChainCreate) check() error {
 	if _, ok := cc.mutation.ThumbnailURL(); !ok {
 		return &ValidationError{Name: "thumbnail_url", err: errors.New(`ent: missing required field "Chain.thumbnail_url"`)}
 	}
+	if _, ok := cc.mutation.Bech32Prefix(); !ok {
+		return &ValidationError{Name: "bech32_prefix", err: errors.New(`ent: missing required field "Chain.bech32_prefix"`)}
+	}
 	return nil
 }
 
 func (cc *ChainCreate) sqlSave(ctx context.Context) (*Chain, error) {
+	if err := cc.check(); err != nil {
+		return nil, err
+	}
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -324,19 +322,15 @@ func (cc *ChainCreate) sqlSave(ctx context.Context) (*Chain, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
+	cc.mutation.id = &_node.ID
+	cc.mutation.done = true
 	return _node, nil
 }
 
 func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Chain{config: cc.config}
-		_spec = &sqlgraph.CreateSpec{
-			Table: chain.Table,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chain.FieldID,
-			},
-		}
+		_spec = sqlgraph.NewCreateSpec(chain.Table, sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt))
 	)
 	if value, ok := cc.mutation.CreateTime(); ok {
 		_spec.SetField(chain.FieldCreateTime, field.TypeTime, value)
@@ -378,6 +372,10 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 		_spec.SetField(chain.FieldThumbnailURL, field.TypeString, value)
 		_node.ThumbnailURL = value
 	}
+	if value, ok := cc.mutation.Bech32Prefix(); ok {
+		_spec.SetField(chain.FieldBech32Prefix, field.TypeString, value)
+		_node.Bech32Prefix = value
+	}
 	if nodes := cc.mutation.ChainProposalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -386,10 +384,7 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Columns: []string{chain.ChainProposalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chainproposal.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -405,10 +400,7 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Columns: chain.TelegramChatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: telegramchat.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -424,10 +416,23 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Columns: chain.DiscordChannelsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: discordchannel.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.AddressTrackersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.AddressTrackersTable,
+			Columns: []string{chain.AddressTrackersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

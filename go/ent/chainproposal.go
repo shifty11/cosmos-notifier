@@ -43,9 +43,11 @@ type ChainProposal struct {
 type ChainProposalEdges struct {
 	// Chain holds the value of the chain edge.
 	Chain *Chain `json:"chain,omitempty"`
+	// AddressTracker holds the value of the address_tracker edge.
+	AddressTracker []*AddressTracker `json:"address_tracker,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // ChainOrErr returns the Chain value or an error if the edge
@@ -59,6 +61,15 @@ func (e ChainProposalEdges) ChainOrErr() (*Chain, error) {
 		return e.Chain, nil
 	}
 	return nil, &NotLoadedError{edge: "chain"}
+}
+
+// AddressTrackerOrErr returns the AddressTracker value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainProposalEdges) AddressTrackerOrErr() ([]*AddressTracker, error) {
+	if e.loadedTypes[1] {
+		return e.AddressTracker, nil
+	}
+	return nil, &NotLoadedError{edge: "address_tracker"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -157,14 +168,19 @@ func (cp *ChainProposal) assignValues(columns []string, values []any) error {
 
 // QueryChain queries the "chain" edge of the ChainProposal entity.
 func (cp *ChainProposal) QueryChain() *ChainQuery {
-	return (&ChainProposalClient{config: cp.config}).QueryChain(cp)
+	return NewChainProposalClient(cp.config).QueryChain(cp)
+}
+
+// QueryAddressTracker queries the "address_tracker" edge of the ChainProposal entity.
+func (cp *ChainProposal) QueryAddressTracker() *AddressTrackerQuery {
+	return NewChainProposalClient(cp.config).QueryAddressTracker(cp)
 }
 
 // Update returns a builder for updating this ChainProposal.
 // Note that you need to call ChainProposal.Unwrap() before calling this method if this ChainProposal
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (cp *ChainProposal) Update() *ChainProposalUpdateOne {
-	return (&ChainProposalClient{config: cp.config}).UpdateOne(cp)
+	return NewChainProposalClient(cp.config).UpdateOne(cp)
 }
 
 // Unwrap unwraps the ChainProposal entity that was returned from a transaction after it was closed,
@@ -212,9 +228,3 @@ func (cp *ChainProposal) String() string {
 
 // ChainProposals is a parsable slice of ChainProposal.
 type ChainProposals []*ChainProposal
-
-func (cp ChainProposals) config(cfg config) {
-	for _i := range cp {
-		cp[_i].config = cfg
-	}
-}

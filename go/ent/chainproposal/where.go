@@ -12,676 +12,432 @@ import (
 
 // ID filters vertices based on their ID field.
 func ID(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
 func IDEQ(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
 func IDNEQ(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
 func IDIn(ids ...int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.In(s.C(FieldID), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
 func IDNotIn(ids ...int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		v := make([]any, len(ids))
-		for i := range v {
-			v[i] = ids[i]
-		}
-		s.Where(sql.NotIn(s.C(FieldID), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
 func IDGT(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
 func IDGTE(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
 func IDLT(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldID), id))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldID, id))
 }
 
 // CreateTime applies equality check predicate on the "create_time" field. It's identical to CreateTimeEQ.
 func CreateTime(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // UpdateTime applies equality check predicate on the "update_time" field. It's identical to UpdateTimeEQ.
 func UpdateTime(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // ProposalID applies equality check predicate on the "proposal_id" field. It's identical to ProposalIDEQ.
 func ProposalID(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldProposalID, v))
 }
 
 // Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
 func Title(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldTitle, v))
 }
 
 // Description applies equality check predicate on the "description" field. It's identical to DescriptionEQ.
 func Description(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldDescription, v))
 }
 
 // VotingStartTime applies equality check predicate on the "voting_start_time" field. It's identical to VotingStartTimeEQ.
 func VotingStartTime(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldVotingStartTime, v))
 }
 
 // VotingEndTime applies equality check predicate on the "voting_end_time" field. It's identical to VotingEndTimeEQ.
 func VotingEndTime(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldVotingEndTime, v))
 }
 
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldCreateTime, v))
 }
 
 // CreateTimeNEQ applies the NEQ predicate on the "create_time" field.
 func CreateTimeNEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldCreateTime, v))
 }
 
 // CreateTimeIn applies the In predicate on the "create_time" field.
 func CreateTimeIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldCreateTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeNotIn applies the NotIn predicate on the "create_time" field.
 func CreateTimeNotIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldCreateTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldCreateTime, vs...))
 }
 
 // CreateTimeGT applies the GT predicate on the "create_time" field.
 func CreateTimeGT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldCreateTime, v))
 }
 
 // CreateTimeGTE applies the GTE predicate on the "create_time" field.
 func CreateTimeGTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldCreateTime, v))
 }
 
 // CreateTimeLT applies the LT predicate on the "create_time" field.
 func CreateTimeLT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldCreateTime, v))
 }
 
 // CreateTimeLTE applies the LTE predicate on the "create_time" field.
 func CreateTimeLTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldCreateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldCreateTime, v))
 }
 
 // UpdateTimeEQ applies the EQ predicate on the "update_time" field.
 func UpdateTimeEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeNEQ applies the NEQ predicate on the "update_time" field.
 func UpdateTimeNEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldUpdateTime, v))
 }
 
 // UpdateTimeIn applies the In predicate on the "update_time" field.
 func UpdateTimeIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeNotIn applies the NotIn predicate on the "update_time" field.
 func UpdateTimeNotIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldUpdateTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldUpdateTime, vs...))
 }
 
 // UpdateTimeGT applies the GT predicate on the "update_time" field.
 func UpdateTimeGT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldUpdateTime, v))
 }
 
 // UpdateTimeGTE applies the GTE predicate on the "update_time" field.
 func UpdateTimeGTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldUpdateTime, v))
 }
 
 // UpdateTimeLT applies the LT predicate on the "update_time" field.
 func UpdateTimeLT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldUpdateTime, v))
 }
 
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldUpdateTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldUpdateTime, v))
 }
 
 // ProposalIDEQ applies the EQ predicate on the "proposal_id" field.
 func ProposalIDEQ(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldProposalID, v))
 }
 
 // ProposalIDNEQ applies the NEQ predicate on the "proposal_id" field.
 func ProposalIDNEQ(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldProposalID, v))
 }
 
 // ProposalIDIn applies the In predicate on the "proposal_id" field.
 func ProposalIDIn(vs ...int) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldProposalID), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldProposalID, vs...))
 }
 
 // ProposalIDNotIn applies the NotIn predicate on the "proposal_id" field.
 func ProposalIDNotIn(vs ...int) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldProposalID), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldProposalID, vs...))
 }
 
 // ProposalIDGT applies the GT predicate on the "proposal_id" field.
 func ProposalIDGT(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldProposalID, v))
 }
 
 // ProposalIDGTE applies the GTE predicate on the "proposal_id" field.
 func ProposalIDGTE(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldProposalID, v))
 }
 
 // ProposalIDLT applies the LT predicate on the "proposal_id" field.
 func ProposalIDLT(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldProposalID, v))
 }
 
 // ProposalIDLTE applies the LTE predicate on the "proposal_id" field.
 func ProposalIDLTE(v int) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldProposalID), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldProposalID, v))
 }
 
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldTitle, v))
 }
 
 // TitleNEQ applies the NEQ predicate on the "title" field.
 func TitleNEQ(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldTitle, v))
 }
 
 // TitleIn applies the In predicate on the "title" field.
 func TitleIn(vs ...string) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTitle), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldTitle, vs...))
 }
 
 // TitleNotIn applies the NotIn predicate on the "title" field.
 func TitleNotIn(vs ...string) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTitle), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldTitle, vs...))
 }
 
 // TitleGT applies the GT predicate on the "title" field.
 func TitleGT(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldTitle, v))
 }
 
 // TitleGTE applies the GTE predicate on the "title" field.
 func TitleGTE(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldTitle, v))
 }
 
 // TitleLT applies the LT predicate on the "title" field.
 func TitleLT(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldTitle, v))
 }
 
 // TitleLTE applies the LTE predicate on the "title" field.
 func TitleLTE(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldTitle, v))
 }
 
 // TitleContains applies the Contains predicate on the "title" field.
 func TitleContains(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldContains(FieldTitle, v))
 }
 
 // TitleHasPrefix applies the HasPrefix predicate on the "title" field.
 func TitleHasPrefix(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldHasPrefix(FieldTitle, v))
 }
 
 // TitleHasSuffix applies the HasSuffix predicate on the "title" field.
 func TitleHasSuffix(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldHasSuffix(FieldTitle, v))
 }
 
 // TitleEqualFold applies the EqualFold predicate on the "title" field.
 func TitleEqualFold(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldEqualFold(FieldTitle, v))
 }
 
 // TitleContainsFold applies the ContainsFold predicate on the "title" field.
 func TitleContainsFold(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTitle), v))
-	})
+	return predicate.ChainProposal(sql.FieldContainsFold(FieldTitle, v))
 }
 
 // DescriptionEQ applies the EQ predicate on the "description" field.
 func DescriptionEQ(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldDescription, v))
 }
 
 // DescriptionNEQ applies the NEQ predicate on the "description" field.
 func DescriptionNEQ(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldDescription, v))
 }
 
 // DescriptionIn applies the In predicate on the "description" field.
 func DescriptionIn(vs ...string) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldDescription), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldDescription, vs...))
 }
 
 // DescriptionNotIn applies the NotIn predicate on the "description" field.
 func DescriptionNotIn(vs ...string) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldDescription), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldDescription, vs...))
 }
 
 // DescriptionGT applies the GT predicate on the "description" field.
 func DescriptionGT(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldDescription, v))
 }
 
 // DescriptionGTE applies the GTE predicate on the "description" field.
 func DescriptionGTE(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldDescription, v))
 }
 
 // DescriptionLT applies the LT predicate on the "description" field.
 func DescriptionLT(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldDescription, v))
 }
 
 // DescriptionLTE applies the LTE predicate on the "description" field.
 func DescriptionLTE(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldDescription, v))
 }
 
 // DescriptionContains applies the Contains predicate on the "description" field.
 func DescriptionContains(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldContains(FieldDescription, v))
 }
 
 // DescriptionHasPrefix applies the HasPrefix predicate on the "description" field.
 func DescriptionHasPrefix(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldHasPrefix(FieldDescription, v))
 }
 
 // DescriptionHasSuffix applies the HasSuffix predicate on the "description" field.
 func DescriptionHasSuffix(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldHasSuffix(FieldDescription, v))
 }
 
 // DescriptionEqualFold applies the EqualFold predicate on the "description" field.
 func DescriptionEqualFold(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldEqualFold(FieldDescription, v))
 }
 
 // DescriptionContainsFold applies the ContainsFold predicate on the "description" field.
 func DescriptionContainsFold(v string) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldDescription), v))
-	})
+	return predicate.ChainProposal(sql.FieldContainsFold(FieldDescription, v))
 }
 
 // VotingStartTimeEQ applies the EQ predicate on the "voting_start_time" field.
 func VotingStartTimeEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldVotingStartTime, v))
 }
 
 // VotingStartTimeNEQ applies the NEQ predicate on the "voting_start_time" field.
 func VotingStartTimeNEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldVotingStartTime, v))
 }
 
 // VotingStartTimeIn applies the In predicate on the "voting_start_time" field.
 func VotingStartTimeIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVotingStartTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldVotingStartTime, vs...))
 }
 
 // VotingStartTimeNotIn applies the NotIn predicate on the "voting_start_time" field.
 func VotingStartTimeNotIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVotingStartTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldVotingStartTime, vs...))
 }
 
 // VotingStartTimeGT applies the GT predicate on the "voting_start_time" field.
 func VotingStartTimeGT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldVotingStartTime, v))
 }
 
 // VotingStartTimeGTE applies the GTE predicate on the "voting_start_time" field.
 func VotingStartTimeGTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldVotingStartTime, v))
 }
 
 // VotingStartTimeLT applies the LT predicate on the "voting_start_time" field.
 func VotingStartTimeLT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldVotingStartTime, v))
 }
 
 // VotingStartTimeLTE applies the LTE predicate on the "voting_start_time" field.
 func VotingStartTimeLTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVotingStartTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldVotingStartTime, v))
 }
 
 // VotingEndTimeEQ applies the EQ predicate on the "voting_end_time" field.
 func VotingEndTimeEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldVotingEndTime, v))
 }
 
 // VotingEndTimeNEQ applies the NEQ predicate on the "voting_end_time" field.
 func VotingEndTimeNEQ(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldVotingEndTime, v))
 }
 
 // VotingEndTimeIn applies the In predicate on the "voting_end_time" field.
 func VotingEndTimeIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldVotingEndTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldVotingEndTime, vs...))
 }
 
 // VotingEndTimeNotIn applies the NotIn predicate on the "voting_end_time" field.
 func VotingEndTimeNotIn(vs ...time.Time) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldVotingEndTime), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldVotingEndTime, vs...))
 }
 
 // VotingEndTimeGT applies the GT predicate on the "voting_end_time" field.
 func VotingEndTimeGT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGT(FieldVotingEndTime, v))
 }
 
 // VotingEndTimeGTE applies the GTE predicate on the "voting_end_time" field.
 func VotingEndTimeGTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldGTE(FieldVotingEndTime, v))
 }
 
 // VotingEndTimeLT applies the LT predicate on the "voting_end_time" field.
 func VotingEndTimeLT(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLT(FieldVotingEndTime, v))
 }
 
 // VotingEndTimeLTE applies the LTE predicate on the "voting_end_time" field.
 func VotingEndTimeLTE(v time.Time) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldVotingEndTime), v))
-	})
+	return predicate.ChainProposal(sql.FieldLTE(FieldVotingEndTime, v))
 }
 
 // StatusEQ applies the EQ predicate on the "status" field.
 func StatusEQ(v Status) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldStatus), v))
-	})
+	return predicate.ChainProposal(sql.FieldEQ(FieldStatus, v))
 }
 
 // StatusNEQ applies the NEQ predicate on the "status" field.
 func StatusNEQ(v Status) predicate.ChainProposal {
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldStatus), v))
-	})
+	return predicate.ChainProposal(sql.FieldNEQ(FieldStatus, v))
 }
 
 // StatusIn applies the In predicate on the "status" field.
 func StatusIn(vs ...Status) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldStatus), v...))
-	})
+	return predicate.ChainProposal(sql.FieldIn(FieldStatus, vs...))
 }
 
 // StatusNotIn applies the NotIn predicate on the "status" field.
 func StatusNotIn(vs ...Status) predicate.ChainProposal {
-	v := make([]any, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.ChainProposal(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldStatus), v...))
-	})
+	return predicate.ChainProposal(sql.FieldNotIn(FieldStatus, vs...))
 }
 
 // HasChain applies the HasEdge predicate on the "chain" edge.
@@ -689,7 +445,6 @@ func HasChain() predicate.ChainProposal {
 	return predicate.ChainProposal(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChainTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, ChainTable, ChainColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
@@ -703,6 +458,33 @@ func HasChainWith(preds ...predicate.Chain) predicate.ChainProposal {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(ChainInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, ChainTable, ChainColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAddressTracker applies the HasEdge predicate on the "address_tracker" edge.
+func HasAddressTracker() predicate.ChainProposal {
+	return predicate.ChainProposal(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, AddressTrackerTable, AddressTrackerPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAddressTrackerWith applies the HasEdge predicate on the "address_tracker" edge with a given conditions (other predicates).
+func HasAddressTrackerWith(preds ...predicate.AddressTracker) predicate.ChainProposal {
+	return predicate.ChainProposal(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(AddressTrackerInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, AddressTrackerTable, AddressTrackerPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

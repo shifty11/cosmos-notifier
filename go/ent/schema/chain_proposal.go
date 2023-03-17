@@ -42,5 +42,7 @@ func (ChainProposal) Edges() []ent.Edge {
 		edge.From("chain", Chain.Type).
 			Ref("chain_proposals").
 			Unique(),
+		edge.From("address_tracker", AddressTracker.Type).
+			Ref("chain_proposals"),
 	}
 }

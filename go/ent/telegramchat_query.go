@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
@@ -21,15 +22,14 @@ import (
 // TelegramChatQuery is the builder for querying TelegramChat entities.
 type TelegramChatQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
-	order         []OrderFunc
-	fields        []string
-	predicates    []predicate.TelegramChat
-	withUsers     *UserQuery
-	withContracts *ContractQuery
-	withChains    *ChainQuery
+	ctx                 *QueryContext
+	order               []OrderFunc
+	inters              []Interceptor
+	predicates          []predicate.TelegramChat
+	withUsers           *UserQuery
+	withContracts       *ContractQuery
+	withChains          *ChainQuery
+	withAddressTrackers *AddressTrackerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -41,26 +41,26 @@ func (tcq *TelegramChatQuery) Where(ps ...predicate.TelegramChat) *TelegramChatQ
 	return tcq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (tcq *TelegramChatQuery) Limit(limit int) *TelegramChatQuery {
-	tcq.limit = &limit
+	tcq.ctx.Limit = &limit
 	return tcq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (tcq *TelegramChatQuery) Offset(offset int) *TelegramChatQuery {
-	tcq.offset = &offset
+	tcq.ctx.Offset = &offset
 	return tcq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (tcq *TelegramChatQuery) Unique(unique bool) *TelegramChatQuery {
-	tcq.unique = &unique
+	tcq.ctx.Unique = &unique
 	return tcq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (tcq *TelegramChatQuery) Order(o ...OrderFunc) *TelegramChatQuery {
 	tcq.order = append(tcq.order, o...)
 	return tcq
@@ -68,7 +68,7 @@ func (tcq *TelegramChatQuery) Order(o ...OrderFunc) *TelegramChatQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (tcq *TelegramChatQuery) QueryUsers() *UserQuery {
-	query := &UserQuery{config: tcq.config}
+	query := (&UserClient{config: tcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +90,7 @@ func (tcq *TelegramChatQuery) QueryUsers() *UserQuery {
 
 // QueryContracts chains the current query on the "contracts" edge.
 func (tcq *TelegramChatQuery) QueryContracts() *ContractQuery {
-	query := &ContractQuery{config: tcq.config}
+	query := (&ContractClient{config: tcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -112,7 +112,7 @@ func (tcq *TelegramChatQuery) QueryContracts() *ContractQuery {
 
 // QueryChains chains the current query on the "chains" edge.
 func (tcq *TelegramChatQuery) QueryChains() *ChainQuery {
-	query := &ChainQuery{config: tcq.config}
+	query := (&ChainClient{config: tcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -132,10 +132,32 @@ func (tcq *TelegramChatQuery) QueryChains() *ChainQuery {
 	return query
 }
 
+// QueryAddressTrackers chains the current query on the "address_trackers" edge.
+func (tcq *TelegramChatQuery) QueryAddressTrackers() *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: tcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, selector),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, telegramchat.AddressTrackersTable, telegramchat.AddressTrackersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first TelegramChat entity from the query.
 // Returns a *NotFoundError when no TelegramChat was found.
 func (tcq *TelegramChatQuery) First(ctx context.Context) (*TelegramChat, error) {
-	nodes, err := tcq.Limit(1).All(ctx)
+	nodes, err := tcq.Limit(1).All(setContextOp(ctx, tcq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +180,7 @@ func (tcq *TelegramChatQuery) FirstX(ctx context.Context) *TelegramChat {
 // Returns a *NotFoundError when no TelegramChat ID was found.
 func (tcq *TelegramChatQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tcq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = tcq.Limit(1).IDs(setContextOp(ctx, tcq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -181,7 +203,7 @@ func (tcq *TelegramChatQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one TelegramChat entity is found.
 // Returns a *NotFoundError when no TelegramChat entities are found.
 func (tcq *TelegramChatQuery) Only(ctx context.Context) (*TelegramChat, error) {
-	nodes, err := tcq.Limit(2).All(ctx)
+	nodes, err := tcq.Limit(2).All(setContextOp(ctx, tcq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +231,7 @@ func (tcq *TelegramChatQuery) OnlyX(ctx context.Context) *TelegramChat {
 // Returns a *NotFoundError when no entities are found.
 func (tcq *TelegramChatQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = tcq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = tcq.Limit(2).IDs(setContextOp(ctx, tcq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -234,10 +256,12 @@ func (tcq *TelegramChatQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of TelegramChats.
 func (tcq *TelegramChatQuery) All(ctx context.Context) ([]*TelegramChat, error) {
+	ctx = setContextOp(ctx, tcq.ctx, "All")
 	if err := tcq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return tcq.sqlAll(ctx)
+	qr := querierAll[[]*TelegramChat, *TelegramChatQuery]()
+	return withInterceptors[[]*TelegramChat](ctx, tcq, qr, tcq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -250,9 +274,12 @@ func (tcq *TelegramChatQuery) AllX(ctx context.Context) []*TelegramChat {
 }
 
 // IDs executes the query and returns a list of TelegramChat IDs.
-func (tcq *TelegramChatQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := tcq.Select(telegramchat.FieldID).Scan(ctx, &ids); err != nil {
+func (tcq *TelegramChatQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if tcq.ctx.Unique == nil && tcq.path != nil {
+		tcq.Unique(true)
+	}
+	ctx = setContextOp(ctx, tcq.ctx, "IDs")
+	if err = tcq.Select(telegramchat.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -269,10 +296,11 @@ func (tcq *TelegramChatQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (tcq *TelegramChatQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, tcq.ctx, "Count")
 	if err := tcq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return tcq.sqlCount(ctx)
+	return withInterceptors[int](ctx, tcq, querierCount[*TelegramChatQuery](), tcq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -286,10 +314,15 @@ func (tcq *TelegramChatQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (tcq *TelegramChatQuery) Exist(ctx context.Context) (bool, error) {
-	if err := tcq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, tcq.ctx, "Exist")
+	switch _, err := tcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return tcq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -308,25 +341,25 @@ func (tcq *TelegramChatQuery) Clone() *TelegramChatQuery {
 		return nil
 	}
 	return &TelegramChatQuery{
-		config:        tcq.config,
-		limit:         tcq.limit,
-		offset:        tcq.offset,
-		order:         append([]OrderFunc{}, tcq.order...),
-		predicates:    append([]predicate.TelegramChat{}, tcq.predicates...),
-		withUsers:     tcq.withUsers.Clone(),
-		withContracts: tcq.withContracts.Clone(),
-		withChains:    tcq.withChains.Clone(),
+		config:              tcq.config,
+		ctx:                 tcq.ctx.Clone(),
+		order:               append([]OrderFunc{}, tcq.order...),
+		inters:              append([]Interceptor{}, tcq.inters...),
+		predicates:          append([]predicate.TelegramChat{}, tcq.predicates...),
+		withUsers:           tcq.withUsers.Clone(),
+		withContracts:       tcq.withContracts.Clone(),
+		withChains:          tcq.withChains.Clone(),
+		withAddressTrackers: tcq.withAddressTrackers.Clone(),
 		// clone intermediate query.
-		sql:    tcq.sql.Clone(),
-		path:   tcq.path,
-		unique: tcq.unique,
+		sql:  tcq.sql.Clone(),
+		path: tcq.path,
 	}
 }
 
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (tcq *TelegramChatQuery) WithUsers(opts ...func(*UserQuery)) *TelegramChatQuery {
-	query := &UserQuery{config: tcq.config}
+	query := (&UserClient{config: tcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -337,7 +370,7 @@ func (tcq *TelegramChatQuery) WithUsers(opts ...func(*UserQuery)) *TelegramChatQ
 // WithContracts tells the query-builder to eager-load the nodes that are connected to
 // the "contracts" edge. The optional arguments are used to configure the query builder of the edge.
 func (tcq *TelegramChatQuery) WithContracts(opts ...func(*ContractQuery)) *TelegramChatQuery {
-	query := &ContractQuery{config: tcq.config}
+	query := (&ContractClient{config: tcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -348,11 +381,22 @@ func (tcq *TelegramChatQuery) WithContracts(opts ...func(*ContractQuery)) *Teleg
 // WithChains tells the query-builder to eager-load the nodes that are connected to
 // the "chains" edge. The optional arguments are used to configure the query builder of the edge.
 func (tcq *TelegramChatQuery) WithChains(opts ...func(*ChainQuery)) *TelegramChatQuery {
-	query := &ChainQuery{config: tcq.config}
+	query := (&ChainClient{config: tcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	tcq.withChains = query
+	return tcq
+}
+
+// WithAddressTrackers tells the query-builder to eager-load the nodes that are connected to
+// the "address_trackers" edge. The optional arguments are used to configure the query builder of the edge.
+func (tcq *TelegramChatQuery) WithAddressTrackers(opts ...func(*AddressTrackerQuery)) *TelegramChatQuery {
+	query := (&AddressTrackerClient{config: tcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tcq.withAddressTrackers = query
 	return tcq
 }
 
@@ -371,16 +415,11 @@ func (tcq *TelegramChatQuery) WithChains(opts ...func(*ChainQuery)) *TelegramCha
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tcq *TelegramChatQuery) GroupBy(field string, fields ...string) *TelegramChatGroupBy {
-	grbuild := &TelegramChatGroupBy{config: tcq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := tcq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return tcq.sqlQuery(ctx), nil
-	}
+	tcq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &TelegramChatGroupBy{build: tcq}
+	grbuild.flds = &tcq.ctx.Fields
 	grbuild.label = telegramchat.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -397,11 +436,11 @@ func (tcq *TelegramChatQuery) GroupBy(field string, fields ...string) *TelegramC
 //		Select(telegramchat.FieldCreateTime).
 //		Scan(ctx, &v)
 func (tcq *TelegramChatQuery) Select(fields ...string) *TelegramChatSelect {
-	tcq.fields = append(tcq.fields, fields...)
-	selbuild := &TelegramChatSelect{TelegramChatQuery: tcq}
-	selbuild.label = telegramchat.Label
-	selbuild.flds, selbuild.scan = &tcq.fields, selbuild.Scan
-	return selbuild
+	tcq.ctx.Fields = append(tcq.ctx.Fields, fields...)
+	sbuild := &TelegramChatSelect{TelegramChatQuery: tcq}
+	sbuild.label = telegramchat.Label
+	sbuild.flds, sbuild.scan = &tcq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a TelegramChatSelect configured with the given aggregations.
@@ -410,7 +449,17 @@ func (tcq *TelegramChatQuery) Aggregate(fns ...AggregateFunc) *TelegramChatSelec
 }
 
 func (tcq *TelegramChatQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range tcq.fields {
+	for _, inter := range tcq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, tcq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range tcq.ctx.Fields {
 		if !telegramchat.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -429,10 +478,11 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 	var (
 		nodes       = []*TelegramChat{}
 		_spec       = tcq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			tcq.withUsers != nil,
 			tcq.withContracts != nil,
 			tcq.withChains != nil,
+			tcq.withAddressTrackers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -474,6 +524,13 @@ func (tcq *TelegramChatQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([
 			return nil, err
 		}
 	}
+	if query := tcq.withAddressTrackers; query != nil {
+		if err := tcq.loadAddressTrackers(ctx, query, nodes,
+			func(n *TelegramChat) { n.Edges.AddressTrackers = []*AddressTracker{} },
+			func(n *TelegramChat, e *AddressTracker) { n.Edges.AddressTrackers = append(n.Edges.AddressTrackers, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -500,27 +557,30 @@ func (tcq *TelegramChatQuery) loadUsers(ctx context.Context, query *UserQuery, n
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -558,27 +618,30 @@ func (tcq *TelegramChatQuery) loadContracts(ctx context.Context, query *Contract
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*Contract](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -616,27 +679,30 @@ func (tcq *TelegramChatQuery) loadChains(ctx context.Context, query *ChainQuery,
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*TelegramChat]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*Chain](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -651,44 +717,56 @@ func (tcq *TelegramChatQuery) loadChains(ctx context.Context, query *ChainQuery,
 	}
 	return nil
 }
+func (tcq *TelegramChatQuery) loadAddressTrackers(ctx context.Context, query *AddressTrackerQuery, nodes []*TelegramChat, init func(*TelegramChat), assign func(*TelegramChat, *AddressTracker)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*TelegramChat)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AddressTracker(func(s *sql.Selector) {
+		s.Where(sql.InValues(telegramchat.AddressTrackersColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.telegram_chat_address_trackers
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "telegram_chat_address_trackers" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "telegram_chat_address_trackers" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (tcq *TelegramChatQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := tcq.querySpec()
-	_spec.Node.Columns = tcq.fields
-	if len(tcq.fields) > 0 {
-		_spec.Unique = tcq.unique != nil && *tcq.unique
+	_spec.Node.Columns = tcq.ctx.Fields
+	if len(tcq.ctx.Fields) > 0 {
+		_spec.Unique = tcq.ctx.Unique != nil && *tcq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, tcq.driver, _spec)
 }
 
-func (tcq *TelegramChatQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := tcq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (tcq *TelegramChatQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   telegramchat.Table,
-			Columns: telegramchat.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: telegramchat.FieldID,
-			},
-		},
-		From:   tcq.sql,
-		Unique: true,
-	}
-	if unique := tcq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(telegramchat.Table, telegramchat.Columns, sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt))
+	_spec.From = tcq.sql
+	if unique := tcq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if tcq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := tcq.fields; len(fields) > 0 {
+	if fields := tcq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, telegramchat.FieldID)
 		for i := range fields {
@@ -704,10 +782,10 @@ func (tcq *TelegramChatQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := tcq.limit; limit != nil {
+	if limit := tcq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := tcq.offset; offset != nil {
+	if offset := tcq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := tcq.order; len(ps) > 0 {
@@ -723,7 +801,7 @@ func (tcq *TelegramChatQuery) querySpec() *sqlgraph.QuerySpec {
 func (tcq *TelegramChatQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(tcq.driver.Dialect())
 	t1 := builder.Table(telegramchat.Table)
-	columns := tcq.fields
+	columns := tcq.ctx.Fields
 	if len(columns) == 0 {
 		columns = telegramchat.Columns
 	}
@@ -732,7 +810,7 @@ func (tcq *TelegramChatQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = tcq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if tcq.unique != nil && *tcq.unique {
+	if tcq.ctx.Unique != nil && *tcq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range tcq.predicates {
@@ -741,12 +819,12 @@ func (tcq *TelegramChatQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range tcq.order {
 		p(selector)
 	}
-	if offset := tcq.offset; offset != nil {
+	if offset := tcq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := tcq.limit; limit != nil {
+	if limit := tcq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -754,13 +832,8 @@ func (tcq *TelegramChatQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // TelegramChatGroupBy is the group-by builder for TelegramChat entities.
 type TelegramChatGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *TelegramChatQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -769,58 +842,46 @@ func (tcgb *TelegramChatGroupBy) Aggregate(fns ...AggregateFunc) *TelegramChatGr
 	return tcgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (tcgb *TelegramChatGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := tcgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, tcgb.build.ctx, "GroupBy")
+	if err := tcgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	tcgb.sql = query
-	return tcgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*TelegramChatQuery, *TelegramChatGroupBy](ctx, tcgb.build, tcgb, tcgb.build.inters, v)
 }
 
-func (tcgb *TelegramChatGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range tcgb.fields {
-		if !telegramchat.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (tcgb *TelegramChatGroupBy) sqlScan(ctx context.Context, root *TelegramChatQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(tcgb.fns))
+	for _, fn := range tcgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := tcgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*tcgb.flds)+len(tcgb.fns))
+		for _, f := range *tcgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*tcgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := tcgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := tcgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (tcgb *TelegramChatGroupBy) sqlQuery() *sql.Selector {
-	selector := tcgb.sql.Select()
-	aggregation := make([]string, 0, len(tcgb.fns))
-	for _, fn := range tcgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(tcgb.fields)+len(tcgb.fns))
-		for _, f := range tcgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(tcgb.fields...)...)
-}
-
 // TelegramChatSelect is the builder for selecting fields of TelegramChat entities.
 type TelegramChatSelect struct {
 	*TelegramChatQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -831,26 +892,27 @@ func (tcs *TelegramChatSelect) Aggregate(fns ...AggregateFunc) *TelegramChatSele
 
 // Scan applies the selector query and scans the result into the given value.
 func (tcs *TelegramChatSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, tcs.ctx, "Select")
 	if err := tcs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	tcs.sql = tcs.TelegramChatQuery.sqlQuery(ctx)
-	return tcs.sqlScan(ctx, v)
+	return scanWithInterceptors[*TelegramChatQuery, *TelegramChatSelect](ctx, tcs.TelegramChatQuery, tcs, tcs.inters, v)
 }
 
-func (tcs *TelegramChatSelect) sqlScan(ctx context.Context, v any) error {
+func (tcs *TelegramChatSelect) sqlScan(ctx context.Context, root *TelegramChatQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(tcs.fns))
 	for _, fn := range tcs.fns {
-		aggregation = append(aggregation, fn(tcs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*tcs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		tcs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		tcs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := tcs.sql.Query()
+	query, args := selector.Query()
 	if err := tcs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

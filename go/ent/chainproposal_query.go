@@ -4,12 +4,14 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
@@ -18,14 +20,13 @@ import (
 // ChainProposalQuery is the builder for querying ChainProposal entities.
 type ChainProposalQuery struct {
 	config
-	limit      *int
-	offset     *int
-	unique     *bool
-	order      []OrderFunc
-	fields     []string
-	predicates []predicate.ChainProposal
-	withChain  *ChainQuery
-	withFKs    bool
+	ctx                *QueryContext
+	order              []OrderFunc
+	inters             []Interceptor
+	predicates         []predicate.ChainProposal
+	withChain          *ChainQuery
+	withAddressTracker *AddressTrackerQuery
+	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -37,26 +38,26 @@ func (cpq *ChainProposalQuery) Where(ps ...predicate.ChainProposal) *ChainPropos
 	return cpq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (cpq *ChainProposalQuery) Limit(limit int) *ChainProposalQuery {
-	cpq.limit = &limit
+	cpq.ctx.Limit = &limit
 	return cpq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (cpq *ChainProposalQuery) Offset(offset int) *ChainProposalQuery {
-	cpq.offset = &offset
+	cpq.ctx.Offset = &offset
 	return cpq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (cpq *ChainProposalQuery) Unique(unique bool) *ChainProposalQuery {
-	cpq.unique = &unique
+	cpq.ctx.Unique = &unique
 	return cpq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (cpq *ChainProposalQuery) Order(o ...OrderFunc) *ChainProposalQuery {
 	cpq.order = append(cpq.order, o...)
 	return cpq
@@ -64,7 +65,7 @@ func (cpq *ChainProposalQuery) Order(o ...OrderFunc) *ChainProposalQuery {
 
 // QueryChain chains the current query on the "chain" edge.
 func (cpq *ChainProposalQuery) QueryChain() *ChainQuery {
-	query := &ChainQuery{config: cpq.config}
+	query := (&ChainClient{config: cpq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cpq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -84,10 +85,32 @@ func (cpq *ChainProposalQuery) QueryChain() *ChainQuery {
 	return query
 }
 
+// QueryAddressTracker chains the current query on the "address_tracker" edge.
+func (cpq *ChainProposalQuery) QueryAddressTracker() *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: cpq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cpq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cpq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chainproposal.Table, chainproposal.FieldID, selector),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, chainproposal.AddressTrackerTable, chainproposal.AddressTrackerPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(cpq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first ChainProposal entity from the query.
 // Returns a *NotFoundError when no ChainProposal was found.
 func (cpq *ChainProposalQuery) First(ctx context.Context) (*ChainProposal, error) {
-	nodes, err := cpq.Limit(1).All(ctx)
+	nodes, err := cpq.Limit(1).All(setContextOp(ctx, cpq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +133,7 @@ func (cpq *ChainProposalQuery) FirstX(ctx context.Context) *ChainProposal {
 // Returns a *NotFoundError when no ChainProposal ID was found.
 func (cpq *ChainProposalQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cpq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = cpq.Limit(1).IDs(setContextOp(ctx, cpq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -133,7 +156,7 @@ func (cpq *ChainProposalQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one ChainProposal entity is found.
 // Returns a *NotFoundError when no ChainProposal entities are found.
 func (cpq *ChainProposalQuery) Only(ctx context.Context) (*ChainProposal, error) {
-	nodes, err := cpq.Limit(2).All(ctx)
+	nodes, err := cpq.Limit(2).All(setContextOp(ctx, cpq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +184,7 @@ func (cpq *ChainProposalQuery) OnlyX(ctx context.Context) *ChainProposal {
 // Returns a *NotFoundError when no entities are found.
 func (cpq *ChainProposalQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = cpq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = cpq.Limit(2).IDs(setContextOp(ctx, cpq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -186,10 +209,12 @@ func (cpq *ChainProposalQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of ChainProposals.
 func (cpq *ChainProposalQuery) All(ctx context.Context) ([]*ChainProposal, error) {
+	ctx = setContextOp(ctx, cpq.ctx, "All")
 	if err := cpq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return cpq.sqlAll(ctx)
+	qr := querierAll[[]*ChainProposal, *ChainProposalQuery]()
+	return withInterceptors[[]*ChainProposal](ctx, cpq, qr, cpq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -202,9 +227,12 @@ func (cpq *ChainProposalQuery) AllX(ctx context.Context) []*ChainProposal {
 }
 
 // IDs executes the query and returns a list of ChainProposal IDs.
-func (cpq *ChainProposalQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := cpq.Select(chainproposal.FieldID).Scan(ctx, &ids); err != nil {
+func (cpq *ChainProposalQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if cpq.ctx.Unique == nil && cpq.path != nil {
+		cpq.Unique(true)
+	}
+	ctx = setContextOp(ctx, cpq.ctx, "IDs")
+	if err = cpq.Select(chainproposal.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -221,10 +249,11 @@ func (cpq *ChainProposalQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (cpq *ChainProposalQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, cpq.ctx, "Count")
 	if err := cpq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return cpq.sqlCount(ctx)
+	return withInterceptors[int](ctx, cpq, querierCount[*ChainProposalQuery](), cpq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -238,10 +267,15 @@ func (cpq *ChainProposalQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (cpq *ChainProposalQuery) Exist(ctx context.Context) (bool, error) {
-	if err := cpq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, cpq.ctx, "Exist")
+	switch _, err := cpq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return cpq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -260,27 +294,38 @@ func (cpq *ChainProposalQuery) Clone() *ChainProposalQuery {
 		return nil
 	}
 	return &ChainProposalQuery{
-		config:     cpq.config,
-		limit:      cpq.limit,
-		offset:     cpq.offset,
-		order:      append([]OrderFunc{}, cpq.order...),
-		predicates: append([]predicate.ChainProposal{}, cpq.predicates...),
-		withChain:  cpq.withChain.Clone(),
+		config:             cpq.config,
+		ctx:                cpq.ctx.Clone(),
+		order:              append([]OrderFunc{}, cpq.order...),
+		inters:             append([]Interceptor{}, cpq.inters...),
+		predicates:         append([]predicate.ChainProposal{}, cpq.predicates...),
+		withChain:          cpq.withChain.Clone(),
+		withAddressTracker: cpq.withAddressTracker.Clone(),
 		// clone intermediate query.
-		sql:    cpq.sql.Clone(),
-		path:   cpq.path,
-		unique: cpq.unique,
+		sql:  cpq.sql.Clone(),
+		path: cpq.path,
 	}
 }
 
 // WithChain tells the query-builder to eager-load the nodes that are connected to
 // the "chain" edge. The optional arguments are used to configure the query builder of the edge.
 func (cpq *ChainProposalQuery) WithChain(opts ...func(*ChainQuery)) *ChainProposalQuery {
-	query := &ChainQuery{config: cpq.config}
+	query := (&ChainClient{config: cpq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	cpq.withChain = query
+	return cpq
+}
+
+// WithAddressTracker tells the query-builder to eager-load the nodes that are connected to
+// the "address_tracker" edge. The optional arguments are used to configure the query builder of the edge.
+func (cpq *ChainProposalQuery) WithAddressTracker(opts ...func(*AddressTrackerQuery)) *ChainProposalQuery {
+	query := (&AddressTrackerClient{config: cpq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cpq.withAddressTracker = query
 	return cpq
 }
 
@@ -299,16 +344,11 @@ func (cpq *ChainProposalQuery) WithChain(opts ...func(*ChainQuery)) *ChainPropos
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cpq *ChainProposalQuery) GroupBy(field string, fields ...string) *ChainProposalGroupBy {
-	grbuild := &ChainProposalGroupBy{config: cpq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := cpq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return cpq.sqlQuery(ctx), nil
-	}
+	cpq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &ChainProposalGroupBy{build: cpq}
+	grbuild.flds = &cpq.ctx.Fields
 	grbuild.label = chainproposal.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -325,11 +365,11 @@ func (cpq *ChainProposalQuery) GroupBy(field string, fields ...string) *ChainPro
 //		Select(chainproposal.FieldCreateTime).
 //		Scan(ctx, &v)
 func (cpq *ChainProposalQuery) Select(fields ...string) *ChainProposalSelect {
-	cpq.fields = append(cpq.fields, fields...)
-	selbuild := &ChainProposalSelect{ChainProposalQuery: cpq}
-	selbuild.label = chainproposal.Label
-	selbuild.flds, selbuild.scan = &cpq.fields, selbuild.Scan
-	return selbuild
+	cpq.ctx.Fields = append(cpq.ctx.Fields, fields...)
+	sbuild := &ChainProposalSelect{ChainProposalQuery: cpq}
+	sbuild.label = chainproposal.Label
+	sbuild.flds, sbuild.scan = &cpq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a ChainProposalSelect configured with the given aggregations.
@@ -338,7 +378,17 @@ func (cpq *ChainProposalQuery) Aggregate(fns ...AggregateFunc) *ChainProposalSel
 }
 
 func (cpq *ChainProposalQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range cpq.fields {
+	for _, inter := range cpq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, cpq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range cpq.ctx.Fields {
 		if !chainproposal.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -358,8 +408,9 @@ func (cpq *ChainProposalQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		nodes       = []*ChainProposal{}
 		withFKs     = cpq.withFKs
 		_spec       = cpq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			cpq.withChain != nil,
+			cpq.withAddressTracker != nil,
 		}
 	)
 	if cpq.withChain != nil {
@@ -392,6 +443,13 @@ func (cpq *ChainProposalQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 			return nil, err
 		}
 	}
+	if query := cpq.withAddressTracker; query != nil {
+		if err := cpq.loadAddressTracker(ctx, query, nodes,
+			func(n *ChainProposal) { n.Edges.AddressTracker = []*AddressTracker{} },
+			func(n *ChainProposal, e *AddressTracker) { n.Edges.AddressTracker = append(n.Edges.AddressTracker, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -407,6 +465,9 @@ func (cpq *ChainProposalQuery) loadChain(ctx context.Context, query *ChainQuery,
 			ids = append(ids, fk)
 		}
 		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
 	}
 	query.Where(chain.IDIn(ids...))
 	neighbors, err := query.All(ctx)
@@ -424,44 +485,86 @@ func (cpq *ChainProposalQuery) loadChain(ctx context.Context, query *ChainQuery,
 	}
 	return nil
 }
+func (cpq *ChainProposalQuery) loadAddressTracker(ctx context.Context, query *AddressTrackerQuery, nodes []*ChainProposal, init func(*ChainProposal), assign func(*ChainProposal, *AddressTracker)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*ChainProposal)
+	nids := make(map[int]map[*ChainProposal]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(chainproposal.AddressTrackerTable)
+		s.Join(joinT).On(s.C(addresstracker.FieldID), joinT.C(chainproposal.AddressTrackerPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(chainproposal.AddressTrackerPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(chainproposal.AddressTrackerPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*ChainProposal]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*AddressTracker](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "address_tracker" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
 
 func (cpq *ChainProposalQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cpq.querySpec()
-	_spec.Node.Columns = cpq.fields
-	if len(cpq.fields) > 0 {
-		_spec.Unique = cpq.unique != nil && *cpq.unique
+	_spec.Node.Columns = cpq.ctx.Fields
+	if len(cpq.ctx.Fields) > 0 {
+		_spec.Unique = cpq.ctx.Unique != nil && *cpq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, cpq.driver, _spec)
 }
 
-func (cpq *ChainProposalQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := cpq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (cpq *ChainProposalQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   chainproposal.Table,
-			Columns: chainproposal.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chainproposal.FieldID,
-			},
-		},
-		From:   cpq.sql,
-		Unique: true,
-	}
-	if unique := cpq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(chainproposal.Table, chainproposal.Columns, sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt))
+	_spec.From = cpq.sql
+	if unique := cpq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if cpq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := cpq.fields; len(fields) > 0 {
+	if fields := cpq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, chainproposal.FieldID)
 		for i := range fields {
@@ -477,10 +580,10 @@ func (cpq *ChainProposalQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := cpq.limit; limit != nil {
+	if limit := cpq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := cpq.offset; offset != nil {
+	if offset := cpq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := cpq.order; len(ps) > 0 {
@@ -496,7 +599,7 @@ func (cpq *ChainProposalQuery) querySpec() *sqlgraph.QuerySpec {
 func (cpq *ChainProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cpq.driver.Dialect())
 	t1 := builder.Table(chainproposal.Table)
-	columns := cpq.fields
+	columns := cpq.ctx.Fields
 	if len(columns) == 0 {
 		columns = chainproposal.Columns
 	}
@@ -505,7 +608,7 @@ func (cpq *ChainProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = cpq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if cpq.unique != nil && *cpq.unique {
+	if cpq.ctx.Unique != nil && *cpq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range cpq.predicates {
@@ -514,12 +617,12 @@ func (cpq *ChainProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range cpq.order {
 		p(selector)
 	}
-	if offset := cpq.offset; offset != nil {
+	if offset := cpq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := cpq.limit; limit != nil {
+	if limit := cpq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -527,13 +630,8 @@ func (cpq *ChainProposalQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // ChainProposalGroupBy is the group-by builder for ChainProposal entities.
 type ChainProposalGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *ChainProposalQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -542,58 +640,46 @@ func (cpgb *ChainProposalGroupBy) Aggregate(fns ...AggregateFunc) *ChainProposal
 	return cpgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (cpgb *ChainProposalGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := cpgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, cpgb.build.ctx, "GroupBy")
+	if err := cpgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cpgb.sql = query
-	return cpgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*ChainProposalQuery, *ChainProposalGroupBy](ctx, cpgb.build, cpgb, cpgb.build.inters, v)
 }
 
-func (cpgb *ChainProposalGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range cpgb.fields {
-		if !chainproposal.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (cpgb *ChainProposalGroupBy) sqlScan(ctx context.Context, root *ChainProposalQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(cpgb.fns))
+	for _, fn := range cpgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := cpgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*cpgb.flds)+len(cpgb.fns))
+		for _, f := range *cpgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*cpgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := cpgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := cpgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (cpgb *ChainProposalGroupBy) sqlQuery() *sql.Selector {
-	selector := cpgb.sql.Select()
-	aggregation := make([]string, 0, len(cpgb.fns))
-	for _, fn := range cpgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(cpgb.fields)+len(cpgb.fns))
-		for _, f := range cpgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(cpgb.fields...)...)
-}
-
 // ChainProposalSelect is the builder for selecting fields of ChainProposal entities.
 type ChainProposalSelect struct {
 	*ChainProposalQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -604,26 +690,27 @@ func (cps *ChainProposalSelect) Aggregate(fns ...AggregateFunc) *ChainProposalSe
 
 // Scan applies the selector query and scans the result into the given value.
 func (cps *ChainProposalSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, cps.ctx, "Select")
 	if err := cps.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cps.sql = cps.ChainProposalQuery.sqlQuery(ctx)
-	return cps.sqlScan(ctx, v)
+	return scanWithInterceptors[*ChainProposalQuery, *ChainProposalSelect](ctx, cps.ChainProposalQuery, cps, cps.inters, v)
 }
 
-func (cps *ChainProposalSelect) sqlScan(ctx context.Context, v any) error {
+func (cps *ChainProposalSelect) sqlScan(ctx context.Context, root *ChainProposalQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(cps.fns))
 	for _, fn := range cps.fns {
-		aggregation = append(aggregation, fn(cps.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*cps.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		cps.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		cps.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := cps.sql.Query()
+	query, args := selector.Query()
 	if err := cps.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

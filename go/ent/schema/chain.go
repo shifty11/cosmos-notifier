@@ -38,6 +38,11 @@ func (Chain) Fields() []ent.Field {
 		field.String("image_url"),
 		field.String("thumbnail_url").
 			Default(""),
+		field.String("bech32_prefix").
+			Default(""),
+		//TODO change field to unique after migration/run of the crawler
+		//field.String("bech32_prefix").
+		//	Unique(),
 	}
 }
 
@@ -48,10 +53,6 @@ func (Chain) Edges() []ent.Edge {
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),
-		//edge.To("draft_proposals", DraftProposal.Type).
-		//	Annotations(entsql.Annotation{
-		//		OnDelete: entsql.Cascade,
-		//	}),
 		edge.From("telegram_chats", TelegramChat.Type).
 			Ref("chains").
 			Annotations(entsql.Annotation{
@@ -59,6 +60,10 @@ func (Chain) Edges() []ent.Edge {
 			}),
 		edge.From("discord_channels", DiscordChannel.Type).
 			Ref("chains").
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.To("address_trackers", AddressTracker.Type).
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),

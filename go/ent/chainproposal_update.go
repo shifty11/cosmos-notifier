@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
@@ -97,6 +98,21 @@ func (cpu *ChainProposalUpdate) SetChain(c *Chain) *ChainProposalUpdate {
 	return cpu.SetChainID(c.ID)
 }
 
+// AddAddressTrackerIDs adds the "address_tracker" edge to the AddressTracker entity by IDs.
+func (cpu *ChainProposalUpdate) AddAddressTrackerIDs(ids ...int) *ChainProposalUpdate {
+	cpu.mutation.AddAddressTrackerIDs(ids...)
+	return cpu
+}
+
+// AddAddressTracker adds the "address_tracker" edges to the AddressTracker entity.
+func (cpu *ChainProposalUpdate) AddAddressTracker(a ...*AddressTracker) *ChainProposalUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cpu.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the ChainProposalMutation object of the builder.
 func (cpu *ChainProposalUpdate) Mutation() *ChainProposalMutation {
 	return cpu.mutation
@@ -108,43 +124,31 @@ func (cpu *ChainProposalUpdate) ClearChain() *ChainProposalUpdate {
 	return cpu
 }
 
+// ClearAddressTracker clears all "address_tracker" edges to the AddressTracker entity.
+func (cpu *ChainProposalUpdate) ClearAddressTracker() *ChainProposalUpdate {
+	cpu.mutation.ClearAddressTracker()
+	return cpu
+}
+
+// RemoveAddressTrackerIDs removes the "address_tracker" edge to AddressTracker entities by IDs.
+func (cpu *ChainProposalUpdate) RemoveAddressTrackerIDs(ids ...int) *ChainProposalUpdate {
+	cpu.mutation.RemoveAddressTrackerIDs(ids...)
+	return cpu
+}
+
+// RemoveAddressTracker removes "address_tracker" edges to AddressTracker entities.
+func (cpu *ChainProposalUpdate) RemoveAddressTracker(a ...*AddressTracker) *ChainProposalUpdate {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cpu.RemoveAddressTrackerIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cpu *ChainProposalUpdate) Save(ctx context.Context) (int, error) {
-	var (
-		err      error
-		affected int
-	)
 	cpu.defaults()
-	if len(cpu.hooks) == 0 {
-		if err = cpu.check(); err != nil {
-			return 0, err
-		}
-		affected, err = cpu.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ChainProposalMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cpu.check(); err != nil {
-				return 0, err
-			}
-			cpu.mutation = mutation
-			affected, err = cpu.sqlSave(ctx)
-			mutation.done = true
-			return affected, err
-		})
-		for i := len(cpu.hooks) - 1; i >= 0; i-- {
-			if cpu.hooks[i] == nil {
-				return 0, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cpu.hooks[i](mut)
-		}
-		if _, err := mut.Mutate(ctx, cpu.mutation); err != nil {
-			return 0, err
-		}
-	}
-	return affected, err
+	return withHooks[int, ChainProposalMutation](ctx, cpu.sqlSave, cpu.mutation, cpu.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -188,16 +192,10 @@ func (cpu *ChainProposalUpdate) check() error {
 }
 
 func (cpu *ChainProposalUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   chainproposal.Table,
-			Columns: chainproposal.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chainproposal.FieldID,
-			},
-		},
+	if err := cpu.check(); err != nil {
+		return n, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(chainproposal.Table, chainproposal.Columns, sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt))
 	if ps := cpu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -237,10 +235,7 @@ func (cpu *ChainProposalUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{chainproposal.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -253,10 +248,52 @@ func (cpu *ChainProposalUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Columns: []string{chainproposal.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cpu.mutation.AddressTrackerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chainproposal.AddressTrackerTable,
+			Columns: chainproposal.AddressTrackerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cpu.mutation.RemovedAddressTrackerIDs(); len(nodes) > 0 && !cpu.mutation.AddressTrackerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chainproposal.AddressTrackerTable,
+			Columns: chainproposal.AddressTrackerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cpu.mutation.AddressTrackerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chainproposal.AddressTrackerTable,
+			Columns: chainproposal.AddressTrackerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -272,6 +309,7 @@ func (cpu *ChainProposalUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		return 0, err
 	}
+	cpu.mutation.done = true
 	return n, nil
 }
 
@@ -351,6 +389,21 @@ func (cpuo *ChainProposalUpdateOne) SetChain(c *Chain) *ChainProposalUpdateOne {
 	return cpuo.SetChainID(c.ID)
 }
 
+// AddAddressTrackerIDs adds the "address_tracker" edge to the AddressTracker entity by IDs.
+func (cpuo *ChainProposalUpdateOne) AddAddressTrackerIDs(ids ...int) *ChainProposalUpdateOne {
+	cpuo.mutation.AddAddressTrackerIDs(ids...)
+	return cpuo
+}
+
+// AddAddressTracker adds the "address_tracker" edges to the AddressTracker entity.
+func (cpuo *ChainProposalUpdateOne) AddAddressTracker(a ...*AddressTracker) *ChainProposalUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cpuo.AddAddressTrackerIDs(ids...)
+}
+
 // Mutation returns the ChainProposalMutation object of the builder.
 func (cpuo *ChainProposalUpdateOne) Mutation() *ChainProposalMutation {
 	return cpuo.mutation
@@ -359,6 +412,33 @@ func (cpuo *ChainProposalUpdateOne) Mutation() *ChainProposalMutation {
 // ClearChain clears the "chain" edge to the Chain entity.
 func (cpuo *ChainProposalUpdateOne) ClearChain() *ChainProposalUpdateOne {
 	cpuo.mutation.ClearChain()
+	return cpuo
+}
+
+// ClearAddressTracker clears all "address_tracker" edges to the AddressTracker entity.
+func (cpuo *ChainProposalUpdateOne) ClearAddressTracker() *ChainProposalUpdateOne {
+	cpuo.mutation.ClearAddressTracker()
+	return cpuo
+}
+
+// RemoveAddressTrackerIDs removes the "address_tracker" edge to AddressTracker entities by IDs.
+func (cpuo *ChainProposalUpdateOne) RemoveAddressTrackerIDs(ids ...int) *ChainProposalUpdateOne {
+	cpuo.mutation.RemoveAddressTrackerIDs(ids...)
+	return cpuo
+}
+
+// RemoveAddressTracker removes "address_tracker" edges to AddressTracker entities.
+func (cpuo *ChainProposalUpdateOne) RemoveAddressTracker(a ...*AddressTracker) *ChainProposalUpdateOne {
+	ids := make([]int, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return cpuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// Where appends a list predicates to the ChainProposalUpdate builder.
+func (cpuo *ChainProposalUpdateOne) Where(ps ...predicate.ChainProposal) *ChainProposalUpdateOne {
+	cpuo.mutation.Where(ps...)
 	return cpuo
 }
 
@@ -371,47 +451,8 @@ func (cpuo *ChainProposalUpdateOne) Select(field string, fields ...string) *Chai
 
 // Save executes the query and returns the updated ChainProposal entity.
 func (cpuo *ChainProposalUpdateOne) Save(ctx context.Context) (*ChainProposal, error) {
-	var (
-		err  error
-		node *ChainProposal
-	)
 	cpuo.defaults()
-	if len(cpuo.hooks) == 0 {
-		if err = cpuo.check(); err != nil {
-			return nil, err
-		}
-		node, err = cpuo.sqlSave(ctx)
-	} else {
-		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*ChainProposalMutation)
-			if !ok {
-				return nil, fmt.Errorf("unexpected mutation type %T", m)
-			}
-			if err = cpuo.check(); err != nil {
-				return nil, err
-			}
-			cpuo.mutation = mutation
-			node, err = cpuo.sqlSave(ctx)
-			mutation.done = true
-			return node, err
-		})
-		for i := len(cpuo.hooks) - 1; i >= 0; i-- {
-			if cpuo.hooks[i] == nil {
-				return nil, fmt.Errorf("ent: uninitialized hook (forgotten import ent/runtime?)")
-			}
-			mut = cpuo.hooks[i](mut)
-		}
-		v, err := mut.Mutate(ctx, cpuo.mutation)
-		if err != nil {
-			return nil, err
-		}
-		nv, ok := v.(*ChainProposal)
-		if !ok {
-			return nil, fmt.Errorf("unexpected node type %T returned from ChainProposalMutation", v)
-		}
-		node = nv
-	}
-	return node, err
+	return withHooks[*ChainProposal, ChainProposalMutation](ctx, cpuo.sqlSave, cpuo.mutation, cpuo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
@@ -455,16 +496,10 @@ func (cpuo *ChainProposalUpdateOne) check() error {
 }
 
 func (cpuo *ChainProposalUpdateOne) sqlSave(ctx context.Context) (_node *ChainProposal, err error) {
-	_spec := &sqlgraph.UpdateSpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   chainproposal.Table,
-			Columns: chainproposal.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: chainproposal.FieldID,
-			},
-		},
+	if err := cpuo.check(); err != nil {
+		return _node, err
 	}
+	_spec := sqlgraph.NewUpdateSpec(chainproposal.Table, chainproposal.Columns, sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt))
 	id, ok := cpuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "ChainProposal.id" for update`)}
@@ -521,10 +556,7 @@ func (cpuo *ChainProposalUpdateOne) sqlSave(ctx context.Context) (_node *ChainPr
 			Columns: []string{chainproposal.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -537,10 +569,52 @@ func (cpuo *ChainProposalUpdateOne) sqlSave(ctx context.Context) (_node *ChainPr
 			Columns: []string{chainproposal.ChainColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: chain.FieldID,
-				},
+				IDSpec: sqlgraph.NewFieldSpec(chain.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cpuo.mutation.AddressTrackerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chainproposal.AddressTrackerTable,
+			Columns: chainproposal.AddressTrackerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cpuo.mutation.RemovedAddressTrackerIDs(); len(nodes) > 0 && !cpuo.mutation.AddressTrackerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chainproposal.AddressTrackerTable,
+			Columns: chainproposal.AddressTrackerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cpuo.mutation.AddressTrackerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   chainproposal.AddressTrackerTable,
+			Columns: chainproposal.AddressTrackerPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -559,5 +633,6 @@ func (cpuo *ChainProposalUpdateOne) sqlSave(ctx context.Context) (_node *ChainPr
 		}
 		return nil, err
 	}
+	cpuo.mutation.done = true
 	return _node, nil
 }

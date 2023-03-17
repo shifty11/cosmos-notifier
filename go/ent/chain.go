@@ -36,6 +36,8 @@ type Chain struct {
 	ImageURL string `json:"image_url,omitempty"`
 	// ThumbnailURL holds the value of the "thumbnail_url" field.
 	ThumbnailURL string `json:"thumbnail_url,omitempty"`
+	// Bech32Prefix holds the value of the "bech32_prefix" field.
+	Bech32Prefix string `json:"bech32_prefix,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ChainQuery when eager-loading is set.
 	Edges ChainEdges `json:"edges"`
@@ -49,9 +51,11 @@ type ChainEdges struct {
 	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
 	// DiscordChannels holds the value of the discord_channels edge.
 	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
+	// AddressTrackers holds the value of the address_trackers edge.
+	AddressTrackers []*AddressTracker `json:"address_trackers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // ChainProposalsOrErr returns the ChainProposals value or an error if the edge
@@ -81,6 +85,15 @@ func (e ChainEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
 	return nil, &NotLoadedError{edge: "discord_channels"}
 }
 
+// AddressTrackersOrErr returns the AddressTrackers value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) AddressTrackersOrErr() ([]*AddressTracker, error) {
+	if e.loadedTypes[3] {
+		return e.AddressTrackers, nil
+	}
+	return nil, &NotLoadedError{edge: "address_trackers"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Chain) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -90,7 +103,7 @@ func (*Chain) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case chain.FieldID:
 			values[i] = new(sql.NullInt64)
-		case chain.FieldChainID, chain.FieldName, chain.FieldPrettyName, chain.FieldPath, chain.FieldDisplay, chain.FieldImageURL, chain.FieldThumbnailURL:
+		case chain.FieldChainID, chain.FieldName, chain.FieldPrettyName, chain.FieldPath, chain.FieldDisplay, chain.FieldImageURL, chain.FieldThumbnailURL, chain.FieldBech32Prefix:
 			values[i] = new(sql.NullString)
 		case chain.FieldCreateTime, chain.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -175,6 +188,12 @@ func (c *Chain) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.ThumbnailURL = value.String
 			}
+		case chain.FieldBech32Prefix:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field bech32_prefix", values[i])
+			} else if value.Valid {
+				c.Bech32Prefix = value.String
+			}
 		}
 	}
 	return nil
@@ -182,24 +201,29 @@ func (c *Chain) assignValues(columns []string, values []any) error {
 
 // QueryChainProposals queries the "chain_proposals" edge of the Chain entity.
 func (c *Chain) QueryChainProposals() *ChainProposalQuery {
-	return (&ChainClient{config: c.config}).QueryChainProposals(c)
+	return NewChainClient(c.config).QueryChainProposals(c)
 }
 
 // QueryTelegramChats queries the "telegram_chats" edge of the Chain entity.
 func (c *Chain) QueryTelegramChats() *TelegramChatQuery {
-	return (&ChainClient{config: c.config}).QueryTelegramChats(c)
+	return NewChainClient(c.config).QueryTelegramChats(c)
 }
 
 // QueryDiscordChannels queries the "discord_channels" edge of the Chain entity.
 func (c *Chain) QueryDiscordChannels() *DiscordChannelQuery {
-	return (&ChainClient{config: c.config}).QueryDiscordChannels(c)
+	return NewChainClient(c.config).QueryDiscordChannels(c)
+}
+
+// QueryAddressTrackers queries the "address_trackers" edge of the Chain entity.
+func (c *Chain) QueryAddressTrackers() *AddressTrackerQuery {
+	return NewChainClient(c.config).QueryAddressTrackers(c)
 }
 
 // Update returns a builder for updating this Chain.
 // Note that you need to call Chain.Unwrap() before calling this method if this Chain
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (c *Chain) Update() *ChainUpdateOne {
-	return (&ChainClient{config: c.config}).UpdateOne(c)
+	return NewChainClient(c.config).UpdateOne(c)
 }
 
 // Unwrap unwraps the Chain entity that was returned from a transaction after it was closed,
@@ -247,15 +271,12 @@ func (c *Chain) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("thumbnail_url=")
 	builder.WriteString(c.ThumbnailURL)
+	builder.WriteString(", ")
+	builder.WriteString("bech32_prefix=")
+	builder.WriteString(c.Bech32Prefix)
 	builder.WriteByte(')')
 	return builder.String()
 }
 
 // Chains is a parsable slice of Chain.
 type Chains []*Chain
-
-func (c Chains) config(cfg config) {
-	for _i := range c {
-		c[_i].config = cfg
-	}
-}

@@ -27,6 +27,8 @@ const (
 	EdgeContracts = "contracts"
 	// EdgeChains holds the string denoting the chains edge name in mutations.
 	EdgeChains = "chains"
+	// EdgeAddressTrackers holds the string denoting the address_trackers edge name in mutations.
+	EdgeAddressTrackers = "address_trackers"
 	// Table holds the table name of the discordchannel in the database.
 	Table = "discord_channels"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -44,6 +46,13 @@ const (
 	// ChainsInverseTable is the table name for the Chain entity.
 	// It exists in this package in order to avoid circular dependency with the "chain" package.
 	ChainsInverseTable = "chains"
+	// AddressTrackersTable is the table that holds the address_trackers relation/edge.
+	AddressTrackersTable = "address_trackers"
+	// AddressTrackersInverseTable is the table name for the AddressTracker entity.
+	// It exists in this package in order to avoid circular dependency with the "addresstracker" package.
+	AddressTrackersInverseTable = "address_trackers"
+	// AddressTrackersColumn is the table column denoting the address_trackers relation/edge.
+	AddressTrackersColumn = "discord_channel_address_trackers"
 )
 
 // Columns holds all SQL columns for discordchannel fields.

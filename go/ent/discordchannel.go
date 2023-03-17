@@ -39,9 +39,11 @@ type DiscordChannelEdges struct {
 	Contracts []*Contract `json:"contracts,omitempty"`
 	// Chains holds the value of the chains edge.
 	Chains []*Chain `json:"chains,omitempty"`
+	// AddressTrackers holds the value of the address_trackers edge.
+	AddressTrackers []*AddressTracker `json:"address_trackers,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -69,6 +71,15 @@ func (e DiscordChannelEdges) ChainsOrErr() ([]*Chain, error) {
 		return e.Chains, nil
 	}
 	return nil, &NotLoadedError{edge: "chains"}
+}
+
+// AddressTrackersOrErr returns the AddressTrackers value or an error if the edge
+// was not loaded in eager-loading.
+func (e DiscordChannelEdges) AddressTrackersOrErr() ([]*AddressTracker, error) {
+	if e.loadedTypes[3] {
+		return e.AddressTrackers, nil
+	}
+	return nil, &NotLoadedError{edge: "address_trackers"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -142,24 +153,29 @@ func (dc *DiscordChannel) assignValues(columns []string, values []any) error {
 
 // QueryUsers queries the "users" edge of the DiscordChannel entity.
 func (dc *DiscordChannel) QueryUsers() *UserQuery {
-	return (&DiscordChannelClient{config: dc.config}).QueryUsers(dc)
+	return NewDiscordChannelClient(dc.config).QueryUsers(dc)
 }
 
 // QueryContracts queries the "contracts" edge of the DiscordChannel entity.
 func (dc *DiscordChannel) QueryContracts() *ContractQuery {
-	return (&DiscordChannelClient{config: dc.config}).QueryContracts(dc)
+	return NewDiscordChannelClient(dc.config).QueryContracts(dc)
 }
 
 // QueryChains queries the "chains" edge of the DiscordChannel entity.
 func (dc *DiscordChannel) QueryChains() *ChainQuery {
-	return (&DiscordChannelClient{config: dc.config}).QueryChains(dc)
+	return NewDiscordChannelClient(dc.config).QueryChains(dc)
+}
+
+// QueryAddressTrackers queries the "address_trackers" edge of the DiscordChannel entity.
+func (dc *DiscordChannel) QueryAddressTrackers() *AddressTrackerQuery {
+	return NewDiscordChannelClient(dc.config).QueryAddressTrackers(dc)
 }
 
 // Update returns a builder for updating this DiscordChannel.
 // Note that you need to call DiscordChannel.Unwrap() before calling this method if this DiscordChannel
 // was returned from a transaction, and the transaction was committed or rolled back.
 func (dc *DiscordChannel) Update() *DiscordChannelUpdateOne {
-	return (&DiscordChannelClient{config: dc.config}).UpdateOne(dc)
+	return NewDiscordChannelClient(dc.config).UpdateOne(dc)
 }
 
 // Unwrap unwraps the DiscordChannel entity that was returned from a transaction after it was closed,
@@ -198,9 +214,3 @@ func (dc *DiscordChannel) String() string {
 
 // DiscordChannels is a parsable slice of DiscordChannel.
 type DiscordChannels []*DiscordChannel
-
-func (dc DiscordChannels) config(cfg config) {
-	for _i := range dc {
-		dc[_i].config = cfg
-	}
-}

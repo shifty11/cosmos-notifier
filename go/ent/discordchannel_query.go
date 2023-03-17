@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
@@ -21,15 +22,14 @@ import (
 // DiscordChannelQuery is the builder for querying DiscordChannel entities.
 type DiscordChannelQuery struct {
 	config
-	limit         *int
-	offset        *int
-	unique        *bool
-	order         []OrderFunc
-	fields        []string
-	predicates    []predicate.DiscordChannel
-	withUsers     *UserQuery
-	withContracts *ContractQuery
-	withChains    *ChainQuery
+	ctx                 *QueryContext
+	order               []OrderFunc
+	inters              []Interceptor
+	predicates          []predicate.DiscordChannel
+	withUsers           *UserQuery
+	withContracts       *ContractQuery
+	withChains          *ChainQuery
+	withAddressTrackers *AddressTrackerQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -41,26 +41,26 @@ func (dcq *DiscordChannelQuery) Where(ps ...predicate.DiscordChannel) *DiscordCh
 	return dcq
 }
 
-// Limit adds a limit step to the query.
+// Limit the number of records to be returned by this query.
 func (dcq *DiscordChannelQuery) Limit(limit int) *DiscordChannelQuery {
-	dcq.limit = &limit
+	dcq.ctx.Limit = &limit
 	return dcq
 }
 
-// Offset adds an offset step to the query.
+// Offset to start from.
 func (dcq *DiscordChannelQuery) Offset(offset int) *DiscordChannelQuery {
-	dcq.offset = &offset
+	dcq.ctx.Offset = &offset
 	return dcq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
 func (dcq *DiscordChannelQuery) Unique(unique bool) *DiscordChannelQuery {
-	dcq.unique = &unique
+	dcq.ctx.Unique = &unique
 	return dcq
 }
 
-// Order adds an order step to the query.
+// Order specifies how the records should be ordered.
 func (dcq *DiscordChannelQuery) Order(o ...OrderFunc) *DiscordChannelQuery {
 	dcq.order = append(dcq.order, o...)
 	return dcq
@@ -68,7 +68,7 @@ func (dcq *DiscordChannelQuery) Order(o ...OrderFunc) *DiscordChannelQuery {
 
 // QueryUsers chains the current query on the "users" edge.
 func (dcq *DiscordChannelQuery) QueryUsers() *UserQuery {
-	query := &UserQuery{config: dcq.config}
+	query := (&UserClient{config: dcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -90,7 +90,7 @@ func (dcq *DiscordChannelQuery) QueryUsers() *UserQuery {
 
 // QueryContracts chains the current query on the "contracts" edge.
 func (dcq *DiscordChannelQuery) QueryContracts() *ContractQuery {
-	query := &ContractQuery{config: dcq.config}
+	query := (&ContractClient{config: dcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -112,7 +112,7 @@ func (dcq *DiscordChannelQuery) QueryContracts() *ContractQuery {
 
 // QueryChains chains the current query on the "chains" edge.
 func (dcq *DiscordChannelQuery) QueryChains() *ChainQuery {
-	query := &ChainQuery{config: dcq.config}
+	query := (&ChainClient{config: dcq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := dcq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -132,10 +132,32 @@ func (dcq *DiscordChannelQuery) QueryChains() *ChainQuery {
 	return query
 }
 
+// QueryAddressTrackers chains the current query on the "address_trackers" edge.
+func (dcq *DiscordChannelQuery) QueryAddressTrackers() *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: dcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.AddressTrackersTable, discordchannel.AddressTrackersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
 // First returns the first DiscordChannel entity from the query.
 // Returns a *NotFoundError when no DiscordChannel was found.
 func (dcq *DiscordChannelQuery) First(ctx context.Context) (*DiscordChannel, error) {
-	nodes, err := dcq.Limit(1).All(ctx)
+	nodes, err := dcq.Limit(1).All(setContextOp(ctx, dcq.ctx, "First"))
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +180,7 @@ func (dcq *DiscordChannelQuery) FirstX(ctx context.Context) *DiscordChannel {
 // Returns a *NotFoundError when no DiscordChannel ID was found.
 func (dcq *DiscordChannelQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = dcq.Limit(1).IDs(ctx); err != nil {
+	if ids, err = dcq.Limit(1).IDs(setContextOp(ctx, dcq.ctx, "FirstID")); err != nil {
 		return
 	}
 	if len(ids) == 0 {
@@ -181,7 +203,7 @@ func (dcq *DiscordChannelQuery) FirstIDX(ctx context.Context) int {
 // Returns a *NotSingularError when more than one DiscordChannel entity is found.
 // Returns a *NotFoundError when no DiscordChannel entities are found.
 func (dcq *DiscordChannelQuery) Only(ctx context.Context) (*DiscordChannel, error) {
-	nodes, err := dcq.Limit(2).All(ctx)
+	nodes, err := dcq.Limit(2).All(setContextOp(ctx, dcq.ctx, "Only"))
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +231,7 @@ func (dcq *DiscordChannelQuery) OnlyX(ctx context.Context) *DiscordChannel {
 // Returns a *NotFoundError when no entities are found.
 func (dcq *DiscordChannelQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
-	if ids, err = dcq.Limit(2).IDs(ctx); err != nil {
+	if ids, err = dcq.Limit(2).IDs(setContextOp(ctx, dcq.ctx, "OnlyID")); err != nil {
 		return
 	}
 	switch len(ids) {
@@ -234,10 +256,12 @@ func (dcq *DiscordChannelQuery) OnlyIDX(ctx context.Context) int {
 
 // All executes the query and returns a list of DiscordChannels.
 func (dcq *DiscordChannelQuery) All(ctx context.Context) ([]*DiscordChannel, error) {
+	ctx = setContextOp(ctx, dcq.ctx, "All")
 	if err := dcq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
-	return dcq.sqlAll(ctx)
+	qr := querierAll[[]*DiscordChannel, *DiscordChannelQuery]()
+	return withInterceptors[[]*DiscordChannel](ctx, dcq, qr, dcq.inters)
 }
 
 // AllX is like All, but panics if an error occurs.
@@ -250,9 +274,12 @@ func (dcq *DiscordChannelQuery) AllX(ctx context.Context) []*DiscordChannel {
 }
 
 // IDs executes the query and returns a list of DiscordChannel IDs.
-func (dcq *DiscordChannelQuery) IDs(ctx context.Context) ([]int, error) {
-	var ids []int
-	if err := dcq.Select(discordchannel.FieldID).Scan(ctx, &ids); err != nil {
+func (dcq *DiscordChannelQuery) IDs(ctx context.Context) (ids []int, err error) {
+	if dcq.ctx.Unique == nil && dcq.path != nil {
+		dcq.Unique(true)
+	}
+	ctx = setContextOp(ctx, dcq.ctx, "IDs")
+	if err = dcq.Select(discordchannel.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
@@ -269,10 +296,11 @@ func (dcq *DiscordChannelQuery) IDsX(ctx context.Context) []int {
 
 // Count returns the count of the given query.
 func (dcq *DiscordChannelQuery) Count(ctx context.Context) (int, error) {
+	ctx = setContextOp(ctx, dcq.ctx, "Count")
 	if err := dcq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
-	return dcq.sqlCount(ctx)
+	return withInterceptors[int](ctx, dcq, querierCount[*DiscordChannelQuery](), dcq.inters)
 }
 
 // CountX is like Count, but panics if an error occurs.
@@ -286,10 +314,15 @@ func (dcq *DiscordChannelQuery) CountX(ctx context.Context) int {
 
 // Exist returns true if the query has elements in the graph.
 func (dcq *DiscordChannelQuery) Exist(ctx context.Context) (bool, error) {
-	if err := dcq.prepareQuery(ctx); err != nil {
-		return false, err
+	ctx = setContextOp(ctx, dcq.ctx, "Exist")
+	switch _, err := dcq.FirstID(ctx); {
+	case IsNotFound(err):
+		return false, nil
+	case err != nil:
+		return false, fmt.Errorf("ent: check existence: %w", err)
+	default:
+		return true, nil
 	}
-	return dcq.sqlExist(ctx)
 }
 
 // ExistX is like Exist, but panics if an error occurs.
@@ -308,25 +341,25 @@ func (dcq *DiscordChannelQuery) Clone() *DiscordChannelQuery {
 		return nil
 	}
 	return &DiscordChannelQuery{
-		config:        dcq.config,
-		limit:         dcq.limit,
-		offset:        dcq.offset,
-		order:         append([]OrderFunc{}, dcq.order...),
-		predicates:    append([]predicate.DiscordChannel{}, dcq.predicates...),
-		withUsers:     dcq.withUsers.Clone(),
-		withContracts: dcq.withContracts.Clone(),
-		withChains:    dcq.withChains.Clone(),
+		config:              dcq.config,
+		ctx:                 dcq.ctx.Clone(),
+		order:               append([]OrderFunc{}, dcq.order...),
+		inters:              append([]Interceptor{}, dcq.inters...),
+		predicates:          append([]predicate.DiscordChannel{}, dcq.predicates...),
+		withUsers:           dcq.withUsers.Clone(),
+		withContracts:       dcq.withContracts.Clone(),
+		withChains:          dcq.withChains.Clone(),
+		withAddressTrackers: dcq.withAddressTrackers.Clone(),
 		// clone intermediate query.
-		sql:    dcq.sql.Clone(),
-		path:   dcq.path,
-		unique: dcq.unique,
+		sql:  dcq.sql.Clone(),
+		path: dcq.path,
 	}
 }
 
 // WithUsers tells the query-builder to eager-load the nodes that are connected to
 // the "users" edge. The optional arguments are used to configure the query builder of the edge.
 func (dcq *DiscordChannelQuery) WithUsers(opts ...func(*UserQuery)) *DiscordChannelQuery {
-	query := &UserQuery{config: dcq.config}
+	query := (&UserClient{config: dcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -337,7 +370,7 @@ func (dcq *DiscordChannelQuery) WithUsers(opts ...func(*UserQuery)) *DiscordChan
 // WithContracts tells the query-builder to eager-load the nodes that are connected to
 // the "contracts" edge. The optional arguments are used to configure the query builder of the edge.
 func (dcq *DiscordChannelQuery) WithContracts(opts ...func(*ContractQuery)) *DiscordChannelQuery {
-	query := &ContractQuery{config: dcq.config}
+	query := (&ContractClient{config: dcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -348,11 +381,22 @@ func (dcq *DiscordChannelQuery) WithContracts(opts ...func(*ContractQuery)) *Dis
 // WithChains tells the query-builder to eager-load the nodes that are connected to
 // the "chains" edge. The optional arguments are used to configure the query builder of the edge.
 func (dcq *DiscordChannelQuery) WithChains(opts ...func(*ChainQuery)) *DiscordChannelQuery {
-	query := &ChainQuery{config: dcq.config}
+	query := (&ChainClient{config: dcq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
 	dcq.withChains = query
+	return dcq
+}
+
+// WithAddressTrackers tells the query-builder to eager-load the nodes that are connected to
+// the "address_trackers" edge. The optional arguments are used to configure the query builder of the edge.
+func (dcq *DiscordChannelQuery) WithAddressTrackers(opts ...func(*AddressTrackerQuery)) *DiscordChannelQuery {
+	query := (&AddressTrackerClient{config: dcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	dcq.withAddressTrackers = query
 	return dcq
 }
 
@@ -371,16 +415,11 @@ func (dcq *DiscordChannelQuery) WithChains(opts ...func(*ChainQuery)) *DiscordCh
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (dcq *DiscordChannelQuery) GroupBy(field string, fields ...string) *DiscordChannelGroupBy {
-	grbuild := &DiscordChannelGroupBy{config: dcq.config}
-	grbuild.fields = append([]string{field}, fields...)
-	grbuild.path = func(ctx context.Context) (prev *sql.Selector, err error) {
-		if err := dcq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		return dcq.sqlQuery(ctx), nil
-	}
+	dcq.ctx.Fields = append([]string{field}, fields...)
+	grbuild := &DiscordChannelGroupBy{build: dcq}
+	grbuild.flds = &dcq.ctx.Fields
 	grbuild.label = discordchannel.Label
-	grbuild.flds, grbuild.scan = &grbuild.fields, grbuild.Scan
+	grbuild.scan = grbuild.Scan
 	return grbuild
 }
 
@@ -397,11 +436,11 @@ func (dcq *DiscordChannelQuery) GroupBy(field string, fields ...string) *Discord
 //		Select(discordchannel.FieldCreateTime).
 //		Scan(ctx, &v)
 func (dcq *DiscordChannelQuery) Select(fields ...string) *DiscordChannelSelect {
-	dcq.fields = append(dcq.fields, fields...)
-	selbuild := &DiscordChannelSelect{DiscordChannelQuery: dcq}
-	selbuild.label = discordchannel.Label
-	selbuild.flds, selbuild.scan = &dcq.fields, selbuild.Scan
-	return selbuild
+	dcq.ctx.Fields = append(dcq.ctx.Fields, fields...)
+	sbuild := &DiscordChannelSelect{DiscordChannelQuery: dcq}
+	sbuild.label = discordchannel.Label
+	sbuild.flds, sbuild.scan = &dcq.ctx.Fields, sbuild.Scan
+	return sbuild
 }
 
 // Aggregate returns a DiscordChannelSelect configured with the given aggregations.
@@ -410,7 +449,17 @@ func (dcq *DiscordChannelQuery) Aggregate(fns ...AggregateFunc) *DiscordChannelS
 }
 
 func (dcq *DiscordChannelQuery) prepareQuery(ctx context.Context) error {
-	for _, f := range dcq.fields {
+	for _, inter := range dcq.inters {
+		if inter == nil {
+			return fmt.Errorf("ent: uninitialized interceptor (forgotten import ent/runtime?)")
+		}
+		if trv, ok := inter.(Traverser); ok {
+			if err := trv.Traverse(ctx, dcq); err != nil {
+				return err
+			}
+		}
+	}
+	for _, f := range dcq.ctx.Fields {
 		if !discordchannel.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
@@ -429,10 +478,11 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*DiscordChannel{}
 		_spec       = dcq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			dcq.withUsers != nil,
 			dcq.withContracts != nil,
 			dcq.withChains != nil,
+			dcq.withAddressTrackers != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -474,6 +524,15 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			return nil, err
 		}
 	}
+	if query := dcq.withAddressTrackers; query != nil {
+		if err := dcq.loadAddressTrackers(ctx, query, nodes,
+			func(n *DiscordChannel) { n.Edges.AddressTrackers = []*AddressTracker{} },
+			func(n *DiscordChannel, e *AddressTracker) {
+				n.Edges.AddressTrackers = append(n.Edges.AddressTrackers, e)
+			}); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
@@ -500,27 +559,30 @@ func (dcq *DiscordChannelQuery) loadUsers(ctx context.Context, query *UserQuery,
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*User](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -558,27 +620,30 @@ func (dcq *DiscordChannelQuery) loadContracts(ctx context.Context, query *Contra
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*Contract](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -616,27 +681,30 @@ func (dcq *DiscordChannelQuery) loadChains(ctx context.Context, query *ChainQuer
 	if err := query.prepareQuery(ctx); err != nil {
 		return err
 	}
-	neighbors, err := query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-		assign := spec.Assign
-		values := spec.ScanValues
-		spec.ScanValues = func(columns []string) ([]any, error) {
-			values, err := values(columns[1:])
-			if err != nil {
-				return nil, err
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
-			return append([]any{new(sql.NullInt64)}, values...), nil
-		}
-		spec.Assign = func(columns []string, values []any) error {
-			outValue := int(values[0].(*sql.NullInt64).Int64)
-			inValue := int(values[1].(*sql.NullInt64).Int64)
-			if nids[inValue] == nil {
-				nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
-				return assign(columns[1:], values[1:])
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
 			}
-			nids[inValue][byID[outValue]] = struct{}{}
-			return nil
-		}
+		})
 	})
+	neighbors, err := withInterceptors[[]*Chain](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
@@ -651,44 +719,56 @@ func (dcq *DiscordChannelQuery) loadChains(ctx context.Context, query *ChainQuer
 	}
 	return nil
 }
+func (dcq *DiscordChannelQuery) loadAddressTrackers(ctx context.Context, query *AddressTrackerQuery, nodes []*DiscordChannel, init func(*DiscordChannel), assign func(*DiscordChannel, *AddressTracker)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*DiscordChannel)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.AddressTracker(func(s *sql.Selector) {
+		s.Where(sql.InValues(discordchannel.AddressTrackersColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.discord_channel_address_trackers
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "discord_channel_address_trackers" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "discord_channel_address_trackers" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
 
 func (dcq *DiscordChannelQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := dcq.querySpec()
-	_spec.Node.Columns = dcq.fields
-	if len(dcq.fields) > 0 {
-		_spec.Unique = dcq.unique != nil && *dcq.unique
+	_spec.Node.Columns = dcq.ctx.Fields
+	if len(dcq.ctx.Fields) > 0 {
+		_spec.Unique = dcq.ctx.Unique != nil && *dcq.ctx.Unique
 	}
 	return sqlgraph.CountNodes(ctx, dcq.driver, _spec)
 }
 
-func (dcq *DiscordChannelQuery) sqlExist(ctx context.Context) (bool, error) {
-	switch _, err := dcq.FirstID(ctx); {
-	case IsNotFound(err):
-		return false, nil
-	case err != nil:
-		return false, fmt.Errorf("ent: check existence: %w", err)
-	default:
-		return true, nil
-	}
-}
-
 func (dcq *DiscordChannelQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := &sqlgraph.QuerySpec{
-		Node: &sqlgraph.NodeSpec{
-			Table:   discordchannel.Table,
-			Columns: discordchannel.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeInt,
-				Column: discordchannel.FieldID,
-			},
-		},
-		From:   dcq.sql,
-		Unique: true,
-	}
-	if unique := dcq.unique; unique != nil {
+	_spec := sqlgraph.NewQuerySpec(discordchannel.Table, discordchannel.Columns, sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt))
+	_spec.From = dcq.sql
+	if unique := dcq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
+	} else if dcq.path != nil {
+		_spec.Unique = true
 	}
-	if fields := dcq.fields; len(fields) > 0 {
+	if fields := dcq.ctx.Fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, discordchannel.FieldID)
 		for i := range fields {
@@ -704,10 +784,10 @@ func (dcq *DiscordChannelQuery) querySpec() *sqlgraph.QuerySpec {
 			}
 		}
 	}
-	if limit := dcq.limit; limit != nil {
+	if limit := dcq.ctx.Limit; limit != nil {
 		_spec.Limit = *limit
 	}
-	if offset := dcq.offset; offset != nil {
+	if offset := dcq.ctx.Offset; offset != nil {
 		_spec.Offset = *offset
 	}
 	if ps := dcq.order; len(ps) > 0 {
@@ -723,7 +803,7 @@ func (dcq *DiscordChannelQuery) querySpec() *sqlgraph.QuerySpec {
 func (dcq *DiscordChannelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(dcq.driver.Dialect())
 	t1 := builder.Table(discordchannel.Table)
-	columns := dcq.fields
+	columns := dcq.ctx.Fields
 	if len(columns) == 0 {
 		columns = discordchannel.Columns
 	}
@@ -732,7 +812,7 @@ func (dcq *DiscordChannelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector = dcq.sql
 		selector.Select(selector.Columns(columns...)...)
 	}
-	if dcq.unique != nil && *dcq.unique {
+	if dcq.ctx.Unique != nil && *dcq.ctx.Unique {
 		selector.Distinct()
 	}
 	for _, p := range dcq.predicates {
@@ -741,12 +821,12 @@ func (dcq *DiscordChannelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	for _, p := range dcq.order {
 		p(selector)
 	}
-	if offset := dcq.offset; offset != nil {
+	if offset := dcq.ctx.Offset; offset != nil {
 		// limit is mandatory for offset clause. We start
 		// with default value, and override it below if needed.
 		selector.Offset(*offset).Limit(math.MaxInt32)
 	}
-	if limit := dcq.limit; limit != nil {
+	if limit := dcq.ctx.Limit; limit != nil {
 		selector.Limit(*limit)
 	}
 	return selector
@@ -754,13 +834,8 @@ func (dcq *DiscordChannelQuery) sqlQuery(ctx context.Context) *sql.Selector {
 
 // DiscordChannelGroupBy is the group-by builder for DiscordChannel entities.
 type DiscordChannelGroupBy struct {
-	config
 	selector
-	fields []string
-	fns    []AggregateFunc
-	// intermediate query (i.e. traversal path).
-	sql  *sql.Selector
-	path func(context.Context) (*sql.Selector, error)
+	build *DiscordChannelQuery
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
@@ -769,58 +844,46 @@ func (dcgb *DiscordChannelGroupBy) Aggregate(fns ...AggregateFunc) *DiscordChann
 	return dcgb
 }
 
-// Scan applies the group-by query and scans the result into the given value.
+// Scan applies the selector query and scans the result into the given value.
 func (dcgb *DiscordChannelGroupBy) Scan(ctx context.Context, v any) error {
-	query, err := dcgb.path(ctx)
-	if err != nil {
+	ctx = setContextOp(ctx, dcgb.build.ctx, "GroupBy")
+	if err := dcgb.build.prepareQuery(ctx); err != nil {
 		return err
 	}
-	dcgb.sql = query
-	return dcgb.sqlScan(ctx, v)
+	return scanWithInterceptors[*DiscordChannelQuery, *DiscordChannelGroupBy](ctx, dcgb.build, dcgb, dcgb.build.inters, v)
 }
 
-func (dcgb *DiscordChannelGroupBy) sqlScan(ctx context.Context, v any) error {
-	for _, f := range dcgb.fields {
-		if !discordchannel.ValidColumn(f) {
-			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
-		}
+func (dcgb *DiscordChannelGroupBy) sqlScan(ctx context.Context, root *DiscordChannelQuery, v any) error {
+	selector := root.sqlQuery(ctx).Select()
+	aggregation := make([]string, 0, len(dcgb.fns))
+	for _, fn := range dcgb.fns {
+		aggregation = append(aggregation, fn(selector))
 	}
-	selector := dcgb.sqlQuery()
+	if len(selector.SelectedColumns()) == 0 {
+		columns := make([]string, 0, len(*dcgb.flds)+len(dcgb.fns))
+		for _, f := range *dcgb.flds {
+			columns = append(columns, selector.C(f))
+		}
+		columns = append(columns, aggregation...)
+		selector.Select(columns...)
+	}
+	selector.GroupBy(selector.Columns(*dcgb.flds...)...)
 	if err := selector.Err(); err != nil {
 		return err
 	}
 	rows := &sql.Rows{}
 	query, args := selector.Query()
-	if err := dcgb.driver.Query(ctx, query, args, rows); err != nil {
+	if err := dcgb.build.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
 }
 
-func (dcgb *DiscordChannelGroupBy) sqlQuery() *sql.Selector {
-	selector := dcgb.sql.Select()
-	aggregation := make([]string, 0, len(dcgb.fns))
-	for _, fn := range dcgb.fns {
-		aggregation = append(aggregation, fn(selector))
-	}
-	if len(selector.SelectedColumns()) == 0 {
-		columns := make([]string, 0, len(dcgb.fields)+len(dcgb.fns))
-		for _, f := range dcgb.fields {
-			columns = append(columns, selector.C(f))
-		}
-		columns = append(columns, aggregation...)
-		selector.Select(columns...)
-	}
-	return selector.GroupBy(selector.Columns(dcgb.fields...)...)
-}
-
 // DiscordChannelSelect is the builder for selecting fields of DiscordChannel entities.
 type DiscordChannelSelect struct {
 	*DiscordChannelQuery
 	selector
-	// intermediate query (i.e. traversal path).
-	sql *sql.Selector
 }
 
 // Aggregate adds the given aggregation functions to the selector query.
@@ -831,26 +894,27 @@ func (dcs *DiscordChannelSelect) Aggregate(fns ...AggregateFunc) *DiscordChannel
 
 // Scan applies the selector query and scans the result into the given value.
 func (dcs *DiscordChannelSelect) Scan(ctx context.Context, v any) error {
+	ctx = setContextOp(ctx, dcs.ctx, "Select")
 	if err := dcs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	dcs.sql = dcs.DiscordChannelQuery.sqlQuery(ctx)
-	return dcs.sqlScan(ctx, v)
+	return scanWithInterceptors[*DiscordChannelQuery, *DiscordChannelSelect](ctx, dcs.DiscordChannelQuery, dcs, dcs.inters, v)
 }
 
-func (dcs *DiscordChannelSelect) sqlScan(ctx context.Context, v any) error {
+func (dcs *DiscordChannelSelect) sqlScan(ctx context.Context, root *DiscordChannelQuery, v any) error {
+	selector := root.sqlQuery(ctx)
 	aggregation := make([]string, 0, len(dcs.fns))
 	for _, fn := range dcs.fns {
-		aggregation = append(aggregation, fn(dcs.sql))
+		aggregation = append(aggregation, fn(selector))
 	}
 	switch n := len(*dcs.selector.flds); {
 	case n == 0 && len(aggregation) > 0:
-		dcs.sql.Select(aggregation...)
+		selector.Select(aggregation...)
 	case n != 0 && len(aggregation) > 0:
-		dcs.sql.AppendSelect(aggregation...)
+		selector.AppendSelect(aggregation...)
 	}
 	rows := &sql.Rows{}
-	query, args := dcs.sql.Query()
+	query, args := selector.Query()
 	if err := dcs.driver.Query(ctx, query, args, rows); err != nil {
 		return err
 	}

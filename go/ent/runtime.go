@@ -5,6 +5,7 @@ package ent
 import (
 	"time"
 
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/contract"
@@ -19,6 +20,21 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	addresstrackerMixin := schema.AddressTracker{}.Mixin()
+	addresstrackerMixinFields0 := addresstrackerMixin[0].Fields()
+	_ = addresstrackerMixinFields0
+	addresstrackerFields := schema.AddressTracker{}.Fields()
+	_ = addresstrackerFields
+	// addresstrackerDescCreateTime is the schema descriptor for create_time field.
+	addresstrackerDescCreateTime := addresstrackerMixinFields0[0].Descriptor()
+	// addresstracker.DefaultCreateTime holds the default value on creation for the create_time field.
+	addresstracker.DefaultCreateTime = addresstrackerDescCreateTime.Default.(func() time.Time)
+	// addresstrackerDescUpdateTime is the schema descriptor for update_time field.
+	addresstrackerDescUpdateTime := addresstrackerMixinFields0[1].Descriptor()
+	// addresstracker.DefaultUpdateTime holds the default value on creation for the update_time field.
+	addresstracker.DefaultUpdateTime = addresstrackerDescUpdateTime.Default.(func() time.Time)
+	// addresstracker.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	addresstracker.UpdateDefaultUpdateTime = addresstrackerDescUpdateTime.UpdateDefault.(func() time.Time)
 	chainMixin := schema.Chain{}.Mixin()
 	chainMixinFields0 := chainMixin[0].Fields()
 	_ = chainMixinFields0
@@ -50,6 +66,10 @@ func init() {
 	chainDescThumbnailURL := chainFields[7].Descriptor()
 	// chain.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
 	chain.DefaultThumbnailURL = chainDescThumbnailURL.Default.(string)
+	// chainDescBech32Prefix is the schema descriptor for bech32_prefix field.
+	chainDescBech32Prefix := chainFields[8].Descriptor()
+	// chain.DefaultBech32Prefix holds the default value on creation for the bech32_prefix field.
+	chain.DefaultBech32Prefix = chainDescBech32Prefix.Default.(string)
 	chainproposalMixin := schema.ChainProposal{}.Mixin()
 	chainproposalMixinFields0 := chainproposalMixin[0].Fields()
 	_ = chainproposalMixinFields0
