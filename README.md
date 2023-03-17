@@ -28,45 +28,9 @@ docker-compose -f local-db.yml up   # add -d for detached mode
 # remove containers and volumes
 docker-compose -f local-db.yml down -v
 ```
+## Backend
 
-### Install cli
-
-```bash
-go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest migrate -database "postgres:
-```
-
-### Generate models and migrations
-
-Edit ent/schema/*.go and run:
-
-```bash
-# generate models
-go generate ./ent
-
-# generate migrations
-go run main.go create-migrations
-
-# or combined
-go generate ./ent && go run main.go create-migrations
-```
-
-### Apply migrations
-
-```bash
-# install cli
-go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
-# apply migrations
-migrate -source file://go/database/migrations -database "postgres://postgres:postgres@localhost:5432/cosmos-notifier-db?sslmode=disable&TimeZone=Europe/Zurich" up
-```
-
-
-## API
-
-### Protoc Installation
-```bash
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-```
+**[Go](go/README.md)**
 
 ## Frontend
 

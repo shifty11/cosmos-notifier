@@ -3,8 +3,8 @@ module github.com/shifty11/cosmos-notifier
 go 1.19
 
 require (
-	ariga.io/atlas v0.8.1
-	entgo.io/ent v0.11.4
+	ariga.io/atlas v0.9.1-0.20230119123307-a3ab6808892b
+	entgo.io/ent v0.11.5-0.20221212200803-3328201ba8a9
 	github.com/TheZeroSlave/zapsentry v1.12.0
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/cosmos/cosmos-sdk v0.46.6
@@ -118,7 +118,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.13.0 // indirect
-	github.com/stretchr/testify v1.8.0 // indirect
+	github.com/stretchr/testify v1.8.1 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tendermint/btcd v0.1.1 // indirect
@@ -133,9 +133,9 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/mod v0.6.0 // indirect
+	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
+	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/term v0.1.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
