@@ -2,6 +2,7 @@ package chain_crawler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	cosmossdktypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/robfig/cron/v3"
@@ -11,16 +12,16 @@ import (
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/notifier"
 	"github.com/shifty11/cosmos-notifier/types"
-
 	"net/http"
 	"time"
 )
 
 const urlProposals = "https://rest.cosmos.directory/%v/cosmos/gov/v1beta1/proposals"
+const urlVote = urlProposals + "/%v/votes/%v"
 const maxErrorCntUntilNotification = 96
 
 type ChainCrawler struct {
-	client                *http.Client
+	httpClient            *http.Client
 	chainManager          *database.ChainManager
 	chainProposalManager  *database.ChainProposalManager
 	addressTrackerManager *database.AddressTrackerManager
@@ -32,7 +33,7 @@ type ChainCrawler struct {
 func NewChainCrawler(dbManagers *database.DbManagers, notifier notifier.ChainNotifier, assetsPath string) *ChainCrawler {
 	var client = &http.Client{Timeout: 10 * time.Second}
 	return &ChainCrawler{
-		client:                client,
+		httpClient:            client,
 		chainManager:          dbManagers.ChainManager,
 		chainProposalManager:  dbManagers.ChainProposalManager,
 		addressTrackerManager: dbManagers.AddressTrackerManager,
@@ -42,18 +43,18 @@ func NewChainCrawler(dbManagers *database.DbManagers, notifier notifier.ChainNot
 	}
 }
 
-func (c *ChainCrawler) getJson(url string, target interface{}) error {
-	resp, err := c.client.Get(url)
+func (c *ChainCrawler) getJson(url string, target interface{}) (int, error) {
+	resp, err := c.httpClient.Get(url)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("status code error: %d %s", resp.StatusCode, resp.Status)
+		return resp.StatusCode, errors.New(resp.Status)
 	}
 	//goland:noinspection GoUnhandledErrorResult
 	defer resp.Body.Close()
 
-	return json.NewDecoder(resp.Body).Decode(target)
+	return resp.StatusCode, json.NewDecoder(resp.Body).Decode(target)
 }
 
 func (c *ChainCrawler) imageManager(chain *types.Chain) *common.ImageManager {
@@ -88,22 +89,30 @@ type ProposalInfo struct {
 	status   database.ProposalStatus
 }
 
-func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []ProposalInfo {
+func (c *ChainCrawler) reportErrorIfNecessary(chainEnt *ent.Chain, url string, err error) {
+	c.errorCnt[chainEnt.ID]++
+	if c.errorCnt[chainEnt.ID]%maxErrorCntUntilNotification == 0 { // report every `maxErrorCntUntilNotification` times
+		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
+	}
+}
+
+func (c *ChainCrawler) resetErrorCount(chainEnt *ent.Chain) {
+	c.errorCnt[chainEnt.ID] = 0
+}
+
+func (c *ChainCrawler) addProposals(chainEnt *ent.Chain, url string) []ProposalInfo {
 	var resp types.ChainProposalsResponse
-	err := c.getJson(url, &resp)
+	_, err := c.getJson(url, &resp)
 	if err != nil {
-		c.errorCnt[entChain.ID]++
-		if c.errorCnt[entChain.ID]%maxErrorCntUntilNotification == 0 { // report every `maxErrorCntUntilNotification` times
-			log.Sugar.Errorf("Error calling `%v`: %v", url, err)
-		}
+		c.reportErrorIfNecessary(chainEnt, url, err)
 		return nil
 	} else {
-		c.errorCnt[entChain.ID] = 0
+		c.resetErrorCount(chainEnt)
 	}
 
 	var props []ProposalInfo
 	for _, proposal := range resp.Proposals {
-		prop, status := c.chainProposalManager.CreateOrUpdate(entChain, &proposal)
+		prop, status := c.chainProposalManager.CreateOrUpdate(chainEnt, &proposal)
 		props = append(props, ProposalInfo{
 			proposal: prop,
 			status:   status,
@@ -114,7 +123,7 @@ func (c *ChainCrawler) addProposals(entChain *ent.Chain, url string) []ProposalI
 
 func (c *ChainCrawler) updateProposal(entChain *ent.Chain, url string) {
 	var resp types.ChainProposalResponse
-	err := c.getJson(url, &resp)
+	_, err := c.getJson(url, &resp)
 	if err != nil {
 		log.Sugar.Errorf("Error calling `%v`: %v", url, err)
 		return
@@ -137,7 +146,7 @@ func (c *ChainCrawler) chainNeedsUpdate(entChain *ent.Chain, chainInfo *types.Ch
 func (c *ChainCrawler) AddOrUpdateChains() {
 	log.Sugar.Debug("Updating chains")
 	var chainInfo types.ChainInfo
-	err := c.getJson("https://chains.cosmos.directory/", &chainInfo)
+	_, err := c.getJson("https://chains.cosmos.directory/", &chainInfo)
 	if err != nil {
 		log.Sugar.Errorf("Error calling reg.ListChains: %v", err)
 	}
@@ -160,30 +169,34 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 		if !found && chain.NetworkType == "mainnet" {
 			thumbnailUrl := c.downloadThumbnail(&chain)
 			entChain := c.chainManager.Create(&chain, thumbnailUrl)
-			url := fmt.Sprintf(urlProposals, entChain.Name)
+			url := fmt.Sprintf(urlProposals, getChainPath(entChain))
 			c.addProposals(entChain, url)
 		}
 	}
 }
 
+func getChainPath(chainEnt *ent.Chain) string {
+	chainPath := chainEnt.Path
+	if chainPath == "" {
+		chainPath = chainEnt.Name
+	}
+	return chainPath
+}
+
 func (c *ChainCrawler) UpdateProposals() {
 	log.Sugar.Debug("Updating chain proposals")
-	for _, entChain := range c.chainManager.All() {
-		log.Sugar.Debugf("Updating proposals for chain %v", entChain.PrettyName)
-		for _, entProposal := range c.chainProposalManager.VotingPeriodExpired(entChain) {
-			url := fmt.Sprintf(urlProposals+"/%v", entChain.Name, entProposal.ProposalID)
-			c.updateProposal(entChain, url)
+	for _, chainEnt := range c.chainManager.All() {
+		log.Sugar.Debugf("Updating proposals for chain %v", chainEnt.PrettyName)
+		for _, entProposal := range c.chainProposalManager.VotingPeriodExpired(chainEnt) {
+			url := fmt.Sprintf(urlProposals+"/%v", getChainPath(chainEnt), entProposal.ProposalID)
+			c.updateProposal(chainEnt, url)
 		}
 
-		urlChain := entChain.Path
-		if urlChain == "" {
-			urlChain = entChain.Name
-		}
-		url := fmt.Sprintf(urlProposals+"?proposal_status=%v", urlChain, cosmossdktypes.StatusVotingPeriod)
-		props := c.addProposals(entChain, url)
+		url := fmt.Sprintf(urlProposals+"?proposal_status=%v", getChainPath(chainEnt), cosmossdktypes.StatusVotingPeriod)
+		props := c.addProposals(chainEnt, url)
 		for _, prop := range props {
-			if entChain.IsEnabled && prop.status == database.ProposalCreated {
-				c.notifier.Notify(entChain, prop.proposal)
+			if chainEnt.IsEnabled && prop.status == database.ProposalCreated {
+				c.notifier.Notify(chainEnt, prop.proposal)
 			}
 		}
 	}
@@ -192,7 +205,20 @@ func (c *ChainCrawler) UpdateProposals() {
 func (c *ChainCrawler) CheckForVotingReminders() {
 	log.Sugar.Info("Checking for voting reminders")
 	for _, data := range c.addressTrackerManager.GetAllUnnotifiedTrackers() {
-		c.notifier.SendVoteReminder(data.ChainProposal.Edges.Chain, data.ChainProposal)
+		url := fmt.Sprintf(urlVote, getChainPath(data.ChainProposal.Edges.Chain), data.ChainProposal.ProposalID, data.AddressTracker.Address)
+		var voteResponse types.ChainProposalVoteResponse
+		statusCode, err := c.getJson(url, &voteResponse)
+		if err != nil && statusCode == 400 {
+			c.notifier.SendVoteReminder(data.ChainProposal.Edges.Chain, data.ChainProposal)
+		} else if err != nil {
+			c.reportErrorIfNecessary(data.ChainProposal.Edges.Chain, url, err)
+			continue
+		} else {
+			if voteResponse.Vote.Option.ToCosmosType() == cosmossdktypes.OptionEmpty {
+				c.notifier.SendVoteReminder(data.ChainProposal.Edges.Chain, data.ChainProposal)
+			}
+		}
+		c.resetErrorCount(data.ChainProposal.Edges.Chain)
 		c.addressTrackerManager.SetNotified(data)
 	}
 }
