@@ -6,16 +6,21 @@ import (
 	"time"
 )
 
-type ChainProposalStatus string
+type ChainProposalStatus cosmossdktypes.ProposalStatus
 
-const (
-	ChainProposalStatusNil           ChainProposalStatus = "PROPOSAL_STATUS_UNSPECIFIED"
-	ChainProposalStatusDepositPeriod ChainProposalStatus = "PROPOSAL_STATUS_DEPOSIT_PERIOD"
-	ChainProposalStatusVotingPeriod  ChainProposalStatus = "PROPOSAL_STATUS_VOTING_PERIOD"
-	ChainProposalStatusPassed        ChainProposalStatus = "PROPOSAL_STATUS_PASSED"
-	ChainProposalStatusRejected      ChainProposalStatus = "PROPOSAL_STATUS_REJECTED"
-	ChainProposalStatusFailed        ChainProposalStatus = "PROPOSAL_STATUS_FAILED"
-)
+func (s *ChainProposalStatus) MarshalJSON() ([]byte, error) {
+	return json.Marshal(cosmossdktypes.ProposalStatus(*s).String())
+}
+
+func (s *ChainProposalStatus) UnmarshalJSON(data []byte) error {
+	var name = ""
+	err := json.Unmarshal(data, &name)
+	if err != nil {
+		return err
+	}
+	*s = ChainProposalStatus(cosmossdktypes.ProposalStatus_value[name])
+	return nil
+}
 
 type ChainProposalContent struct {
 	Title       string `json:"title"`
