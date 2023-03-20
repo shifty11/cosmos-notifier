@@ -199,23 +199,26 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
 
 class AddTrackerResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddTrackerResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$5.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
-    ..aInt64(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
-    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
-    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOM<$5.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
+    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
+    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
     ..hasRequiredFields = false
   ;
 
   AddTrackerResponse._() : super();
   factory AddTrackerResponse({
+    $fixnum.Int64? trackerId,
     $core.String? address,
     $5.Duration? notificationInterval,
     $fixnum.Int64? discordChannelId,
     $fixnum.Int64? telegramChatId,
-    $fixnum.Int64? trackerId,
   }) {
     final _result = create();
+    if (trackerId != null) {
+      _result.trackerId = trackerId;
+    }
     if (address != null) {
       _result.address = address;
     }
@@ -227,9 +230,6 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
     }
     if (telegramChatId != null) {
       _result.telegramChatId = telegramChatId;
-    }
-    if (trackerId != null) {
-      _result.trackerId = trackerId;
     }
     return _result;
   }
@@ -255,51 +255,247 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
   static AddTrackerResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get address => $_getSZ(0);
+  $fixnum.Int64 get trackerId => $_getI64(0);
   @$pb.TagNumber(1)
-  set address($core.String v) { $_setString(0, v); }
+  set trackerId($fixnum.Int64 v) { $_setInt64(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasAddress() => $_has(0);
+  $core.bool hasTrackerId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearAddress() => clearField(1);
+  void clearTrackerId() => clearField(1);
 
   @$pb.TagNumber(2)
+  $core.String get address => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set address($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAddress() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAddress() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $5.Duration get notificationInterval => $_getN(2);
+  @$pb.TagNumber(3)
+  set notificationInterval($5.Duration v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasNotificationInterval() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNotificationInterval() => clearField(3);
+  @$pb.TagNumber(3)
+  $5.Duration ensureNotificationInterval() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get discordChannelId => $_getI64(3);
+  @$pb.TagNumber(4)
+  set discordChannelId($fixnum.Int64 v) { $_setInt64(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasDiscordChannelId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDiscordChannelId() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get telegramChatId => $_getI64(4);
+  @$pb.TagNumber(5)
+  set telegramChatId($fixnum.Int64 v) { $_setInt64(4, v); }
+  @$pb.TagNumber(5)
+  $core.bool hasTelegramChatId() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearTelegramChatId() => clearField(5);
+}
+
+class UpdateTrackerRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
+    ..aOM<$5.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
+    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
+    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
+    ..hasRequiredFields = false
+  ;
+
+  UpdateTrackerRequest._() : super();
+  factory UpdateTrackerRequest({
+    $fixnum.Int64? trackerId,
+    $5.Duration? notificationInterval,
+    $fixnum.Int64? discordChannelId,
+    $fixnum.Int64? telegramChatId,
+  }) {
+    final _result = create();
+    if (trackerId != null) {
+      _result.trackerId = trackerId;
+    }
+    if (notificationInterval != null) {
+      _result.notificationInterval = notificationInterval;
+    }
+    if (discordChannelId != null) {
+      _result.discordChannelId = discordChannelId;
+    }
+    if (telegramChatId != null) {
+      _result.telegramChatId = telegramChatId;
+    }
+    return _result;
+  }
+  factory UpdateTrackerRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateTrackerRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateTrackerRequest clone() => UpdateTrackerRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateTrackerRequest copyWith(void Function(UpdateTrackerRequest) updates) => super.copyWith((message) => updates(message as UpdateTrackerRequest)) as UpdateTrackerRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateTrackerRequest create() => UpdateTrackerRequest._();
+  UpdateTrackerRequest createEmptyInstance() => create();
+  static $pb.PbList<UpdateTrackerRequest> createRepeated() => $pb.PbList<UpdateTrackerRequest>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateTrackerRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateTrackerRequest>(create);
+  static UpdateTrackerRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get trackerId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set trackerId($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTrackerId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTrackerId() => clearField(1);
+
+  @$pb.TagNumber(3)
   $5.Duration get notificationInterval => $_getN(1);
-  @$pb.TagNumber(2)
-  set notificationInterval($5.Duration v) { setField(2, v); }
-  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  set notificationInterval($5.Duration v) { setField(3, v); }
+  @$pb.TagNumber(3)
   $core.bool hasNotificationInterval() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearNotificationInterval() => clearField(2);
-  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  void clearNotificationInterval() => clearField(3);
+  @$pb.TagNumber(3)
   $5.Duration ensureNotificationInterval() => $_ensure(1);
 
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   $fixnum.Int64 get discordChannelId => $_getI64(2);
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   set discordChannelId($fixnum.Int64 v) { $_setInt64(2, v); }
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   $core.bool hasDiscordChannelId() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearDiscordChannelId() => clearField(3);
-
   @$pb.TagNumber(4)
+  void clearDiscordChannelId() => clearField(4);
+
+  @$pb.TagNumber(5)
   $fixnum.Int64 get telegramChatId => $_getI64(3);
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   set telegramChatId($fixnum.Int64 v) { $_setInt64(3, v); }
-  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   $core.bool hasTelegramChatId() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearTelegramChatId() => clearField(5);
+}
+
+class UpdateTrackerResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTrackerResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOM<$5.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
+    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
+    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
+    ..hasRequiredFields = false
+  ;
+
+  UpdateTrackerResponse._() : super();
+  factory UpdateTrackerResponse({
+    $fixnum.Int64? trackerId,
+    $core.String? address,
+    $5.Duration? notificationInterval,
+    $fixnum.Int64? discordChannelId,
+    $fixnum.Int64? telegramChatId,
+  }) {
+    final _result = create();
+    if (trackerId != null) {
+      _result.trackerId = trackerId;
+    }
+    if (address != null) {
+      _result.address = address;
+    }
+    if (notificationInterval != null) {
+      _result.notificationInterval = notificationInterval;
+    }
+    if (discordChannelId != null) {
+      _result.discordChannelId = discordChannelId;
+    }
+    if (telegramChatId != null) {
+      _result.telegramChatId = telegramChatId;
+    }
+    return _result;
+  }
+  factory UpdateTrackerResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory UpdateTrackerResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  UpdateTrackerResponse clone() => UpdateTrackerResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  UpdateTrackerResponse copyWith(void Function(UpdateTrackerResponse) updates) => super.copyWith((message) => updates(message as UpdateTrackerResponse)) as UpdateTrackerResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateTrackerResponse create() => UpdateTrackerResponse._();
+  UpdateTrackerResponse createEmptyInstance() => create();
+  static $pb.PbList<UpdateTrackerResponse> createRepeated() => $pb.PbList<UpdateTrackerResponse>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateTrackerResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<UpdateTrackerResponse>(create);
+  static UpdateTrackerResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get trackerId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set trackerId($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasTrackerId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTrackerId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get address => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set address($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAddress() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAddress() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $5.Duration get notificationInterval => $_getN(2);
+  @$pb.TagNumber(3)
+  set notificationInterval($5.Duration v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasNotificationInterval() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearNotificationInterval() => clearField(3);
+  @$pb.TagNumber(3)
+  $5.Duration ensureNotificationInterval() => $_ensure(2);
+
   @$pb.TagNumber(4)
-  void clearTelegramChatId() => clearField(4);
+  $fixnum.Int64 get discordChannelId => $_getI64(3);
+  @$pb.TagNumber(4)
+  set discordChannelId($fixnum.Int64 v) { $_setInt64(3, v); }
+  @$pb.TagNumber(4)
+  $core.bool hasDiscordChannelId() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDiscordChannelId() => clearField(4);
 
   @$pb.TagNumber(5)
-  $fixnum.Int64 get trackerId => $_getI64(4);
+  $fixnum.Int64 get telegramChatId => $_getI64(4);
   @$pb.TagNumber(5)
-  set trackerId($fixnum.Int64 v) { $_setInt64(4, v); }
+  set telegramChatId($fixnum.Int64 v) { $_setInt64(4, v); }
   @$pb.TagNumber(5)
-  $core.bool hasTrackerId() => $_has(4);
+  $core.bool hasTelegramChatId() => $_has(4);
   @$pb.TagNumber(5)
-  void clearTrackerId() => clearField(5);
+  void clearTelegramChatId() => clearField(5);
 }
 
 class DeleteTrackerRequest extends $pb.GeneratedMessage {

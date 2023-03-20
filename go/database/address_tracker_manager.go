@@ -10,6 +10,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/user"
 	"github.com/shifty11/cosmos-notifier/log"
 	"time"
 )
@@ -60,6 +61,9 @@ func (manager *AddressTrackerManager) AddTracker(
 	if discordChannelId != 0 && telegramChatId != 0 {
 		return nil, errors.New("only one of discordChannelId or telegramChatId must be non-zero")
 	}
+	if notificationInterval < 0 {
+		return nil, errors.New("notification interval must be non-negative")
+	}
 
 	createQuery := manager.client.AddressTracker.
 		Create().
@@ -91,12 +95,68 @@ func (manager *AddressTrackerManager) AddTracker(
 		createQuery.SetTelegramChatID(telegramChatId)
 	}
 
-	addressTrackerDto, err := createQuery.Save(manager.ctx)
+	return createQuery.Save(manager.ctx)
+}
+
+func (manager *AddressTrackerManager) UpdateTracker(
+	userEnt *ent.User,
+	addressTrackerId int,
+	discordChannelId int,
+	telegramChatId int,
+	notificationInterval int64,
+) (*ent.AddressTracker, error) {
+	if discordChannelId == 0 && telegramChatId == 0 {
+		return nil, errors.New("at least one of discordChannelId or telegramChatId must be non-zero")
+	}
+	if discordChannelId != 0 && telegramChatId != 0 {
+		return nil, errors.New("only one of discordChannelId or telegramChatId must be non-zero")
+	}
+	if notificationInterval < 0 {
+		return nil, errors.New("notification interval must be non-negative")
+	}
+
+	addressTracker, err := manager.client.AddressTracker.
+		Query().
+		Where(addresstracker.And(
+			addresstracker.IDEQ(addressTrackerId),
+			addresstracker.Or(
+				addresstracker.HasDiscordChannelWith(discordchannel.HasUsersWith(user.IDEQ(userEnt.ID))),
+				addresstracker.HasTelegramChatWith(telegramchat.HasUsersWith(user.IDEQ(userEnt.ID))),
+			),
+		)).
+		Only(manager.ctx)
 	if err != nil {
 		return nil, err
 	}
+	updateQuery := addressTracker.
+		Update().
+		SetNotificationInterval(notificationInterval)
 
-	return addressTrackerDto, err
+	if discordChannelId != 0 {
+		exist, err := userEnt.QueryDiscordChannels().
+			Where(discordchannel.IDEQ(discordChannelId)).
+			Exist(manager.ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !exist {
+			return nil, errors.New("discord channel not found")
+		}
+		updateQuery.SetDiscordChannelID(discordChannelId)
+	} else {
+		exist, err := userEnt.QueryTelegramChats().
+			Where(telegramchat.IDEQ(telegramChatId)).
+			Exist(manager.ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !exist {
+			return nil, errors.New("telegram chat not found")
+		}
+		updateQuery.SetTelegramChatID(telegramChatId)
+	}
+
+	return updateQuery.Save(manager.ctx)
 }
 
 type AddressTrackerWithChainProposal struct {
