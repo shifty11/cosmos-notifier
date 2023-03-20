@@ -10,6 +10,7 @@ option go_package = "go/tracker_service";
 service TrackerService {
   rpc IsAddressValid (IsAddressValidRequest) returns (IsAddressValidResponse) {}
   rpc AddTracker (AddTrackerRequest) returns (AddTrackerResponse) {}
+  rpc UpdateTracker (UpdateTrackerRequest) returns (UpdateTrackerResponse) {}
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
 }
 
@@ -29,11 +30,26 @@ message AddTrackerRequest {
 }
 
 message AddTrackerResponse {
-  string address = 1;
-  google.protobuf.Duration notificationInterval = 2;
-  int64 discordChannelId = 3;
-  int64 telegramChatId = 4;
-  int64 trackerId = 5;
+  int64 trackerId = 1;
+  string address = 2;
+  google.protobuf.Duration notificationInterval = 3;
+  int64 discordChannelId = 4;
+  int64 telegramChatId = 5;
+}
+
+message UpdateTrackerRequest {
+  int64 trackerId = 1;
+  google.protobuf.Duration notificationInterval = 3;
+  int64 discordChannelId = 4;
+  int64 telegramChatId = 5;
+}
+
+message UpdateTrackerResponse {
+  int64 trackerId = 1;
+  string address = 2;
+  google.protobuf.Duration notificationInterval = 3;
+  int64 discordChannelId = 4;
+  int64 telegramChatId = 5;
 }
 
 message DeleteTrackerRequest {

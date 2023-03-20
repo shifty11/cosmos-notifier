@@ -45,16 +45,43 @@ final $typed_data.Uint8List addTrackerRequestDescriptor = $convert.base64Decode(
 const AddTrackerResponse$json = const {
   '1': 'AddTrackerResponse',
   '2': const [
-    const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
-    const {'1': 'notificationInterval', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
-    const {'1': 'discordChannelId', '3': 3, '4': 1, '5': 3, '10': 'discordChannelId'},
-    const {'1': 'telegramChatId', '3': 4, '4': 1, '5': 3, '10': 'telegramChatId'},
-    const {'1': 'trackerId', '3': 5, '4': 1, '5': 3, '10': 'trackerId'},
+    const {'1': 'trackerId', '3': 1, '4': 1, '5': 3, '10': 'trackerId'},
+    const {'1': 'address', '3': 2, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'notificationInterval', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
+    const {'1': 'discordChannelId', '3': 4, '4': 1, '5': 3, '10': 'discordChannelId'},
+    const {'1': 'telegramChatId', '3': 5, '4': 1, '5': 3, '10': 'telegramChatId'},
   ],
 };
 
 /// Descriptor for `AddTrackerResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addTrackerResponseDescriptor = $convert.base64Decode('ChJBZGRUcmFja2VyUmVzcG9uc2USGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxJNChRub3RpZmljYXRpb25JbnRlcnZhbBgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvblIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSKgoQZGlzY29yZENoYW5uZWxJZBgDIAEoA1IQZGlzY29yZENoYW5uZWxJZBImCg50ZWxlZ3JhbUNoYXRJZBgEIAEoA1IOdGVsZWdyYW1DaGF0SWQSHAoJdHJhY2tlcklkGAUgASgDUgl0cmFja2VySWQ=');
+final $typed_data.Uint8List addTrackerResponseDescriptor = $convert.base64Decode('ChJBZGRUcmFja2VyUmVzcG9uc2USHAoJdHJhY2tlcklkGAEgASgDUgl0cmFja2VySWQSGAoHYWRkcmVzcxgCIAEoCVIHYWRkcmVzcxJNChRub3RpZmljYXRpb25JbnRlcnZhbBgDIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvblIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSKgoQZGlzY29yZENoYW5uZWxJZBgEIAEoA1IQZGlzY29yZENoYW5uZWxJZBImCg50ZWxlZ3JhbUNoYXRJZBgFIAEoA1IOdGVsZWdyYW1DaGF0SWQ=');
+@$core.Deprecated('Use updateTrackerRequestDescriptor instead')
+const UpdateTrackerRequest$json = const {
+  '1': 'UpdateTrackerRequest',
+  '2': const [
+    const {'1': 'trackerId', '3': 1, '4': 1, '5': 3, '10': 'trackerId'},
+    const {'1': 'notificationInterval', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
+    const {'1': 'discordChannelId', '3': 4, '4': 1, '5': 3, '10': 'discordChannelId'},
+    const {'1': 'telegramChatId', '3': 5, '4': 1, '5': 3, '10': 'telegramChatId'},
+  ],
+};
+
+/// Descriptor for `UpdateTrackerRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updateTrackerRequestDescriptor = $convert.base64Decode('ChRVcGRhdGVUcmFja2VyUmVxdWVzdBIcCgl0cmFja2VySWQYASABKANSCXRyYWNrZXJJZBJNChRub3RpZmljYXRpb25JbnRlcnZhbBgDIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvblIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSKgoQZGlzY29yZENoYW5uZWxJZBgEIAEoA1IQZGlzY29yZENoYW5uZWxJZBImCg50ZWxlZ3JhbUNoYXRJZBgFIAEoA1IOdGVsZWdyYW1DaGF0SWQ=');
+@$core.Deprecated('Use updateTrackerResponseDescriptor instead')
+const UpdateTrackerResponse$json = const {
+  '1': 'UpdateTrackerResponse',
+  '2': const [
+    const {'1': 'trackerId', '3': 1, '4': 1, '5': 3, '10': 'trackerId'},
+    const {'1': 'address', '3': 2, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'notificationInterval', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
+    const {'1': 'discordChannelId', '3': 4, '4': 1, '5': 3, '10': 'discordChannelId'},
+    const {'1': 'telegramChatId', '3': 5, '4': 1, '5': 3, '10': 'telegramChatId'},
+  ],
+};
+
+/// Descriptor for `UpdateTrackerResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List updateTrackerResponseDescriptor = $convert.base64Decode('ChVVcGRhdGVUcmFja2VyUmVzcG9uc2USHAoJdHJhY2tlcklkGAEgASgDUgl0cmFja2VySWQSGAoHYWRkcmVzcxgCIAEoCVIHYWRkcmVzcxJNChRub3RpZmljYXRpb25JbnRlcnZhbBgDIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvblIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSKgoQZGlzY29yZENoYW5uZWxJZBgEIAEoA1IQZGlzY29yZENoYW5uZWxJZBImCg50ZWxlZ3JhbUNoYXRJZBgFIAEoA1IOdGVsZWdyYW1DaGF0SWQ=');
 @$core.Deprecated('Use deleteTrackerRequestDescriptor instead')
 const DeleteTrackerRequest$json = const {
   '1': 'DeleteTrackerRequest',

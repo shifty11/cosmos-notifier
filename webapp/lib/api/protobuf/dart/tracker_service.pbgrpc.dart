@@ -27,6 +27,12 @@ class TrackerServiceClient extends $grpc.Client {
           ($4.AddTrackerRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $4.AddTrackerResponse.fromBuffer(value));
+  static final _$updateTracker =
+      $grpc.ClientMethod<$4.UpdateTrackerRequest, $4.UpdateTrackerResponse>(
+          '/cosmos_notifier_grpc.TrackerService/UpdateTracker',
+          ($4.UpdateTrackerRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) =>
+              $4.UpdateTrackerResponse.fromBuffer(value));
   static final _$deleteTracker =
       $grpc.ClientMethod<$4.DeleteTrackerRequest, $1.Empty>(
           '/cosmos_notifier_grpc.TrackerService/DeleteTracker',
@@ -48,6 +54,12 @@ class TrackerServiceClient extends $grpc.Client {
       $4.AddTrackerRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$addTracker, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$4.UpdateTrackerResponse> updateTracker(
+      $4.UpdateTrackerRequest request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$updateTracker, request, options: options);
   }
 
   $grpc.ResponseFuture<$1.Empty> deleteTracker($4.DeleteTrackerRequest request,
@@ -76,6 +88,15 @@ abstract class TrackerServiceBase extends $grpc.Service {
         false,
         ($core.List<$core.int> value) => $4.AddTrackerRequest.fromBuffer(value),
         ($4.AddTrackerResponse value) => value.writeToBuffer()));
+    $addMethod(
+        $grpc.ServiceMethod<$4.UpdateTrackerRequest, $4.UpdateTrackerResponse>(
+            'UpdateTracker',
+            updateTracker_Pre,
+            false,
+            false,
+            ($core.List<$core.int> value) =>
+                $4.UpdateTrackerRequest.fromBuffer(value),
+            ($4.UpdateTrackerResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$4.DeleteTrackerRequest, $1.Empty>(
         'DeleteTracker',
         deleteTracker_Pre,
@@ -97,6 +118,12 @@ abstract class TrackerServiceBase extends $grpc.Service {
     return addTracker(call, await request);
   }
 
+  $async.Future<$4.UpdateTrackerResponse> updateTracker_Pre(
+      $grpc.ServiceCall call,
+      $async.Future<$4.UpdateTrackerRequest> request) async {
+    return updateTracker(call, await request);
+  }
+
   $async.Future<$1.Empty> deleteTracker_Pre($grpc.ServiceCall call,
       $async.Future<$4.DeleteTrackerRequest> request) async {
     return deleteTracker(call, await request);
@@ -106,6 +133,8 @@ abstract class TrackerServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $4.IsAddressValidRequest request);
   $async.Future<$4.AddTrackerResponse> addTracker(
       $grpc.ServiceCall call, $4.AddTrackerRequest request);
+  $async.Future<$4.UpdateTrackerResponse> updateTracker(
+      $grpc.ServiceCall call, $4.UpdateTrackerRequest request);
   $async.Future<$1.Empty> deleteTracker(
       $grpc.ServiceCall call, $4.DeleteTrackerRequest request);
 }

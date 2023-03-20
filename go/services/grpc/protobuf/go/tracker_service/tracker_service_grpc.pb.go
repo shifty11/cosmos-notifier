@@ -22,6 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	TrackerService_IsAddressValid_FullMethodName = "/cosmos_notifier_grpc.TrackerService/IsAddressValid"
 	TrackerService_AddTracker_FullMethodName     = "/cosmos_notifier_grpc.TrackerService/AddTracker"
+	TrackerService_UpdateTracker_FullMethodName  = "/cosmos_notifier_grpc.TrackerService/UpdateTracker"
 	TrackerService_DeleteTracker_FullMethodName  = "/cosmos_notifier_grpc.TrackerService/DeleteTracker"
 )
 
@@ -31,6 +32,7 @@ const (
 type TrackerServiceClient interface {
 	IsAddressValid(ctx context.Context, in *IsAddressValidRequest, opts ...grpc.CallOption) (*IsAddressValidResponse, error)
 	AddTracker(ctx context.Context, in *AddTrackerRequest, opts ...grpc.CallOption) (*AddTrackerResponse, error)
+	UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*UpdateTrackerResponse, error)
 	DeleteTracker(ctx context.Context, in *DeleteTrackerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -60,6 +62,15 @@ func (c *trackerServiceClient) AddTracker(ctx context.Context, in *AddTrackerReq
 	return out, nil
 }
 
+func (c *trackerServiceClient) UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*UpdateTrackerResponse, error) {
+	out := new(UpdateTrackerResponse)
+	err := c.cc.Invoke(ctx, TrackerService_UpdateTracker_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *trackerServiceClient) DeleteTracker(ctx context.Context, in *DeleteTrackerRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
 	err := c.cc.Invoke(ctx, TrackerService_DeleteTracker_FullMethodName, in, out, opts...)
@@ -75,6 +86,7 @@ func (c *trackerServiceClient) DeleteTracker(ctx context.Context, in *DeleteTrac
 type TrackerServiceServer interface {
 	IsAddressValid(context.Context, *IsAddressValidRequest) (*IsAddressValidResponse, error)
 	AddTracker(context.Context, *AddTrackerRequest) (*AddTrackerResponse, error)
+	UpdateTracker(context.Context, *UpdateTrackerRequest) (*UpdateTrackerResponse, error)
 	DeleteTracker(context.Context, *DeleteTrackerRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedTrackerServiceServer()
 }
@@ -88,6 +100,9 @@ func (UnimplementedTrackerServiceServer) IsAddressValid(context.Context, *IsAddr
 }
 func (UnimplementedTrackerServiceServer) AddTracker(context.Context, *AddTrackerRequest) (*AddTrackerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTracker not implemented")
+}
+func (UnimplementedTrackerServiceServer) UpdateTracker(context.Context, *UpdateTrackerRequest) (*UpdateTrackerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTracker not implemented")
 }
 func (UnimplementedTrackerServiceServer) DeleteTracker(context.Context, *DeleteTrackerRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTracker not implemented")
@@ -141,6 +156,24 @@ func _TrackerService_AddTracker_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TrackerService_UpdateTracker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTrackerRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).UpdateTracker(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_UpdateTracker_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).UpdateTracker(ctx, req.(*UpdateTrackerRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _TrackerService_DeleteTracker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteTrackerRequest)
 	if err := dec(in); err != nil {
@@ -173,6 +206,10 @@ var TrackerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddTracker",
 			Handler:    _TrackerService_AddTracker_Handler,
+		},
+		{
+			MethodName: "UpdateTracker",
+			Handler:    _TrackerService_UpdateTracker_Handler,
 		},
 		{
 			MethodName: "DeleteTracker",
