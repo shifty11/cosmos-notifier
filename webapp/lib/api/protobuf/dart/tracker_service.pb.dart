@@ -199,7 +199,7 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
     ..aInt64(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval')
     ..aInt64(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
     ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
-    ..a<$core.int>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', $pb.PbFieldType.O3, protoName: 'trackerId')
+    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
     ..hasRequiredFields = false
   ;
 
@@ -209,7 +209,7 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
     $fixnum.Int64? notificationInterval,
     $fixnum.Int64? discordChannelId,
     $fixnum.Int64? telegramChatId,
-    $core.int? trackerId,
+    $fixnum.Int64? trackerId,
   }) {
     final _result = create();
     if (address != null) {
@@ -287,9 +287,9 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
   void clearTelegramChatId() => clearField(4);
 
   @$pb.TagNumber(5)
-  $core.int get trackerId => $_getIZ(4);
+  $fixnum.Int64 get trackerId => $_getI64(4);
   @$pb.TagNumber(5)
-  set trackerId($core.int v) { $_setSignedInt32(4, v); }
+  set trackerId($fixnum.Int64 v) { $_setInt64(4, v); }
   @$pb.TagNumber(5)
   $core.bool hasTrackerId() => $_has(4);
   @$pb.TagNumber(5)

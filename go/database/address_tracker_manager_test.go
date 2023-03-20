@@ -17,14 +17,16 @@ func addAddressTrackers(m *AddressTrackerManager, addresses []string, discordCha
 	var addressTrackers []*ent.AddressTracker
 	for _, address := range addresses {
 		for _, discordChannel := range discordChannels {
-			addressTracker, err := m.AddTracker(address, discordChannel.ID, 0)
+			userEnt := discordChannel.QueryUsers().FirstX(m.ctx)
+			addressTracker, err := m.AddTracker(userEnt, address, discordChannel.ID, 0)
 			addressTrackers = append(addressTrackers, addressTracker)
 			if err != nil {
 				panic(err)
 			}
 		}
 		for _, telegramChat := range telegramChats {
-			addressTracker, err := m.AddTracker(address, 0, telegramChat.ID)
+			userEnt := telegramChat.QueryUsers().FirstX(m.ctx)
+			addressTracker, err := m.AddTracker(userEnt, address, 0, telegramChat.ID)
 			addressTrackers = append(addressTrackers, addressTracker)
 			if err != nil {
 				panic(err)
@@ -71,17 +73,17 @@ func TestAddressTrackerManager_AddTrackerForDiscordChannel(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	if _, err := m.AddTracker("", 0, 0); err == nil {
+	if _, err := m.AddTracker(users[0], "", 0, 0); err == nil {
 		t.Error("Empty address is valid")
 	}
-	if _, err := m.AddTracker("cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 0); err == nil {
+	if _, err := m.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 0); err == nil {
 		t.Error("Empty discordChannelId and telegramChatId is valid")
 	}
-	if _, err := m.AddTracker("cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 1); err == nil {
+	if _, err := m.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 1); err == nil {
 		t.Error("Both discordChannelId and telegramChatId are valid")
 	}
 
-	tracker, err := m.AddTracker("cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0)
+	tracker, err := m.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -111,7 +113,7 @@ func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	tracker, err := m.AddTracker("cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID)
+	tracker, err := m.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,17 +134,35 @@ func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_NoUser(t *testing.T) {
+func TestAddressTracker_NoDiscordChannel(t *testing.T) {
 	addChains(newTestChainManager(t))
+	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
+
 	manager := newTestAddressTrackerManager(t)
-	_, err := manager.AddTracker("cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 0)
+	_, err := manager.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 0)
 	if err == nil {
 		t.Error("Address is added without user")
 	}
 
-	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
 	channels := addDiscordChannels(newTestDiscordChannelManager(t), users)
-	_, err = manager.AddTracker("cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0)
+	_, err = manager.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAddressTracker_NoTelegramChat(t *testing.T) {
+	addChains(newTestChainManager(t))
+	users := addUsers(newTestUserManager(t), 1, user.TypeTelegram)
+
+	manager := newTestAddressTrackerManager(t)
+	_, err := manager.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 1)
+	if err == nil {
+		t.Error("Address is added without user")
+	}
+
+	chats := addTelegramChats(newTestTelegramChatManager(t), users)
+	_, err = manager.AddTracker(users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID)
 	if err != nil {
 		t.Error(err)
 	}

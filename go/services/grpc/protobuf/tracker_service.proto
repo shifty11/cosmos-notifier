@@ -32,7 +32,7 @@ message AddTrackerResponse {
   int64 notificationInterval = 2;
   int64 discordChannelId = 3;
   int64 telegramChatId = 4;
-  int32 trackerId = 5;
+  int64 trackerId = 5;
 }
 
 message DeleteTrackerRequest {

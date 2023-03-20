@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/log"
 
 	cosmossdk "github.com/cosmos/cosmos-sdk/types"
@@ -40,7 +42,7 @@ func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain)
 	return false, nil
 }
 
-func (manager *AddressTrackerManager) AddTracker(address string, discordChannelId int, telegramChatId int) (*ent.AddressTracker, error) {
+func (manager *AddressTrackerManager) AddTracker(userEnt *ent.User, address string, discordChannelId int, telegramChatId int) (*ent.AddressTracker, error) {
 	isValid, chainEnt := manager.IsValid(address)
 	if !isValid {
 		return nil, errors.New("invalid address")
@@ -58,8 +60,26 @@ func (manager *AddressTrackerManager) AddTracker(address string, discordChannelI
 		SetAddress(address)
 
 	if discordChannelId != 0 {
+		exist, err := userEnt.QueryDiscordChannels().
+			Where(discordchannel.IDEQ(discordChannelId)).
+			Exist(manager.ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !exist {
+			return nil, errors.New("discord channel not found")
+		}
 		createQuery.SetDiscordChannelID(discordChannelId)
 	} else {
+		exist, err := userEnt.QueryTelegramChats().
+			Where(telegramchat.IDEQ(telegramChatId)).
+			Exist(manager.ctx)
+		if err != nil {
+			return nil, err
+		}
+		if !exist {
+			return nil, errors.New("telegram chat not found")
+		}
 		createQuery.SetTelegramChatID(telegramChatId)
 	}
 
