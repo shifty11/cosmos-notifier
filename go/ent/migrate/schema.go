@@ -14,7 +14,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "address", Type: field.TypeString},
-		{Name: "notification_interval", Type: field.TypeUint64},
+		{Name: "notification_interval", Type: field.TypeInt64},
 		{Name: "chain_address_trackers", Type: field.TypeInt},
 		{Name: "discord_channel_address_trackers", Type: field.TypeInt, Nullable: true},
 		{Name: "telegram_chat_address_trackers", Type: field.TypeInt, Nullable: true},

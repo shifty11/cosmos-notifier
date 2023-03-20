@@ -84,6 +84,7 @@ var runChainCrawlerCmd = &cobra.Command{
 		crawler := chain_crawler.NewChainCrawler(managers, notifier, assetsPath)
 		crawler.AddOrUpdateChains()
 		crawler.UpdateProposals()
+		crawler.CheckForVotingReminders()
 
 		if cmd.Flag("repeat").Value.String() == "true" {
 			crawler.ScheduleCrawl()

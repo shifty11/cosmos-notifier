@@ -20,23 +20,25 @@ const urlProposals = "https://rest.cosmos.directory/%v/cosmos/gov/v1beta1/propos
 const maxErrorCntUntilNotification = 96
 
 type ChainCrawler struct {
-	client               *http.Client
-	chainManager         *database.ChainManager
-	chainProposalManager *database.ChainProposalManager
-	notifier             *notifier.ChainNotifier
-	assetsPath           string
-	errorCnt             map[int]int
+	client                *http.Client
+	chainManager          *database.ChainManager
+	chainProposalManager  *database.ChainProposalManager
+	addressTrackerManager *database.AddressTrackerManager
+	notifier              notifier.ChainNotifier
+	assetsPath            string
+	errorCnt              map[int]int
 }
 
-func NewChainCrawler(dbManagers *database.DbManagers, notifier *notifier.ChainNotifier, assetsPath string) *ChainCrawler {
+func NewChainCrawler(dbManagers *database.DbManagers, notifier notifier.ChainNotifier, assetsPath string) *ChainCrawler {
 	var client = &http.Client{Timeout: 10 * time.Second}
 	return &ChainCrawler{
-		client:               client,
-		chainManager:         dbManagers.ChainManager,
-		chainProposalManager: dbManagers.ChainProposalManager,
-		notifier:             notifier,
-		assetsPath:           assetsPath,
-		errorCnt:             make(map[int]int),
+		client:                client,
+		chainManager:          dbManagers.ChainManager,
+		chainProposalManager:  dbManagers.ChainProposalManager,
+		addressTrackerManager: dbManagers.AddressTrackerManager,
+		notifier:              notifier,
+		assetsPath:            assetsPath,
+		errorCnt:              make(map[int]int),
 	}
 }
 
@@ -187,16 +189,28 @@ func (c *ChainCrawler) UpdateProposals() {
 	}
 }
 
+func (c *ChainCrawler) CheckForVotingReminders() {
+	log.Sugar.Info("Checking for voting reminders")
+	for _, data := range c.addressTrackerManager.GetAllUnnotifiedTrackers() {
+		c.notifier.SendVoteReminder(data.ChainProposal.Edges.Chain, data.ChainProposal)
+		c.addressTrackerManager.SetNotified(data)
+	}
+}
+
 func (c *ChainCrawler) ScheduleCrawl() {
 	log.Sugar.Info("Scheduling chain crawl")
 	cr := cron.New()
 	_, err := cr.AddFunc("*/15 * * * *", func() { c.UpdateProposals() }) // every 15min
 	if err != nil {
-		log.Sugar.Errorf("while executing 'updateContracts' via cron: %v", err)
+		log.Sugar.Errorf("while executing 'UpdateProposals' via cron: %v", err)
+	}
+	_, err = cr.AddFunc("5-50/15 * * * *", func() { c.CheckForVotingReminders() }) // every 15min but not at the same time as UpdateProposals
+	if err != nil {
+		log.Sugar.Errorf("while executing 'CheckForVotingReminders' via cron: %v", err)
 	}
 	_, err = cr.AddFunc("0 9 * * *", func() { c.AddOrUpdateChains() }) // every day at 9:00
 	if err != nil {
-		log.Sugar.Errorf("while executing 'updateContracts' via cron: %v", err)
+		log.Sugar.Errorf("while executing 'AddOrUpdateChains' via cron: %v", err)
 	}
 	cr.Start()
 }

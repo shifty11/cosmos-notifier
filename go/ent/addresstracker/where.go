@@ -71,7 +71,7 @@ func Address(v string) predicate.AddressTracker {
 }
 
 // NotificationInterval applies equality check predicate on the "notification_interval" field. It's identical to NotificationIntervalEQ.
-func NotificationInterval(v uint64) predicate.AddressTracker {
+func NotificationInterval(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldEQ(FieldNotificationInterval, v))
 }
 
@@ -221,42 +221,42 @@ func AddressContainsFold(v string) predicate.AddressTracker {
 }
 
 // NotificationIntervalEQ applies the EQ predicate on the "notification_interval" field.
-func NotificationIntervalEQ(v uint64) predicate.AddressTracker {
+func NotificationIntervalEQ(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldEQ(FieldNotificationInterval, v))
 }
 
 // NotificationIntervalNEQ applies the NEQ predicate on the "notification_interval" field.
-func NotificationIntervalNEQ(v uint64) predicate.AddressTracker {
+func NotificationIntervalNEQ(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldNEQ(FieldNotificationInterval, v))
 }
 
 // NotificationIntervalIn applies the In predicate on the "notification_interval" field.
-func NotificationIntervalIn(vs ...uint64) predicate.AddressTracker {
+func NotificationIntervalIn(vs ...int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldIn(FieldNotificationInterval, vs...))
 }
 
 // NotificationIntervalNotIn applies the NotIn predicate on the "notification_interval" field.
-func NotificationIntervalNotIn(vs ...uint64) predicate.AddressTracker {
+func NotificationIntervalNotIn(vs ...int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldNotIn(FieldNotificationInterval, vs...))
 }
 
 // NotificationIntervalGT applies the GT predicate on the "notification_interval" field.
-func NotificationIntervalGT(v uint64) predicate.AddressTracker {
+func NotificationIntervalGT(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldGT(FieldNotificationInterval, v))
 }
 
 // NotificationIntervalGTE applies the GTE predicate on the "notification_interval" field.
-func NotificationIntervalGTE(v uint64) predicate.AddressTracker {
+func NotificationIntervalGTE(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldGTE(FieldNotificationInterval, v))
 }
 
 // NotificationIntervalLT applies the LT predicate on the "notification_interval" field.
-func NotificationIntervalLT(v uint64) predicate.AddressTracker {
+func NotificationIntervalLT(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldLT(FieldNotificationInterval, v))
 }
 
 // NotificationIntervalLTE applies the LTE predicate on the "notification_interval" field.
-func NotificationIntervalLTE(v uint64) predicate.AddressTracker {
+func NotificationIntervalLTE(v int64) predicate.AddressTracker {
 	return predicate.AddressTracker(sql.FieldLTE(FieldNotificationInterval, v))
 }
 

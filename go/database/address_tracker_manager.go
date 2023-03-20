@@ -3,13 +3,15 @@ package database
 import (
 	"context"
 	"errors"
+	cosmossdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/log"
-
-	cosmossdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/shifty11/cosmos-notifier/ent"
+	"time"
 )
 
 type AddressTrackerManager struct {
@@ -46,7 +48,7 @@ func (manager *AddressTrackerManager) AddTracker(
 	userEnt *ent.User,
 	address string, discordChannelId int,
 	telegramChatId int,
-	notificationInterval uint64,
+	notificationInterval int64,
 ) (*ent.AddressTracker, error) {
 	isValid, chainEnt := manager.IsValid(address)
 	if !isValid {
@@ -95,4 +97,56 @@ func (manager *AddressTrackerManager) AddTracker(
 	}
 
 	return addressTrackerDto, err
+}
+
+type AddressTrackerWithChainProposal struct {
+	AddressTracker *ent.AddressTracker
+	ChainProposal  *ent.ChainProposal
+}
+
+func (manager *AddressTrackerManager) GetAllUnnotifiedTrackers() []AddressTrackerWithChainProposal {
+	proposals, err := manager.client.AddressTracker.
+		Query().
+		QueryChain().
+		QueryChainProposals().
+		Where(chainproposal.StatusEQ(chainproposal.StatusPROPOSAL_STATUS_VOTING_PERIOD)).
+		WithChain().
+		All(manager.ctx)
+	if err != nil {
+		log.Sugar.Panicf("error while getting all proposals: %v", err)
+	}
+	var result []AddressTrackerWithChainProposal
+	for _, proposal := range proposals {
+		timeUntilVotingEnd := proposal.VotingEndTime.Sub(time.Now())
+		addressTrackers, err := manager.client.AddressTracker.
+			Query().
+			Where(
+				addresstracker.And(
+					addresstracker.HasChainWith(chain.IDEQ(proposal.Edges.Chain.ID)),
+					addresstracker.Not(addresstracker.HasChainProposalsWith(chainproposal.IDEQ(proposal.ID))),
+					addresstracker.NotificationIntervalGTE(int64(timeUntilVotingEnd.Seconds())),
+				),
+			).
+			All(manager.ctx)
+		if err != nil {
+			log.Sugar.Panicf("error while getting address trackers: %v", err)
+		}
+		for _, addressTracker := range addressTrackers {
+			result = append(result, AddressTrackerWithChainProposal{
+				AddressTracker: addressTracker,
+				ChainProposal:  proposal,
+			})
+		}
+	}
+	return result
+}
+
+func (manager *AddressTrackerManager) SetNotified(data AddressTrackerWithChainProposal) {
+	err := data.AddressTracker.
+		Update().
+		AddChainProposals(data.ChainProposal).
+		Exec(manager.ctx)
+	if err != nil {
+		log.Sugar.Panicf("error while setting notified: %v", err)
+	}
 }

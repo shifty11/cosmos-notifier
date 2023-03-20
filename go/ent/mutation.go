@@ -50,7 +50,7 @@ type AddressTrackerMutation struct {
 	create_time              *time.Time
 	update_time              *time.Time
 	address                  *string
-	notification_interval    *uint64
+	notification_interval    *int64
 	addnotification_interval *int64
 	clearedFields            map[string]struct{}
 	chain                    *int
@@ -274,13 +274,13 @@ func (m *AddressTrackerMutation) ResetAddress() {
 }
 
 // SetNotificationInterval sets the "notification_interval" field.
-func (m *AddressTrackerMutation) SetNotificationInterval(u uint64) {
-	m.notification_interval = &u
+func (m *AddressTrackerMutation) SetNotificationInterval(i int64) {
+	m.notification_interval = &i
 	m.addnotification_interval = nil
 }
 
 // NotificationInterval returns the value of the "notification_interval" field in the mutation.
-func (m *AddressTrackerMutation) NotificationInterval() (r uint64, exists bool) {
+func (m *AddressTrackerMutation) NotificationInterval() (r int64, exists bool) {
 	v := m.notification_interval
 	if v == nil {
 		return
@@ -291,7 +291,7 @@ func (m *AddressTrackerMutation) NotificationInterval() (r uint64, exists bool) 
 // OldNotificationInterval returns the old "notification_interval" field's value of the AddressTracker entity.
 // If the AddressTracker object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AddressTrackerMutation) OldNotificationInterval(ctx context.Context) (v uint64, err error) {
+func (m *AddressTrackerMutation) OldNotificationInterval(ctx context.Context) (v int64, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldNotificationInterval is only allowed on UpdateOne operations")
 	}
@@ -305,12 +305,12 @@ func (m *AddressTrackerMutation) OldNotificationInterval(ctx context.Context) (v
 	return oldValue.NotificationInterval, nil
 }
 
-// AddNotificationInterval adds u to the "notification_interval" field.
-func (m *AddressTrackerMutation) AddNotificationInterval(u int64) {
+// AddNotificationInterval adds i to the "notification_interval" field.
+func (m *AddressTrackerMutation) AddNotificationInterval(i int64) {
 	if m.addnotification_interval != nil {
-		*m.addnotification_interval += u
+		*m.addnotification_interval += i
 	} else {
-		m.addnotification_interval = &u
+		m.addnotification_interval = &i
 	}
 }
 
@@ -611,7 +611,7 @@ func (m *AddressTrackerMutation) SetField(name string, value ent.Value) error {
 		m.SetAddress(v)
 		return nil
 	case addresstracker.FieldNotificationInterval:
-		v, ok := value.(uint64)
+		v, ok := value.(int64)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
