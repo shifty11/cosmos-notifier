@@ -21,9 +21,10 @@ func NewTrackersServer(managers *database.DbManagers) pb.TrackerServiceServer {
 	}
 }
 
-func (server *TrackerServer) IsAddressValid(ctx context.Context, req *pb.IsAddressValidRequest) (*pb.IsAddressValidResponse, error) {
+func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddressValidRequest) (*pb.IsAddressValidResponse, error) {
+	isValid, _ := server.addressTrackerManager.IsValid(req.Address)
 	return &pb.IsAddressValidResponse{
-		IsValid: server.addressTrackerManager.IsValid(req.Address),
+		IsValid: isValid,
 	}, nil
 }
 func (server *TrackerServer) AddTracker(context.Context, *pb.AddTrackerRequest) (*pb.AddTrackerResponse, error) {

@@ -9,8 +9,14 @@ protobuf:
 generate-models:
     cd go && go generate ./ent
 
+visualize-models:
+    cd go && go run -mod=mod ariga.io/entviz ./ent/schema/
+
 generate-migrations:
     cd go && go run main.go database create-migrations
 
 migrate:
     cd go && go run main.go database migrate
+
+test-go:
+    cd go && go test ./...

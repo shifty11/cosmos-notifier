@@ -14,6 +14,29 @@ func newTestDiscordChannelManager(t *testing.T) *DiscordChannelManager {
 	return manager
 }
 
+func addDiscordChannels(m *DiscordChannelManager, users []*ent.User) []*ent.DiscordChannel {
+	var channels []*ent.DiscordChannel
+	for _, userDto := range users {
+		c := m.client.DiscordChannel.
+			Create().
+			SetChannelID(1).
+			SetName("channel-1").
+			SetIsGroup(false).
+			AddUsers(userDto).
+			SaveX(m.ctx)
+		channels = append(channels, c)
+		c = m.client.DiscordChannel.
+			Create().
+			SetChannelID(2).
+			SetName("channel-2").
+			SetIsGroup(true).
+			AddUsers(userDto).
+			SaveX(m.ctx)
+		channels = append(channels, c)
+	}
+	return channels
+}
+
 func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
 	_, err := m.AddOrRemoveChain(1, 1)

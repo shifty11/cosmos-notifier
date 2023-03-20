@@ -14,6 +14,29 @@ func newTestTelegramChatManager(t *testing.T) *TelegramChatManager {
 	return manager
 }
 
+func addTelegramChats(m *TelegramChatManager, users []*ent.User) []*ent.TelegramChat {
+	var chats []*ent.TelegramChat
+	for _, userDto := range users {
+		c := m.client.TelegramChat.
+			Create().
+			SetChatID(1).
+			SetName("channel-1").
+			SetIsGroup(false).
+			AddUsers(userDto).
+			SaveX(m.ctx)
+		chats = append(chats, c)
+		c = m.client.TelegramChat.
+			Create().
+			SetChatID(2).
+			SetName("channel-2").
+			SetIsGroup(true).
+			AddUsers(userDto).
+			SaveX(m.ctx)
+		chats = append(chats, c)
+	}
+	return chats
+}
+
 func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
 	m := newTestTelegramChatManager(t)
 	_, err := m.AddOrRemoveChain(1, 1)
