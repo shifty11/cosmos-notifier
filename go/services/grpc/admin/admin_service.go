@@ -16,11 +16,11 @@ import (
 //goland:noinspection GoNameStartsWithPackageName
 type AdminServer struct {
 	pb.UnimplementedAdminServiceServer
-	notifier     *notifier.GeneralNotifier
+	notifier     notifier.GeneralNotifier
 	statsManager *database.StatsManager
 }
 
-func NewAdminServer(notifier *notifier.GeneralNotifier, managers *database.DbManagers) pb.AdminServiceServer {
+func NewAdminServer(notifier notifier.GeneralNotifier, managers *database.DbManagers) pb.AdminServiceServer {
 	return &AdminServer{
 		notifier:     notifier,
 		statsManager: managers.StatsManager,

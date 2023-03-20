@@ -3,8 +3,10 @@ package database
 import (
 	"context"
 	"github.com/shifty11/cosmos-notifier/ent"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"testing"
+	"time"
 )
 
 func newTestAddressTrackerManager(t *testing.T) *AddressTrackerManager {
@@ -222,5 +224,88 @@ func TestAddressTracker_CascadeDeleteForTelegramChat(t *testing.T) {
 
 	if m.client.AddressTracker.Query().CountX(m.ctx) != 0 {
 		t.Error("AddressTracker is not deleted")
+	}
+}
+
+func TestAddressTracker_GetAllUnnotifiedTrackers(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	addChainProposals(newTestChainProposalManager(t), chains)
+	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
+	channels := addDiscordChannels(newTestDiscordChannelManager(t), users)
+	tgChats := addTelegramChats(newTestTelegramChatManager(t), users)
+	m := newTestAddressTrackerManager(t)
+
+	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, tgChats)
+	for _, tracker := range trackers {
+		twoWeeksDuration := time.Hour * 24 * 14
+		tracker.Update().
+			SetNotificationInterval(int64(twoWeeksDuration.Seconds())).
+			ExecX(m.ctx)
+	}
+
+	unnotifiedTrackers := m.GetAllUnnotifiedTrackers()
+	if len(unnotifiedTrackers) != 4 {
+		t.Error("Wrong number of unnotifiedTrackers")
+	}
+	for _, tracker := range unnotifiedTrackers {
+		if tracker.AddressTracker.QueryChain().FirstX(m.ctx).Name != "Cosmos" {
+			t.Error("Wrong chain")
+		}
+		if tracker.ChainProposal.Status != chainproposal.StatusPROPOSAL_STATUS_VOTING_PERIOD {
+			t.Error("Wrong chain proposal status")
+		}
+	}
+}
+
+func TestAddressTracker_GetAllUnnotifiedTrackers_CheckTime(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	addChainProposals(newTestChainProposalManager(t), chains)
+	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
+	channels := addDiscordChannels(newTestDiscordChannelManager(t), users)
+	tgChats := addTelegramChats(newTestTelegramChatManager(t), users)
+	m := newTestAddressTrackerManager(t)
+
+	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, tgChats)
+
+	unnotifiedTrackers := m.GetAllUnnotifiedTrackers()
+	if len(unnotifiedTrackers) != 0 {
+		t.Error("Wrong number of unnotifiedTrackers")
+	}
+
+	twoWeeksDuration := time.Hour * 24 * 14
+	trackers[0].Update().
+		SetNotificationInterval(int64(twoWeeksDuration.Seconds())).
+		ExecX(m.ctx)
+
+	unnotifiedTrackers = m.GetAllUnnotifiedTrackers()
+	if len(unnotifiedTrackers) != 1 {
+		t.Error("Wrong number of unnotifiedTrackers")
+	}
+}
+
+func TestAddressTracker_GetAllUnnotifiedTrackers_SetNotified(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	addChainProposals(newTestChainProposalManager(t), chains)
+	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
+	channels := addDiscordChannels(newTestDiscordChannelManager(t), users)
+	tgChats := addTelegramChats(newTestTelegramChatManager(t), users)
+	m := newTestAddressTrackerManager(t)
+
+	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, tgChats)
+
+	twoWeeksDuration := time.Hour * 24 * 14
+	trackers[0].Update().
+		SetNotificationInterval(int64(twoWeeksDuration.Seconds())).
+		ExecX(m.ctx)
+
+	unnotifiedTrackers := m.GetAllUnnotifiedTrackers()
+	if len(unnotifiedTrackers) != 1 {
+		t.Error("Wrong number of unnotifiedTrackers")
+	}
+
+	m.SetNotified(unnotifiedTrackers[0])
+	unnotifiedTrackers = m.GetAllUnnotifiedTrackers()
+	if len(unnotifiedTrackers) != 0 {
+		t.Error("Wrong number of unnotifiedTrackers")
 	}
 }

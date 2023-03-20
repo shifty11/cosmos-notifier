@@ -16,8 +16,14 @@ func newTestChainProposalManager(t *testing.T) *ChainProposalManager {
 }
 
 func addChainProposals(m *ChainProposalManager, chains []*ent.Chain) {
+	stati := []types.ChainProposalStatus{types.ChainProposalStatusPassed, types.ChainProposalStatusRejected, types.ChainProposalStatusFailed, types.ChainProposalStatusVotingPeriod}
+	oneWeekAgo := time.Now().Add(-time.Hour * 24 * 7)
+	twoWeeksAgo := time.Now().Add(-time.Hour * 24 * 14)
+	threeWeeksAgo := time.Now().Add(-time.Hour * 24 * 21)
+	oneWeekInFuture := time.Now().Add(time.Hour * 24 * 7)
+	votingStartTimes := []time.Time{threeWeeksAgo, twoWeeksAgo, oneWeekAgo, oneWeekAgo}
+	votingEndTimes := []time.Time{twoWeeksAgo, oneWeekAgo, time.Now(), oneWeekInFuture}
 	for _, chainDto := range chains {
-		stati := []types.ChainProposalStatus{types.ChainProposalStatusVotingPeriod, types.ChainProposalStatusPassed, types.ChainProposalStatusRejected, types.ChainProposalStatusFailed}
 		for i := 1; i <= len(stati); i++ {
 			m.CreateOrUpdate(chainDto, &types.ChainProposal{
 				ProposalId: i,
@@ -26,8 +32,8 @@ func addChainProposals(m *ChainProposalManager, chains []*ent.Chain) {
 					Description: fmt.Sprintf("description %d", i),
 				},
 				Status:          stati[i-1],
-				VotingStartTime: time.Time{},
-				VotingEndTime:   time.Time{},
+				VotingStartTime: votingStartTimes[i-1],
+				VotingEndTime:   votingEndTimes[i-1],
 			})
 		}
 	}

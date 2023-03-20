@@ -17,12 +17,12 @@ type ContractCrawler struct {
 	contractManager database.IContractManager
 	chainManager    *database.ChainManager
 	proposalManager *database.ContractProposalManager
-	notifier        *notifier.ContractNotifier
+	notifier        notifier.ContractNotifier
 	apiUrl          string
 	assetsPath      string
 }
 
-func NewContractCrawler(managers *database.DbManagers, notifier *notifier.ContractNotifier, apiUrl string, assetsPath string) *ContractCrawler {
+func NewContractCrawler(managers *database.DbManagers, notifier notifier.ContractNotifier, apiUrl string, assetsPath string) *ContractCrawler {
 	return &ContractCrawler{
 		contractManager: managers.ContractManager,
 		chainManager:    managers.ChainManager,

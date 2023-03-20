@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/duration.proto";
 
 package cosmos_notifier_grpc;
 
@@ -22,14 +23,14 @@ message IsAddressValidResponse {
 
 message AddTrackerRequest {
   string address = 1;
-  uint64 notificationInterval = 2;
+  google.protobuf.Duration notificationInterval = 2;
   int64 discordChannelId = 3;
   int64 telegramChatId = 4;
 }
 
 message AddTrackerResponse {
   string address = 1;
-  uint64 notificationInterval = 2;
+  google.protobuf.Duration notificationInterval = 2;
   int64 discordChannelId = 3;
   int64 telegramChatId = 4;
   int64 trackerId = 5;

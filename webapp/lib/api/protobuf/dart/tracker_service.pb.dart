@@ -10,6 +10,8 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+import 'google/protobuf/duration.pb.dart' as $5;
+
 class IsAddressValidRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'IsAddressValidRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
@@ -107,7 +109,7 @@ class IsAddressValidResponse extends $pb.GeneratedMessage {
 class AddTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', $pb.PbFieldType.OU6, protoName: 'notificationInterval', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOM<$5.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
     ..aInt64(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
     ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
     ..hasRequiredFields = false
@@ -116,7 +118,7 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
   AddTrackerRequest._() : super();
   factory AddTrackerRequest({
     $core.String? address,
-    $fixnum.Int64? notificationInterval,
+    $5.Duration? notificationInterval,
     $fixnum.Int64? discordChannelId,
     $fixnum.Int64? telegramChatId,
   }) {
@@ -166,13 +168,15 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
   void clearAddress() => clearField(1);
 
   @$pb.TagNumber(2)
-  $fixnum.Int64 get notificationInterval => $_getI64(1);
+  $5.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($fixnum.Int64 v) { $_setInt64(1, v); }
+  set notificationInterval($5.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
+  @$pb.TagNumber(2)
+  $5.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   $fixnum.Int64 get discordChannelId => $_getI64(2);
@@ -196,7 +200,7 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
 class AddTrackerResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddTrackerResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..a<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', $pb.PbFieldType.OU6, protoName: 'notificationInterval', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOM<$5.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
     ..aInt64(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
     ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
     ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
@@ -206,7 +210,7 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
   AddTrackerResponse._() : super();
   factory AddTrackerResponse({
     $core.String? address,
-    $fixnum.Int64? notificationInterval,
+    $5.Duration? notificationInterval,
     $fixnum.Int64? discordChannelId,
     $fixnum.Int64? telegramChatId,
     $fixnum.Int64? trackerId,
@@ -260,13 +264,15 @@ class AddTrackerResponse extends $pb.GeneratedMessage {
   void clearAddress() => clearField(1);
 
   @$pb.TagNumber(2)
-  $fixnum.Int64 get notificationInterval => $_getI64(1);
+  $5.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($fixnum.Int64 v) { $_setInt64(1, v); }
+  set notificationInterval($5.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
+  @$pb.TagNumber(2)
+  $5.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   $fixnum.Int64 get discordChannelId => $_getI64(2);

@@ -8,6 +8,19 @@ import (
 	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service"
 )
 
+type ContractNotifier interface {
+	Notify(entContract *ent.Contract, entProp *ent.ContractProposal)
+}
+
+type ChainNotifier interface {
+	Notify(entChain *ent.Chain, entProp *ent.ChainProposal)
+	SendVoteReminder(entChain *ent.Chain, entProp *ent.ChainProposal)
+}
+
+type GeneralNotifier interface {
+	BroadcastMessage(message string, receiver pb.BroadcastMessageRequest_MessageType, entUser *ent.User, waitc chan BroadcastMessageResult) BroadcastMessageResult
+}
+
 func chunks(text string, limit int) []string {
 	if len(text) <= limit {
 		return []string{text}
@@ -23,15 +36,20 @@ func chunks(text string, limit int) []string {
 	return result
 }
 
-type ContractNotifier struct {
+type contractNotifier struct {
 	telegramNotifier      *telegramNotifier
 	discordNotifier       *DiscordNotifier
 	telegramChatManager   database.ITelegramChatManager
 	discordChannelManager database.IDiscordChannelManager
 }
 
-func NewContractNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string, discordBotToken string) *ContractNotifier {
-	return &ContractNotifier{
+func NewContractNotifier(
+	managers *database.DbManagers,
+	telegramBotToken string,
+	telegramEndpoint string,
+	discordBotToken string,
+) ContractNotifier {
+	return &contractNotifier{
 		telegramNotifier:      newTelegramNotifier(managers, telegramBotToken, telegramEndpoint),
 		discordNotifier:       newDiscordNotifier(managers, discordBotToken),
 		telegramChatManager:   managers.TelegramChatManager,
@@ -39,7 +57,7 @@ func NewContractNotifier(managers *database.DbManagers, telegramBotToken string,
 	}
 }
 
-func (n *ContractNotifier) Notify(entContract *ent.Contract, entProp *ent.ContractProposal) {
+func (n *contractNotifier) Notify(entContract *ent.Contract, entProp *ent.ContractProposal) {
 	log.Sugar.Infof("Notifying for proposal %v on contract %v", entProp.ProposalID, entContract.Name)
 
 	tgIds := n.telegramChatManager.GetSubscribedIds(entContract.QueryTelegramChats())
@@ -49,15 +67,15 @@ func (n *ContractNotifier) Notify(entContract *ent.Contract, entProp *ent.Contra
 	n.discordNotifier.notify(discordIds, entContract.Name, entProp.ProposalID, entProp.Title, entProp.Description)
 }
 
-type ChainNotifier struct {
+type chainNotifier struct {
 	telegramNotifier      *telegramNotifier
 	discordNotifier       *DiscordNotifier
 	telegramChatManager   database.ITelegramChatManager
 	discordChannelManager database.IDiscordChannelManager
 }
 
-func NewChainNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string, discordBotToken string) *ChainNotifier {
-	return &ChainNotifier{
+func NewChainNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string, discordBotToken string) ChainNotifier {
+	return &chainNotifier{
 		telegramNotifier:      newTelegramNotifier(managers, telegramBotToken, telegramEndpoint),
 		discordNotifier:       newDiscordNotifier(managers, discordBotToken),
 		telegramChatManager:   managers.TelegramChatManager,
@@ -65,7 +83,7 @@ func NewChainNotifier(managers *database.DbManagers, telegramBotToken string, te
 	}
 }
 
-func (n *ChainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) {
+func (n *chainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) {
 	log.Sugar.Infof("Notifying for proposal %v on chain %v", entProp.ProposalID, entChain.PrettyName)
 
 	tgIds := n.telegramChatManager.GetSubscribedIds(entChain.QueryTelegramChats())
@@ -75,15 +93,19 @@ func (n *ChainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) 
 	n.discordNotifier.notify(discordIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 }
 
-type GeneralNotifier struct {
+func (n *chainNotifier) SendVoteReminder(entChain *ent.Chain, entProp *ent.ChainProposal) {
+	// TODO: implement this
+}
+
+type generalNotifier struct {
 	telegramNotifier      *telegramNotifier
 	discordNotifier       *DiscordNotifier
 	telegramChatManager   database.ITelegramChatManager
 	discordChannelManager database.IDiscordChannelManager
 }
 
-func NewGeneralNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string, discordBotToken string) *GeneralNotifier {
-	return &GeneralNotifier{
+func NewGeneralNotifier(managers *database.DbManagers, telegramBotToken string, telegramEndpoint string, discordBotToken string) GeneralNotifier {
+	return &generalNotifier{
 		telegramNotifier:      newTelegramNotifier(managers, telegramBotToken, telegramEndpoint),
 		discordNotifier:       newDiscordNotifier(managers, discordBotToken),
 		telegramChatManager:   managers.TelegramChatManager,
@@ -99,7 +121,7 @@ type BroadcastMessageResult struct {
 	Error          error
 }
 
-func (n *GeneralNotifier) BroadcastMessage(message string, receiver pb.BroadcastMessageRequest_MessageType, entUser *ent.User, waitc chan BroadcastMessageResult) BroadcastMessageResult {
+func (n *generalNotifier) BroadcastMessage(message string, receiver pb.BroadcastMessageRequest_MessageType, entUser *ent.User, waitc chan BroadcastMessageResult) BroadcastMessageResult {
 	switch receiver {
 	case pb.BroadcastMessageRequest_TELEGRAM:
 		tgIds := n.telegramChatManager.GetAllIds()

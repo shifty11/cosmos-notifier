@@ -59,8 +59,8 @@ func (atc *AddressTrackerCreate) SetAddress(s string) *AddressTrackerCreate {
 }
 
 // SetNotificationInterval sets the "notification_interval" field.
-func (atc *AddressTrackerCreate) SetNotificationInterval(u uint64) *AddressTrackerCreate {
-	atc.mutation.SetNotificationInterval(u)
+func (atc *AddressTrackerCreate) SetNotificationInterval(i int64) *AddressTrackerCreate {
+	atc.mutation.SetNotificationInterval(i)
 	return atc
 }
 
@@ -229,7 +229,7 @@ func (atc *AddressTrackerCreate) createSpec() (*AddressTracker, *sqlgraph.Create
 		_node.Address = value
 	}
 	if value, ok := atc.mutation.NotificationInterval(); ok {
-		_spec.SetField(addresstracker.FieldNotificationInterval, field.TypeUint64, value)
+		_spec.SetField(addresstracker.FieldNotificationInterval, field.TypeInt64, value)
 		_node.NotificationInterval = value
 	}
 	if nodes := atc.mutation.ChainIDs(); len(nodes) > 0 {

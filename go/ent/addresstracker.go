@@ -26,7 +26,7 @@ type AddressTracker struct {
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// NotificationInterval holds the value of the "notification_interval" field.
-	NotificationInterval uint64 `json:"notification_interval,omitempty"`
+	NotificationInterval int64 `json:"notification_interval,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AddressTrackerQuery when eager-loading is set.
 	Edges                            AddressTrackerEdges `json:"edges"`
@@ -158,7 +158,7 @@ func (at *AddressTracker) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field notification_interval", values[i])
 			} else if value.Valid {
-				at.NotificationInterval = uint64(value.Int64)
+				at.NotificationInterval = value.Int64
 			}
 		case addresstracker.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {

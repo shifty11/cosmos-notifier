@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
@@ -41,17 +42,25 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 	if req.DiscordChannelId != 0 && req.TelegramChatId != 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "both discord-channel-id and telegram-chat-id provided")
 	}
+	if req.NotificationInterval.Seconds <= 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
+	}
 
-	tracker, err := server.addressTrackerManager.AddTracker(userEnt, req.Address, int(req.DiscordChannelId), int(req.TelegramChatId), req.NotificationInterval)
+	tracker, err := server.addressTrackerManager.AddTracker(
+		userEnt,
+		req.Address,
+		int(req.DiscordChannelId),
+		int(req.TelegramChatId),
+		req.NotificationInterval.Seconds,
+	)
 	if err != nil {
 		log.Sugar.Errorf("error while adding tracker: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
-	// TODO: send actual notifications if there are any
 
 	return &pb.AddTrackerResponse{
 		Address:              tracker.Address,
-		NotificationInterval: tracker.NotificationInterval,
+		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
 		TelegramChatId:       req.TelegramChatId,
 		TrackerId:            int64(tracker.ID),

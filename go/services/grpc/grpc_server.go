@@ -34,11 +34,21 @@ type GRPCServer struct {
 	dbManagers      *database.DbManagers
 	config          *Config
 	crawlerClient   *contract_crawler.ContractCrawler
-	generalNotifier *notifier.GeneralNotifier
+	generalNotifier notifier.GeneralNotifier
 }
 
-func NewGRPCServer(dbManagers *database.DbManagers, config *Config, crawlerClient *contract_crawler.ContractCrawler, generalNotifier *notifier.GeneralNotifier) *GRPCServer {
-	return &GRPCServer{dbManagers: dbManagers, config: config, crawlerClient: crawlerClient, generalNotifier: generalNotifier}
+func NewGRPCServer(
+	dbManagers *database.DbManagers,
+	config *Config,
+	crawlerClient *contract_crawler.ContractCrawler,
+	generalNotifier notifier.GeneralNotifier,
+) *GRPCServer {
+	return &GRPCServer{
+		dbManagers:      dbManagers,
+		config:          config,
+		crawlerClient:   crawlerClient,
+		generalNotifier: generalNotifier,
+	}
 }
 
 func (s GRPCServer) Run() {

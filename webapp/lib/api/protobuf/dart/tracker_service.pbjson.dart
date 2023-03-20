@@ -33,20 +33,20 @@ const AddTrackerRequest$json = const {
   '1': 'AddTrackerRequest',
   '2': const [
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
-    const {'1': 'notificationInterval', '3': 2, '4': 1, '5': 4, '10': 'notificationInterval'},
+    const {'1': 'notificationInterval', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
     const {'1': 'discordChannelId', '3': 3, '4': 1, '5': 3, '10': 'discordChannelId'},
     const {'1': 'telegramChatId', '3': 4, '4': 1, '5': 3, '10': 'telegramChatId'},
   ],
 };
 
 /// Descriptor for `AddTrackerRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addTrackerRequestDescriptor = $convert.base64Decode('ChFBZGRUcmFja2VyUmVxdWVzdBIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNzEjIKFG5vdGlmaWNhdGlvbkludGVydmFsGAIgASgEUhRub3RpZmljYXRpb25JbnRlcnZhbBIqChBkaXNjb3JkQ2hhbm5lbElkGAMgASgDUhBkaXNjb3JkQ2hhbm5lbElkEiYKDnRlbGVncmFtQ2hhdElkGAQgASgDUg50ZWxlZ3JhbUNoYXRJZA==');
+final $typed_data.Uint8List addTrackerRequestDescriptor = $convert.base64Decode('ChFBZGRUcmFja2VyUmVxdWVzdBIYCgdhZGRyZXNzGAEgASgJUgdhZGRyZXNzEk0KFG5vdGlmaWNhdGlvbkludGVydmFsGAIgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uUhRub3RpZmljYXRpb25JbnRlcnZhbBIqChBkaXNjb3JkQ2hhbm5lbElkGAMgASgDUhBkaXNjb3JkQ2hhbm5lbElkEiYKDnRlbGVncmFtQ2hhdElkGAQgASgDUg50ZWxlZ3JhbUNoYXRJZA==');
 @$core.Deprecated('Use addTrackerResponseDescriptor instead')
 const AddTrackerResponse$json = const {
   '1': 'AddTrackerResponse',
   '2': const [
     const {'1': 'address', '3': 1, '4': 1, '5': 9, '10': 'address'},
-    const {'1': 'notificationInterval', '3': 2, '4': 1, '5': 4, '10': 'notificationInterval'},
+    const {'1': 'notificationInterval', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
     const {'1': 'discordChannelId', '3': 3, '4': 1, '5': 3, '10': 'discordChannelId'},
     const {'1': 'telegramChatId', '3': 4, '4': 1, '5': 3, '10': 'telegramChatId'},
     const {'1': 'trackerId', '3': 5, '4': 1, '5': 3, '10': 'trackerId'},
@@ -54,7 +54,7 @@ const AddTrackerResponse$json = const {
 };
 
 /// Descriptor for `AddTrackerResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List addTrackerResponseDescriptor = $convert.base64Decode('ChJBZGRUcmFja2VyUmVzcG9uc2USGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxIyChRub3RpZmljYXRpb25JbnRlcnZhbBgCIAEoBFIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSKgoQZGlzY29yZENoYW5uZWxJZBgDIAEoA1IQZGlzY29yZENoYW5uZWxJZBImCg50ZWxlZ3JhbUNoYXRJZBgEIAEoA1IOdGVsZWdyYW1DaGF0SWQSHAoJdHJhY2tlcklkGAUgASgDUgl0cmFja2VySWQ=');
+final $typed_data.Uint8List addTrackerResponseDescriptor = $convert.base64Decode('ChJBZGRUcmFja2VyUmVzcG9uc2USGAoHYWRkcmVzcxgBIAEoCVIHYWRkcmVzcxJNChRub3RpZmljYXRpb25JbnRlcnZhbBgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvblIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSKgoQZGlzY29yZENoYW5uZWxJZBgDIAEoA1IQZGlzY29yZENoYW5uZWxJZBImCg50ZWxlZ3JhbUNoYXRJZBgEIAEoA1IOdGVsZWdyYW1DaGF0SWQSHAoJdHJhY2tlcklkGAUgASgDUgl0cmFja2VySWQ=');
 @$core.Deprecated('Use deleteTrackerRequestDescriptor instead')
 const DeleteTrackerRequest$json = const {
   '1': 'DeleteTrackerRequest',
