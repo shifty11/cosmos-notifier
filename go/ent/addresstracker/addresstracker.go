@@ -17,6 +17,8 @@ const (
 	FieldUpdateTime = "update_time"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
+	// FieldNotificationInterval holds the string denoting the notification_interval field in the database.
+	FieldNotificationInterval = "notification_interval"
 	// EdgeChain holds the string denoting the chain edge name in mutations.
 	EdgeChain = "chain"
 	// EdgeDiscordChannel holds the string denoting the discord_channel edge name in mutations.
@@ -61,6 +63,7 @@ var Columns = []string{
 	FieldCreateTime,
 	FieldUpdateTime,
 	FieldAddress,
+	FieldNotificationInterval,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "address_trackers"

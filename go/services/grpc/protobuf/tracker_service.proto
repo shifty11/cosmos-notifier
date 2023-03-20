@@ -22,14 +22,14 @@ message IsAddressValidResponse {
 
 message AddTrackerRequest {
   string address = 1;
-  int64 notificationInterval = 2;
+  uint64 notificationInterval = 2;
   int64 discordChannelId = 3;
   int64 telegramChatId = 4;
 }
 
 message AddTrackerResponse {
   string address = 1;
-  int64 notificationInterval = 2;
+  uint64 notificationInterval = 2;
   int64 discordChannelId = 3;
   int64 telegramChatId = 4;
   int64 trackerId = 5;

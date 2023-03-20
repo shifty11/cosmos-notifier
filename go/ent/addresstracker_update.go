@@ -44,6 +44,19 @@ func (atu *AddressTrackerUpdate) SetAddress(s string) *AddressTrackerUpdate {
 	return atu
 }
 
+// SetNotificationInterval sets the "notification_interval" field.
+func (atu *AddressTrackerUpdate) SetNotificationInterval(u uint64) *AddressTrackerUpdate {
+	atu.mutation.ResetNotificationInterval()
+	atu.mutation.SetNotificationInterval(u)
+	return atu
+}
+
+// AddNotificationInterval adds u to the "notification_interval" field.
+func (atu *AddressTrackerUpdate) AddNotificationInterval(u int64) *AddressTrackerUpdate {
+	atu.mutation.AddNotificationInterval(u)
+	return atu
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by ID.
 func (atu *AddressTrackerUpdate) SetChainID(id int) *AddressTrackerUpdate {
 	atu.mutation.SetChainID(id)
@@ -214,6 +227,12 @@ func (atu *AddressTrackerUpdate) sqlSave(ctx context.Context) (n int, err error)
 	if value, ok := atu.mutation.Address(); ok {
 		_spec.SetField(addresstracker.FieldAddress, field.TypeString, value)
 	}
+	if value, ok := atu.mutation.NotificationInterval(); ok {
+		_spec.SetField(addresstracker.FieldNotificationInterval, field.TypeUint64, value)
+	}
+	if value, ok := atu.mutation.AddedNotificationInterval(); ok {
+		_spec.AddField(addresstracker.FieldNotificationInterval, field.TypeUint64, value)
+	}
 	if atu.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -375,6 +394,19 @@ func (atuo *AddressTrackerUpdateOne) SetUpdateTime(t time.Time) *AddressTrackerU
 // SetAddress sets the "address" field.
 func (atuo *AddressTrackerUpdateOne) SetAddress(s string) *AddressTrackerUpdateOne {
 	atuo.mutation.SetAddress(s)
+	return atuo
+}
+
+// SetNotificationInterval sets the "notification_interval" field.
+func (atuo *AddressTrackerUpdateOne) SetNotificationInterval(u uint64) *AddressTrackerUpdateOne {
+	atuo.mutation.ResetNotificationInterval()
+	atuo.mutation.SetNotificationInterval(u)
+	return atuo
+}
+
+// AddNotificationInterval adds u to the "notification_interval" field.
+func (atuo *AddressTrackerUpdateOne) AddNotificationInterval(u int64) *AddressTrackerUpdateOne {
+	atuo.mutation.AddNotificationInterval(u)
 	return atuo
 }
 
@@ -577,6 +609,12 @@ func (atuo *AddressTrackerUpdateOne) sqlSave(ctx context.Context) (_node *Addres
 	}
 	if value, ok := atuo.mutation.Address(); ok {
 		_spec.SetField(addresstracker.FieldAddress, field.TypeString, value)
+	}
+	if value, ok := atuo.mutation.NotificationInterval(); ok {
+		_spec.SetField(addresstracker.FieldNotificationInterval, field.TypeUint64, value)
+	}
+	if value, ok := atuo.mutation.AddedNotificationInterval(); ok {
+		_spec.AddField(addresstracker.FieldNotificationInterval, field.TypeUint64, value)
 	}
 	if atuo.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{

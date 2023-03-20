@@ -14,6 +14,7 @@ var (
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "address", Type: field.TypeString},
+		{Name: "notification_interval", Type: field.TypeUint64},
 		{Name: "chain_address_trackers", Type: field.TypeInt},
 		{Name: "discord_channel_address_trackers", Type: field.TypeInt, Nullable: true},
 		{Name: "telegram_chat_address_trackers", Type: field.TypeInt, Nullable: true},
@@ -26,19 +27,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "address_trackers_chains_address_trackers",
-				Columns:    []*schema.Column{AddressTrackersColumns[4]},
+				Columns:    []*schema.Column{AddressTrackersColumns[5]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "address_trackers_discord_channels_address_trackers",
-				Columns:    []*schema.Column{AddressTrackersColumns[5]},
+				Columns:    []*schema.Column{AddressTrackersColumns[6]},
 				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "address_trackers_telegram_chats_address_trackers",
-				Columns:    []*schema.Column{AddressTrackersColumns[6]},
+				Columns:    []*schema.Column{AddressTrackersColumns[7]},
 				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -47,7 +48,7 @@ var (
 			{
 				Name:    "addresstracker_address_chain_address_trackers_discord_channel_address_trackers_telegram_chat_address_trackers",
 				Unique:  true,
-				Columns: []*schema.Column{AddressTrackersColumns[3], AddressTrackersColumns[4], AddressTrackersColumns[5], AddressTrackersColumns[6]},
+				Columns: []*schema.Column{AddressTrackersColumns[3], AddressTrackersColumns[5], AddressTrackersColumns[6], AddressTrackersColumns[7]},
 			},
 		},
 	}

@@ -58,6 +58,12 @@ func (atc *AddressTrackerCreate) SetAddress(s string) *AddressTrackerCreate {
 	return atc
 }
 
+// SetNotificationInterval sets the "notification_interval" field.
+func (atc *AddressTrackerCreate) SetNotificationInterval(u uint64) *AddressTrackerCreate {
+	atc.mutation.SetNotificationInterval(u)
+	return atc
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by ID.
 func (atc *AddressTrackerCreate) SetChainID(id int) *AddressTrackerCreate {
 	atc.mutation.SetChainID(id)
@@ -178,6 +184,9 @@ func (atc *AddressTrackerCreate) check() error {
 	if _, ok := atc.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "AddressTracker.address"`)}
 	}
+	if _, ok := atc.mutation.NotificationInterval(); !ok {
+		return &ValidationError{Name: "notification_interval", err: errors.New(`ent: missing required field "AddressTracker.notification_interval"`)}
+	}
 	if _, ok := atc.mutation.ChainID(); !ok {
 		return &ValidationError{Name: "chain", err: errors.New(`ent: missing required edge "AddressTracker.chain"`)}
 	}
@@ -218,6 +227,10 @@ func (atc *AddressTrackerCreate) createSpec() (*AddressTracker, *sqlgraph.Create
 	if value, ok := atc.mutation.Address(); ok {
 		_spec.SetField(addresstracker.FieldAddress, field.TypeString, value)
 		_node.Address = value
+	}
+	if value, ok := atc.mutation.NotificationInterval(); ok {
+		_spec.SetField(addresstracker.FieldNotificationInterval, field.TypeUint64, value)
+		_node.NotificationInterval = value
 	}
 	if nodes := atc.mutation.ChainIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

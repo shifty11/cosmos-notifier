@@ -17,7 +17,7 @@ type TrackerServer struct {
 	addressTrackerManager *database.AddressTrackerManager
 }
 
-func NewTrackersServer(managers *database.DbManagers) pb.TrackerServiceServer {
+func NewTrackerServer(managers *database.DbManagers) pb.TrackerServiceServer {
 	return &TrackerServer{
 		addressTrackerManager: managers.AddressTrackerManager,
 	}
@@ -42,15 +42,16 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 		return nil, status.Errorf(codes.InvalidArgument, "both discord-channel-id and telegram-chat-id provided")
 	}
 
-	tracker, err := server.addressTrackerManager.AddTracker(userEnt, req.Address, int(req.DiscordChannelId), int(req.TelegramChatId))
+	tracker, err := server.addressTrackerManager.AddTracker(userEnt, req.Address, int(req.DiscordChannelId), int(req.TelegramChatId), req.NotificationInterval)
 	if err != nil {
 		log.Sugar.Errorf("error while adding tracker: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
+	// TODO: send actual notifications if there are any
 
 	return &pb.AddTrackerResponse{
 		Address:              tracker.Address,
-		NotificationInterval: 0,
+		NotificationInterval: tracker.NotificationInterval,
 		DiscordChannelId:     req.DiscordChannelId,
 		TelegramChatId:       req.TelegramChatId,
 		TrackerId:            int64(tracker.ID),
