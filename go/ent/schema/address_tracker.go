@@ -23,6 +23,7 @@ func (AddressTracker) Mixin() []ent.Mixin {
 func (AddressTracker) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("address"),
+		field.Uint64("notification_interval"),
 	}
 }
 

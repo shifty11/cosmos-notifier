@@ -25,6 +25,8 @@ type AddressTracker struct {
 	UpdateTime time.Time `json:"update_time,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
+	// NotificationInterval holds the value of the "notification_interval" field.
+	NotificationInterval uint64 `json:"notification_interval,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AddressTrackerQuery when eager-loading is set.
 	Edges                            AddressTrackerEdges `json:"edges"`
@@ -101,7 +103,7 @@ func (*AddressTracker) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case addresstracker.FieldID:
+		case addresstracker.FieldID, addresstracker.FieldNotificationInterval:
 			values[i] = new(sql.NullInt64)
 		case addresstracker.FieldAddress:
 			values[i] = new(sql.NullString)
@@ -151,6 +153,12 @@ func (at *AddressTracker) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field address", values[i])
 			} else if value.Valid {
 				at.Address = value.String
+			}
+		case addresstracker.FieldNotificationInterval:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field notification_interval", values[i])
+			} else if value.Valid {
+				at.NotificationInterval = uint64(value.Int64)
 			}
 		case addresstracker.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -229,6 +237,9 @@ func (at *AddressTracker) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("address=")
 	builder.WriteString(at.Address)
+	builder.WriteString(", ")
+	builder.WriteString("notification_interval=")
+	builder.WriteString(fmt.Sprintf("%v", at.NotificationInterval))
 	builder.WriteByte(')')
 	return builder.String()
 }

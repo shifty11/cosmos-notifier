@@ -44,25 +44,27 @@ const (
 // AddressTrackerMutation represents an operation that mutates the AddressTracker nodes in the graph.
 type AddressTrackerMutation struct {
 	config
-	op                     Op
-	typ                    string
-	id                     *int
-	create_time            *time.Time
-	update_time            *time.Time
-	address                *string
-	clearedFields          map[string]struct{}
-	chain                  *int
-	clearedchain           bool
-	discord_channel        *int
-	cleareddiscord_channel bool
-	telegram_chat          *int
-	clearedtelegram_chat   bool
-	chain_proposals        map[int]struct{}
-	removedchain_proposals map[int]struct{}
-	clearedchain_proposals bool
-	done                   bool
-	oldValue               func(context.Context) (*AddressTracker, error)
-	predicates             []predicate.AddressTracker
+	op                       Op
+	typ                      string
+	id                       *int
+	create_time              *time.Time
+	update_time              *time.Time
+	address                  *string
+	notification_interval    *uint64
+	addnotification_interval *int64
+	clearedFields            map[string]struct{}
+	chain                    *int
+	clearedchain             bool
+	discord_channel          *int
+	cleareddiscord_channel   bool
+	telegram_chat            *int
+	clearedtelegram_chat     bool
+	chain_proposals          map[int]struct{}
+	removedchain_proposals   map[int]struct{}
+	clearedchain_proposals   bool
+	done                     bool
+	oldValue                 func(context.Context) (*AddressTracker, error)
+	predicates               []predicate.AddressTracker
 }
 
 var _ ent.Mutation = (*AddressTrackerMutation)(nil)
@@ -271,6 +273,62 @@ func (m *AddressTrackerMutation) ResetAddress() {
 	m.address = nil
 }
 
+// SetNotificationInterval sets the "notification_interval" field.
+func (m *AddressTrackerMutation) SetNotificationInterval(u uint64) {
+	m.notification_interval = &u
+	m.addnotification_interval = nil
+}
+
+// NotificationInterval returns the value of the "notification_interval" field in the mutation.
+func (m *AddressTrackerMutation) NotificationInterval() (r uint64, exists bool) {
+	v := m.notification_interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNotificationInterval returns the old "notification_interval" field's value of the AddressTracker entity.
+// If the AddressTracker object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AddressTrackerMutation) OldNotificationInterval(ctx context.Context) (v uint64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNotificationInterval is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNotificationInterval requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNotificationInterval: %w", err)
+	}
+	return oldValue.NotificationInterval, nil
+}
+
+// AddNotificationInterval adds u to the "notification_interval" field.
+func (m *AddressTrackerMutation) AddNotificationInterval(u int64) {
+	if m.addnotification_interval != nil {
+		*m.addnotification_interval += u
+	} else {
+		m.addnotification_interval = &u
+	}
+}
+
+// AddedNotificationInterval returns the value that was added to the "notification_interval" field in this mutation.
+func (m *AddressTrackerMutation) AddedNotificationInterval() (r int64, exists bool) {
+	v := m.addnotification_interval
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNotificationInterval resets all changes to the "notification_interval" field.
+func (m *AddressTrackerMutation) ResetNotificationInterval() {
+	m.notification_interval = nil
+	m.addnotification_interval = nil
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by id.
 func (m *AddressTrackerMutation) SetChainID(id int) {
 	m.chain = &id
@@ -476,7 +534,7 @@ func (m *AddressTrackerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AddressTrackerMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.create_time != nil {
 		fields = append(fields, addresstracker.FieldCreateTime)
 	}
@@ -485,6 +543,9 @@ func (m *AddressTrackerMutation) Fields() []string {
 	}
 	if m.address != nil {
 		fields = append(fields, addresstracker.FieldAddress)
+	}
+	if m.notification_interval != nil {
+		fields = append(fields, addresstracker.FieldNotificationInterval)
 	}
 	return fields
 }
@@ -500,6 +561,8 @@ func (m *AddressTrackerMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdateTime()
 	case addresstracker.FieldAddress:
 		return m.Address()
+	case addresstracker.FieldNotificationInterval:
+		return m.NotificationInterval()
 	}
 	return nil, false
 }
@@ -515,6 +578,8 @@ func (m *AddressTrackerMutation) OldField(ctx context.Context, name string) (ent
 		return m.OldUpdateTime(ctx)
 	case addresstracker.FieldAddress:
 		return m.OldAddress(ctx)
+	case addresstracker.FieldNotificationInterval:
+		return m.OldNotificationInterval(ctx)
 	}
 	return nil, fmt.Errorf("unknown AddressTracker field %s", name)
 }
@@ -545,6 +610,13 @@ func (m *AddressTrackerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetAddress(v)
 		return nil
+	case addresstracker.FieldNotificationInterval:
+		v, ok := value.(uint64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNotificationInterval(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AddressTracker field %s", name)
 }
@@ -552,13 +624,21 @@ func (m *AddressTrackerMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *AddressTrackerMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addnotification_interval != nil {
+		fields = append(fields, addresstracker.FieldNotificationInterval)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *AddressTrackerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case addresstracker.FieldNotificationInterval:
+		return m.AddedNotificationInterval()
+	}
 	return nil, false
 }
 
@@ -567,6 +647,13 @@ func (m *AddressTrackerMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AddressTrackerMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case addresstracker.FieldNotificationInterval:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNotificationInterval(v)
+		return nil
 	}
 	return fmt.Errorf("unknown AddressTracker numeric field %s", name)
 }
@@ -602,6 +689,9 @@ func (m *AddressTrackerMutation) ResetField(name string) error {
 		return nil
 	case addresstracker.FieldAddress:
 		m.ResetAddress()
+		return nil
+	case addresstracker.FieldNotificationInterval:
+		m.ResetNotificationInterval()
 		return nil
 	}
 	return fmt.Errorf("unknown AddressTracker field %s", name)

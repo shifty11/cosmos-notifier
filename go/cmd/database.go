@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"ariga.io/atlas/sql/sqltool"
+	"bufio"
 	"context"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql/schema"
@@ -12,6 +13,8 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/migrate"
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/spf13/cobra"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -53,13 +56,37 @@ go run main.go createMigrations postgres://postgres:postgres@localhost:5432/daod
 	},
 }
 
+func getMigrationChecksum(migrationPath string) string {
+	file, err := os.Open(filepath.Join(migrationPath, "atlas.sum"))
+	if err != nil {
+		return ""
+	}
+	//goland:noinspection GoUnhandledErrorResult
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	const maxCapacity int = 100 // required line length
+	buf := make([]byte, maxCapacity)
+	scanner.Buffer(buf, maxCapacity)
+
+	for scanner.Scan() {
+		return scanner.Text()
+	}
+	return ""
+}
+
 func createMigrations(dbCon string) {
 	ctx := context.Background()
 	// Create a local migration directory able to understand golang-migrate migration files for replay.
-	dir, err := sqltool.NewGolangMigrateDir("database/migrations")
+	migrationPath := "database/migrations"
+	dir, err := sqltool.NewGolangMigrateDir(migrationPath)
 	if err != nil {
 		log.Sugar.Fatalf("failed creating atlas migration directory: %v", err)
 	}
+
+	checksum := getMigrationChecksum(migrationPath)
+
 	// Write migration diff.
 	opts := []schema.MigrateOption{
 		schema.WithDir(dir),                         // provide migration directory
@@ -72,6 +99,11 @@ func createMigrations(dbCon string) {
 	err = migrate.NamedDiff(ctx, dbCon, "migration", opts...)
 	if err != nil {
 		log.Sugar.Fatalf("failed generating migration file: %v", err)
+	}
+	if checksum == getMigrationChecksum(migrationPath) {
+		log.Sugar.Info("no changes detected")
+	} else {
+		log.Sugar.Info("migrations created successfully")
 	}
 }
 

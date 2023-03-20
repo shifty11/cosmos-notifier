@@ -42,7 +42,12 @@ func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain)
 	return false, nil
 }
 
-func (manager *AddressTrackerManager) AddTracker(userEnt *ent.User, address string, discordChannelId int, telegramChatId int) (*ent.AddressTracker, error) {
+func (manager *AddressTrackerManager) AddTracker(
+	userEnt *ent.User,
+	address string, discordChannelId int,
+	telegramChatId int,
+	notificationInterval uint64,
+) (*ent.AddressTracker, error) {
 	isValid, chainEnt := manager.IsValid(address)
 	if !isValid {
 		return nil, errors.New("invalid address")
@@ -57,7 +62,8 @@ func (manager *AddressTrackerManager) AddTracker(userEnt *ent.User, address stri
 	createQuery := manager.client.AddressTracker.
 		Create().
 		SetChain(chainEnt).
-		SetAddress(address)
+		SetAddress(address).
+		SetNotificationInterval(notificationInterval)
 
 	if discordChannelId != 0 {
 		exist, err := userEnt.QueryDiscordChannels().
