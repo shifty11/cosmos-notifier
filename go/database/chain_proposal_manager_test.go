@@ -2,6 +2,8 @@ package database
 
 import (
 	"context"
+	"fmt"
+	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 	"time"
@@ -11,6 +13,24 @@ func newTestChainProposalManager(t *testing.T) *ChainProposalManager {
 	manager := NewChainProposalManager(testClient(t), context.Background())
 	t.Cleanup(func() { closeTestClient(manager.client) })
 	return manager
+}
+
+func addChainProposals(m *ChainProposalManager, chains []*ent.Chain) {
+	for _, chainDto := range chains {
+		stati := []types.ChainProposalStatus{types.ChainProposalStatusVotingPeriod, types.ChainProposalStatusPassed, types.ChainProposalStatusRejected, types.ChainProposalStatusFailed}
+		for i := 1; i <= len(stati); i++ {
+			m.CreateOrUpdate(chainDto, &types.ChainProposal{
+				ProposalId: i,
+				Content: types.ChainProposalContent{
+					Title:       fmt.Sprintf("title %d", i),
+					Description: fmt.Sprintf("description %d", i),
+				},
+				Status:          stati[i-1],
+				VotingStartTime: time.Time{},
+				VotingEndTime:   time.Time{},
+			})
+		}
+	}
 }
 
 func TestChainProposalManager_CreateOrUpdate(t *testing.T) {

@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
 )
@@ -12,8 +13,9 @@ func newTestChainManager(t *testing.T) *ChainManager {
 	return manager
 }
 
-func addChains(manager *ChainManager) {
-	manager.Create(&types.Chain{
+func addChains(manager *ChainManager) []*ent.Chain {
+	var chains []*ent.Chain
+	chainDto := manager.Create(&types.Chain{
 		ChainId:      "cosmoshub-3",
 		Name:         "Cosmos",
 		PrettyName:   "Cosmos Hub",
@@ -23,7 +25,8 @@ func addChains(manager *ChainManager) {
 		Image:        "",
 		Bech32Prefix: "cosmos",
 	}, "")
-	manager.Create(&types.Chain{
+	chains = append(chains, chainDto)
+	chainDto = manager.Create(&types.Chain{
 		ChainId:      "osmosis-1",
 		Name:         "Osmosis",
 		Path:         "osmosis",
@@ -32,7 +35,8 @@ func addChains(manager *ChainManager) {
 		Image:        "",
 		Bech32Prefix: "osmo",
 	}, "")
-	manager.Create(&types.Chain{
+	chains = append(chains, chainDto)
+	chainDto = manager.Create(&types.Chain{
 		ChainId:      "comdex-1",
 		Name:         "Comdex",
 		PrettyName:   "Comdex",
@@ -42,4 +46,6 @@ func addChains(manager *ChainManager) {
 		Image:        "",
 		Bech32Prefix: "comdex",
 	}, "")
+	chains = append(chains, chainDto)
+	return chains
 }

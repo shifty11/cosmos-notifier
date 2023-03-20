@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"testing"
@@ -11,6 +12,24 @@ func newTestUserManager(t *testing.T) *UserManager {
 	manager := NewUserManager(testClient(t), context.Background())
 	t.Cleanup(func() { closeTestClient(manager.client) })
 	return manager
+}
+
+func addUsers(m *UserManager, number int, userType user.Type) []*ent.User {
+	lastUserId := int64(1)
+	userDto, err := m.client.User.
+		Query().
+		Order(ent.Desc(user.FieldUserID)).
+		First(m.ctx)
+	if !ent.IsNotFound(err) {
+		lastUserId = userDto.UserID
+	}
+	users := make([]*ent.User, number)
+	for i := 0; i < number; i++ {
+		lastUserId++
+		u := m.createOrUpdateUser(lastUserId, fmt.Sprintf("userDto %d", lastUserId), userType)
+		users[i] = u
+	}
+	return users
 }
 
 func TestUserManager_CreateOrUpdateUser(t *testing.T) {
