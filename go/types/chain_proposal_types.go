@@ -1,6 +1,10 @@
 package types
 
-import "time"
+import (
+	"encoding/json"
+	cosmossdktypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"time"
+)
 
 type ChainProposalStatus string
 
@@ -40,4 +44,36 @@ type ChainProposalsResponse struct {
 
 type ChainProposalResponse struct {
 	Proposal ChainProposal `json:"proposal"`
+}
+
+type ChainProposalVoteOption cosmossdktypes.VoteOption
+
+func (o *ChainProposalVoteOption) MarshalJSON() ([]byte, error) {
+	return json.Marshal(cosmossdktypes.VoteOption(*o).String())
+}
+
+func (o *ChainProposalVoteOption) UnmarshalJSON(data []byte) error {
+	var name string
+	err := json.Unmarshal(data, &name)
+	if err != nil {
+		return err
+	}
+	*o = ChainProposalVoteOption(cosmossdktypes.VoteOption_value[name])
+	return nil
+}
+
+func (o ChainProposalVoteOption) ToCosmosType() cosmossdktypes.VoteOption {
+	return cosmossdktypes.VoteOption(o)
+}
+
+type ChainProposalVoteResponse struct {
+	Vote struct {
+		ProposalID string                  `json:"proposal_id"`
+		Voter      string                  `json:"voter"`
+		Option     ChainProposalVoteOption `json:"option"`
+		Options    []struct {
+			Option ChainProposalVoteOption `json:"option"`
+			Weight string                  `json:"weight"`
+		} `json:"options"`
+	} `json:"vote"`
 }

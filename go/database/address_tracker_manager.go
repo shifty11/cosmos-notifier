@@ -47,7 +47,8 @@ func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain)
 
 func (manager *AddressTrackerManager) AddTracker(
 	userEnt *ent.User,
-	address string, discordChannelId int,
+	address string,
+	discordChannelId int,
 	telegramChatId int,
 	notificationInterval int64,
 ) (*ent.AddressTracker, error) {
