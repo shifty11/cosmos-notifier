@@ -6,8 +6,11 @@ protobuf:
     protoc -I=go/services/grpc/protobuf/ --go_out=go/services/grpc/protobuf/ --go-grpc_out=go/services/grpc/protobuf/ --dart_out=grpc:webapp/lib/api/protobuf/dart/ go/services/grpc/protobuf/*.proto && \
     protoc -I=go/services/grpc/protobuf/ --dart_out=grpc:webapp/lib/api/protobuf/dart/ google/protobuf/timestamp.proto google/protobuf/empty.proto
 
-models:
+generate-models:
     cd go && go generate ./ent
 
-migration:
+generate-migrations:
     cd go && go run main.go database create-migrations
+
+migrate:
+    cd go && go run main.go database migrate
