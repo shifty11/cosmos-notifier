@@ -8,10 +8,23 @@ package cosmos_notifier_grpc;
 option go_package = "go/tracker_service";
 
 service TrackerService {
+  rpc GetTrackers (google.protobuf.Empty) returns (GetTrackersResponse) {}
   rpc IsAddressValid (IsAddressValidRequest) returns (IsAddressValidResponse) {}
-  rpc AddTracker (AddTrackerRequest) returns (AddTrackerResponse) {}
-  rpc UpdateTracker (UpdateTrackerRequest) returns (UpdateTrackerResponse) {}
+  rpc AddTracker (AddTrackerRequest) returns (Tracker) {}
+  rpc UpdateTracker (UpdateTrackerRequest) returns (Tracker) {}
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
+}
+
+message Tracker {
+  int64 trackerId = 1;
+  string address = 2;
+  google.protobuf.Duration notificationInterval = 3;
+  int64 discordChannelId = 4;
+  int64 telegramChatId = 5;
+}
+
+message GetTrackersResponse {
+  repeated Tracker trackers = 1;
 }
 
 message IsAddressValidRequest {
@@ -29,24 +42,8 @@ message AddTrackerRequest {
   int64 telegramChatId = 4;
 }
 
-message AddTrackerResponse {
-  int64 trackerId = 1;
-  string address = 2;
-  google.protobuf.Duration notificationInterval = 3;
-  int64 discordChannelId = 4;
-  int64 telegramChatId = 5;
-}
-
 message UpdateTrackerRequest {
   int64 trackerId = 1;
-  google.protobuf.Duration notificationInterval = 3;
-  int64 discordChannelId = 4;
-  int64 telegramChatId = 5;
-}
-
-message UpdateTrackerResponse {
-  int64 trackerId = 1;
-  string address = 2;
   google.protobuf.Duration notificationInterval = 3;
   int64 discordChannelId = 4;
   int64 telegramChatId = 5;

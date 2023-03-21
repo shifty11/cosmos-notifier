@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	cosmossdktypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/types"
 	"testing"
@@ -16,7 +17,7 @@ func newTestChainProposalManager(t *testing.T) *ChainProposalManager {
 }
 
 func addChainProposals(m *ChainProposalManager, chains []*ent.Chain) {
-	stati := []types.ChainProposalStatus{types.ChainProposalStatusPassed, types.ChainProposalStatusRejected, types.ChainProposalStatusFailed, types.ChainProposalStatusVotingPeriod}
+	stati := []cosmossdktypes.ProposalStatus{cosmossdktypes.StatusPassed, cosmossdktypes.StatusRejected, cosmossdktypes.StatusFailed, cosmossdktypes.StatusVotingPeriod}
 	oneWeekAgo := time.Now().Add(-time.Hour * 24 * 7)
 	twoWeeksAgo := time.Now().Add(-time.Hour * 24 * 14)
 	threeWeeksAgo := time.Now().Add(-time.Hour * 24 * 21)
@@ -31,7 +32,7 @@ func addChainProposals(m *ChainProposalManager, chains []*ent.Chain) {
 					Title:       fmt.Sprintf("title %d", i),
 					Description: fmt.Sprintf("description %d", i),
 				},
-				Status:          stati[i-1],
+				Status:          types.ChainProposalStatus(stati[i-1]),
 				VotingStartTime: votingStartTimes[i-1],
 				VotingEndTime:   votingEndTimes[i-1],
 			})
@@ -63,7 +64,7 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 			Title:       "title",
 			Description: "description",
 		},
-		Status:          types.ChainProposalStatusVotingPeriod,
+		Status:          types.ChainProposalStatus(cosmossdktypes.StatusVotingPeriod),
 		VotingStartTime: atTime,
 		VotingEndTime:   atTime.Add(time.Hour * 24 * 7),
 	}
@@ -113,7 +114,7 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 		t.Fatalf("Expected %s, got %s", propData.Content.Description, prop.Description)
 	}
 
-	propData.Status = types.ChainProposalStatusPassed
+	propData.Status = types.ChainProposalStatus(cosmossdktypes.StatusPassed)
 	prop, status = m.CreateOrUpdate(c, propData)
 	if status != ProposalStatusChangedFromOpen {
 		t.Errorf("Expected status %s, got %s", ProposalStatusChangedFromOpen, status)
@@ -122,8 +123,8 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 		t.Fatalf("Expected %s, got %s", string(propData.Status), prop.Status.String())
 	}
 
-	for _, statType := range []types.ChainProposalStatus{types.ChainProposalStatusRejected, types.ChainProposalStatusFailed, types.ChainProposalStatusPassed} {
-		propData.Status = statType
+	for _, statType := range []cosmossdktypes.ProposalStatus{cosmossdktypes.StatusRejected, cosmossdktypes.StatusFailed, cosmossdktypes.StatusPassed} {
+		propData.Status = types.ChainProposalStatus(statType)
 		prop, status = m.CreateOrUpdate(c, propData)
 		if status != ProposalUpdated {
 			t.Errorf("Expected status %s, got %s", ProposalUpdated, status)
@@ -158,7 +159,7 @@ func TestChainProposalManager_VotingPeriodExpired(t *testing.T) {
 			Title:       "title",
 			Description: "description",
 		},
-		Status:          types.ChainProposalStatusVotingPeriod,
+		Status:          types.ChainProposalStatus(cosmossdktypes.StatusVotingPeriod),
 		VotingStartTime: atTime,
 		VotingEndTime:   atTime.Add(time.Hour * 24 * 7),
 	}
