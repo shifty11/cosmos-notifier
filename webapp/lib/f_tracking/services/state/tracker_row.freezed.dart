@@ -18,10 +18,11 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$TrackerRow {
   Int64 get id => throw _privateConstructorUsedError;
   String get address => throw _privateConstructorUsedError;
-  String get notificationInterval => throw _privateConstructorUsedError;
+  pb.Duration get notificationInterval => throw _privateConstructorUsedError;
   Int64 get chatId => throw _privateConstructorUsedError;
   bool get isSaved => throw _privateConstructorUsedError;
   bool get isAddRow => throw _privateConstructorUsedError;
+  bool get isAddressValid => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $TrackerRowCopyWith<TrackerRow> get copyWith =>
@@ -37,10 +38,11 @@ abstract class $TrackerRowCopyWith<$Res> {
   $Res call(
       {Int64 id,
       String address,
-      String notificationInterval,
+      pb.Duration notificationInterval,
       Int64 chatId,
       bool isSaved,
-      bool isAddRow});
+      bool isAddRow,
+      bool isAddressValid});
 }
 
 /// @nodoc
@@ -62,6 +64,7 @@ class _$TrackerRowCopyWithImpl<$Res, $Val extends TrackerRow>
     Object? chatId = null,
     Object? isSaved = null,
     Object? isAddRow = null,
+    Object? isAddressValid = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -75,7 +78,7 @@ class _$TrackerRowCopyWithImpl<$Res, $Val extends TrackerRow>
       notificationInterval: null == notificationInterval
           ? _value.notificationInterval
           : notificationInterval // ignore: cast_nullable_to_non_nullable
-              as String,
+              as pb.Duration,
       chatId: null == chatId
           ? _value.chatId
           : chatId // ignore: cast_nullable_to_non_nullable
@@ -87,6 +90,10 @@ class _$TrackerRowCopyWithImpl<$Res, $Val extends TrackerRow>
       isAddRow: null == isAddRow
           ? _value.isAddRow
           : isAddRow // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isAddressValid: null == isAddressValid
+          ? _value.isAddressValid
+          : isAddressValid // ignore: cast_nullable_to_non_nullable
               as bool,
     ) as $Val);
   }
@@ -103,10 +110,11 @@ abstract class _$$_TrackerRowCopyWith<$Res>
   $Res call(
       {Int64 id,
       String address,
-      String notificationInterval,
+      pb.Duration notificationInterval,
       Int64 chatId,
       bool isSaved,
-      bool isAddRow});
+      bool isAddRow,
+      bool isAddressValid});
 }
 
 /// @nodoc
@@ -126,6 +134,7 @@ class __$$_TrackerRowCopyWithImpl<$Res>
     Object? chatId = null,
     Object? isSaved = null,
     Object? isAddRow = null,
+    Object? isAddressValid = null,
   }) {
     return _then(_$_TrackerRow(
       id: null == id
@@ -139,7 +148,7 @@ class __$$_TrackerRowCopyWithImpl<$Res>
       notificationInterval: null == notificationInterval
           ? _value.notificationInterval
           : notificationInterval // ignore: cast_nullable_to_non_nullable
-              as String,
+              as pb.Duration,
       chatId: null == chatId
           ? _value.chatId
           : chatId // ignore: cast_nullable_to_non_nullable
@@ -152,27 +161,33 @@ class __$$_TrackerRowCopyWithImpl<$Res>
           ? _value.isAddRow
           : isAddRow // ignore: cast_nullable_to_non_nullable
               as bool,
+      isAddressValid: null == isAddressValid
+          ? _value.isAddressValid
+          : isAddressValid // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
 
 /// @nodoc
 
-class _$_TrackerRow implements _TrackerRow {
+class _$_TrackerRow extends _TrackerRow {
   const _$_TrackerRow(
       {required this.id,
       required this.address,
       required this.notificationInterval,
       required this.chatId,
       required this.isSaved,
-      this.isAddRow = false});
+      this.isAddRow = false,
+      this.isAddressValid = true})
+      : super._();
 
   @override
   final Int64 id;
   @override
   final String address;
   @override
-  final String notificationInterval;
+  final pb.Duration notificationInterval;
   @override
   final Int64 chatId;
   @override
@@ -180,10 +195,13 @@ class _$_TrackerRow implements _TrackerRow {
   @override
   @JsonKey()
   final bool isAddRow;
+  @override
+  @JsonKey()
+  final bool isAddressValid;
 
   @override
   String toString() {
-    return 'TrackerRow(id: $id, address: $address, notificationInterval: $notificationInterval, chatId: $chatId, isSaved: $isSaved, isAddRow: $isAddRow)';
+    return 'TrackerRow(id: $id, address: $address, notificationInterval: $notificationInterval, chatId: $chatId, isSaved: $isSaved, isAddRow: $isAddRow, isAddressValid: $isAddressValid)';
   }
 
   @override
@@ -198,12 +216,14 @@ class _$_TrackerRow implements _TrackerRow {
             (identical(other.chatId, chatId) || other.chatId == chatId) &&
             (identical(other.isSaved, isSaved) || other.isSaved == isSaved) &&
             (identical(other.isAddRow, isAddRow) ||
-                other.isAddRow == isAddRow));
+                other.isAddRow == isAddRow) &&
+            (identical(other.isAddressValid, isAddressValid) ||
+                other.isAddressValid == isAddressValid));
   }
 
   @override
   int get hashCode => Object.hash(runtimeType, id, address,
-      notificationInterval, chatId, isSaved, isAddRow);
+      notificationInterval, chatId, isSaved, isAddRow, isAddressValid);
 
   @JsonKey(ignore: true)
   @override
@@ -212,27 +232,31 @@ class _$_TrackerRow implements _TrackerRow {
       __$$_TrackerRowCopyWithImpl<_$_TrackerRow>(this, _$identity);
 }
 
-abstract class _TrackerRow implements TrackerRow {
+abstract class _TrackerRow extends TrackerRow {
   const factory _TrackerRow(
       {required final Int64 id,
       required final String address,
-      required final String notificationInterval,
+      required final pb.Duration notificationInterval,
       required final Int64 chatId,
       required final bool isSaved,
-      final bool isAddRow}) = _$_TrackerRow;
+      final bool isAddRow,
+      final bool isAddressValid}) = _$_TrackerRow;
+  const _TrackerRow._() : super._();
 
   @override
   Int64 get id;
   @override
   String get address;
   @override
-  String get notificationInterval;
+  pb.Duration get notificationInterval;
   @override
   Int64 get chatId;
   @override
   bool get isSaved;
   @override
   bool get isAddRow;
+  @override
+  bool get isAddressValid;
   @override
   @JsonKey(ignore: true)
   _$$_TrackerRowCopyWith<_$_TrackerRow> get copyWith =>

@@ -51,6 +51,7 @@ dependencies:
   url_launcher: ^6.1.5
   font_awesome_flutter: ^10.2.1
   badges: ^2.0.3
+  debounce_throttle: ^2.0.0
 
 
 dev_dependencies:
