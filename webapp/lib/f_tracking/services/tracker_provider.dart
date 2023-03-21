@@ -6,10 +6,10 @@ import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
 
 final trackerFutureProvider = FutureProvider((ref) async {
   await ref.read(trackerNotifierProvider.notifier).getTrackers();
-  return ref.read(trackerNotifierProvider);
 });
 
 final trackerNotifierProvider = StateNotifierProvider<TrackerNotifier, List<TrackerRow>>((ref) {
@@ -22,52 +22,62 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
 
   TrackerNotifier(this.trackerService, this.messageNotifier) : super([]);
 
-  String notificationIntervalAsString(Int64 seconds) {
-    Duration duration = Duration(seconds: seconds.toInt());
-    if (duration.inDays > 0) {
-      var dayText = "day";
-      if (duration.inDays > 1) {
-        dayText = "days";
-      }
-      if (duration.inHours > duration.inDays * 24) {
-        return "${duration.inDays} $dayText, ${duration.inHours - duration.inDays * 24} hours before";
-      } else {
-        return "${duration.inDays} $dayText";
-      }
-    } else if (duration.inHours > 0) {
-      return "${duration.inHours} hours before";
-    } else if (duration.inMinutes > 0) {
-      return "${duration.inMinutes} minutes before";
-    }
-    return "on time";
-  }
-
-  String shortenedBech32Address(String address) {
-    if (address.length > 20) {
-      return "${address.substring(0, 8)}...${address.substring(address.length - 4)}";
-    }
-    return address;
-  }
-
   Future<void> getTrackers() async {
     var response = await trackerService.getTrackers(Empty());
-    response.trackers.forEach((tracker) {
+    for (var tracker in response.trackers) {
       state = [
         ...state,
         TrackerRow(
           id: tracker.id,
-          address: shortenedBech32Address(tracker.address),
-          notificationInterval: notificationIntervalAsString(tracker.notificationInterval.seconds),
+          address: tracker.address,
+          notificationInterval: tracker.notificationInterval,
           chatId: tracker.discordChannelId,
           isSaved: true,
         )
       ];
-    });
-    state = [...state, TrackerRow(id: Int64(0), address: "", notificationInterval: "", chatId: Int64(0), isSaved: false, isAddRow: true)];
+    }
+    state = [...state, TrackerRow(id: Int64(0), address: "", notificationInterval: pb.Duration(), chatId: Int64(0), isSaved: false, isAddRow: true)];
   }
 
   void addTracker() {
-    state = [...state, TrackerRow(id: Int64(0), address: "", notificationInterval: "", chatId: Int64(0), isSaved: false)];
+    if (state.last.isAddRow) {
+      return;
+    }
+    state = [...state, TrackerRow(id: Int64(0), address: "", notificationInterval: pb.Duration(), chatId: Int64(0), isSaved: false)];
+  }
+
+  Future<void> updateTracker(TrackerRow tracker) async {
+    if (tracker.isAddRow) {
+      if (tracker.address.isNotEmpty) {
+        try {
+          var response = await trackerService.isAddressValid(IsAddressValidRequest(address: tracker.address));
+          tracker = tracker.copyWith(isAddressValid: response.isValid);
+          state = [
+            for (final oldTrackerRow in state)
+              if (oldTrackerRow.id == tracker.id)
+                tracker
+              else
+                oldTrackerRow,
+          ];
+        } catch (e) {
+          messageNotifier.sendMsg(error: e.toString());
+          return;
+        }
+      }
+      // if (tracker.address.isNotEmpty && !tracker.notificationInterval.seconds.isZero && tracker.chatId.toInt() > 0) {
+      if (tracker.isAddressValid && !tracker.notificationInterval.seconds.isZero) {
+        try {
+          var response = await trackerService.addTracker(AddTrackerRequest(
+            address: tracker.address,
+            notificationInterval: tracker.notificationInterval,
+            discordChannelId: tracker.chatId,
+          ));
+          // TODO: fix state
+        } catch (e) {
+          messageNotifier.sendMsg(error: e.toString());
+        }
+      }
+    }
   }
 
   Future<void> deleteTracker(TrackerRow tracker) async {
