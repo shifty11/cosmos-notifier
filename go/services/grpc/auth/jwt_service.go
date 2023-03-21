@@ -28,6 +28,7 @@ func AccessibleRoles() map[string][]Role {
 	const authService = path + ".AuthService/"
 	const subsService = path + ".SubscriptionService/"
 	const adminService = path + ".AdminService/"
+	const trackerService = path + ".TrackerService/"
 
 	return map[string][]Role{
 		authService + "TelegramLogin":              {Unauthenticated, User, Admin},
@@ -40,6 +41,11 @@ func AccessibleRoles() map[string][]Role {
 		subsService + "AddDao":                     {Admin},
 		subsService + "EnableChain":                {Admin},
 		subsService + "DeleteDao":                  {Admin},
+		trackerService + "GetTrackers":             {User, Admin},
+		trackerService + "AddTracker":              {User, Admin},
+		trackerService + "UpdateTracker":           {User, Admin},
+		trackerService + "DeleteTracker":           {User, Admin},
+		trackerService + "IsAddressValid":          {User, Admin},
 		adminService + "BroadcastMessage":          {Admin},
 		adminService + "GetStats":                  {Admin},
 	}
