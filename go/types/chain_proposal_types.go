@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	cosmossdktypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"time"
 )
 
@@ -22,8 +23,12 @@ func (s *ChainProposalStatus) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (s *ChainProposalStatus) ToString() string {
+func (s *ChainProposalStatus) String() string {
 	return cosmossdktypes.ProposalStatus(*s).String()
+}
+
+func (s *ChainProposalStatus) ToEntStatus() chainproposal.Status {
+	return chainproposal.Status(s.String())
 }
 
 type ChainProposalContent struct {

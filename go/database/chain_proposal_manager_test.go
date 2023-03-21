@@ -82,8 +82,8 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 	if prop.Description != propData.Content.Description {
 		t.Fatalf("Expected %s, got %s", propData.Content.Description, prop.Description)
 	}
-	if prop.Status.String() != string(propData.Status) {
-		t.Fatalf("Expected %s, got %s", string(propData.Status), prop.Status.String())
+	if prop.Status != propData.Status.ToEntStatus() {
+		t.Fatalf("Expected %s, got %s", propData.Status.ToEntStatus(), prop.Status)
 	}
 	if prop.VotingStartTime != propData.VotingStartTime {
 		t.Fatalf("Expected %s, got %s", propData.VotingStartTime, prop.VotingStartTime)
@@ -119,8 +119,8 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 	if status != ProposalStatusChangedFromOpen {
 		t.Errorf("Expected status %s, got %s", ProposalStatusChangedFromOpen, status)
 	}
-	if prop.Status.String() != string(propData.Status) {
-		t.Fatalf("Expected %s, got %s", string(propData.Status), prop.Status.String())
+	if prop.Status != propData.Status.ToEntStatus() {
+		t.Fatalf("Expected %s, got %s", propData.Status.ToEntStatus(), prop.Status)
 	}
 
 	for _, statType := range []cosmossdktypes.ProposalStatus{cosmossdktypes.StatusRejected, cosmossdktypes.StatusFailed, cosmossdktypes.StatusPassed} {
@@ -129,8 +129,8 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 		if status != ProposalUpdated {
 			t.Errorf("Expected status %s, got %s", ProposalUpdated, status)
 		}
-		if prop.Status.String() != string(propData.Status) {
-			t.Fatalf("Expected %s, got %s", string(propData.Status), prop.Status.String())
+		if prop.Status != propData.Status.ToEntStatus() {
+			t.Fatalf("Expected %s, got %s", propData.Status.ToEntStatus(), prop.Status)
 		}
 	}
 }
