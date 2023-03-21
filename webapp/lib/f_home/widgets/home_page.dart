@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -24,8 +25,8 @@ class HomePage extends StatelessWidget {
           label: const Text("Telegram"),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(buttonWith, 50),
-            primary: Styles.telegramColor,
-            onPrimary: Colors.white,
+            backgroundColor: Styles.telegramColor,
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(32.0),
             ),
@@ -38,8 +39,8 @@ class HomePage extends StatelessWidget {
           label: const Text("Discord"),
           style: ElevatedButton.styleFrom(
             minimumSize: const Size(buttonWith, 50),
-            primary: Styles.discordColor,
-            onPrimary: Colors.white,
+            backgroundColor: Styles.discordColor,
+            foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(32.0),
             ),
@@ -99,10 +100,31 @@ class HomePage extends StatelessWidget {
                   child: Text(
                       text,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headline5?.copyWith(color: Styles.dangerTextColor)));
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Styles.dangerTextColor)));
             },
           ) ??
           Container();
+    });
+  }
+
+  Widget devEnvLoginButton(BuildContext context) {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child){
+      final auth = ref.watch(authProvider);
+      if (auth.isAuthenticated) {
+        return Container();
+      }
+      return Column(
+        children: [
+          OutlinedButton.icon(
+            onPressed: () => GoRouter.of(context).go(rLogin.path),
+            icon: const Icon(Icons.login),
+            label: const Text("Login"),
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size(380, 50),
+            ),
+          ),
+        ],
+      );
     });
   }
 
@@ -120,17 +142,18 @@ class HomePage extends StatelessWidget {
             Flexible(
               flex: 0,
               child: Text("Get notified about governance proposals of Cosmos chains and DAO's",
-                  textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline5),
+                  textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineSmall),
             ),
             const SizedBox(height: 10),
             Flexible(
                 flex: 0,
                 child: Text("Now available on Telegram and Discord",
-                    textAlign: TextAlign.center, style: Theme.of(context).textTheme.headline6)),
+                    textAlign: TextAlign.center, style: Theme.of(context).textTheme.titleLarge)),
             const Spacer(flex: 1),
             botButtons(context),
             const Spacer(flex: 1),
             subscriptionButton(),
+            kReleaseMode ? Container() : devEnvLoginButton(context),
             errorMsg(),
             const Spacer(flex: 4),
             const Flexible(flex: 0, child: FooterWidget()),

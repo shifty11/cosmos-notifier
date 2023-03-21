@@ -4,6 +4,7 @@ import 'package:cosmos_notifier/f_home/services/auth_interceptor.dart';
 import 'package:cosmos_notifier/f_home/services/auth_service.dart';
 import 'package:cosmos_notifier/f_home/services/jwt_manager.dart';
 import 'package:cosmos_notifier/f_subscription/services/subscription_service.dart';
+import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:grpc/grpc_web.dart';
 
@@ -16,6 +17,7 @@ final authInterceptor = AuthInterceptor(jwtManager);
 final authService = AuthService(channel, [authInterceptor], jwtManager, refreshBeforeExpDuration);
 final subsService = SubscriptionService(channel, [authInterceptor]);
 final adminService = AdminService(channel, [authInterceptor]);
+final trackerService = TrackerService(channel, [authInterceptor]);
 
 class RouteData {
   final String name;
@@ -29,6 +31,7 @@ const rLoading = RouteData("loading", "/loading");
 const rLogin = RouteData("login", "/login");
 const rSubscriptions = RouteData("subscriptions", "/subscriptions");
 const rAdmin = RouteData("admin", "/admin");
+const rTracking = RouteData("tracking", "/tracking");
 
 const bool cDebugMode = true;
 
