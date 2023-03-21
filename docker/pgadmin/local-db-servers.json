@@ -9,6 +9,16 @@
       "Username": "postgres",
       "PassFile": "/pgpass",
       "SSLMode": "prefer"
+    },
+    "2": {
+      "Name": "Cosmos Notifier Test (dev)",
+      "Group": "Servers",
+      "Host": "db",
+      "Port": 5433,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpassfile"
     }
   }
 }
