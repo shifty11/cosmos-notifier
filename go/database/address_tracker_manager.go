@@ -24,6 +24,20 @@ func NewAddressTrackerManager(client *ent.Client, ctx context.Context) *AddressT
 	return &AddressTrackerManager{client: client, ctx: ctx}
 }
 
+func (manager *AddressTrackerManager) GetTrackers(userEnt *ent.User) ([]*ent.AddressTracker, error) {
+	return manager.client.AddressTracker.
+		Query().
+		Where(addresstracker.And(
+			addresstracker.Or(
+				addresstracker.HasDiscordChannelWith(discordchannel.HasUsersWith(user.IDEQ(userEnt.ID))),
+				addresstracker.HasTelegramChatWith(telegramchat.HasUsersWith(user.IDEQ(userEnt.ID))),
+			),
+		)).
+		WithDiscordChannel().
+		WithTelegramChat().
+		All(manager.ctx)
+}
+
 func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain) {
 	if address == "" {
 		return false, nil

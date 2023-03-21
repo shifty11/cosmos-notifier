@@ -38,6 +38,62 @@ func addAddressTrackers(m *AddressTrackerManager, addresses []string, discordCha
 	return addressTrackers
 }
 
+func TestAddressTrackerManager_GetTrackers(t *testing.T) {
+	addChains(newTestChainManager(t))
+	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
+	channels := addDiscordChannels(newTestDiscordChannelManager(t), users[:1])
+	telegramChats := addTelegramChats(newTestTelegramChatManager(t), users[1:])
+
+	m := newTestAddressTrackerManager(t)
+	addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, []*ent.TelegramChat{})
+	addAddressTrackers(m, []string{"osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq", "comdex1cx82d7pm4dgffy7a93rl6ul5g84vjgxkqfyp2m"}, []*ent.DiscordChannel{}, telegramChats)
+
+	trackers, err := m.GetTrackers(users[0])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(trackers) != 2 {
+		t.Errorf("Expected 2 tracker, got %d", len(trackers))
+	}
+	if trackers[0].Address != "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02" {
+		t.Errorf("Expected address %s, got %s", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", trackers[0].Address)
+	}
+	if trackers[0].Edges.DiscordChannel.ID != channels[0].ID {
+		t.Errorf("Expected discord channel %d, got %d", channels[0].ID, trackers[0].Edges.DiscordChannel.ID)
+	}
+	if trackers[0].Edges.TelegramChat != nil {
+		t.Error("Telegram chat is not nil")
+	}
+	if trackers[1].Address != "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02" {
+		t.Errorf("Expected address %s, got %s", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", trackers[1].Address)
+	}
+	if trackers[1].Edges.DiscordChannel.ID != channels[1].ID {
+		t.Errorf("Expected discord channel %d, got %d", channels[1].ID, trackers[1].Edges.DiscordChannel.ID)
+	}
+	if trackers[1].Edges.TelegramChat != nil {
+		t.Error("Telegram chat is not nil")
+	}
+
+	trackers, err = m.GetTrackers(users[1])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(trackers) != 4 {
+		t.Errorf("Expected 4 tracker, got %d", len(trackers))
+	}
+	for _, tracker := range trackers {
+		if tracker.Address != "osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq" && tracker.Address != "comdex1cx82d7pm4dgffy7a93rl6ul5g84vjgxkqfyp2m" {
+			t.Errorf("Expected address %s or %s, got %s", "osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq", "comdex1cx82d7pm4dgffy7a93rl6ul5g84vjgxkqfyp2m", tracker.Address)
+		}
+		if tracker.Edges.DiscordChannel != nil {
+			t.Error("Discord channel is not nil")
+		}
+		if tracker.Edges.TelegramChat.ID != telegramChats[0].ID && tracker.Edges.TelegramChat.ID != telegramChats[1].ID {
+			t.Errorf("Expected telegram chat %d or %d, got %d", telegramChats[0].ID, telegramChats[1].ID, tracker.Edges.TelegramChat.ID)
+		}
+	}
+}
+
 func TestAddressTrackerManager_IsValid(t *testing.T) {
 	m := newTestAddressTrackerManager(t)
 

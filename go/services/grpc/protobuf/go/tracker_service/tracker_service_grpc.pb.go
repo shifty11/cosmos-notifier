@@ -20,6 +20,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	TrackerService_GetTrackers_FullMethodName    = "/cosmos_notifier_grpc.TrackerService/GetTrackers"
 	TrackerService_IsAddressValid_FullMethodName = "/cosmos_notifier_grpc.TrackerService/IsAddressValid"
 	TrackerService_AddTracker_FullMethodName     = "/cosmos_notifier_grpc.TrackerService/AddTracker"
 	TrackerService_UpdateTracker_FullMethodName  = "/cosmos_notifier_grpc.TrackerService/UpdateTracker"
@@ -30,9 +31,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type TrackerServiceClient interface {
+	GetTrackers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetTrackersResponse, error)
 	IsAddressValid(ctx context.Context, in *IsAddressValidRequest, opts ...grpc.CallOption) (*IsAddressValidResponse, error)
-	AddTracker(ctx context.Context, in *AddTrackerRequest, opts ...grpc.CallOption) (*AddTrackerResponse, error)
-	UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*UpdateTrackerResponse, error)
+	AddTracker(ctx context.Context, in *AddTrackerRequest, opts ...grpc.CallOption) (*Tracker, error)
+	UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*Tracker, error)
 	DeleteTracker(ctx context.Context, in *DeleteTrackerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
@@ -44,6 +46,15 @@ func NewTrackerServiceClient(cc grpc.ClientConnInterface) TrackerServiceClient {
 	return &trackerServiceClient{cc}
 }
 
+func (c *trackerServiceClient) GetTrackers(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetTrackersResponse, error) {
+	out := new(GetTrackersResponse)
+	err := c.cc.Invoke(ctx, TrackerService_GetTrackers_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *trackerServiceClient) IsAddressValid(ctx context.Context, in *IsAddressValidRequest, opts ...grpc.CallOption) (*IsAddressValidResponse, error) {
 	out := new(IsAddressValidResponse)
 	err := c.cc.Invoke(ctx, TrackerService_IsAddressValid_FullMethodName, in, out, opts...)
@@ -53,8 +64,8 @@ func (c *trackerServiceClient) IsAddressValid(ctx context.Context, in *IsAddress
 	return out, nil
 }
 
-func (c *trackerServiceClient) AddTracker(ctx context.Context, in *AddTrackerRequest, opts ...grpc.CallOption) (*AddTrackerResponse, error) {
-	out := new(AddTrackerResponse)
+func (c *trackerServiceClient) AddTracker(ctx context.Context, in *AddTrackerRequest, opts ...grpc.CallOption) (*Tracker, error) {
+	out := new(Tracker)
 	err := c.cc.Invoke(ctx, TrackerService_AddTracker_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,8 +73,8 @@ func (c *trackerServiceClient) AddTracker(ctx context.Context, in *AddTrackerReq
 	return out, nil
 }
 
-func (c *trackerServiceClient) UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*UpdateTrackerResponse, error) {
-	out := new(UpdateTrackerResponse)
+func (c *trackerServiceClient) UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*Tracker, error) {
+	out := new(Tracker)
 	err := c.cc.Invoke(ctx, TrackerService_UpdateTracker_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -84,9 +95,10 @@ func (c *trackerServiceClient) DeleteTracker(ctx context.Context, in *DeleteTrac
 // All implementations must embed UnimplementedTrackerServiceServer
 // for forward compatibility
 type TrackerServiceServer interface {
+	GetTrackers(context.Context, *empty.Empty) (*GetTrackersResponse, error)
 	IsAddressValid(context.Context, *IsAddressValidRequest) (*IsAddressValidResponse, error)
-	AddTracker(context.Context, *AddTrackerRequest) (*AddTrackerResponse, error)
-	UpdateTracker(context.Context, *UpdateTrackerRequest) (*UpdateTrackerResponse, error)
+	AddTracker(context.Context, *AddTrackerRequest) (*Tracker, error)
+	UpdateTracker(context.Context, *UpdateTrackerRequest) (*Tracker, error)
 	DeleteTracker(context.Context, *DeleteTrackerRequest) (*empty.Empty, error)
 	mustEmbedUnimplementedTrackerServiceServer()
 }
@@ -95,13 +107,16 @@ type TrackerServiceServer interface {
 type UnimplementedTrackerServiceServer struct {
 }
 
+func (UnimplementedTrackerServiceServer) GetTrackers(context.Context, *empty.Empty) (*GetTrackersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTrackers not implemented")
+}
 func (UnimplementedTrackerServiceServer) IsAddressValid(context.Context, *IsAddressValidRequest) (*IsAddressValidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsAddressValid not implemented")
 }
-func (UnimplementedTrackerServiceServer) AddTracker(context.Context, *AddTrackerRequest) (*AddTrackerResponse, error) {
+func (UnimplementedTrackerServiceServer) AddTracker(context.Context, *AddTrackerRequest) (*Tracker, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTracker not implemented")
 }
-func (UnimplementedTrackerServiceServer) UpdateTracker(context.Context, *UpdateTrackerRequest) (*UpdateTrackerResponse, error) {
+func (UnimplementedTrackerServiceServer) UpdateTracker(context.Context, *UpdateTrackerRequest) (*Tracker, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTracker not implemented")
 }
 func (UnimplementedTrackerServiceServer) DeleteTracker(context.Context, *DeleteTrackerRequest) (*empty.Empty, error) {
@@ -118,6 +133,24 @@ type UnsafeTrackerServiceServer interface {
 
 func RegisterTrackerServiceServer(s grpc.ServiceRegistrar, srv TrackerServiceServer) {
 	s.RegisterService(&TrackerService_ServiceDesc, srv)
+}
+
+func _TrackerService_GetTrackers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).GetTrackers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_GetTrackers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).GetTrackers(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _TrackerService_IsAddressValid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -199,6 +232,10 @@ var TrackerService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "cosmos_notifier_grpc.TrackerService",
 	HandlerType: (*TrackerServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetTrackers",
+			Handler:    _TrackerService_GetTrackers_Handler,
+		},
 		{
 			MethodName: "IsAddressValid",
 			Handler:    _TrackerService_IsAddressValid_Handler,

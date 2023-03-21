@@ -24,6 +24,40 @@ func NewTrackerServer(managers *database.DbManagers) pb.TrackerServiceServer {
 	}
 }
 
+func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*pb.GetTrackersResponse, error) {
+	userEnt, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
+	}
+
+	trackers, err := server.addressTrackerManager.GetTrackers(userEnt)
+	if err != nil {
+		log.Sugar.Error(err)
+		return nil, status.Errorf(codes.Internal, "error while getting trackers")
+	}
+
+	pbTrackers := make([]*pb.Tracker, len(trackers))
+	for _, tracker := range trackers {
+		discordChannelId := int64(0)
+		if tracker.Edges.DiscordChannel != nil {
+			discordChannelId = int64(tracker.Edges.DiscordChannel.ID)
+		}
+		telegramChatId := int64(0)
+		if tracker.Edges.TelegramChat != nil {
+			telegramChatId = int64(tracker.Edges.TelegramChat.ID)
+		}
+		pbTrackers = append(pbTrackers, &pb.Tracker{
+			TrackerId:            int64(tracker.ID),
+			Address:              tracker.Address,
+			NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
+			DiscordChannelId:     discordChannelId,
+			TelegramChatId:       telegramChatId,
+		})
+	}
+	return &pb.GetTrackersResponse{Trackers: pbTrackers}, nil
+}
+
 func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddressValidRequest) (*pb.IsAddressValidResponse, error) {
 	isValid, _ := server.addressTrackerManager.IsValid(req.Address)
 	return &pb.IsAddressValidResponse{
@@ -31,7 +65,7 @@ func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddress
 	}, nil
 }
 
-func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerRequest) (*pb.AddTrackerResponse, error) {
+func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerRequest) (*pb.Tracker, error) {
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
@@ -59,7 +93,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
 
-	return &pb.AddTrackerResponse{
+	return &pb.Tracker{
 		Address:              tracker.Address,
 		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
@@ -68,7 +102,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 	}, nil
 }
 
-func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTrackerRequest) (*pb.UpdateTrackerResponse, error) {
+func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTrackerRequest) (*pb.Tracker, error) {
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
@@ -96,7 +130,7 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
 
-	return &pb.UpdateTrackerResponse{
+	return &pb.Tracker{
 		Address:              tracker.Address,
 		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
