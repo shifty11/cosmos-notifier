@@ -37,7 +37,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 		return nil, status.Errorf(codes.Internal, "error while getting trackers")
 	}
 
-	pbTrackers := make([]*pb.Tracker, len(trackers))
+	var pbTrackers []*pb.Tracker
 	for _, tracker := range trackers {
 		discordChannelId := int64(0)
 		if tracker.Edges.DiscordChannel != nil {
@@ -48,7 +48,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 			telegramChatId = int64(tracker.Edges.TelegramChat.ID)
 		}
 		pbTrackers = append(pbTrackers, &pb.Tracker{
-			TrackerId:            int64(tracker.ID),
+			Id:                   int64(tracker.ID),
 			Address:              tracker.Address,
 			NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 			DiscordChannelId:     discordChannelId,
@@ -98,7 +98,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
 		TelegramChatId:       req.TelegramChatId,
-		TrackerId:            int64(tracker.ID),
+		Id:                   int64(tracker.ID),
 	}, nil
 }
 
@@ -135,7 +135,7 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
 		TelegramChatId:       req.TelegramChatId,
-		TrackerId:            int64(tracker.ID),
+		Id:                   int64(tracker.ID),
 	}, nil
 }
 

@@ -7,6 +7,7 @@ import 'package:cosmos_notifier/f_home/services/state/auth_state.dart';
 import 'package:cosmos_notifier/f_home/widgets/loading_page.dart';
 import 'package:cosmos_notifier/f_login/widgets/login_page.dart';
 import 'package:cosmos_notifier/f_subscription/widgets/subscription_page.dart';
+import 'package:cosmos_notifier/f_tracking/widgets/tracking_page.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,7 +25,7 @@ class MyRouter {
 
   late final router = GoRouter(
     refreshListenable: authStateListener,
-    debugLogDiagnostics: cDebugMode,
+    // debugLogDiagnostics: cDebugMode,
     urlPathStrategy: UrlPathStrategy.hash,
     routes: [
       GoRoute(
@@ -65,6 +66,14 @@ class MyRouter {
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
           child: const LoginPage(),
+        ),
+      ),
+      GoRoute(
+        name: rTracking.name,
+        path: rTracking.path,
+        pageBuilder: (context, state) => MaterialPage<void>(
+          key: state.pageKey,
+          child: const TrackingPage(),
         ),
       ),
     ],

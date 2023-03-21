@@ -62,7 +62,7 @@ class HeaderWidget extends StatelessWidget {
                 icon: const Icon(Icons.home),
                 label: const Text("Home"),
                 style: TextButton.styleFrom(
-                  primary: location == rRoot.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                  foregroundColor: location == rRoot.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
                 ),
               ),
               TextButton.icon(
@@ -70,7 +70,15 @@ class HeaderWidget extends StatelessWidget {
                 icon: const Icon(Icons.notifications),
                 label: const Text("Subscriptions"),
                 style: TextButton.styleFrom(
-                  primary: location == rSubscriptions.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                  foregroundColor: location == rSubscriptions.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () => context.pushNamed(rTracking.name),
+                icon: const Icon(Icons.my_location),
+                label: const Text("Tracking"),
+                style: TextButton.styleFrom(
+                  foregroundColor: location == rTracking.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
                 ),
               ),
               jwtManager.isAdmin ? TextButton.icon(
@@ -78,7 +86,7 @@ class HeaderWidget extends StatelessWidget {
                 icon: const Icon(Icons.settings),
                 label: const Text("Admin"),
                 style: TextButton.styleFrom(
-                  primary: location == rAdmin.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
+                  foregroundColor: location == rAdmin.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
                 ),
               ) : Container(),
               const Spacer(),
