@@ -22,6 +22,10 @@ func (s *ChainProposalStatus) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (s *ChainProposalStatus) ToString() string {
+	return cosmossdktypes.ProposalStatus(*s).String()
+}
+
 type ChainProposalContent struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`

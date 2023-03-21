@@ -44,7 +44,7 @@ func (m *ChainProposalManager) CreateOrUpdate(c *ent.Chain, propData *types.Chai
 			SetProposalID(propData.ProposalId).
 			SetTitle(propData.Content.Title).
 			SetDescription(propData.Content.Description).
-			SetStatus(chainproposal.Status(propData.Status)).
+			SetStatus(chainproposal.Status(propData.Status.ToString())).
 			SetVotingStartTime(propData.VotingStartTime).
 			SetVotingEndTime(propData.VotingEndTime).
 			Save(m.ctx)
@@ -57,12 +57,12 @@ func (m *ChainProposalManager) CreateOrUpdate(c *ent.Chain, propData *types.Chai
 	} else {
 		if prop.Title != propData.Content.Title ||
 			prop.Description != propData.Content.Description ||
-			prop.Status != chainproposal.Status(propData.Status) {
+			prop.Status != chainproposal.Status(propData.Status.ToString()) {
 			updatedProp, err := m.client.ChainProposal.
 				UpdateOne(prop).
 				SetTitle(propData.Content.Title).
 				SetDescription(propData.Content.Description).
-				SetStatus(chainproposal.Status(propData.Status)).
+				SetStatus(chainproposal.Status(propData.Status.ToString())).
 				Save(m.ctx)
 			if err != nil {
 				log.Sugar.Panicf("Error while updating proposal: %v", err)
