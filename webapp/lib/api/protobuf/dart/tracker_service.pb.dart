@@ -11,6 +11,7 @@ import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 import 'google/protobuf/duration.pb.dart' as $5;
+import 'google/protobuf/timestamp.pb.dart' as $6;
 
 class Tracker extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Tracker', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
@@ -19,6 +20,7 @@ class Tracker extends $pb.GeneratedMessage {
     ..aOM<$5.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
     ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
     ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
+    ..aOM<$6.Timestamp>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $6.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -29,6 +31,7 @@ class Tracker extends $pb.GeneratedMessage {
     $5.Duration? notificationInterval,
     $fixnum.Int64? discordChannelId,
     $fixnum.Int64? telegramChatId,
+    $6.Timestamp? updatedAt,
   }) {
     final _result = create();
     if (id != null) {
@@ -45,6 +48,9 @@ class Tracker extends $pb.GeneratedMessage {
     }
     if (telegramChatId != null) {
       _result.telegramChatId = telegramChatId;
+    }
+    if (updatedAt != null) {
+      _result.updatedAt = updatedAt;
     }
     return _result;
   }
@@ -115,6 +121,17 @@ class Tracker extends $pb.GeneratedMessage {
   $core.bool hasTelegramChatId() => $_has(4);
   @$pb.TagNumber(5)
   void clearTelegramChatId() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $6.Timestamp get updatedAt => $_getN(5);
+  @$pb.TagNumber(6)
+  set updatedAt($6.Timestamp v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasUpdatedAt() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearUpdatedAt() => clearField(6);
+  @$pb.TagNumber(6)
+  $6.Timestamp ensureUpdatedAt() => $_ensure(5);
 }
 
 class GetTrackersResponse extends $pb.GeneratedMessage {

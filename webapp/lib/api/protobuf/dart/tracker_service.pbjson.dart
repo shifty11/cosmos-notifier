@@ -17,11 +17,12 @@ const Tracker$json = const {
     const {'1': 'notificationInterval', '3': 3, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
     const {'1': 'discordChannelId', '3': 4, '4': 1, '5': 3, '10': 'discordChannelId'},
     const {'1': 'telegramChatId', '3': 5, '4': 1, '5': 3, '10': 'telegramChatId'},
+    const {'1': 'updatedAt', '3': 6, '4': 1, '5': 11, '6': '.google.protobuf.Timestamp', '10': 'updatedAt'},
   ],
 };
 
 /// Descriptor for `Tracker`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List trackerDescriptor = $convert.base64Decode('CgdUcmFja2VyEg4KAmlkGAEgASgDUgJpZBIYCgdhZGRyZXNzGAIgASgJUgdhZGRyZXNzEk0KFG5vdGlmaWNhdGlvbkludGVydmFsGAMgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uUhRub3RpZmljYXRpb25JbnRlcnZhbBIqChBkaXNjb3JkQ2hhbm5lbElkGAQgASgDUhBkaXNjb3JkQ2hhbm5lbElkEiYKDnRlbGVncmFtQ2hhdElkGAUgASgDUg50ZWxlZ3JhbUNoYXRJZA==');
+final $typed_data.Uint8List trackerDescriptor = $convert.base64Decode('CgdUcmFja2VyEg4KAmlkGAEgASgDUgJpZBIYCgdhZGRyZXNzGAIgASgJUgdhZGRyZXNzEk0KFG5vdGlmaWNhdGlvbkludGVydmFsGAMgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uUhRub3RpZmljYXRpb25JbnRlcnZhbBIqChBkaXNjb3JkQ2hhbm5lbElkGAQgASgDUhBkaXNjb3JkQ2hhbm5lbElkEiYKDnRlbGVncmFtQ2hhdElkGAUgASgDUg50ZWxlZ3JhbUNoYXRJZBI4Cgl1cGRhdGVkQXQYBiABKAsyGi5nb29nbGUucHJvdG9idWYuVGltZXN0YW1wUgl1cGRhdGVkQXQ=');
 @$core.Deprecated('Use getTrackersResponseDescriptor instead')
 const GetTrackersResponse$json = const {
   '1': 'GetTrackersResponse',

@@ -13,34 +13,41 @@ class TrackerRow with _$TrackerRow {
     required String address,
     required pb.Duration notificationInterval,
     required Int64 chatId,
-    required bool isSaved,
-    @Default(false) bool isAddRow,
+    required DateTime? updatedAt,
     @Default(true) bool isAddressValid,
   }) = _TrackerRow;
+
+  bool get isSaved => id != Int64(0);
+
+  String _singularOrPlural(int number, String singular, String plural) {
+    if (number == 1) {
+      return singular;
+    }
+    return plural;
+  }
 
   String get notificationIntervalPrettyString {
     Duration duration = Duration(seconds: notificationInterval.seconds.toInt());
     if (duration.inDays > 0) {
-      var dayText = "day";
-      if (duration.inDays > 1) {
-        dayText = "days";
-      }
       if (duration.inHours > duration.inDays * 24) {
-        return "${duration.inDays} $dayText, ${duration.inHours - duration.inDays * 24} hours before";
+        final hours = duration.inHours - duration.inDays * 24;
+        return "${duration.inDays} "
+            "${_singularOrPlural(duration.inDays, "day", "days")}, "
+            "$hours ${_singularOrPlural(hours, "hour", "hours")} before";
       } else {
-        return "${duration.inDays} $dayText";
+        return "${duration.inDays} ${_singularOrPlural(duration.inDays, "day", "days")}";
       }
     } else if (duration.inHours > 0) {
-      return "${duration.inHours} hours before";
+      return "${duration.inHours} ${_singularOrPlural(duration.inHours, "hour", "hours")} before";
     } else if (duration.inMinutes > 0) {
-      return "${duration.inMinutes} minutes before";
+      return "${duration.inMinutes} ${_singularOrPlural(duration.inMinutes, "minute", "minutes")} before";
     }
     return "on time";
   }
 
   String get shortenedBech32Address {
     if (isAddressValid && address.length > 20) {
-      return "${address.substring(0, 8)}...${address.substring(address.length - 4)}";
+      return "${address.substring(0, 9)}...${address.substring(address.length - 4)}";
     }
     return address;
   }
