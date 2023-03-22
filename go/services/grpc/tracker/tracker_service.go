@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
@@ -53,6 +54,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 			NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 			DiscordChannelId:     discordChannelId,
 			TelegramChatId:       telegramChatId,
+			UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
 		})
 	}
 	return &pb.GetTrackersResponse{Trackers: pbTrackers}, nil
@@ -94,11 +96,12 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 	}
 
 	return &pb.Tracker{
+		Id:                   int64(tracker.ID),
 		Address:              tracker.Address,
 		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
 		TelegramChatId:       req.TelegramChatId,
-		Id:                   int64(tracker.ID),
+		UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
 	}, nil
 }
 
@@ -114,7 +117,7 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 	if req.DiscordChannelId != 0 && req.TelegramChatId != 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "both discord-channel-id and telegram-chat-id provided")
 	}
-	if req.NotificationInterval.Seconds <= 0 {
+	if req.NotificationInterval.Seconds < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
 	}
 
@@ -131,11 +134,12 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 	}
 
 	return &pb.Tracker{
+		Id:                   int64(tracker.ID),
 		Address:              tracker.Address,
 		NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 		DiscordChannelId:     req.DiscordChannelId,
 		TelegramChatId:       req.TelegramChatId,
-		Id:                   int64(tracker.ID),
+		UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
 	}, nil
 }
 
