@@ -192,48 +192,50 @@ multiline
         children: [
           MessageOverlayListener(
             provider: messageProvider,
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              padding: const EdgeInsets.only(top: Styles.topPadding, left: Styles.sidePadding, right: Styles.sidePadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const HeaderWidget(),
-                  const SizedBox(height: 10),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.of(context).size.height - 200,
-                    ),
-                    child: Form(
-                      key: formKey,
-                      child: TextFormField(
-                        controller: messageController,
-                        keyboardType: TextInputType.multiline,
-                        minLines: 1,
-                        maxLines: null,
-                        decoration: InputDecoration(
-                          border: const OutlineInputBorder(),
-                          alignLabelWithHint: true,
-                          labelText: 'Message',
-                          hintText: jwtManager.isTelegramUser ? telegramHelp : discordHelp,
-                        ),
-                        validator: (String? text) {
-                          if (text == null) {
+            child: SingleChildScrollView(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                padding: const EdgeInsets.only(top: Styles.topPadding, left: Styles.sidePadding, right: Styles.sidePadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const HeaderWidget(),
+                    const SizedBox(height: 10),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height - 200,
+                      ),
+                      child: Form(
+                        key: formKey,
+                        child: TextFormField(
+                          controller: messageController,
+                          keyboardType: TextInputType.multiline,
+                          minLines: 1,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            alignLabelWithHint: true,
+                            labelText: 'Message',
+                            hintText: jwtManager.isTelegramUser ? telegramHelp : discordHelp,
+                          ),
+                          validator: (String? text) {
+                            if (text == null) {
+                              return null;
+                            }
+                            if (text.isEmpty) {
+                              return "Message cannot be empty";
+                            }
                             return null;
-                          }
-                          if (text.isEmpty) {
-                            return "Message cannot be empty";
-                          }
-                          return null;
-                        },
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  buttons(context),
-                  const SizedBox(height: 50),
-                  Center(child: stats(context)),
-                ],
+                    const SizedBox(height: 10),
+                    buttons(context),
+                    const SizedBox(height: 50),
+                    Center(child: stats(context)),
+                  ],
+                ),
               ),
             ),
           ),
