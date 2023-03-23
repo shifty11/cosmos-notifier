@@ -16,18 +16,20 @@ func newTestDiscordChannelManager(t *testing.T) *DiscordChannelManager {
 
 func addDiscordChannels(m *DiscordChannelManager, users []*ent.User) []*ent.DiscordChannel {
 	var channels []*ent.DiscordChannel
+	var nextChannelID = int64(m.client.DiscordChannel.Query().CountX(m.ctx) + 1)
 	for _, userDto := range users {
 		c := m.client.DiscordChannel.
 			Create().
-			SetChannelID(1).
+			SetChannelID(nextChannelID).
 			SetName("channel-1").
 			SetIsGroup(false).
 			AddUsers(userDto).
 			SaveX(m.ctx)
 		channels = append(channels, c)
+		nextChannelID++
 		c = m.client.DiscordChannel.
 			Create().
-			SetChannelID(2).
+			SetChannelID(nextChannelID).
 			SetName("channel-2").
 			SetIsGroup(true).
 			AddUsers(userDto).

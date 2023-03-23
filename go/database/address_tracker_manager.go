@@ -110,7 +110,16 @@ func (manager *AddressTrackerManager) AddTracker(
 		createQuery.SetTelegramChatID(telegramChatId)
 	}
 
-	return createQuery.Save(manager.ctx)
+	created, err := createQuery.Save(manager.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return manager.client.AddressTracker.Query().
+		Where(addresstracker.IDEQ(created.ID)).
+		WithChain().
+		WithDiscordChannel().
+		WithTelegramChat().
+		Only(manager.ctx)
 }
 
 func (manager *AddressTrackerManager) UpdateTracker(
@@ -171,7 +180,16 @@ func (manager *AddressTrackerManager) UpdateTracker(
 		updateQuery.SetTelegramChatID(telegramChatId)
 	}
 
-	return updateQuery.Save(manager.ctx)
+	updated, err := updateQuery.Save(manager.ctx)
+	if err != nil {
+		return nil, err
+	}
+	return manager.client.AddressTracker.Query().
+		Where(addresstracker.IDEQ(updated.ID)).
+		WithChain().
+		WithDiscordChannel().
+		WithTelegramChat().
+		Only(manager.ctx)
 }
 
 type AddressTrackerWithChainProposal struct {
@@ -224,4 +242,22 @@ func (manager *AddressTrackerManager) SetNotified(data AddressTrackerWithChainPr
 	if err != nil {
 		log.Sugar.Panicf("error while setting notified: %v", err)
 	}
+}
+
+func (manager *AddressTrackerManager) GetChatRooms(userEnt *ent.User) ([]*ent.DiscordChannel, []*ent.TelegramChat, error) {
+	discordChannels, err := userEnt.QueryDiscordChannels().All(manager.ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	telegramChats, err := userEnt.QueryTelegramChats().All(manager.ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(discordChannels) == 0 && len(telegramChats) == 0 {
+		return nil, nil, errors.New("no chat rooms found")
+	}
+	if len(discordChannels) != 0 && len(telegramChats) != 0 {
+		return nil, nil, errors.New("only one of discord channels or telegram chats must be non-zero")
+	}
+	return discordChannels, telegramChats, nil
 }

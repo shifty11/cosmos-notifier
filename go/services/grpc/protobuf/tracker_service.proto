@@ -16,17 +16,27 @@ service TrackerService {
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
 }
 
+message TrackerChatRoom {
+  int64 id = 1;
+  string name = 2;
+  enum Type {
+    TELEGRAM = 0;
+    DISCORD = 1;
+  }
+  Type TYPE = 3;
+}
+
 message Tracker {
   int64 id = 1;
   string address = 2;
   google.protobuf.Duration notificationInterval = 3;
-  int64 discordChannelId = 4;
-  int64 telegramChatId = 5;
-  google.protobuf.Timestamp updatedAt = 6;
+  TrackerChatRoom chatRoom = 4;
+  google.protobuf.Timestamp updatedAt = 5;
 }
 
 message GetTrackersResponse {
   repeated Tracker trackers = 1;
+  repeated TrackerChatRoom chatRooms = 2;
 }
 
 message IsAddressValidRequest {
@@ -40,15 +50,13 @@ message IsAddressValidResponse {
 message AddTrackerRequest {
   string address = 1;
   google.protobuf.Duration notificationInterval = 2;
-  int64 discordChannelId = 3;
-  int64 telegramChatId = 4;
+  TrackerChatRoom chatRoom = 3;
 }
 
 message UpdateTrackerRequest {
   int64 trackerId = 1;
-  google.protobuf.Duration notificationInterval = 3;
-  int64 discordChannelId = 4;
-  int64 telegramChatId = 5;
+  google.protobuf.Duration notificationInterval = 2;
+  TrackerChatRoom chatRoom = 3;
 }
 
 message DeleteTrackerRequest {

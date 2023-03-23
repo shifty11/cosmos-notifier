@@ -163,6 +163,16 @@ func TestAddressTrackerManager_AddTrackerForDiscordChannel(t *testing.T) {
 	if tracker.QueryTelegramChat().CountX(m.ctx) != 0 {
 		t.Error("Telegram chat is saved")
 	}
+
+	if tracker.Edges.Chain == nil {
+		t.Error("Chain is nil")
+	}
+	if tracker.Edges.DiscordChannel == nil {
+		t.Error("Discord channel is nil")
+	}
+	if tracker.Edges.TelegramChat != nil {
+		t.Error("Telegram chat is not nil")
+	}
 }
 
 func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
@@ -195,6 +205,16 @@ func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
 	}
 	if tracker.QueryTelegramChat().FirstX(m.ctx).ID != chats[0].ID {
 		t.Error("Telegram chat is not saved")
+	}
+
+	if tracker.Edges.Chain == nil {
+		t.Error("Chain is nil")
+	}
+	if tracker.Edges.DiscordChannel != nil {
+		t.Error("Discord channel is not nil")
+	}
+	if tracker.Edges.TelegramChat == nil {
+		t.Error("Telegram chat is nil")
 	}
 }
 
@@ -455,5 +475,50 @@ func TestAddressTracker_GetAllUnnotifiedTrackers_SetNotified(t *testing.T) {
 	unnotifiedTrackers = m.GetAllUnnotifiedTrackers()
 	if len(unnotifiedTrackers) != 0 {
 		t.Error("Wrong number of unnotifiedTrackers")
+	}
+}
+
+func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	addChainProposals(newTestChainProposalManager(t), chains)
+	dUsers := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
+	tgUsers := addUsers(newTestUserManager(t), 1, user.TypeTelegram)
+
+	m := newTestAddressTrackerManager(t)
+
+	discordChannels, telegramChats, err := m.GetChatRooms(dUsers[0])
+	if err == nil {
+		t.Error(err)
+	}
+
+	addDiscordChannels(newTestDiscordChannelManager(t), dUsers[:1])
+	addTelegramChats(newTestTelegramChatManager(t), tgUsers[:1])
+
+	discordChannels, telegramChats, err = m.GetChatRooms(dUsers[0])
+	if err != nil {
+		t.Error(err)
+	}
+	if len(discordChannels) != 2 {
+		t.Error("Wrong number of discord channels")
+	}
+	if len(telegramChats) != 0 {
+		t.Error("Wrong number of telegram chats")
+	}
+
+	discordChannels, telegramChats, err = m.GetChatRooms(tgUsers[0])
+	if err != nil {
+		t.Error(err)
+	}
+	if len(discordChannels) != 0 {
+		t.Error("Wrong number of discord channels")
+	}
+	if len(telegramChats) != 2 {
+		t.Error("Wrong number of telegram chats")
+	}
+
+	addDiscordChannels(newTestDiscordChannelManager(t), tgUsers[:1])
+	discordChannels, telegramChats, err = m.GetChatRooms(tgUsers[0])
+	if err == nil {
+		t.Error(err)
 	}
 }
