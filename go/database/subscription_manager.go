@@ -177,7 +177,7 @@ func (m *SubscriptionManager) telegramChatsToChatRoom(tgChats []*ent.TelegramCha
 		chats = append(chats, &pb.ChatRoom{
 			Id:            tgChat.ChatID,
 			Name:          tgChat.Name,
-			TYPE:          pb.ChatRoom_TELEGRAM,
+			Type:          pb.ChatRoom_TELEGRAM,
 			Subscriptions: m.getSubscriptions(m.getIdsOfTelegramChat(tgChat, qType), qType, isAdmin),
 		})
 		if isAdmin && qType == chainQuery {
@@ -195,7 +195,7 @@ func (m *SubscriptionManager) discordChannelsToChatRoom(discordChannels []*ent.D
 		chats = append(chats, &pb.ChatRoom{
 			Id:            dChannel.ChannelID,
 			Name:          dChannel.Name,
-			TYPE:          pb.ChatRoom_DISCORD,
+			Type:          pb.ChatRoom_DISCORD,
 			Subscriptions: m.getSubscriptions(m.getIdsOfDiscordChannel(dChannel, qType), qType, isAdmin),
 		})
 		if isAdmin && qType == chainQuery {

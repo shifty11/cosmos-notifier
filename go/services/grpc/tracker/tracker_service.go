@@ -10,6 +10,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
+	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/pbcommon"
 	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,7 +35,7 @@ func getTrackerChatRoom(tracker *ent.AddressTracker) (*pb.TrackerChatRoom, error
 	if tracker.Edges.DiscordChannel != nil {
 		chatRoom.Name = tracker.Edges.DiscordChannel.Name
 		chatRoom.Type = &pb.TrackerChatRoom_Discord{
-			Discord: &pb.DiscordType{
+			Discord: &pbcommon.DiscordType{
 				Id: int32(tracker.Edges.DiscordChannel.ID),
 				//ChannelId: tracker.Edges.DiscordChannel.ChannelID,
 			},
@@ -43,7 +44,7 @@ func getTrackerChatRoom(tracker *ent.AddressTracker) (*pb.TrackerChatRoom, error
 	if tracker.Edges.TelegramChat != nil {
 		chatRoom.Name = tracker.Edges.TelegramChat.Name
 		chatRoom.Type = &pb.TrackerChatRoom_Telegram{
-			Telegram: &pb.TelegramType{
+			Telegram: &pbcommon.TelegramType{
 				Id: int32(tracker.Edges.TelegramChat.ID),
 				//ChatId: tracker.Edges.TelegramChat.ChatID
 			},
@@ -135,7 +136,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 	for _, trackerChatRoom := range discordChannels {
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
 			Name: trackerChatRoom.Name,
-			Type: &pb.TrackerChatRoom_Discord{Discord: &pb.DiscordType{
+			Type: &pb.TrackerChatRoom_Discord{Discord: &pbcommon.DiscordType{
 				Id: int32(trackerChatRoom.ID),
 				//ChannelId: trackerChatRoom.ChannelID,
 			}},
@@ -144,7 +145,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 	for _, trackerChatRoom := range telegramChats {
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
 			Name: trackerChatRoom.Name,
-			Type: &pb.TrackerChatRoom_Telegram{Telegram: &pb.TelegramType{
+			Type: &pb.TrackerChatRoom_Telegram{Telegram: &pbcommon.TelegramType{
 				Id: int32(trackerChatRoom.ID),
 				//ChatId: trackerChatRoom.ChatID,
 			}},
