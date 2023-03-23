@@ -36,8 +36,8 @@ func getTrackerChatRoom(tracker *ent.AddressTracker) (*pb.TrackerChatRoom, error
 		chatRoom.Name = tracker.Edges.DiscordChannel.Name
 		chatRoom.Type = &pb.TrackerChatRoom_Discord{
 			Discord: &pbcommon.DiscordType{
-				Id: int32(tracker.Edges.DiscordChannel.ID),
-				//ChannelId: tracker.Edges.DiscordChannel.ChannelID,
+				Id:        int32(tracker.Edges.DiscordChannel.ID),
+				ChannelId: tracker.Edges.DiscordChannel.ChannelID,
 			},
 		}
 	}
@@ -45,8 +45,8 @@ func getTrackerChatRoom(tracker *ent.AddressTracker) (*pb.TrackerChatRoom, error
 		chatRoom.Name = tracker.Edges.TelegramChat.Name
 		chatRoom.Type = &pb.TrackerChatRoom_Telegram{
 			Telegram: &pbcommon.TelegramType{
-				Id: int32(tracker.Edges.TelegramChat.ID),
-				//ChatId: tracker.Edges.TelegramChat.ChatID
+				Id:     int32(tracker.Edges.TelegramChat.ID),
+				ChatId: tracker.Edges.TelegramChat.ChatID,
 			},
 		}
 	}
@@ -137,8 +137,8 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
 			Name: trackerChatRoom.Name,
 			Type: &pb.TrackerChatRoom_Discord{Discord: &pbcommon.DiscordType{
-				Id: int32(trackerChatRoom.ID),
-				//ChannelId: trackerChatRoom.ChannelID,
+				Id:        int32(trackerChatRoom.ID),
+				ChannelId: trackerChatRoom.ChannelID,
 			}},
 		})
 	}
@@ -146,8 +146,8 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
 			Name: trackerChatRoom.Name,
 			Type: &pb.TrackerChatRoom_Telegram{Telegram: &pbcommon.TelegramType{
-				Id: int32(trackerChatRoom.ID),
-				//ChatId: trackerChatRoom.ChatID,
+				Id:     int32(trackerChatRoom.ID),
+				ChatId: trackerChatRoom.ChatID,
 			}},
 		})
 	}

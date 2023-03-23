@@ -13,18 +13,20 @@ const DiscordType$json = const {
   '1': 'DiscordType',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
+    const {'1': 'channel_id', '3': 2, '4': 1, '5': 3, '10': 'channelId'},
   ],
 };
 
 /// Descriptor for `DiscordType`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List discordTypeDescriptor = $convert.base64Decode('CgtEaXNjb3JkVHlwZRIOCgJpZBgBIAEoBVICaWQ=');
+final $typed_data.Uint8List discordTypeDescriptor = $convert.base64Decode('CgtEaXNjb3JkVHlwZRIOCgJpZBgBIAEoBVICaWQSHQoKY2hhbm5lbF9pZBgCIAEoA1IJY2hhbm5lbElk');
 @$core.Deprecated('Use telegramTypeDescriptor instead')
 const TelegramType$json = const {
   '1': 'TelegramType',
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
+    const {'1': 'chat_id', '3': 2, '4': 1, '5': 3, '10': 'chatId'},
   ],
 };
 
 /// Descriptor for `TelegramType`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List telegramTypeDescriptor = $convert.base64Decode('CgxUZWxlZ3JhbVR5cGUSDgoCaWQYASABKAVSAmlk');
+final $typed_data.Uint8List telegramTypeDescriptor = $convert.base64Decode('CgxUZWxlZ3JhbVR5cGUSDgoCaWQYASABKAVSAmlkEhcKB2NoYXRfaWQYAiABKANSBmNoYXRJZA==');

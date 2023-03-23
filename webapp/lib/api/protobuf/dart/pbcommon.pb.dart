@@ -7,21 +7,27 @@
 
 import 'dart:core' as $core;
 
+import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class DiscordType extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DiscordType', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aInt64(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'channelId')
     ..hasRequiredFields = false
   ;
 
   DiscordType._() : super();
   factory DiscordType({
     $core.int? id,
+    $fixnum.Int64? channelId,
   }) {
     final _result = create();
     if (id != null) {
       _result.id = id;
+    }
+    if (channelId != null) {
+      _result.channelId = channelId;
     }
     return _result;
   }
@@ -54,21 +60,35 @@ class DiscordType extends $pb.GeneratedMessage {
   $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get channelId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set channelId($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasChannelId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChannelId() => clearField(2);
 }
 
 class TelegramType extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TelegramType', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..a<$core.int>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id', $pb.PbFieldType.O3)
+    ..aInt64(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatId')
     ..hasRequiredFields = false
   ;
 
   TelegramType._() : super();
   factory TelegramType({
     $core.int? id,
+    $fixnum.Int64? chatId,
   }) {
     final _result = create();
     if (id != null) {
       _result.id = id;
+    }
+    if (chatId != null) {
+      _result.chatId = chatId;
     }
     return _result;
   }
@@ -101,5 +121,14 @@ class TelegramType extends $pb.GeneratedMessage {
   $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
   void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get chatId => $_getI64(1);
+  @$pb.TagNumber(2)
+  set chatId($fixnum.Int64 v) { $_setInt64(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasChatId() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearChatId() => clearField(2);
 }
 
