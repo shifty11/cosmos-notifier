@@ -12,6 +12,7 @@ import 'package:cosmos_notifier/style.dart';
 import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_messages/riverpod_messages.dart';
@@ -26,75 +27,82 @@ class TrackingPage extends StatelessWidget {
     final duration = Duration(seconds: trackerRow.notificationInterval.seconds.toInt());
     var days = duration.inDays;
     var hours = duration.inHours - days * 24;
-    return AlertDialog(
-      title: const Text("Notification"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text("When should the notification be sent before the proposal ends?"),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              const SizedBox(width: 50, child: Text("Days:")),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 100,
-                child: TextFormField(
-                  initialValue: days.toString(),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    hintText: "Days",
+    return Shortcuts(
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.escape): const DismissIntent(),
+      },
+      child: AlertDialog(
+        title: const Text("Notification"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("When should the notification be sent before the proposal ends?"),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                const SizedBox(width: 50, child: Text("Days:")),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 100,
+                  child: TextFormField(
+                    initialValue: days.toString(),
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      hintText: "Days",
+                    ),
+                    onChanged: (value) {
+                      days = int.tryParse(value) ?? 0;
+                    },
                   ),
-                  onChanged: (value) {
-                    days = int.tryParse(value) ?? 0;
-                  },
                 ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              const SizedBox(width: 50, child: Text("Hours:")),
-              const SizedBox(width: 10),
-              SizedBox(
-                width: 100,
-                child: TextFormField(
-                  initialValue: hours.toString(),
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    enabledBorder: InputBorder.none,
-                    hintText: "Hours",
+              ],
+            ),
+            Row(
+              children: [
+                const SizedBox(width: 50, child: Text("Hours:")),
+                const SizedBox(width: 10),
+                SizedBox(
+                  width: 100,
+                  child: TextFormField(
+                    initialValue: hours.toString(),
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      hintText: "Hours",
+                    ),
+                    onChanged: (value) {
+                      hours = int.tryParse(value) ?? 0;
+                    },
                   ),
-                  onChanged: (value) {
-                    hours = int.tryParse(value) ?? 0;
-                  },
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Cancel")),
+          ElevatedButton(
+              onPressed: () {
+                final newDuration = Duration(days: days, hours: hours);
+                if (newDuration.compareTo(duration) != 0) {
+                  final pbDuration = pb.Duration(seconds: Int64(newDuration.inSeconds));
+                  if (pbDuration.seconds != trackerRow.notificationInterval.seconds) {
+                    trackerRow = trackerRow.copyWith(notificationInterval: pbDuration);
+                    ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
+                  }
+                }
+                Navigator.of(context).pop();
+              },
+              child: const Text("Save")),
         ],
       ),
-      actions: [
-        TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text("Cancel")),
-        ElevatedButton(
-            // style: ElevatedButton.styleFrom(backgroundColor: Styles.dangerBgColor, foregroundColor: Styles.dangerTextColor),
-            onPressed: () {
-              final newDuration = Duration(days: days, hours: hours);
-              if (newDuration.compareTo(duration) != 0) {
-                trackerRow = trackerRow.copyWith(notificationInterval: pb.Duration(seconds: Int64(newDuration.inSeconds)));
-                ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
-              }
-              Navigator.of(context).pop();
-            },
-            child: const Text("Save")),
-      ],
     );
   }
 
@@ -119,16 +127,24 @@ class TrackingPage extends StatelessWidget {
                 rows: trackerRows.map((trackerRow) {
                   return DataRow(cells: [
                     DataCell(trackerRow.isSaved ? Text(trackerRow.shortenedAddress) : AddressInputWidget(ref, trackerRow)),
-                    DataCell(Row(
-                      children: [
-                        Text(trackerRow.notificationIntervalPrettyString, textAlign: TextAlign.center),
-                        IconButton(
-                          padding: const EdgeInsets.all(0),
-                          onPressed: () async =>
-                              {showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref))},
-                          icon: const Icon(Icons.edit, size: iconSizeSmall),
-                        ),
-                      ],
+                    DataCell(ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        elevation: 0,
+                      ),
+                      onPressed: () async =>
+                          {showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref))},
+                      child: Row(
+                        children: [
+                          Text(trackerRow.notificationIntervalPrettyString, textAlign: TextAlign.center),
+                          const SizedBox(width: 5),
+                          const Icon(
+                            Icons.edit,
+                            size: iconSizeSmall,
+                          ),
+                        ],
+                      ),
                     )),
                     DataCell(
                       DropdownButton<TrackerChatRoom>(
