@@ -1,8 +1,10 @@
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
+import 'package:cosmos_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pb.dart';
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/message_provider.dart';
+import 'package:cosmos_notifier/f_subscription/services/subscription_provider.dart';
 import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
@@ -52,8 +54,27 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     return lastModifiedTracker.notificationInterval;
   }
 
-  bool get hasUnsavedChanges {
-    return state.where((trackerRow) => !trackerRow.isSaved).isNotEmpty;
+  TrackerChatRoom? _getDefaultChatRoom() {
+    final selectedChatRoom = ref.watch(selectedChatRoomProvider);
+    final availableChatRooms = ref.watch(trackerChatRoomsProvider);
+
+    if (selectedChatRoom != null) {
+      for (final chatRoom in availableChatRooms) {
+        if (selectedChatRoom.type == ChatRoom_Type.DISCORD) {
+          if (chatRoom.whichType() == TrackerChatRoom_Type.discord && chatRoom.discord.channelId == selectedChatRoom.id){
+            return chatRoom;
+          }
+        } else if (selectedChatRoom.type == ChatRoom_Type.TELEGRAM) {
+          if (chatRoom.whichType() == TrackerChatRoom_Type.telegram && chatRoom.telegram.chatId == selectedChatRoom.id) {
+            return chatRoom;
+          }
+        }
+      }
+    }
+    if (state.isNotEmpty) {
+      return state.first.chatRoom;
+    }
+    return null;
   }
 
   Future<GetTrackersResponse> getTrackers() async {
