@@ -42,12 +42,13 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   /// Returns the default notification interval for a new tracker.
   /// Uses the latest modified tracker's notification interval or 1 day if there are no trackers.
   pb.Duration _getDefaultNotificationInterval() {
-    var lastModifiedTracker = state.where((trackerRow) => trackerRow.updatedAt != null).reduce((value, element) {
-      if (value.updatedAt != null && element.updatedAt != null && value.updatedAt!.isBefore(element.updatedAt!)) {
-        return value;
-      }
-      return element;
-    });
+    final sortedTrackers = state
+        .where((trackerRow) => trackerRow.isSaved)
+        .toList()
+          ..sort((a, b) => b.updatedAt?.compareTo(a.updatedAt ?? DateTime.fromMicrosecondsSinceEpoch(0)) ?? -1);
+    final lastModifiedTracker = sortedTrackers.first;
+
+    print("lastModifiedTracker: $lastModifiedTracker");
     if (lastModifiedTracker.updatedAt == null) {
       return pb.Duration(seconds: Int64(60 * 60 * 24)); // 1 day by default
     }
@@ -61,7 +62,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     if (selectedChatRoom != null) {
       for (final chatRoom in availableChatRooms) {
         if (selectedChatRoom.type == ChatRoom_Type.DISCORD) {
-          if (chatRoom.whichType() == TrackerChatRoom_Type.discord && chatRoom.discord.channelId == selectedChatRoom.id){
+          if (chatRoom.whichType() == TrackerChatRoom_Type.discord && chatRoom.discord.channelId == selectedChatRoom.id) {
             return chatRoom;
           }
         } else if (selectedChatRoom.type == ChatRoom_Type.TELEGRAM) {
@@ -167,7 +168,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
       notificationInterval: response.notificationInterval,
       chatRoom: response.chatRoom,
       updatedAt: response.updatedAt.toDateTime(),
-    ));
+    ), isNewTracker: isNewTracker);
   }
 
   Future<void> deleteTracker(TrackerRow tracker) async {
@@ -178,6 +179,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     try {
       await trackerService.deleteTracker(DeleteTrackerRequest(trackerId: tracker.id));
       state = state.where((element) => element.id != tracker.id).toList();
+      messageNotifier.sendMsg(info: "Tracker deleted");
     } catch (e) {
       messageNotifier.sendMsg(error: e.toString());
     }

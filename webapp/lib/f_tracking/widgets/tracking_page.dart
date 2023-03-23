@@ -118,7 +118,7 @@ class TrackingPage extends StatelessWidget {
                 ],
                 rows: trackerRows.map((trackerRow) {
                   return DataRow(cells: [
-                    DataCell(trackerRow.updatedAt == null ? AddressInputWidget(ref, trackerRow) : Text(trackerRow.shortenedAddress)),
+                    DataCell(trackerRow.isSaved ? Text(trackerRow.shortenedAddress) : AddressInputWidget(ref, trackerRow)),
                     DataCell(Row(
                       children: [
                         Text(trackerRow.notificationIntervalPrettyString, textAlign: TextAlign.center),
@@ -191,7 +191,7 @@ class TrackingPage extends StatelessWidget {
               trackerRows.firstWhereOrNull((trackerRow) => trackerRow.updatedAt == null && !trackerRow.isAddressValid);
           if (trackerRowWithValErr != null) {
             return const Padding(
-              padding: EdgeInsets.only(left: 20),
+              padding: EdgeInsets.only(left: 24),
               child: Text("Invalid address", style: TextStyle(color: Colors.red)),
             );
           } else {
