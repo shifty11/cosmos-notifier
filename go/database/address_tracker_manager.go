@@ -192,6 +192,26 @@ func (manager *AddressTrackerManager) UpdateTracker(
 		Only(manager.ctx)
 }
 
+func (manager *AddressTrackerManager) DeleteTracker(
+	userEnt *ent.User,
+	addressTrackerId int,
+) error {
+	addressTracker, err := manager.client.AddressTracker.
+		Query().
+		Where(addresstracker.And(
+			addresstracker.IDEQ(addressTrackerId),
+			addresstracker.Or(
+				addresstracker.HasDiscordChannelWith(discordchannel.HasUsersWith(user.IDEQ(userEnt.ID))),
+				addresstracker.HasTelegramChatWith(telegramchat.HasUsersWith(user.IDEQ(userEnt.ID))),
+			),
+		)).
+		Only(manager.ctx)
+	if err != nil {
+		return err
+	}
+	return manager.client.AddressTracker.DeleteOne(addressTracker).Exec(manager.ctx)
+}
+
 type AddressTrackerWithChainProposal struct {
 	AddressTracker *ent.AddressTracker
 	ChainProposal  *ent.ChainProposal

@@ -522,3 +522,25 @@ func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAddressTracker_DeleteTracker(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	addChainProposals(newTestChainProposalManager(t), chains)
+	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
+	channels := addDiscordChannels(newTestDiscordChannelManager(t), users)
+	tgChats := addTelegramChats(newTestTelegramChatManager(t), users)
+	m := newTestAddressTrackerManager(t)
+
+	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, tgChats)
+	if len(trackers) != 4 {
+		t.Error("Wrong number of trackers")
+	}
+
+	err := m.DeleteTracker(users[0], trackers[0].ID)
+	if err != nil {
+		return
+	}
+	if m.client.AddressTracker.Query().CountX(m.ctx) != 3 {
+		t.Error("Wrong number of trackers")
+	}
+}

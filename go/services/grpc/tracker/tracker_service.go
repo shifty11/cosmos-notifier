@@ -237,6 +237,17 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 	}, nil
 }
 
-func (server *TrackerServer) DeleteTracker(context.Context, *pb.DeleteTrackerRequest) (*empty.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTracker not implemented")
+func (server *TrackerServer) DeleteTracker(ctx context.Context, req *pb.DeleteTrackerRequest) (*empty.Empty, error) {
+	userEnt, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
+	}
+
+	if err := server.addressTrackerManager.DeleteTracker(userEnt, int(req.TrackerId)); err != nil {
+		log.Sugar.Errorf("error while deleting tracker: %v", err)
+		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+	}
+
+	return &empty.Empty{}, nil
 }
