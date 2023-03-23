@@ -3,10 +3,11 @@ syntax = "proto3";
 import "google/protobuf/empty.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/timestamp.proto";
+import "pbcommon.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "go/tracker_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service";
 
 service TrackerService {
   rpc GetTrackers (google.protobuf.Empty) returns (GetTrackersResponse) {}
@@ -14,14 +15,6 @@ service TrackerService {
   rpc AddTracker (AddTrackerRequest) returns (Tracker) {}
   rpc UpdateTracker (UpdateTrackerRequest) returns (Tracker) {}
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
-}
-
-message DiscordType {
-  int32 id = 1;
-}
-
-message TelegramType {
-  int32 id = 1;
 }
 
 message TrackerChatRoom {

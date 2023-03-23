@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "go/admin_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service";
 
 service AdminService {
   rpc BroadcastMessage (BroadcastMessageRequest) returns (stream BroadcastMessageResponse) {}

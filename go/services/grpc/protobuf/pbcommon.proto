@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package cosmos_notifier_grpc;
+
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/pbcommon";
+
+
+message DiscordType {
+  int32 id = 1;
+}
+
+message TelegramType {
+  int32 id = 1;
+}
