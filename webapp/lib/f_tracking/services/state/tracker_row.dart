@@ -1,4 +1,5 @@
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
+import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pb.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -12,7 +13,7 @@ class TrackerRow with _$TrackerRow {
     required Int64 id,
     required String address,
     required pb.Duration notificationInterval,
-    required Int64 chatId,
+    required TrackerChatRoom? chatRoom,
     required DateTime? updatedAt,
     @Default(true) bool isAddressValid,
   }) = _TrackerRow;
@@ -45,7 +46,7 @@ class TrackerRow with _$TrackerRow {
     return "on time";
   }
 
-  String get shortenedBech32Address {
+  String get shortenedAddress {
     if (isAddressValid && address.length > 20) {
       return "${address.substring(0, 9)}...${address.substring(address.length - 4)}";
     }

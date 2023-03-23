@@ -226,7 +226,7 @@ class ChatRoom extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatRoom', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..e<ChatRoom_Type>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'TYPE', $pb.PbFieldType.OE, protoName: 'TYPE', defaultOrMaker: ChatRoom_Type.TELEGRAM, valueOf: ChatRoom_Type.valueOf, enumValues: ChatRoom_Type.values)
+    ..e<ChatRoom_Type>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: ChatRoom_Type.TELEGRAM, valueOf: ChatRoom_Type.valueOf, enumValues: ChatRoom_Type.values)
     ..pc<Subscription>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: Subscription.create)
     ..hasRequiredFields = false
   ;
@@ -235,7 +235,7 @@ class ChatRoom extends $pb.GeneratedMessage {
   factory ChatRoom({
     $fixnum.Int64? id,
     $core.String? name,
-    ChatRoom_Type? tYPE,
+    ChatRoom_Type? type,
     $core.Iterable<Subscription>? subscriptions,
   }) {
     final _result = create();
@@ -245,8 +245,8 @@ class ChatRoom extends $pb.GeneratedMessage {
     if (name != null) {
       _result.name = name;
     }
-    if (tYPE != null) {
-      _result.tYPE = tYPE;
+    if (type != null) {
+      _result.type = type;
     }
     if (subscriptions != null) {
       _result.subscriptions.addAll(subscriptions);
@@ -293,13 +293,13 @@ class ChatRoom extends $pb.GeneratedMessage {
   void clearName() => clearField(2);
 
   @$pb.TagNumber(3)
-  ChatRoom_Type get tYPE => $_getN(2);
+  ChatRoom_Type get type => $_getN(2);
   @$pb.TagNumber(3)
-  set tYPE(ChatRoom_Type v) { setField(3, v); }
+  set type(ChatRoom_Type v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasTYPE() => $_has(2);
+  $core.bool hasType() => $_has(2);
   @$pb.TagNumber(3)
-  void clearTYPE() => clearField(3);
+  void clearType() => clearField(3);
 
   @$pb.TagNumber(4)
   $core.List<Subscription> get subscriptions => $_getList(3);

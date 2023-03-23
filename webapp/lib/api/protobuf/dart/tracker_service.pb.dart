@@ -10,17 +10,111 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'google/protobuf/duration.pb.dart' as $5;
-import 'google/protobuf/timestamp.pb.dart' as $6;
+import 'pbcommon.pb.dart' as $5;
+import 'google/protobuf/duration.pb.dart' as $6;
+import 'google/protobuf/timestamp.pb.dart' as $7;
+
+enum TrackerChatRoom_Type {
+  discord, 
+  telegram, 
+  notSet
+}
+
+class TrackerChatRoom extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, TrackerChatRoom_Type> _TrackerChatRoom_TypeByTag = {
+    2 : TrackerChatRoom_Type.discord,
+    3 : TrackerChatRoom_Type.telegram,
+    0 : TrackerChatRoom_Type.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackerChatRoom', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..oo(0, [2, 3])
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
+    ..aOM<$5.DiscordType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discord', subBuilder: $5.DiscordType.create)
+    ..aOM<$5.TelegramType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegram', subBuilder: $5.TelegramType.create)
+    ..hasRequiredFields = false
+  ;
+
+  TrackerChatRoom._() : super();
+  factory TrackerChatRoom({
+    $core.String? name,
+    $5.DiscordType? discord,
+    $5.TelegramType? telegram,
+  }) {
+    final _result = create();
+    if (name != null) {
+      _result.name = name;
+    }
+    if (discord != null) {
+      _result.discord = discord;
+    }
+    if (telegram != null) {
+      _result.telegram = telegram;
+    }
+    return _result;
+  }
+  factory TrackerChatRoom.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory TrackerChatRoom.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  TrackerChatRoom clone() => TrackerChatRoom()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  TrackerChatRoom copyWith(void Function(TrackerChatRoom) updates) => super.copyWith((message) => updates(message as TrackerChatRoom)) as TrackerChatRoom; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TrackerChatRoom create() => TrackerChatRoom._();
+  TrackerChatRoom createEmptyInstance() => create();
+  static $pb.PbList<TrackerChatRoom> createRepeated() => $pb.PbList<TrackerChatRoom>();
+  @$core.pragma('dart2js:noInline')
+  static TrackerChatRoom getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackerChatRoom>(create);
+  static TrackerChatRoom? _defaultInstance;
+
+  TrackerChatRoom_Type whichType() => _TrackerChatRoom_TypeByTag[$_whichOneof(0)]!;
+  void clearType() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  $core.String get name => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set name($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasName() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearName() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $5.DiscordType get discord => $_getN(1);
+  @$pb.TagNumber(2)
+  set discord($5.DiscordType v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasDiscord() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDiscord() => clearField(2);
+  @$pb.TagNumber(2)
+  $5.DiscordType ensureDiscord() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $5.TelegramType get telegram => $_getN(2);
+  @$pb.TagNumber(3)
+  set telegram($5.TelegramType v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasTelegram() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTelegram() => clearField(3);
+  @$pb.TagNumber(3)
+  $5.TelegramType ensureTelegram() => $_ensure(2);
+}
 
 class Tracker extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Tracker', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$5.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
-    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
-    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
-    ..aOM<$6.Timestamp>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $6.Timestamp.create)
+    ..aOM<$6.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $6.Duration.create)
+    ..aOM<TrackerChatRoom>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
+    ..aOM<$7.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $7.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -28,10 +122,9 @@ class Tracker extends $pb.GeneratedMessage {
   factory Tracker({
     $fixnum.Int64? id,
     $core.String? address,
-    $5.Duration? notificationInterval,
-    $fixnum.Int64? discordChannelId,
-    $fixnum.Int64? telegramChatId,
-    $6.Timestamp? updatedAt,
+    $6.Duration? notificationInterval,
+    TrackerChatRoom? chatRoom,
+    $7.Timestamp? updatedAt,
   }) {
     final _result = create();
     if (id != null) {
@@ -43,11 +136,8 @@ class Tracker extends $pb.GeneratedMessage {
     if (notificationInterval != null) {
       _result.notificationInterval = notificationInterval;
     }
-    if (discordChannelId != null) {
-      _result.discordChannelId = discordChannelId;
-    }
-    if (telegramChatId != null) {
-      _result.telegramChatId = telegramChatId;
+    if (chatRoom != null) {
+      _result.chatRoom = chatRoom;
     }
     if (updatedAt != null) {
       _result.updatedAt = updatedAt;
@@ -94,59 +184,57 @@ class Tracker extends $pb.GeneratedMessage {
   void clearAddress() => clearField(2);
 
   @$pb.TagNumber(3)
-  $5.Duration get notificationInterval => $_getN(2);
+  $6.Duration get notificationInterval => $_getN(2);
   @$pb.TagNumber(3)
-  set notificationInterval($5.Duration v) { setField(3, v); }
+  set notificationInterval($6.Duration v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasNotificationInterval() => $_has(2);
   @$pb.TagNumber(3)
   void clearNotificationInterval() => clearField(3);
   @$pb.TagNumber(3)
-  $5.Duration ensureNotificationInterval() => $_ensure(2);
+  $6.Duration ensureNotificationInterval() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  $fixnum.Int64 get discordChannelId => $_getI64(3);
+  TrackerChatRoom get chatRoom => $_getN(3);
   @$pb.TagNumber(4)
-  set discordChannelId($fixnum.Int64 v) { $_setInt64(3, v); }
+  set chatRoom(TrackerChatRoom v) { setField(4, v); }
   @$pb.TagNumber(4)
-  $core.bool hasDiscordChannelId() => $_has(3);
+  $core.bool hasChatRoom() => $_has(3);
   @$pb.TagNumber(4)
-  void clearDiscordChannelId() => clearField(4);
+  void clearChatRoom() => clearField(4);
+  @$pb.TagNumber(4)
+  TrackerChatRoom ensureChatRoom() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $fixnum.Int64 get telegramChatId => $_getI64(4);
+  $7.Timestamp get updatedAt => $_getN(4);
   @$pb.TagNumber(5)
-  set telegramChatId($fixnum.Int64 v) { $_setInt64(4, v); }
+  set updatedAt($7.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
-  $core.bool hasTelegramChatId() => $_has(4);
+  $core.bool hasUpdatedAt() => $_has(4);
   @$pb.TagNumber(5)
-  void clearTelegramChatId() => clearField(5);
-
-  @$pb.TagNumber(6)
-  $6.Timestamp get updatedAt => $_getN(5);
-  @$pb.TagNumber(6)
-  set updatedAt($6.Timestamp v) { setField(6, v); }
-  @$pb.TagNumber(6)
-  $core.bool hasUpdatedAt() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearUpdatedAt() => clearField(6);
-  @$pb.TagNumber(6)
-  $6.Timestamp ensureUpdatedAt() => $_ensure(5);
+  void clearUpdatedAt() => clearField(5);
+  @$pb.TagNumber(5)
+  $7.Timestamp ensureUpdatedAt() => $_ensure(4);
 }
 
 class GetTrackersResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetTrackersResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..pc<Tracker>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackers', $pb.PbFieldType.PM, subBuilder: Tracker.create)
+    ..pc<TrackerChatRoom>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRooms', $pb.PbFieldType.PM, protoName: 'chatRooms', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
 
   GetTrackersResponse._() : super();
   factory GetTrackersResponse({
     $core.Iterable<Tracker>? trackers,
+    $core.Iterable<TrackerChatRoom>? chatRooms,
   }) {
     final _result = create();
     if (trackers != null) {
       _result.trackers.addAll(trackers);
+    }
+    if (chatRooms != null) {
+      _result.chatRooms.addAll(chatRooms);
     }
     return _result;
   }
@@ -173,6 +261,9 @@ class GetTrackersResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   $core.List<Tracker> get trackers => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<TrackerChatRoom> get chatRooms => $_getList(1);
 }
 
 class IsAddressValidRequest extends $pb.GeneratedMessage {
@@ -272,18 +363,16 @@ class IsAddressValidResponse extends $pb.GeneratedMessage {
 class AddTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$5.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
-    ..aInt64(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
-    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
+    ..aOM<$6.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $6.Duration.create)
+    ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
 
   AddTrackerRequest._() : super();
   factory AddTrackerRequest({
     $core.String? address,
-    $5.Duration? notificationInterval,
-    $fixnum.Int64? discordChannelId,
-    $fixnum.Int64? telegramChatId,
+    $6.Duration? notificationInterval,
+    TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
     if (address != null) {
@@ -292,11 +381,8 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
     if (notificationInterval != null) {
       _result.notificationInterval = notificationInterval;
     }
-    if (discordChannelId != null) {
-      _result.discordChannelId = discordChannelId;
-    }
-    if (telegramChatId != null) {
-      _result.telegramChatId = telegramChatId;
+    if (chatRoom != null) {
+      _result.chatRoom = chatRoom;
     }
     return _result;
   }
@@ -331,50 +417,41 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
   void clearAddress() => clearField(1);
 
   @$pb.TagNumber(2)
-  $5.Duration get notificationInterval => $_getN(1);
+  $6.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($5.Duration v) { setField(2, v); }
+  set notificationInterval($6.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
   @$pb.TagNumber(2)
-  $5.Duration ensureNotificationInterval() => $_ensure(1);
+  $6.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $fixnum.Int64 get discordChannelId => $_getI64(2);
+  TrackerChatRoom get chatRoom => $_getN(2);
   @$pb.TagNumber(3)
-  set discordChannelId($fixnum.Int64 v) { $_setInt64(2, v); }
+  set chatRoom(TrackerChatRoom v) { setField(3, v); }
   @$pb.TagNumber(3)
-  $core.bool hasDiscordChannelId() => $_has(2);
+  $core.bool hasChatRoom() => $_has(2);
   @$pb.TagNumber(3)
-  void clearDiscordChannelId() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $fixnum.Int64 get telegramChatId => $_getI64(3);
-  @$pb.TagNumber(4)
-  set telegramChatId($fixnum.Int64 v) { $_setInt64(3, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasTelegramChatId() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearTelegramChatId() => clearField(4);
+  void clearChatRoom() => clearField(3);
+  @$pb.TagNumber(3)
+  TrackerChatRoom ensureChatRoom() => $_ensure(2);
 }
 
 class UpdateTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
-    ..aOM<$5.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $5.Duration.create)
-    ..aInt64(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discordChannelId', protoName: 'discordChannelId')
-    ..aInt64(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegramChatId', protoName: 'telegramChatId')
+    ..aOM<$6.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $6.Duration.create)
+    ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
 
   UpdateTrackerRequest._() : super();
   factory UpdateTrackerRequest({
     $fixnum.Int64? trackerId,
-    $5.Duration? notificationInterval,
-    $fixnum.Int64? discordChannelId,
-    $fixnum.Int64? telegramChatId,
+    $6.Duration? notificationInterval,
+    TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
     if (trackerId != null) {
@@ -383,11 +460,8 @@ class UpdateTrackerRequest extends $pb.GeneratedMessage {
     if (notificationInterval != null) {
       _result.notificationInterval = notificationInterval;
     }
-    if (discordChannelId != null) {
-      _result.discordChannelId = discordChannelId;
-    }
-    if (telegramChatId != null) {
-      _result.telegramChatId = telegramChatId;
+    if (chatRoom != null) {
+      _result.chatRoom = chatRoom;
     }
     return _result;
   }
@@ -421,34 +495,27 @@ class UpdateTrackerRequest extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   void clearTrackerId() => clearField(1);
 
-  @$pb.TagNumber(3)
-  $5.Duration get notificationInterval => $_getN(1);
-  @$pb.TagNumber(3)
-  set notificationInterval($5.Duration v) { setField(3, v); }
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(2)
+  $6.Duration get notificationInterval => $_getN(1);
+  @$pb.TagNumber(2)
+  set notificationInterval($6.Duration v) { setField(2, v); }
+  @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
-  @$pb.TagNumber(3)
-  void clearNotificationInterval() => clearField(3);
-  @$pb.TagNumber(3)
-  $5.Duration ensureNotificationInterval() => $_ensure(1);
+  @$pb.TagNumber(2)
+  void clearNotificationInterval() => clearField(2);
+  @$pb.TagNumber(2)
+  $6.Duration ensureNotificationInterval() => $_ensure(1);
 
-  @$pb.TagNumber(4)
-  $fixnum.Int64 get discordChannelId => $_getI64(2);
-  @$pb.TagNumber(4)
-  set discordChannelId($fixnum.Int64 v) { $_setInt64(2, v); }
-  @$pb.TagNumber(4)
-  $core.bool hasDiscordChannelId() => $_has(2);
-  @$pb.TagNumber(4)
-  void clearDiscordChannelId() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $fixnum.Int64 get telegramChatId => $_getI64(3);
-  @$pb.TagNumber(5)
-  set telegramChatId($fixnum.Int64 v) { $_setInt64(3, v); }
-  @$pb.TagNumber(5)
-  $core.bool hasTelegramChatId() => $_has(3);
-  @$pb.TagNumber(5)
-  void clearTelegramChatId() => clearField(5);
+  @$pb.TagNumber(3)
+  TrackerChatRoom get chatRoom => $_getN(2);
+  @$pb.TagNumber(3)
+  set chatRoom(TrackerChatRoom v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasChatRoom() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearChatRoom() => clearField(3);
+  @$pb.TagNumber(3)
+  TrackerChatRoom ensureChatRoom() => $_ensure(2);
 }
 
 class DeleteTrackerRequest extends $pb.GeneratedMessage {

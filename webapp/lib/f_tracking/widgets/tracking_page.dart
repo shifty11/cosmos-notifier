@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
+import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pbgrpc.dart';
 import 'package:cosmos_notifier/common/header_widget.dart';
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/message_provider.dart';
@@ -102,6 +103,7 @@ class TrackingPage extends StatelessWidget {
       final trackerFuture = ref.watch(trackerFutureProvider);
       final trackerRows = ref.watch(trackerNotifierProvider);
       final showAddTrackerButton = ref.watch(showAddTrackerButtonProvider);
+      final trackerChatRooms = ref.watch(trackerChatRoomsProvider);
       return Builder(
         builder: (BuildContext context) {
           if (trackerFuture.isLoading) {
@@ -116,7 +118,7 @@ class TrackingPage extends StatelessWidget {
                 ],
                 rows: trackerRows.map((trackerRow) {
                   return DataRow(cells: [
-                    DataCell(trackerRow.updatedAt == null ? AddressInputWidget(ref, trackerRow) : Text(trackerRow.shortenedBech32Address)),
+                    DataCell(trackerRow.updatedAt == null ? AddressInputWidget(ref, trackerRow) : Text(trackerRow.shortenedAddress)),
                     DataCell(Row(
                       children: [
                         Text(trackerRow.notificationIntervalPrettyString, textAlign: TextAlign.center),
@@ -128,7 +130,32 @@ class TrackingPage extends StatelessWidget {
                         ),
                       ],
                     )),
-                    DataCell(Text(trackerRow.chatId.toString())),
+                    DataCell(
+                      DropdownButton<TrackerChatRoom>(
+                        value: trackerRow.chatRoom,
+                        icon: const Icon(Icons.arrow_downward),
+                        iconSize: iconSizeSmall,
+                        elevation: 16,
+                        style: const TextStyle(color: Colors.deepPurple),
+                        underline: Container(
+                          height: 2,
+                          color: Colors.deepPurpleAccent,
+                        ),
+                        onChanged: (TrackerChatRoom? newValue) async {
+                          if (newValue == null) {
+                            return;
+                          }
+                          trackerRow = trackerRow.copyWith(chatRoom: newValue);
+                          await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
+                        },
+                        items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
+                          return DropdownMenuItem<TrackerChatRoom>(
+                            value: trackerChatRoom,
+                            child: Text(trackerChatRoom.name),
+                          );
+                        }).toList(),
+                      ),
+                    ),
                     DataCell(IconButton(
                       padding: const EdgeInsets.all(0),
                       onPressed: () async => {await ref.read(trackerNotifierProvider.notifier).deleteTracker(trackerRow)},
@@ -217,7 +244,7 @@ class AddressInputWidget extends HookWidget {
     debouncer.values.listen((value) {
       ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow.copyWith(address: value));
     });
-    final controller = useTextEditingController(text: trackerRow.shortenedBech32Address);
+    final controller = useTextEditingController(text: trackerRow.shortenedAddress);
     return TextField(
       controller: controller,
       decoration: const InputDecoration(

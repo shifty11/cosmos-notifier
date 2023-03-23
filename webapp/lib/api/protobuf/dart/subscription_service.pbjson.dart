@@ -42,7 +42,7 @@ const ChatRoom$json = const {
   '2': const [
     const {'1': 'id', '3': 1, '4': 1, '5': 3, '10': 'id'},
     const {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
-    const {'1': 'TYPE', '3': 3, '4': 1, '5': 14, '6': '.cosmos_notifier_grpc.ChatRoom.Type', '10': 'TYPE'},
+    const {'1': 'type', '3': 3, '4': 1, '5': 14, '6': '.cosmos_notifier_grpc.ChatRoom.Type', '10': 'type'},
     const {'1': 'subscriptions', '3': 4, '4': 3, '5': 11, '6': '.cosmos_notifier_grpc.Subscription', '10': 'subscriptions'},
   ],
   '4': const [ChatRoom_Type$json],
@@ -58,7 +58,7 @@ const ChatRoom_Type$json = const {
 };
 
 /// Descriptor for `ChatRoom`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List chatRoomDescriptor = $convert.base64Decode('CghDaGF0Um9vbRIOCgJpZBgBIAEoA1ICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRI3CgRUWVBFGAMgASgOMiMuY29zbW9zX25vdGlmaWVyX2dycGMuQ2hhdFJvb20uVHlwZVIEVFlQRRJICg1zdWJzY3JpcHRpb25zGAQgAygLMiIuY29zbW9zX25vdGlmaWVyX2dycGMuU3Vic2NyaXB0aW9uUg1zdWJzY3JpcHRpb25zIiEKBFR5cGUSDAoIVEVMRUdSQU0QABILCgdESVNDT1JEEAE=');
+final $typed_data.Uint8List chatRoomDescriptor = $convert.base64Decode('CghDaGF0Um9vbRIOCgJpZBgBIAEoA1ICaWQSEgoEbmFtZRgCIAEoCVIEbmFtZRI3CgR0eXBlGAMgASgOMiMuY29zbW9zX25vdGlmaWVyX2dycGMuQ2hhdFJvb20uVHlwZVIEdHlwZRJICg1zdWJzY3JpcHRpb25zGAQgAygLMiIuY29zbW9zX25vdGlmaWVyX2dycGMuU3Vic2NyaXB0aW9uUg1zdWJzY3JpcHRpb25zIiEKBFR5cGUSDAoIVEVMRUdSQU0QABILCgdESVNDT1JEEAE=');
 @$core.Deprecated('Use getSubscriptionsResponseDescriptor instead')
 const GetSubscriptionsResponse$json = const {
   '1': 'GetSubscriptionsResponse',
