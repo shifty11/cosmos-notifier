@@ -29,19 +29,25 @@ func NewTrackerServer(managers *database.DbManagers) pb.TrackerServiceServer {
 
 func getTrackerChatRoom(tracker *ent.AddressTracker) (*pb.TrackerChatRoom, error) {
 	chatRoom := &pb.TrackerChatRoom{
-		Id:   0,
 		Name: "",
-		TYPE: 0,
 	}
 	if tracker.Edges.DiscordChannel != nil {
-		chatRoom.Id = int64(tracker.Edges.DiscordChannel.ID)
 		chatRoom.Name = tracker.Edges.DiscordChannel.Name
-		chatRoom.TYPE = pb.TrackerChatRoom_DISCORD
+		chatRoom.Type = &pb.TrackerChatRoom_Discord{
+			Discord: &pb.DiscordType{
+				Id: int32(tracker.Edges.DiscordChannel.ID),
+				//ChannelId: tracker.Edges.DiscordChannel.ChannelID,
+			},
+		}
 	}
 	if tracker.Edges.TelegramChat != nil {
-		chatRoom.Id = int64(tracker.Edges.TelegramChat.ID)
 		chatRoom.Name = tracker.Edges.TelegramChat.Name
-		chatRoom.TYPE = pb.TrackerChatRoom_TELEGRAM
+		chatRoom.Type = &pb.TrackerChatRoom_Telegram{
+			Telegram: &pb.TelegramType{
+				Id: int32(tracker.Edges.TelegramChat.ID),
+				//ChatId: tracker.Edges.TelegramChat.ChatID
+			},
+		}
 	}
 	if tracker.Edges.DiscordChannel != nil && tracker.Edges.TelegramChat != nil {
 		err := errors.New(fmt.Sprintf("tracker %d has both discord channel and telegram chat", tracker.ID))
@@ -54,6 +60,42 @@ func getTrackerChatRoom(tracker *ent.AddressTracker) (*pb.TrackerChatRoom, error
 		return nil, err
 	}
 	return chatRoom, nil
+}
+
+func validateChatRoom(chatRoom *pb.TrackerChatRoom) error {
+	if chatRoom == nil {
+		return status.Errorf(codes.InvalidArgument, "chat-room must be set")
+	}
+	var discord = chatRoom.GetDiscord()
+	if discord != nil && discord.GetId() == 0 {
+		return status.Errorf(codes.InvalidArgument, "invalid discord chat-room")
+	}
+	var telegram = chatRoom.GetTelegram()
+	if telegram != nil && telegram.GetId() == 0 {
+		return status.Errorf(codes.InvalidArgument, "invalid telegram chat-room")
+	}
+	if chatRoom.GetType() == nil {
+		return status.Errorf(codes.InvalidArgument, "chat-room-type must be set")
+	}
+	return nil
+}
+
+func getDiscordChannelIdOrZero(chatRoom *pb.TrackerChatRoom) int {
+	switch chatRoom.Type.(type) {
+	case *pb.TrackerChatRoom_Discord:
+		return int(chatRoom.GetDiscord().GetId())
+	default:
+		return 0
+	}
+}
+
+func getTelegramChatIdOrZero(chatRoom *pb.TrackerChatRoom) int {
+	switch chatRoom.Type.(type) {
+	case *pb.TrackerChatRoom_Telegram:
+		return int(chatRoom.GetTelegram().GetId())
+	default:
+		return 0
+	}
 }
 
 func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*pb.GetTrackersResponse, error) {
@@ -92,16 +134,20 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 	}
 	for _, trackerChatRoom := range discordChannels {
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
-			Id:   int64(trackerChatRoom.ID),
 			Name: trackerChatRoom.Name,
-			TYPE: pb.TrackerChatRoom_DISCORD,
+			Type: &pb.TrackerChatRoom_Discord{Discord: &pb.DiscordType{
+				Id: int32(trackerChatRoom.ID),
+				//ChannelId: trackerChatRoom.ChannelID,
+			}},
 		})
 	}
 	for _, trackerChatRoom := range telegramChats {
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
-			Id:   int64(trackerChatRoom.ID),
 			Name: trackerChatRoom.Name,
-			TYPE: pb.TrackerChatRoom_TELEGRAM,
+			Type: &pb.TrackerChatRoom_Telegram{Telegram: &pb.TelegramType{
+				Id: int32(trackerChatRoom.ID),
+				//ChatId: trackerChatRoom.ChatID,
+			}},
 		})
 	}
 	return &pb.GetTrackersResponse{Trackers: pbTrackers, ChatRooms: pbTrackerChatRooms}, nil
@@ -120,26 +166,18 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
-	if req.ChatRoom == nil || req.ChatRoom.Id == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "chat-room-id must be provided")
-	}
 	if req.NotificationInterval == nil || req.NotificationInterval.Seconds < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
 	}
-
-	var discordChannelId, telegramChatId int
-	if req.ChatRoom.TYPE == pb.TrackerChatRoom_DISCORD {
-		discordChannelId = int(req.ChatRoom.Id)
-	}
-	if req.ChatRoom.TYPE == pb.TrackerChatRoom_TELEGRAM {
-		telegramChatId = int(req.ChatRoom.Id)
+	if err := validateChatRoom(req.ChatRoom); err != nil {
+		return nil, err
 	}
 
 	tracker, err := server.addressTrackerManager.AddTracker(
 		userEnt,
 		req.Address,
-		discordChannelId,
-		telegramChatId,
+		getDiscordChannelIdOrZero(req.ChatRoom),
+		getTelegramChatIdOrZero(req.ChatRoom),
 		req.NotificationInterval.Seconds,
 	)
 	if err != nil {
@@ -166,26 +204,18 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
-	if req.ChatRoom == nil || req.ChatRoom.Id == 0 {
-		return nil, status.Errorf(codes.InvalidArgument, "chat-room-id must be provided")
-	}
 	if req.NotificationInterval == nil || req.NotificationInterval.Seconds < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
 	}
-
-	var discordChannelId, telegramChatId int
-	if req.ChatRoom.TYPE == pb.TrackerChatRoom_DISCORD {
-		discordChannelId = int(req.ChatRoom.Id)
-	}
-	if req.ChatRoom.TYPE == pb.TrackerChatRoom_TELEGRAM {
-		telegramChatId = int(req.ChatRoom.Id)
+	if err := validateChatRoom(req.ChatRoom); err != nil {
+		return nil, err
 	}
 
 	tracker, err := server.addressTrackerManager.UpdateTracker(
 		userEnt,
 		int(req.TrackerId),
-		discordChannelId,
-		telegramChatId,
+		getDiscordChannelIdOrZero(req.ChatRoom),
+		getTelegramChatIdOrZero(req.ChatRoom),
 		req.NotificationInterval.Seconds,
 	)
 	if err != nil {

@@ -16,14 +16,20 @@ service TrackerService {
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
 }
 
+message DiscordType {
+  int32 id = 1;
+}
+
+message TelegramType {
+  int32 id = 1;
+}
+
 message TrackerChatRoom {
-  int64 id = 1;
-  string name = 2;
-  enum Type {
-    TELEGRAM = 0;
-    DISCORD = 1;
+  string name = 1;
+  oneof type {
+    DiscordType discord = 2;
+    TelegramType telegram = 3;
   }
-  Type TYPE = 3;
 }
 
 message Tracker {
