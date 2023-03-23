@@ -8,7 +8,9 @@ import 'package:go_router/go_router.dart';
 import '../../f_home/services/chat_id_provider.dart';
 
 class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({Key? key}) : super(key: key);
+  bool showChatDropdownWidget;
+
+  HeaderWidget(this.showChatDropdownWidget, {Key? key}) : super(key: key);
 
   Widget chatDropdownWidget(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
@@ -90,7 +92,7 @@ class HeaderWidget extends StatelessWidget {
                 ),
               ) : Container(),
               const Spacer(),
-              chatDropdownWidget(context),
+              showChatDropdownWidget ? chatDropdownWidget(context) : Container(),
             ],
           ),
           const Divider(),
