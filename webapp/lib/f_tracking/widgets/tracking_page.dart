@@ -151,11 +151,9 @@ class TrackingPage extends StatelessWidget {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
-                            Flexible(
-                              child: Text(
-                                trackerRow.notificationIntervalPrettyString,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                            Text(
+                              trackerRow.notificationIntervalPrettyString,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             const SizedBox(width: 5),
                             const Icon(
