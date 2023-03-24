@@ -76,16 +76,14 @@ class _CollapsibleHeaderState extends State<CollapsibleHeader> {
           foregroundColor: location == rSubscriptions.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
         ),
       ),
-      jwtManager.isAdmin
-          ? TextButton.icon(
+      TextButton.icon(
               onPressed: () => context.pushNamed(rTracking.name),
               icon: const Icon(Icons.my_location),
               label: const Text("Tracking"),
               style: TextButton.styleFrom(
                 foregroundColor: location == rTracking.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
               ),
-            )
-          : Container(),
+            ),
       jwtManager.isAdmin
           ? TextButton.icon(
               onPressed: () => context.pushNamed(rAdmin.name),
