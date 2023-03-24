@@ -13,7 +13,7 @@ class HeaderWidget extends StatefulWidget {
 class MenuButtonData {
   final String title;
   final IconData icon;
-  final RouteData routeData;
+  final MyRouteData routeData;
 
   MenuButtonData(this.title, this.icon, this.routeData);
 }

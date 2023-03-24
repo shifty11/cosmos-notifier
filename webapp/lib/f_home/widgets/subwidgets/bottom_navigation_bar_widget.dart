@@ -5,7 +5,7 @@ import 'package:cosmos_notifier/f_home/services/jwt_manager.dart';
 
 class NavigationData {
   final int index;
-  final RouteData routerData;
+  final MyRouteData routerData;
   final Icon icon;
   final String label;
 

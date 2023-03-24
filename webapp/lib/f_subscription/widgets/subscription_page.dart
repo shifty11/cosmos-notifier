@@ -150,8 +150,7 @@ class SubscriptionPage extends StatelessWidget {
         Tooltip(
           message: "Subscribed Telegram chats",
           child: badges.Badge(
-            toAnimate: false,
-            badgeColor: Styles.telegramColor.withOpacity(0.5),
+            badgeStyle: badges.BadgeStyle(badgeColor: Styles.telegramColor.withOpacity(0.5)),
             badgeContent: Text(
               "${subscription.stats.telegram}",
               style: const TextStyle(fontSize: 12, color: Colors.white),
@@ -162,8 +161,7 @@ class SubscriptionPage extends StatelessWidget {
         Tooltip(
           message: "Subscribed Discord channels",
           child: badges.Badge(
-            toAnimate: false,
-            badgeColor: Styles.discordColor.withOpacity(0.5),
+            badgeStyle: badges.BadgeStyle(badgeColor: Styles.discordColor.withOpacity(0.5)),
             badgeContent: Text(
               "${subscription.stats.discord}",
               style: const TextStyle(fontSize: 12, color: Colors.white),
@@ -174,8 +172,7 @@ class SubscriptionPage extends StatelessWidget {
         Tooltip(
           message: "Total subscriptions",
           child: badges.Badge(
-            toAnimate: false,
-            badgeColor: Colors.black.withOpacity(0.5),
+            badgeStyle: badges.BadgeStyle(badgeColor: Colors.black.withOpacity(0.5)),
             badgeContent: Text(
               "${subscription.stats.total}",
               style: const TextStyle(fontSize: 12, color: Colors.white),

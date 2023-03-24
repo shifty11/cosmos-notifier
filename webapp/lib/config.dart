@@ -19,19 +19,19 @@ final subsService = SubscriptionService(channel, [authInterceptor]);
 final adminService = AdminService(channel, [authInterceptor]);
 final trackerService = TrackerService(channel, [authInterceptor]);
 
-class RouteData {
+class MyRouteData {
   final String name;
   final String path;
 
-  const RouteData(this.name, this.path);
+  const MyRouteData(this.name, this.path);
 }
 
-const rRoot = RouteData("root", "/");
-const rLoading = RouteData("loading", "/loading");
-const rLogin = RouteData("login", "/login");
-const rSubscriptions = RouteData("subscriptions", "/subscriptions");
-const rAdmin = RouteData("admin", "/admin");
-const rTracking = RouteData("reminder", "/reminder");
+const rRoot = MyRouteData("root", "/");
+const rLoading = MyRouteData("loading", "/loading");
+const rLogin = MyRouteData("login", "/login");
+const rSubscriptions = MyRouteData("subscriptions", "/subscriptions");
+const rAdmin = MyRouteData("admin", "/admin");
+const rTracking = MyRouteData("reminder", "/reminder");
 
 const bool cDebugMode = true;
 
