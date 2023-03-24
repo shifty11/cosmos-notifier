@@ -252,7 +252,7 @@ class TrackingPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CollapsibleHeader(),
+                  const HeaderWidget(),
                   const SizedBox(height: 10),
                   Expanded(
                     child: SingleChildScrollView(
