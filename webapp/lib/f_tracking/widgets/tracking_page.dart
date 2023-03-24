@@ -138,9 +138,9 @@ class TrackingPage extends StatelessWidget {
                       ElevatedButton(
                         onPressed: () {  },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          elevation: 0,
+                          // backgroundColor: Colors.transparent,
+                          // shadowColor: Colors.transparent,
+                          // elevation: 0,
                           maximumSize: Size.fromWidth(
                             ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200,
                           ),
