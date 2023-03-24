@@ -144,30 +144,23 @@ class TrackingPage extends StatelessWidget {
                             elevation: 0,
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 22),
                           ),
-                          onPressed: () async =>
-                              showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
-                          child: LimitedBox(
-                            maxWidth: 100,
-                            child: Flexible(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      trackerRow.notificationIntervalPrettyString,
-                                      textAlign: TextAlign.start,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  const Icon(
-                                    Icons.edit,
-                                    size: iconSizeSmall,
-                                  ),
-                                ],
+                          onPressed: () async => showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  trackerRow.notificationIntervalPrettyString,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 5),
+                              const Icon(
+                                Icons.edit,
+                                size: iconSizeSmall,
+                              ),
+                            ],
                           ),
                         ),
                       ),
