@@ -117,6 +117,9 @@ class Styles {
               borderRadius: BorderRadius.all(Radius.circular(5)),
             )),
       ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: bgColor,
+      ),
       dialogTheme: DialogTheme(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
       ),
