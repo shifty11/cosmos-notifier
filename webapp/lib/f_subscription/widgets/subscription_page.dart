@@ -2,6 +2,7 @@ import 'package:badges/badges.dart' as badges;
 import 'package:cosmos_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:cosmos_notifier/common/header_widget.dart';
 import 'package:cosmos_notifier/config.dart';
+import 'package:cosmos_notifier/f_home/services/chat_id_provider.dart';
 import 'package:cosmos_notifier/f_home/services/message_provider.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/bottom_navigation_bar_widget.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/footer_widget.dart';
@@ -11,6 +12,7 @@ import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_messages/riverpod_messages.dart';
 
@@ -425,6 +427,44 @@ class SubscriptionPage extends StatelessWidget {
     });
   }
 
+  Widget chatDropdownWidget(BuildContext context) {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      final state = ref.watch(chatroomListStateProvider);
+      return state.when(
+        loading: () => Container(),
+        data: (chainChatRooms, contractChatRooms) {
+          var chatRooms = ref.read(isChainsSelectedProvider) ? chainChatRooms : contractChatRooms;
+          if (chatRooms.isEmpty) {
+            return Container();
+          }
+          if (chatRooms.length == 1) {
+            return Text(chatRooms.first.name);
+          }
+          return DropdownButtonHideUnderline(
+            child: DropdownButton<ChatRoom>(
+              value: ref.watch(selectedChatRoomProvider),
+              icon: const Padding(
+                padding: EdgeInsets.only(left: 4.0),
+                child: Icon(Icons.person, size: 20),
+              ),
+              onChanged: (ChatRoom? newValue) {
+                ref.watch(selectedChatRoomProvider.notifier).state = newValue;
+                ref.read(chatIdProvider.notifier).state = newValue?.id ?? ref.read(chatIdProvider.notifier).state;
+                context.pushNamed(rSubscriptions.name, queryParams: {'chat-id': newValue?.id.toString() ?? ""});
+              },
+              items: chatRooms.map<DropdownMenuItem<ChatRoom>>((ChatRoom chatRoom) {
+                return DropdownMenuItem<ChatRoom>(
+                  value: chatRoom,
+                  child: Text(chatRoom.name),
+                );
+              }).toList(),
+            ),
+          );
+        },
+      );
+    });
+  }
+
   Widget title(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -439,7 +479,11 @@ class SubscriptionPage extends StatelessWidget {
                     "You will receive notifications about new governance proposals.",
                 child: Icon(Icons.info, size: 20, color: Theme.of(context).disabledColor)),
             const Spacer(),
-            ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? Container() : subscriptionTypeWidget(context),
+            chatDropdownWidget(context),
+            ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? Container() : Padding(
+              padding: const EdgeInsets.only(left: 20),
+              child: subscriptionTypeWidget(context),
+            ),
           ],
         ),
         ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? subscriptionTypeWidget(context) : Container(),
@@ -460,7 +504,7 @@ class SubscriptionPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  HeaderWidget(true),
+                  const CollapsibleHeader(),
                   const SizedBox(height: 10),
                   title(context),
                   const SizedBox(height: 20),

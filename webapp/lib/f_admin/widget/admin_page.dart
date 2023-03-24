@@ -199,7 +199,7 @@ multiline
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    HeaderWidget(false),
+                    const CollapsibleHeader(),
                     const SizedBox(height: 10),
                     ConstrainedBox(
                       constraints: BoxConstraints(
