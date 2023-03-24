@@ -117,104 +117,102 @@ class TrackingPage extends StatelessWidget {
           if (trackerFuture.isLoading) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            return SingleChildScrollView(
-              child: DataTable(
-                  columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
-                  columns: const [
-                    DataColumn(label: Text("Track Address")),
-                    DataColumn(
-                        label: Padding(
-                      padding: EdgeInsets.only(left: 10),
-                      child: Text("Notification"),
-                    )),
-                    DataColumn(label: Text("Chat")),
-                    DataColumn(label: Text("Action")),
-                  ],
-                  rows: trackerRows.map((trackerRow) {
-                    return DataRow(cells: [
-                      DataCell(
-                          trackerRow.isSaved
-                              ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
-                                  : AddressInputWidget(ref, trackerRow)),
-                      DataCell(
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 22),
-                          ),
-                          onPressed: () async => showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  trackerRow.notificationIntervalPrettyString,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+            return DataTable(
+                columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
+                columns: const [
+                  DataColumn(label: Text("Track Address")),
+                  DataColumn(
+                      label: Padding(
+                    padding: EdgeInsets.only(left: 10),
+                    child: Text("Notification"),
+                  )),
+                  DataColumn(label: Text("Chat")),
+                  DataColumn(label: Text("Action")),
+                ],
+                rows: trackerRows.map((trackerRow) {
+                  return DataRow(cells: [
+                    DataCell(
+                        trackerRow.isSaved
+                            ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
+                                : AddressInputWidget(ref, trackerRow)),
+                    DataCell(
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 22),
+                        ),
+                        onPressed: () async => showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                trackerRow.notificationIntervalPrettyString,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(width: 5),
-                              const Icon(
-                                Icons.edit,
-                                size: iconSizeSmall,
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 5),
+                            const Icon(
+                              Icons.edit,
+                              size: iconSizeSmall,
+                            ),
+                          ],
                         ),
                       ),
-                      DataCell(
-                        LimitedBox(
-                          maxWidth: 200,
-                          child: DropdownButton<TrackerChatRoom>(
-                            focusColor: Colors.transparent,
-                            value: trackerRow.chatRoom,
-                            icon: const Icon(Icons.arrow_downward),
-                            iconSize: iconSizeSmall,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            onChanged: (TrackerChatRoom? newValue) async {
-                              if (newValue == null || newValue == trackerRow.chatRoom) {
-                                return;
-                              }
-                              trackerRow = trackerRow.copyWith(chatRoom: newValue);
-                              await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
-                            },
-                            items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
-                              return DropdownMenuItem<TrackerChatRoom>(
-                                value: trackerChatRoom,
-                                child: Text(
-                                  trackerChatRoom.name,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              );
-                            }).toList(),
-                          ),
+                    ),
+                    DataCell(
+                      LimitedBox(
+                        maxWidth: 200,
+                        child: DropdownButton<TrackerChatRoom>(
+                          focusColor: Colors.transparent,
+                          value: trackerRow.chatRoom,
+                          icon: const Icon(Icons.arrow_downward),
+                          iconSize: iconSizeSmall,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          onChanged: (TrackerChatRoom? newValue) async {
+                            if (newValue == null || newValue == trackerRow.chatRoom) {
+                              return;
+                            }
+                            trackerRow = trackerRow.copyWith(chatRoom: newValue);
+                            await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
+                          },
+                          items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
+                            return DropdownMenuItem<TrackerChatRoom>(
+                              value: trackerChatRoom,
+                              child: Text(
+                                trackerChatRoom.name,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
-                      DataCell(
-                        IconButton(
+                    ),
+                    DataCell(
+                      IconButton(
+                        padding: const EdgeInsets.all(0),
+                        onPressed: () async => {await ref.read(trackerNotifierProvider.notifier).deleteTracker(trackerRow)},
+                        icon: const Icon(Icons.delete, size: iconSize),
+                      ),
+                    ),
+                  ]);
+                }).toList()
+                  ..addAll([
+                    if (showAddTrackerButton)
+                      DataRow(cells: [
+                        const DataCell(Text("")),
+                        const DataCell(Text("")),
+                        const DataCell(Text("")),
+                        DataCell(IconButton(
                           padding: const EdgeInsets.all(0),
-                          onPressed: () async => {await ref.read(trackerNotifierProvider.notifier).deleteTracker(trackerRow)},
-                          icon: const Icon(Icons.delete, size: iconSize),
-                        ),
-                      ),
-                    ]);
-                  }).toList()
-                    ..addAll([
-                      if (showAddTrackerButton)
-                        DataRow(cells: [
-                          const DataCell(Text("")),
-                          const DataCell(Text("")),
-                          const DataCell(Text("")),
-                          DataCell(IconButton(
-                            padding: const EdgeInsets.all(0),
-                            onPressed: () async => {ref.read(trackerNotifierProvider.notifier).addTracker()},
-                            icon: const Icon(Icons.add, size: iconSize),
-                          ))
-                        ])
-                    ])),
-            );
+                          onPressed: () async => {ref.read(trackerNotifierProvider.notifier).addTracker()},
+                          icon: const Icon(Icons.add, size: iconSize),
+                        ))
+                      ])
+                  ]));
           }
         },
       );
@@ -256,9 +254,16 @@ class TrackingPage extends StatelessWidget {
                 children: [
                   HeaderWidget(false),
                   const SizedBox(height: 10),
-                  table(context),
-                  validationError(context),
-                  const Spacer(flex: 1),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          table(context),
+                          validationError(context),
+                        ],
+                      ),
+                    ),
+                  ),
                   const Flexible(flex: 0, child: FooterWidget()),
                 ],
               ),
