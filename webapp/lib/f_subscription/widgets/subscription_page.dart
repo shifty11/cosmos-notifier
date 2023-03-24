@@ -8,6 +8,7 @@ import 'package:cosmos_notifier/f_home/widgets/subwidgets/bottom_navigation_bar_
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/footer_widget.dart';
 import 'package:cosmos_notifier/f_subscription/services/subscription_provider.dart';
 import 'package:cosmos_notifier/style.dart';
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -188,7 +189,7 @@ class SubscriptionPage extends StatelessWidget {
   Widget subscriptionList() {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        final state = ref.watch(chatroomListStateProvider);
+        final state = ref.read(chatroomListStateProvider);
         return state.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           data: (chainChatRooms, contractChatRooms) {
@@ -287,8 +288,12 @@ class SubscriptionPage extends StatelessWidget {
 
   Widget searchWidget(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      final debouncer = Debouncer<String>(const Duration(milliseconds: 200), initialValue: "");
+      debouncer.values.listen((value) {
+        ref.watch(searchSubsProvider.notifier).state = value;
+      });
       return TextField(
-        onChanged: (value) => ref.watch(searchSubsProvider.notifier).state = value,
+        onChanged: (value) => debouncer.value = value,
         decoration: const InputDecoration(
           prefixIcon: Icon(Icons.search),
           border: OutlineInputBorder(),
