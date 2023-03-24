@@ -1,104 +1,50 @@
-import 'package:cosmos_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:cosmos_notifier/config.dart';
-import 'package:cosmos_notifier/f_subscription/services/subscription_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-import '../../f_home/services/chat_id_provider.dart';
-
-class CollapsibleHeader extends StatefulWidget {
-  const CollapsibleHeader({Key? key}) : super(key: key);
+class HeaderWidget extends StatefulWidget {
+  const HeaderWidget({Key? key}) : super(key: key);
 
   @override
-  _CollapsibleHeaderState createState() => _CollapsibleHeaderState();
+  _HeaderWidgetState createState() => _HeaderWidgetState();
 }
 
-class _CollapsibleHeaderState extends State<CollapsibleHeader> {
+class MenuButtonData {
+  final String title;
+  final IconData icon;
+  final RouteData routeData;
+
+  MenuButtonData(this.title, this.icon, this.routeData);
+}
+
+class _HeaderWidgetState extends State<HeaderWidget> {
   bool isCollapsed = false;
-  bool showChatDropdownWidget = false;
 
-  Widget chatDropdownWidget(BuildContext context) {
-    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-      final state = ref.watch(chatroomListStateProvider);
-      return state.when(
-        loading: () => Container(),
-        data: (chainChatRooms, contractChatRooms) {
-          var chatRooms = ref.read(isChainsSelectedProvider) ? chainChatRooms : contractChatRooms;
-          if (chatRooms.isEmpty) {
-            return Container();
-          }
-          if (chatRooms.length == 1) {
-            return Text(chatRooms.first.name);
-          }
-          return DropdownButtonHideUnderline(
-            child: DropdownButton<ChatRoom>(
-              value: ref.watch(selectedChatRoomProvider),
-              icon: const Padding(
-                padding: EdgeInsets.only(left: 4.0),
-                child: Icon(Icons.person, size: 20),
-              ),
-              onChanged: (ChatRoom? newValue) {
-                ref.watch(selectedChatRoomProvider.notifier).state = newValue;
-                ref.read(chatIdProvider.notifier).state = newValue?.id ?? ref.read(chatIdProvider.notifier).state;
-                context.pushNamed(rSubscriptions.name, queryParams: {'chat-id': newValue?.id.toString() ?? ""});
-              },
-              items: chatRooms.map<DropdownMenuItem<ChatRoom>>((ChatRoom chatRoom) {
-                return DropdownMenuItem<ChatRoom>(
-                  value: chatRoom,
-                  child: Text(chatRoom.name),
-                );
-              }).toList(),
-            ),
-          );
-        },
-      );
-    });
-  }
-
-  List<Widget> getMenuButtons() {
-    var location = GoRouter.of(context).location;
+  Iterable<MenuButtonData> getRoutes() {
     return [
-      TextButton.icon(
-        onPressed: () => context.pushNamed(rRoot.name),
-        icon: const Icon(Icons.home),
-        label: const Text("Home"),
-        style: TextButton.styleFrom(
-          foregroundColor: location == rRoot.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
-        ),
-      ),
-      TextButton.icon(
-        onPressed: () => context.pushNamed(rSubscriptions.name),
-        icon: const Icon(Icons.notifications),
-        label: const Text("Subscriptions"),
-        style: TextButton.styleFrom(
-          foregroundColor: location == rSubscriptions.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
-        ),
-      ),
-      TextButton.icon(
-              onPressed: () => context.pushNamed(rTracking.name),
-              icon: const Icon(Icons.my_location),
-              label: const Text("Tracking"),
-              style: TextButton.styleFrom(
-                foregroundColor: location == rTracking.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
-              ),
-            ),
-      jwtManager.isAdmin
-          ? TextButton.icon(
-              onPressed: () => context.pushNamed(rAdmin.name),
-              icon: const Icon(Icons.settings),
-              label: const Text("Admin"),
-              style: TextButton.styleFrom(
-                foregroundColor: location == rAdmin.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor,
-              ),
-            )
-          : Container(),
+      MenuButtonData("Home", Icons.home, rRoot),
+      MenuButtonData("Subscriptions", Icons.notifications, rSubscriptions),
+      MenuButtonData("Tracking", Icons.my_location, rTracking),
+      if (jwtManager.isAdmin) MenuButtonData("Admin", Icons.settings, rAdmin),
     ];
   }
 
-  Widget getPopupMenu(BuildContext context) {
-    final menuItems = getMenuButtons().map((e) => PopupMenuItem(child: e)).toList();
+  Widget getPopupMenu() {
+    var location = GoRouter.of(context).location;
+    final menuItems = getRoutes().map((data) {
+      final color = location == data.routeData.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor;
+      return PopupMenuItem(
+        value: data.routeData,
+        onTap: () {
+          context.pushNamed(data.routeData.name);
+        },
+        child: ListTile(
+          leading: Icon(data.icon, color: color),
+          title: Text(data.title, style: TextStyle(color: color)),
+        ),
+      );
+    }).toList();
     return PopupMenuButton(
       itemBuilder: (_) => menuItems,
       child: Row(
@@ -108,6 +54,26 @@ class _CollapsibleHeaderState extends State<CollapsibleHeader> {
           Text("Menu"),
         ],
       ),
+    );
+  }
+
+  Widget getExpandedMenu() {
+    var location = GoRouter.of(context).location;
+    final menuItems = getRoutes().map((data) {
+      final color = location == data.routeData.path ? Theme.of(context).primaryColor : Theme.of(context).disabledColor;
+      return TextButton.icon(
+        onPressed: () => context.pushNamed(data.routeData.name),
+        icon: Icon(data.icon, color: color),
+        label: Text(data.title, style: TextStyle(color: color)),
+      );
+    }).toList();
+    return Column(
+      children: [
+        Row(
+          children: menuItems,
+        ),
+        const Divider(),
+      ],
     );
   }
 
@@ -123,14 +89,9 @@ class _CollapsibleHeaderState extends State<CollapsibleHeader> {
                     isCollapsed = !isCollapsed;
                   });
                 },
-                child: getPopupMenu(context),
+                child: getPopupMenu(),
               )
-            : Column(children: [
-                Row(
-                  children: getMenuButtons(),
-                ),
-                const Divider(),
-              ]);
+            : getExpandedMenu();
       },
     );
   }
