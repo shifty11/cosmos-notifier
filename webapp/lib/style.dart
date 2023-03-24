@@ -91,23 +91,9 @@ class Styles {
           iconColor: borderColor,
           enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: borderColor))),
       dialogBackgroundColor: bgColor,
-      textTheme: TextTheme(
-        displayMedium: const TextStyle().copyWith(fontSize: 64),
-        displaySmall: const TextStyle().copyWith(fontSize: 40),
-        headlineMedium: const TextStyle().copyWith(fontSize: 24),
-        headlineSmall: const TextStyle().copyWith(fontSize: 22),
-        titleLarge: const TextStyle().copyWith(fontSize: 20),
-        titleMedium: const TextStyle().copyWith(fontSize: 18),
-        bodyMedium: const TextStyle(),
-        bodySmall: const TextStyle(),
-        titleSmall: const TextStyle(),
-        bodyLarge: const TextStyle(),
-        labelLarge: const TextStyle(),
-        labelMedium: const TextStyle(),
-        labelSmall: const TextStyle(),
-      ).apply(
-        bodyColor: textColor,
-        displayColor: textColor,
+      textTheme: isDarkTheme ? Typography().white : Typography().black,
+      toggleButtonsTheme: ToggleButtonsThemeData(
+        selectedColor: primaryColor,
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(

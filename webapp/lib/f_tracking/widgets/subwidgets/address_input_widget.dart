@@ -20,12 +20,12 @@ class AddressInputWidget extends HookWidget {
     final controller = useTextEditingController(text: trackerRow.shortenedAddress);
     return TextField(
       controller: controller,
-      style: const TextStyle(fontSize: 14),
-      decoration: const InputDecoration(
+      style: Theme.of(context).textTheme.bodyMedium,
+      decoration: InputDecoration(
         hintText: 'Enter wallet address',
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
-        hintStyle: TextStyle(color: Colors.grey, fontSize: 12),
+        hintStyle: TextStyle(color: Colors.grey, fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize),
       ),
       onChanged: (value) => {debouncer.value = value},
     );
