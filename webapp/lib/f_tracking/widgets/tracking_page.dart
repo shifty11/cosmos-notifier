@@ -135,26 +135,41 @@ class TrackingPage extends StatelessWidget {
                         ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
                         : AddressInputWidget(ref, trackerRow)),
                     DataCell(
-                      GestureDetector(
-                        onTap: () async =>
-                            showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  trackerRow.notificationIntervalPrettyString,
-                                  overflow: TextOverflow.ellipsis,
+                      ElevatedButton(
+                        onPressed: () {  },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          elevation: 0,
+                          maximumSize: Size.fromWidth(
+                            ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 22),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(0),
+                          ),
+                        ),
+                        child: GestureDetector(
+                          onTap: () async =>
+                              showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
+                          child: Container(
+                            constraints: BoxConstraints(maxWidth: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    trackerRow.notificationIntervalPrettyString,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(width: 5),
-                              const Icon(
-                                Icons.edit,
-                                size: iconSizeSmall,
-                              ),
-                            ],
+                                const SizedBox(width: 5),
+                                const Icon(
+                                  Icons.edit,
+                                  size: iconSizeSmall,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
