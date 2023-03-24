@@ -1,10 +1,8 @@
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
-import 'package:cosmos_notifier/api/protobuf/dart/subscription_service.pb.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pb.dart';
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/message_provider.dart';
-import 'package:cosmos_notifier/f_subscription/services/subscription_provider.dart';
 import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
@@ -39,38 +37,31 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
 
   TrackerNotifier(this.trackerService, this.messageNotifier, this.ref) : super([]);
 
-  /// Returns the default notification interval for a new tracker.
-  /// Uses the latest modified tracker's notification interval or 1 day if there are no trackers.
-  pb.Duration _getDefaultNotificationInterval() {
+  TrackerRow? _getLastModifiedTrackerRow() {
     final sortedTrackers = state
         .where((trackerRow) => trackerRow.isSaved)
         .toList()
-          ..sort((a, b) => b.updatedAt?.compareTo(a.updatedAt ?? DateTime.fromMicrosecondsSinceEpoch(0)) ?? -1);
-    final lastModifiedTracker = sortedTrackers.first;
+      ..sort((a, b) => b.updatedAt?.compareTo(a.updatedAt ?? DateTime.fromMicrosecondsSinceEpoch(0)) ?? -1);
+    if (sortedTrackers.isEmpty) {
+      return null;
+    }
+    return sortedTrackers.first;
+  }
 
-    print("lastModifiedTracker: $lastModifiedTracker");
-    if (lastModifiedTracker.updatedAt == null) {
+  /// Returns the default notification interval for a new tracker.
+  /// Uses the latest modified tracker's notification interval or 1 day if there are no trackers.
+  pb.Duration _getDefaultNotificationInterval() {
+    final lastModifiedTracker = _getLastModifiedTrackerRow();
+    if (lastModifiedTracker == null || lastModifiedTracker.updatedAt == null) {
       return pb.Duration(seconds: Int64(60 * 60 * 24)); // 1 day by default
     }
     return lastModifiedTracker.notificationInterval;
   }
 
   TrackerChatRoom? _getDefaultChatRoom() {
-    final selectedChatRoom = ref.watch(selectedChatRoomProvider);
-    final availableChatRooms = ref.watch(trackerChatRoomsProvider);
-
-    if (selectedChatRoom != null) {
-      for (final chatRoom in availableChatRooms) {
-        if (selectedChatRoom.type == ChatRoom_Type.DISCORD) {
-          if (chatRoom.whichType() == TrackerChatRoom_Type.discord && chatRoom.discord.channelId == selectedChatRoom.id) {
-            return chatRoom;
-          }
-        } else if (selectedChatRoom.type == ChatRoom_Type.TELEGRAM) {
-          if (chatRoom.whichType() == TrackerChatRoom_Type.telegram && chatRoom.telegram.chatId == selectedChatRoom.id) {
-            return chatRoom;
-          }
-        }
-      }
+    final lastModifiedTracker = _getLastModifiedTrackerRow();
+    if (lastModifiedTracker != null && lastModifiedTracker.chatRoom != null) {
+      return lastModifiedTracker.chatRoom;
     }
     if (state.isNotEmpty) {
       return state.first.chatRoom;
@@ -111,12 +102,16 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   Future<void> updateTracker(TrackerRow tracker) async {
     if (!tracker.isSaved) {
       if (tracker.address.isNotEmpty) {
-        try {
-          var response = await trackerService.isAddressValid(IsAddressValidRequest(address: tracker.address));
-          tracker = tracker.copyWith(isAddressValid: response.isValid);
-        } catch (e) {
-          messageNotifier.sendMsg(error: e.toString());
-          return;
+        if (tracker.address.length < 32) {
+          tracker = tracker.copyWith(isAddressValid: false);
+        } else {
+          try {
+            var response = await trackerService.isAddressValid(IsAddressValidRequest(address: tracker.address));
+            tracker = tracker.copyWith(isAddressValid: response.isValid);
+          } catch (e) {
+            messageNotifier.sendMsg(error: e.toString());
+            return;
+          }
         }
       }
       if (tracker.address.isNotEmpty && tracker.isAddressValid && tracker.chatRoom != null) {
