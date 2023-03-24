@@ -148,20 +148,23 @@ class TrackingPage extends StatelessWidget {
                         ),
                         onPressed: () async =>
                             showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              trackerRow.notificationIntervalPrettyString,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(width: 5),
-                            const Icon(
-                              Icons.edit,
-                              size: iconSizeSmall,
-                            ),
-                          ],
-                        ),
+                        child: Text(trackerRow.notificationIntervalPrettyString),
+                        // child: Row(
+                        //   mainAxisAlignment: MainAxisAlignment.start,
+                        //   children: [
+                        //     Flexible(
+                        //       child: Text(
+                        //         trackerRow.notificationIntervalPrettyString,
+                        //         overflow: TextOverflow.ellipsis,
+                        //       ),
+                        //     ),
+                        //     const SizedBox(width: 5),
+                        //     const Icon(
+                        //       Icons.edit,
+                        //       size: iconSizeSmall,
+                        //     ),
+                        //   ],
+                        // ),
                       ),
                     ),
                     DataCell(
