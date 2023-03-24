@@ -209,13 +209,13 @@ func (c *ChainCrawler) CheckForVotingReminders() {
 		var voteResponse types.ChainProposalVoteResponse
 		statusCode, err := c.getJson(url, &voteResponse)
 		if err != nil && statusCode == 400 {
-			c.notifier.SendVoteReminder(data.ChainProposal.Edges.Chain, data.ChainProposal)
+			c.notifier.SendVoteReminder(data)
 		} else if err != nil {
 			c.reportErrorIfNecessary(data.ChainProposal.Edges.Chain, url, err)
 			continue
 		} else {
 			if voteResponse.Vote.Option.ToCosmosType() == cosmossdktypes.OptionEmpty {
-				c.notifier.SendVoteReminder(data.ChainProposal.Edges.Chain, data.ChainProposal)
+				c.notifier.SendVoteReminder(data)
 			}
 		}
 		c.resetErrorCount(data.ChainProposal.Edges.Chain)

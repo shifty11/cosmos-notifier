@@ -240,6 +240,8 @@ func (manager *AddressTrackerManager) GetAllUnnotifiedTrackers() []AddressTracke
 					addresstracker.NotificationIntervalGTE(int64(timeUntilVotingEnd.Seconds())),
 				),
 			).
+			WithTelegramChat().
+			WithDiscordChannel().
 			All(manager.ctx)
 		if err != nil {
 			log.Sugar.Panicf("error while getting address trackers: %v", err)
