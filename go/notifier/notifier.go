@@ -2,10 +2,12 @@ package notifier
 
 import (
 	"errors"
+	"fmt"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
 	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service"
+	"time"
 )
 
 type ContractNotifier interface {
@@ -14,7 +16,7 @@ type ContractNotifier interface {
 
 type ChainNotifier interface {
 	Notify(entChain *ent.Chain, entProp *ent.ChainProposal)
-	SendVoteReminder(entChain *ent.Chain, entProp *ent.ChainProposal)
+	SendVoteReminder(data database.AddressTrackerWithChainProposal)
 }
 
 type GeneralNotifier interface {
@@ -93,8 +95,37 @@ func (n *chainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) 
 	n.discordNotifier.notify(discordIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 }
 
-func (n *chainNotifier) SendVoteReminder(entChain *ent.Chain, entProp *ent.ChainProposal) {
-	// TODO: implement this
+func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainProposal) {
+	var remainingTime = data.ChainProposal.VotingEndTime.Sub(time.Now())
+	var remainingTimeText string
+	if remainingTime > 0 {
+		if remainingTime.Hours() > 24 {
+			remainingTimeText = fmt.Sprintf("%d days %d hours %d minutes", int(remainingTime.Hours()/24), int(remainingTime.Hours())%24, int(remainingTime.Minutes())%60)
+		} else if remainingTime.Hours() > 1 {
+			remainingTimeText = fmt.Sprintf("%d hours %d minutes", int(remainingTime.Hours()), int(remainingTime.Minutes())%60)
+		} else {
+			remainingTimeText = fmt.Sprintf("%d minutes", int(remainingTime.Minutes()))
+		}
+	}
+
+	if data.AddressTracker.Edges.TelegramChat != nil {
+		n.telegramNotifier.sendVoteReminder(
+			data.AddressTracker.Edges.TelegramChat,
+			data.ChainProposal.Edges.Chain.PrettyName,
+			data.ChainProposal.ProposalID,
+			data.ChainProposal.Title,
+			remainingTimeText,
+		)
+	}
+	if data.AddressTracker.Edges.DiscordChannel != nil {
+		n.discordNotifier.sendVoteReminder(
+			data.AddressTracker.Edges.DiscordChannel,
+			data.ChainProposal.Edges.Chain.PrettyName,
+			data.ChainProposal.ProposalID,
+			data.ChainProposal.Title,
+			remainingTimeText,
+		)
+	}
 }
 
 type generalNotifier struct {

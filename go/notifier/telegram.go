@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/types"
 	"golang.org/x/exp/slices"
@@ -130,4 +131,44 @@ func (n *telegramNotifier) broadcastMessage(ids []types.TgChatQueryResult, messa
 		n.telegramChatManager.DeleteMultiple(errIds)
 	}
 	return len(errIds)
+}
+
+func (n *telegramNotifier) sendVoteReminder(
+	telegramChat *ent.TelegramChat,
+	chainName string,
+	proposalId int,
+	proposalTitle string,
+	remainingTimeText string,
+) {
+	log.Sugar.Debugf("Sending vote reminder for proposal %v on chain %v to telegram chat %v (%v)", proposalId, chainName, telegramChat.Name, telegramChat.ChatID)
+
+	var textMsg string
+	if remainingTimeText == "" {
+		textMsg = fmt.Sprintf("🗳️  <b>%v - Proposal Reminder %v\n\n%v</b>\n\nYou missed the voting deadline!",
+			chainName,
+			proposalId,
+			proposalTitle,
+		)
+
+	} else {
+		textMsg = fmt.Sprintf("🗳️  <b>%v - Proposal Reminder %v\n\n%v</b>\n\nYou did not vote yet! You have <b>%v</b> left to vote.",
+			chainName,
+			proposalId,
+			proposalTitle,
+			remainingTimeText,
+		)
+	}
+
+	msg := tgbotapi.NewMessage(telegramChat.ChatID, textMsg)
+	msg.ParseMode = "html"
+	msg.DisableWebPagePreview = true
+
+	_, err := n.telegramApi.Send(msg)
+	if err != nil {
+		if n.shouldDeleteUser(err) {
+			n.telegramChatManager.DeleteMultiple([]int64{telegramChat.ChatID})
+		} else {
+			log.Sugar.Errorf("Error sending vote reminder to telegram chat %v (%v): %v", telegramChat.Name, telegramChat.ChatID, err)
+		}
+	}
 }

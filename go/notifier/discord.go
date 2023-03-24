@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/microcosm-cc/bluemonday"
 	"github.com/shifty11/cosmos-notifier/database"
+	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/types"
 	"regexp"
@@ -150,4 +151,46 @@ func (n *DiscordNotifier) broadcastMessage(ids []types.DiscordChannelQueryResult
 		n.discordChannelManager.DeleteMultiple(errIds)
 	}
 	return len(errIds)
+}
+
+func (n *DiscordNotifier) sendVoteReminder(
+	dc *ent.DiscordChannel,
+	chainName string,
+	proposalId int,
+	proposalTitle string,
+	remainingTimeText string,
+) {
+	log.Sugar.Debugf("Sending vote reminder for proposal %v on chain %v to discord channel %v (%v)", proposalId, chainName, dc.Name, dc.ChannelID)
+
+	session := n.startDiscordSession()
+	defer n.closeDiscordSession(session)
+
+	p := bluemonday.StripTagsPolicy()
+
+	var msgText string
+	if remainingTimeText == "" {
+		msgText = fmt.Sprintf("🗳️  **%v - Proposal Reminder %v\n\n%v**\n\nYou missed the voting deadline!",
+			chainName,
+			proposalId,
+			p.Sanitize(proposalTitle),
+		)
+	} else {
+		msgText = fmt.Sprintf("🗳️  **%v - Proposal Reminder %v\n\n%v**\n\nYou did not vote yet! You have **%v** left to vote.",
+			chainName,
+			proposalId,
+			p.Sanitize(proposalTitle),
+			remainingTimeText,
+		)
+	}
+
+	var _, err = session.ChannelMessageSendComplex(
+		strconv.FormatInt(dc.ChannelID, 10),
+		&discordgo.MessageSend{Content: msgText})
+	if err != nil {
+		if n.shouldDeleteUser(err) {
+			n.discordChannelManager.DeleteMultiple([]int64{dc.ChannelID})
+		} else {
+			log.Sugar.Errorf("Error sending vote reminder to discord channel %v (%v): %v", dc.Name, dc.ChannelID, err)
+		}
+	}
 }
