@@ -9,6 +9,7 @@ import 'package:cosmos_notifier/f_home/widgets/subwidgets/footer_widget.dart';
 import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_provider.dart';
 import 'package:cosmos_notifier/f_tracking/widgets/subwidgets/address_input_widget.dart';
+import 'package:cosmos_notifier/f_tracking/widgets/subwidgets/hover_container.dart';
 import 'package:cosmos_notifier/style.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
@@ -135,25 +136,16 @@ class TrackingPage extends StatelessWidget {
                         ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
                         : AddressInputWidget(ref, trackerRow)),
                     DataCell(
-                      OutlinedButton(
-                        onPressed: () {  },
-                        style: ElevatedButton.styleFrom(
-                          // backgroundColor: Colors.transparent,
-                          // shadowColor: Colors.transparent,
-                          // elevation: 0,
-                          maximumSize: Size.fromWidth(
-                            ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200,
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 22),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(0),
-                          ),
-                        ),
-                        child: GestureDetector(
-                          onTap: () async =>
-                              showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
+                      GestureDetector(
+                        onTap: () async =>
+                            showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
+                        child: HoverContainer(
                           child: Container(
-                            constraints: BoxConstraints(maxWidth: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            constraints: BoxConstraints(
+                              maxWidth: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200,
+                              minHeight: 56,
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -267,7 +259,8 @@ class TrackingPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 10),
-                  const Text("Set up your reminders. You will get a notification if you did not vote on a proposal and it is about to end.", maxLines: 3),
+                  const Text("Set up your reminders. You will get a notification if you did not vote on a proposal and it is about to end.",
+                      maxLines: 3),
                   const SizedBox(height: 10),
                   Expanded(
                     child: SingleChildScrollView(
