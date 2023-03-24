@@ -135,7 +135,7 @@ class TrackingPage extends StatelessWidget {
                         ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
                         : AddressInputWidget(ref, trackerRow)),
                     DataCell(
-                      ElevatedButton(
+                      OutlinedButton(
                         onPressed: () {  },
                         style: ElevatedButton.styleFrom(
                           // backgroundColor: Colors.transparent,
