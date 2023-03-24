@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-class CollapsibleHeader extends StatefulWidget {
-  const CollapsibleHeader({Key? key}) : super(key: key);
+class HeaderWidget extends StatefulWidget {
+  const HeaderWidget({Key? key}) : super(key: key);
 
   @override
-  _CollapsibleHeaderState createState() => _CollapsibleHeaderState();
+  _HeaderWidgetState createState() => _HeaderWidgetState();
 }
 
 class MenuButtonData {
@@ -18,7 +18,7 @@ class MenuButtonData {
   MenuButtonData(this.title, this.icon, this.routeData);
 }
 
-class _CollapsibleHeaderState extends State<CollapsibleHeader> {
+class _HeaderWidgetState extends State<HeaderWidget> {
   bool isCollapsed = false;
 
   Iterable<MenuButtonData> getRoutes() {
