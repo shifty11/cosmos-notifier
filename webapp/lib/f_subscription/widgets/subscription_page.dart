@@ -189,7 +189,7 @@ class SubscriptionPage extends StatelessWidget {
   Widget subscriptionList() {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        final state = ref.read(chatroomListStateProvider);
+        final state = ref.watch(chatroomListStateProvider);
         return state.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           data: (chainChatRooms, contractChatRooms) {
