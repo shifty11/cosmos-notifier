@@ -46,9 +46,10 @@ class TrackerRow with _$TrackerRow {
     return "on time";
   }
 
-  String get shortenedAddress {
-    if (isAddressValid && address.length > 20) {
-      return "${address.substring(0, 9)}...${address.substring(address.length - 4)}";
+  String shortenedAddress(bool veryShort) {
+    final maxLength = veryShort ? 10 : 20;
+    if (isAddressValid && address.length > maxLength) {
+      return "${address.substring(0, maxLength ~/ 2)}...${address.substring(address.length - maxLength ~/ 2)}";
     }
     return address;
   }

@@ -4,6 +4,7 @@ import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_framework/responsive_wrapper.dart';
 
 class AddressInputWidget extends HookWidget {
   final WidgetRef ref;
@@ -17,7 +18,7 @@ class AddressInputWidget extends HookWidget {
     debouncer.values.listen((value) {
       ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow.copyWith(address: value));
     });
-    final controller = useTextEditingController(text: trackerRow.shortenedAddress);
+    final controller = useTextEditingController(text: trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)));
     return TextField(
       controller: controller,
       style: Theme.of(context).textTheme.bodyMedium,
