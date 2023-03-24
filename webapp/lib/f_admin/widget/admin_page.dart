@@ -190,7 +190,7 @@ multiline
     return Scaffold(
       body: Row(
         children: [
-          MessageOverlayListener(
+          MessageSnackbarListener(
             provider: messageProvider,
             child: SingleChildScrollView(
               child: Container(

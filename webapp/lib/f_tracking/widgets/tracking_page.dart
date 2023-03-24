@@ -244,7 +244,7 @@ class TrackingPage extends StatelessWidget {
     return Scaffold(
       body: Row(
         children: [
-          MessageOverlayListener(
+          MessageSnackbarListener(
             provider: messageProvider,
             child: Container(
               width: MediaQuery.of(context).size.width,
