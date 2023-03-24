@@ -25,7 +25,7 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
   late final SubscriptionService _subsService;
 
   SubscriptionListNotifier(this._ref) : super(SubscriptionListState.loading()) {
-    _subsService = _ref.read(subscriptionProvider);
+    _subsService = _ref.watch(subscriptionProvider);
     _loadSubscriptions();
   }
 
