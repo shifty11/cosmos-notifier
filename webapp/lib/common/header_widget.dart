@@ -25,7 +25,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     return [
       MenuButtonData("Home", Icons.home, rRoot),
       MenuButtonData("Subscriptions", Icons.notifications, rSubscriptions),
-      if (jwtManager.isAdmin) MenuButtonData("Tracking", Icons.my_location, rTracking),
+      if (jwtManager.isAdmin) MenuButtonData("Reminders", Icons.alarm, rTracking),
       if (jwtManager.isAdmin) MenuButtonData("Admin", Icons.settings, rAdmin),
     ];
   }

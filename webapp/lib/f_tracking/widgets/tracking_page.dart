@@ -120,7 +120,7 @@ class TrackingPage extends StatelessWidget {
             return DataTable(
                 columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
                 columns: const [
-                  DataColumn(label: Text("Track Address")),
+                  DataColumn(label: Text("Address")),
                   DataColumn(
                       label: Padding(
                     padding: EdgeInsets.only(left: 10),
@@ -131,26 +131,28 @@ class TrackingPage extends StatelessWidget {
                 ],
                 rows: trackerRows.map((trackerRow) {
                   return DataRow(cells: [
-                    DataCell(
-                        trackerRow.isSaved
-                            ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
-                                : AddressInputWidget(ref, trackerRow)),
+                    DataCell(trackerRow.isSaved
+                        ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
+                        : AddressInputWidget(ref, trackerRow)),
                     DataCell(
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           elevation: 0,
+                          maximumSize: Size.fromWidth(
+                            ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? MediaQuery.of(context).size.width / 5 : 200,
+                          ),
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 22),
                         ),
-                        onPressed: () async => showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
+                        onPressed: () async =>
+                            showDialog(context: context, builder: (context) => notificationIntervalDialog(context, trackerRow, ref)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Flexible(
                               child: Text(
                                 trackerRow.notificationIntervalPrettyString,
-                                maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -253,6 +255,10 @@ class TrackingPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const HeaderWidget(),
+                  const SizedBox(height: 10),
+                  Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
+                  const SizedBox(height: 10),
+                  const Text("Set up your reminders. You will get a notification if you did not vote on a proposal and it is about to end.", maxLines: 3),
                   const SizedBox(height: 10),
                   Expanded(
                     child: SingleChildScrollView(

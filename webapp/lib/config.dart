@@ -31,7 +31,7 @@ const rLoading = RouteData("loading", "/loading");
 const rLogin = RouteData("login", "/login");
 const rSubscriptions = RouteData("subscriptions", "/subscriptions");
 const rAdmin = RouteData("admin", "/admin");
-const rTracking = RouteData("tracking", "/tracking");
+const rTracking = RouteData("reminder", "/reminder");
 
 const bool cDebugMode = true;
 
