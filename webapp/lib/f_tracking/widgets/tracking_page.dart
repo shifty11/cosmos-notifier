@@ -147,16 +147,17 @@ class TrackingPage extends StatelessWidget {
                     )),
                     DataCell(
                       DropdownButton<TrackerChatRoom>(
+                        focusColor: Colors.transparent,
                         value: trackerRow.chatRoom,
                         icon: const Icon(Icons.arrow_downward),
                         iconSize: iconSizeSmall,
                         elevation: 16,
-                        style: const TextStyle(),
+                        style: Theme.of(context).textTheme.bodyMedium,
                         underline: Container(
                           height: 2,
                         ),
                         onChanged: (TrackerChatRoom? newValue) async {
-                          if (newValue == null) {
+                          if (newValue == null || newValue == trackerRow.chatRoom) {
                             return;
                           }
                           trackerRow = trackerRow.copyWith(chatRoom: newValue);
