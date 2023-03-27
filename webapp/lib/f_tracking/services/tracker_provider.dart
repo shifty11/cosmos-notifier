@@ -42,12 +42,54 @@ final showChatRoomColumnProvider = Provider<bool>((ref) {
   return ref.watch(trackerChatRoomsProvider).length > 1;
 });
 
+final trackerSortProvider = StateProvider<TrackerSortState>((ref) {
+  return const TrackerSortState(isAscending: true, sortType: TrackerSortType.address);
+});
+
 class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   TrackerService trackerService;
   MessageNotifier messageNotifier;
   StateNotifierProviderRef<TrackerNotifier, List<TrackerRow>> ref;
 
   TrackerNotifier(this.trackerService, this.messageNotifier, this.ref) : super([]);
+
+  _sortByAddress(bool isAscending) {
+    state.sort((a, b) => a.address.compareTo(b.address));
+    if (!isAscending) {
+      state = state.reversed.toList();
+    }
+  }
+
+  _sortByNotificationInterval(bool isAscending) {
+    state.sort((a, b) => a.notificationInterval.seconds.compareTo(b.notificationInterval.seconds));
+    if (!isAscending) {
+      state = state.reversed.toList();
+    }
+  }
+
+  _sortByChatRoom(bool isAscending) {
+    state.sort((a, b) => a.chatRoom!.name.compareTo(b.chatRoom!.name));
+    if (!isAscending) {
+      state = state.reversed.toList();
+    }
+  }
+
+  sort() {
+    final sortState = ref.read(trackerSortProvider);
+    switch (sortState.sortType) {
+      case TrackerSortType.none:
+        break;
+      case TrackerSortType.address:
+        _sortByAddress(sortState.isAscending);
+        break;
+      case TrackerSortType.notificationInterval:
+        _sortByNotificationInterval(sortState.isAscending);
+        break;
+      case TrackerSortType.chatRoom:
+        _sortByChatRoom(sortState.isAscending);
+        break;
+    }
+  }
 
   TrackerRow? _getLastModifiedTrackerRow() {
     final sortedTrackers = state
@@ -135,6 +177,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
           ));
           state = _updateTrackerRowByResponse(tracker, response, isNewTracker: true);
           messageNotifier.sendMsg(info: "Reminder added");
+          ref.read(trackerSortProvider.notifier).state = ref.read(trackerSortProvider).copyWith(sortType: TrackerSortType.none);
         } catch (e) {
           messageNotifier.sendMsg(error: e.toString());
           return;

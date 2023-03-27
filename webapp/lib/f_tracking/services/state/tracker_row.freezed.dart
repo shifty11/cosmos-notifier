@@ -244,27 +244,28 @@ abstract class _TrackerRow extends TrackerRow {
 }
 
 /// @nodoc
-mixin _$TrackerList {
-  List<TrackerRow> get trackers => throw _privateConstructorUsedError;
+mixin _$TrackerSortState {
+  bool get isAscending => throw _privateConstructorUsedError;
+  TrackerSortType get sortType => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
-  $TrackerListCopyWith<TrackerList> get copyWith =>
+  $TrackerSortStateCopyWith<TrackerSortState> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $TrackerListCopyWith<$Res> {
-  factory $TrackerListCopyWith(
-          TrackerList value, $Res Function(TrackerList) then) =
-      _$TrackerListCopyWithImpl<$Res, TrackerList>;
+abstract class $TrackerSortStateCopyWith<$Res> {
+  factory $TrackerSortStateCopyWith(
+          TrackerSortState value, $Res Function(TrackerSortState) then) =
+      _$TrackerSortStateCopyWithImpl<$Res, TrackerSortState>;
   @useResult
-  $Res call({List<TrackerRow> trackers});
+  $Res call({bool isAscending, TrackerSortType sortType});
 }
 
 /// @nodoc
-class _$TrackerListCopyWithImpl<$Res, $Val extends TrackerList>
-    implements $TrackerListCopyWith<$Res> {
-  _$TrackerListCopyWithImpl(this._value, this._then);
+class _$TrackerSortStateCopyWithImpl<$Res, $Val extends TrackerSortState>
+    implements $TrackerSortStateCopyWith<$Res> {
+  _$TrackerSortStateCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
@@ -274,96 +275,109 @@ class _$TrackerListCopyWithImpl<$Res, $Val extends TrackerList>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? trackers = null,
+    Object? isAscending = null,
+    Object? sortType = null,
   }) {
     return _then(_value.copyWith(
-      trackers: null == trackers
-          ? _value.trackers
-          : trackers // ignore: cast_nullable_to_non_nullable
-              as List<TrackerRow>,
+      isAscending: null == isAscending
+          ? _value.isAscending
+          : isAscending // ignore: cast_nullable_to_non_nullable
+              as bool,
+      sortType: null == sortType
+          ? _value.sortType
+          : sortType // ignore: cast_nullable_to_non_nullable
+              as TrackerSortType,
     ) as $Val);
   }
 }
 
 /// @nodoc
-abstract class _$$_TrackerListCopyWith<$Res>
-    implements $TrackerListCopyWith<$Res> {
-  factory _$$_TrackerListCopyWith(
-          _$_TrackerList value, $Res Function(_$_TrackerList) then) =
-      __$$_TrackerListCopyWithImpl<$Res>;
+abstract class _$$_TrackerSortStateCopyWith<$Res>
+    implements $TrackerSortStateCopyWith<$Res> {
+  factory _$$_TrackerSortStateCopyWith(
+          _$_TrackerSortState value, $Res Function(_$_TrackerSortState) then) =
+      __$$_TrackerSortStateCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<TrackerRow> trackers});
+  $Res call({bool isAscending, TrackerSortType sortType});
 }
 
 /// @nodoc
-class __$$_TrackerListCopyWithImpl<$Res>
-    extends _$TrackerListCopyWithImpl<$Res, _$_TrackerList>
-    implements _$$_TrackerListCopyWith<$Res> {
-  __$$_TrackerListCopyWithImpl(
-      _$_TrackerList _value, $Res Function(_$_TrackerList) _then)
+class __$$_TrackerSortStateCopyWithImpl<$Res>
+    extends _$TrackerSortStateCopyWithImpl<$Res, _$_TrackerSortState>
+    implements _$$_TrackerSortStateCopyWith<$Res> {
+  __$$_TrackerSortStateCopyWithImpl(
+      _$_TrackerSortState _value, $Res Function(_$_TrackerSortState) _then)
       : super(_value, _then);
 
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? trackers = null,
+    Object? isAscending = null,
+    Object? sortType = null,
   }) {
-    return _then(_$_TrackerList(
-      trackers: null == trackers
-          ? _value._trackers
-          : trackers // ignore: cast_nullable_to_non_nullable
-              as List<TrackerRow>,
+    return _then(_$_TrackerSortState(
+      isAscending: null == isAscending
+          ? _value.isAscending
+          : isAscending // ignore: cast_nullable_to_non_nullable
+              as bool,
+      sortType: null == sortType
+          ? _value.sortType
+          : sortType // ignore: cast_nullable_to_non_nullable
+              as TrackerSortType,
     ));
   }
 }
 
 /// @nodoc
 
-class _$_TrackerList implements _TrackerList {
-  const _$_TrackerList({required final List<TrackerRow> trackers})
-      : _trackers = trackers;
+class _$_TrackerSortState extends _TrackerSortState {
+  const _$_TrackerSortState({required this.isAscending, required this.sortType})
+      : super._();
 
-  final List<TrackerRow> _trackers;
   @override
-  List<TrackerRow> get trackers {
-    if (_trackers is EqualUnmodifiableListView) return _trackers;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_trackers);
-  }
+  final bool isAscending;
+  @override
+  final TrackerSortType sortType;
 
   @override
   String toString() {
-    return 'TrackerList(trackers: $trackers)';
+    return 'TrackerSortState(isAscending: $isAscending, sortType: $sortType)';
   }
 
   @override
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$_TrackerList &&
-            const DeepCollectionEquality().equals(other._trackers, _trackers));
+            other is _$_TrackerSortState &&
+            (identical(other.isAscending, isAscending) ||
+                other.isAscending == isAscending) &&
+            (identical(other.sortType, sortType) ||
+                other.sortType == sortType));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(_trackers));
+  int get hashCode => Object.hash(runtimeType, isAscending, sortType);
 
   @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
-  _$$_TrackerListCopyWith<_$_TrackerList> get copyWith =>
-      __$$_TrackerListCopyWithImpl<_$_TrackerList>(this, _$identity);
+  _$$_TrackerSortStateCopyWith<_$_TrackerSortState> get copyWith =>
+      __$$_TrackerSortStateCopyWithImpl<_$_TrackerSortState>(this, _$identity);
 }
 
-abstract class _TrackerList implements TrackerList {
-  const factory _TrackerList({required final List<TrackerRow> trackers}) =
-      _$_TrackerList;
+abstract class _TrackerSortState extends TrackerSortState {
+  const factory _TrackerSortState(
+      {required final bool isAscending,
+      required final TrackerSortType sortType}) = _$_TrackerSortState;
+  const _TrackerSortState._() : super._();
 
   @override
-  List<TrackerRow> get trackers;
+  bool get isAscending;
+  @override
+  TrackerSortType get sortType;
   @override
   @JsonKey(ignore: true)
-  _$$_TrackerListCopyWith<_$_TrackerList> get copyWith =>
+  _$$_TrackerSortStateCopyWith<_$_TrackerSortState> get copyWith =>
       throw _privateConstructorUsedError;
 }

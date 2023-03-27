@@ -120,14 +120,37 @@ class TrackingPage extends StatelessWidget {
           } else {
             return DataTable(
                 columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
+                sortAscending: ref.watch(trackerSortProvider).isAscending,
+                sortColumnIndex: ref.watch(trackerSortProvider).sortType.index,
                 columns: [
-                  const DataColumn(label: Text("Address")),
-                  const DataColumn(
-                      label: Padding(
-                    padding: EdgeInsets.only(left: 10),
-                    child: Text("Notification"),
-                  )),
-                  if (showChatRoomColumn) const DataColumn(label: Text("Chat")),
+                  DataColumn(
+                      label: const Text("Address"),
+                      tooltip: "Wallet address that is being tracked",
+                      onSort: (columnIndex, ascending) {
+                        ref.read(trackerSortProvider.notifier).state =
+                            TrackerSortState(isAscending: ascending, sortType: TrackerSortType.address);
+                        ref.read(trackerNotifierProvider.notifier).sort();
+                      }),
+                  DataColumn(
+                      label: const Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text("Notification"),
+                      ),
+                      tooltip: "Time when the notification will be sent before the proposal ends",
+                      onSort: (columnIndex, ascending) {
+                        ref.read(trackerSortProvider.notifier).state =
+                            TrackerSortState(isAscending: ascending, sortType: TrackerSortType.notificationInterval);
+                        ref.read(trackerNotifierProvider.notifier).sort();
+                      }),
+                  if (showChatRoomColumn)
+                    DataColumn(
+                        label: const Text("Chat"),
+                        tooltip: "Reminder will be sent to this chat",
+                        onSort: (columnIndex, ascending) {
+                          ref.read(trackerSortProvider.notifier).state =
+                              TrackerSortState(isAscending: ascending, sortType: TrackerSortType.chatRoom);
+                          ref.read(trackerNotifierProvider.notifier).sort();
+                        }),
                   const DataColumn(label: Text("Action")),
                 ],
                 rows: trackerRows.map((trackerRow) {
@@ -166,34 +189,35 @@ class TrackingPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (showChatRoomColumn) DataCell(
-                      LimitedBox(
-                        maxWidth: 200,
-                        child: DropdownButton<TrackerChatRoom>(
-                          focusColor: Colors.transparent,
-                          value: trackerRow.chatRoom,
-                          icon: const Icon(Icons.arrow_downward),
-                          iconSize: iconSizeSmall,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          onChanged: (TrackerChatRoom? newValue) async {
-                            if (newValue == null || newValue == trackerRow.chatRoom) {
-                              return;
-                            }
-                            trackerRow = trackerRow.copyWith(chatRoom: newValue);
-                            await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
-                          },
-                          items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
-                            return DropdownMenuItem<TrackerChatRoom>(
-                              value: trackerChatRoom,
-                              child: Text(
-                                trackerChatRoom.name,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
+                    if (showChatRoomColumn)
+                      DataCell(
+                        LimitedBox(
+                          maxWidth: 200,
+                          child: DropdownButton<TrackerChatRoom>(
+                            focusColor: Colors.transparent,
+                            value: trackerRow.chatRoom,
+                            icon: const Icon(Icons.arrow_downward),
+                            iconSize: iconSizeSmall,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            onChanged: (TrackerChatRoom? newValue) async {
+                              if (newValue == null || newValue == trackerRow.chatRoom) {
+                                return;
+                              }
+                              trackerRow = trackerRow.copyWith(chatRoom: newValue);
+                              await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
+                            },
+                            items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
+                              return DropdownMenuItem<TrackerChatRoom>(
+                                value: trackerChatRoom,
+                                child: Text(
+                                  trackerChatRoom.name,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
                       ),
-                    ),
                     DataCell(
                       IconButton(
                         padding: const EdgeInsets.all(0),
@@ -208,7 +232,7 @@ class TrackingPage extends StatelessWidget {
                       DataRow(cells: [
                         const DataCell(Text("")),
                         const DataCell(Text("")),
-                       if (showChatRoomColumn) const DataCell(Text("")),
+                        if (showChatRoomColumn) const DataCell(Text("")),
                         DataCell(IconButton(
                           padding: const EdgeInsets.all(0),
                           onPressed: () async => {ref.read(trackerNotifierProvider.notifier).addTracker()},
@@ -253,7 +277,8 @@ class TrackingPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 10),
-                  const Text("Add your wallet address to get a reminder notification if you forget to vote on a proposal. You will be reminded before voting ends.",
+                  const Text(
+                      "Add your wallet address to get a reminder notification if you forget to vote on a proposal. You will be reminded before voting ends.",
                       maxLines: 3),
                   const SizedBox(height: 10),
                   Expanded(
