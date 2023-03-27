@@ -5,6 +5,12 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'tracker_row.freezed.dart';
 
+enum AddressSize {
+  veryShort,
+  short,
+  long,
+}
+
 @freezed
 class TrackerRow with _$TrackerRow {
   const TrackerRow._();
@@ -20,34 +26,25 @@ class TrackerRow with _$TrackerRow {
 
   bool get isSaved => id != Int64(0);
 
-  String _singularOrPlural(int number, String singular, String plural) {
-    if (number == 1) {
-      return singular;
-    }
-    return plural;
-  }
-
   String get notificationIntervalPrettyString {
     Duration duration = Duration(seconds: notificationInterval.seconds.toInt());
     if (duration.inDays > 0) {
       if (duration.inHours > duration.inDays * 24) {
         final hours = duration.inHours - duration.inDays * 24;
-        return "${duration.inDays} "
-            "${_singularOrPlural(duration.inDays, "day", "days")}, "
-            "$hours ${_singularOrPlural(hours, "hour", "hours")} before";
+        return "${duration.inDays}d ${hours}h";
       } else {
-        return "${duration.inDays} ${_singularOrPlural(duration.inDays, "day", "days")}";
+        return "${duration.inDays}d";
       }
     } else if (duration.inHours > 0) {
-      return "${duration.inHours} ${_singularOrPlural(duration.inHours, "hour", "hours")} before";
+      return "${duration.inHours}h";
     } else if (duration.inMinutes > 0) {
-      return "${duration.inMinutes} ${_singularOrPlural(duration.inMinutes, "minute", "minutes")} before";
+      return "${duration.inMinutes}m";
     }
     return "on time";
   }
 
-  String shortenedAddress(bool veryShort) {
-    final maxLength = veryShort ? 12 : 20;
+  String shortenedAddress(AddressSize addressSize) {
+    final maxLength = addressSize == AddressSize.veryShort ? 8 : addressSize == AddressSize.short ? 12 : 16;
     if (isAddressValid && address.length > maxLength) {
       return "${address.substring(0, maxLength ~/ 2)}...${address.substring(address.length - maxLength ~/ 2)}";
     }

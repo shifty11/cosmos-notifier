@@ -154,9 +154,13 @@ class TrackingPage extends StatelessWidget {
                   const DataColumn(label: Text("Action")),
                 ],
                 rows: trackerRows.map((trackerRow) {
+                  var addressSize = ResponsiveWrapper.of(context).isSmallerThan(MOBILE) ? AddressSize.veryShort : AddressSize.short;
+                  if (ResponsiveWrapper.of(context).isLargerThan(TABLET)) {
+                    addressSize = AddressSize.long;
+                  }
                   return DataRow(cells: [
                     DataCell(trackerRow.isSaved
-                        ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
+                        ? Text(trackerRow.shortenedAddress(addressSize))
                         : AddressInputWidget(ref, trackerRow)),
                     DataCell(
                       GestureDetector(

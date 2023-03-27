@@ -18,7 +18,11 @@ class AddressInputWidget extends HookWidget {
     debouncer.values.listen((value) {
       ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow.copyWith(address: value));
     });
-    final controller = useTextEditingController(text: trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)));
+    var addressSize = ResponsiveWrapper.of(context).isSmallerThan(MOBILE) ? AddressSize.veryShort : AddressSize.short;
+    if (ResponsiveWrapper.of(context).isLargerThan(TABLET)) {
+      addressSize = AddressSize.long;
+    }
+    final controller = useTextEditingController(text: trackerRow.shortenedAddress(addressSize));
     return TextField(
       controller: controller,
       style: Theme.of(context).textTheme.bodyMedium,
