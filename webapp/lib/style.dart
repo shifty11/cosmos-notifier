@@ -74,6 +74,7 @@ class Styles {
   static ThemeData _defaultTheme(
       bool isDarkTheme, Color bgColor, Color bgColorLight, Color textColor, Color textColorHint, Color primaryColor) {
     const borderColor = Colors.grey;
+    var textTheme = isDarkTheme ? Typography().white : Typography().black;
     return ThemeData(
       brightness: isDarkTheme ? Brightness.dark : Brightness.light,
       fontFamily: "Montserrat",
@@ -91,7 +92,7 @@ class Styles {
           iconColor: borderColor,
           enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: borderColor))),
       dialogBackgroundColor: bgColor,
-      textTheme: isDarkTheme ? Typography().white : Typography().black,
+      textTheme: textTheme,
       toggleButtonsTheme: ToggleButtonsThemeData(
         selectedColor: primaryColor,
       ),
