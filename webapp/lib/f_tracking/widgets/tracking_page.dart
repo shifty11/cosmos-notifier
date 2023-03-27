@@ -195,31 +195,31 @@ class TrackingPage extends StatelessWidget {
                     ),
                     if (showChatRoomColumn)
                       DataCell(
-                        LimitedBox(
-                          maxWidth: 200,
-                          child: DropdownButton<TrackerChatRoom>(
-                            focusColor: Colors.transparent,
-                            value: trackerRow.chatRoom,
-                            icon: const Icon(Icons.arrow_downward),
-                            iconSize: iconSizeSmall,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                            onChanged: (TrackerChatRoom? newValue) async {
-                              if (newValue == null || newValue == trackerRow.chatRoom) {
-                                return;
-                              }
-                              trackerRow = trackerRow.copyWith(chatRoom: newValue);
-                              await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
-                            },
-                            items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
-                              return DropdownMenuItem<TrackerChatRoom>(
-                                value: trackerChatRoom,
+                        DropdownButton<TrackerChatRoom>(
+                          focusColor: Colors.transparent,
+                          value: trackerRow.chatRoom,
+                          icon: const Icon(Icons.arrow_downward),
+                          iconSize: iconSizeSmall,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          onChanged: (TrackerChatRoom? newValue) async {
+                            if (newValue == null || newValue == trackerRow.chatRoom) {
+                              return;
+                            }
+                            trackerRow = trackerRow.copyWith(chatRoom: newValue);
+                            await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
+                          },
+                          items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
+                            return DropdownMenuItem<TrackerChatRoom>(
+                              value: trackerChatRoom,
+                              child: LimitedBox(
+                                maxWidth: ResponsiveWrapper.of(context).isSmallerThan(MOBILE) ? 80 : 200,
                                 child: Text(
                                   trackerChatRoom.name,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              );
-                            }).toList(),
-                          ),
+                              ),
+                            );
+                          }).toList(),
                         ),
                       ),
                     DataCell(
