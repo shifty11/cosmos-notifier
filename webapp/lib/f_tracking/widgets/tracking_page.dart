@@ -112,6 +112,7 @@ class TrackingPage extends StatelessWidget {
       final trackerRows = ref.watch(trackerNotifierProvider);
       final showAddTrackerButton = ref.watch(showAddTrackerButtonProvider);
       final trackerChatRooms = ref.watch(trackerChatRoomsProvider);
+      final showChatRoomColumn = ref.watch(showChatRoomColumnProvider);
       return Builder(
         builder: (BuildContext context) {
           if (trackerFuture.isLoading) {
@@ -119,15 +120,15 @@ class TrackingPage extends StatelessWidget {
           } else {
             return DataTable(
                 columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
-                columns: const [
-                  DataColumn(label: Text("Address")),
-                  DataColumn(
+                columns: [
+                  const DataColumn(label: Text("Address")),
+                  const DataColumn(
                       label: Padding(
                     padding: EdgeInsets.only(left: 10),
                     child: Text("Notification"),
                   )),
-                  DataColumn(label: Text("Chat")),
-                  DataColumn(label: Text("Action")),
+                  if (showChatRoomColumn) const DataColumn(label: Text("Chat")),
+                  const DataColumn(label: Text("Action")),
                 ],
                 rows: trackerRows.map((trackerRow) {
                   return DataRow(cells: [
@@ -165,7 +166,7 @@ class TrackingPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    DataCell(
+                    if (showChatRoomColumn) DataCell(
                       LimitedBox(
                         maxWidth: 200,
                         child: DropdownButton<TrackerChatRoom>(
@@ -207,7 +208,7 @@ class TrackingPage extends StatelessWidget {
                       DataRow(cells: [
                         const DataCell(Text("")),
                         const DataCell(Text("")),
-                        const DataCell(Text("")),
+                       if (showChatRoomColumn) const DataCell(Text("")),
                         DataCell(IconButton(
                           padding: const EdgeInsets.all(0),
                           onPressed: () async => {ref.read(trackerNotifierProvider.notifier).addTracker()},
