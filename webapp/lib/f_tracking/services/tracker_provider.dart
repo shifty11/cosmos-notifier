@@ -7,6 +7,7 @@ import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:collection/collection.dart';
 
 final trackerFutureProvider = FutureProvider<GetTrackersResponse>((ref) async {
   return await ref.read(trackerNotifierProvider.notifier).getTrackers();
@@ -28,6 +29,13 @@ final trackerChatRoomsProvider = Provider<List<TrackerChatRoom>>((ref) {
         loading: () => [],
         error: (_, __) => [],
       );
+});
+
+final hasValidationErrorProvider = Provider<bool>((ref) {
+  return ref.watch(trackerNotifierProvider.select((trackerRows) {
+    final trackerRow = trackerRows.firstWhereOrNull((trackerRow) => !trackerRow.isSaved && !trackerRow.isAddressValid);
+    return trackerRow != null;
+  }));
 });
 
 class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
@@ -122,7 +130,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
             chatRoom: tracker.chatRoom,
           ));
           state = _updateTrackerRowByResponse(tracker, response, isNewTracker: true);
-          messageNotifier.sendMsg(info: "Tracker added");
+          messageNotifier.sendMsg(info: "Reminder added");
         } catch (e) {
           messageNotifier.sendMsg(error: e.toString());
           return;
@@ -137,7 +145,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
           chatRoom: tracker.chatRoom,
         ));
         state = _updateTrackerRowByResponse(tracker, response);
-        messageNotifier.sendMsg(info: "Tracker updated");
+        messageNotifier.sendMsg(info: "Reminder updated");
       } catch (e) {
         messageNotifier.sendMsg(error: e.toString());
       }
@@ -174,7 +182,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     try {
       await trackerService.deleteTracker(DeleteTrackerRequest(trackerId: tracker.id));
       state = state.where((element) => element.id != tracker.id).toList();
-      messageNotifier.sendMsg(info: "Tracker deleted");
+      messageNotifier.sendMsg(info: "Reminder deleted");
     } catch (e) {
       messageNotifier.sendMsg(error: e.toString());
     }
