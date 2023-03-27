@@ -27,6 +27,8 @@ const (
 	EdgeTelegramChat = "telegram_chat"
 	// EdgeChainProposals holds the string denoting the chain_proposals edge name in mutations.
 	EdgeChainProposals = "chain_proposals"
+	// EdgeValidator holds the string denoting the validator edge name in mutations.
+	EdgeValidator = "validator"
 	// Table holds the table name of the addresstracker in the database.
 	Table = "address_trackers"
 	// ChainTable is the table that holds the chain relation/edge.
@@ -55,6 +57,13 @@ const (
 	// ChainProposalsInverseTable is the table name for the ChainProposal entity.
 	// It exists in this package in order to avoid circular dependency with the "chainproposal" package.
 	ChainProposalsInverseTable = "chain_proposals"
+	// ValidatorTable is the table that holds the validator relation/edge.
+	ValidatorTable = "address_trackers"
+	// ValidatorInverseTable is the table name for the Validator entity.
+	// It exists in this package in order to avoid circular dependency with the "validator" package.
+	ValidatorInverseTable = "validators"
+	// ValidatorColumn is the table column denoting the validator relation/edge.
+	ValidatorColumn = "validator_address_trackers"
 )
 
 // Columns holds all SQL columns for addresstracker fields.
@@ -72,6 +81,7 @@ var ForeignKeys = []string{
 	"chain_address_trackers",
 	"discord_channel_address_trackers",
 	"telegram_chat_address_trackers",
+	"validator_address_trackers",
 }
 
 var (

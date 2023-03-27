@@ -18,6 +18,7 @@ var (
 		{Name: "chain_address_trackers", Type: field.TypeInt},
 		{Name: "discord_channel_address_trackers", Type: field.TypeInt, Nullable: true},
 		{Name: "telegram_chat_address_trackers", Type: field.TypeInt, Nullable: true},
+		{Name: "validator_address_trackers", Type: field.TypeInt, Nullable: true},
 	}
 	// AddressTrackersTable holds the schema information for the "address_trackers" table.
 	AddressTrackersTable = &schema.Table{
@@ -43,11 +44,17 @@ var (
 				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
+			{
+				Symbol:     "address_trackers_validators_address_trackers",
+				Columns:    []*schema.Column{AddressTrackersColumns[8]},
+				RefColumns: []*schema.Column{ValidatorsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "addresstracker_address_chain_address_trackers_discord_channel_address_trackers_telegram_chat_address_trackers",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{AddressTrackersColumns[3], AddressTrackersColumns[5], AddressTrackersColumns[6], AddressTrackersColumns[7]},
 			},
 		},
@@ -60,12 +67,12 @@ var (
 		{Name: "chain_id", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "pretty_name", Type: field.TypeString, Unique: true},
-		{Name: "path", Type: field.TypeString, Default: ""},
+		{Name: "path", Type: field.TypeString},
 		{Name: "display", Type: field.TypeString, Default: ""},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
 		{Name: "image_url", Type: field.TypeString},
 		{Name: "thumbnail_url", Type: field.TypeString, Default: ""},
-		{Name: "bech32_prefix", Type: field.TypeString, Default: ""},
+		{Name: "bech32_prefix", Type: field.TypeString},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{
@@ -90,7 +97,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD"}},
 		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainProposalsTable holds the schema information for the "chain_proposals" table.
@@ -205,6 +212,41 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// ValidatorsColumns holds the columns for the "validators" table.
+	ValidatorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "address", Type: field.TypeString},
+		{Name: "moniker", Type: field.TypeString},
+		{Name: "chain_validators", Type: field.TypeInt},
+	}
+	// ValidatorsTable holds the schema information for the "validators" table.
+	ValidatorsTable = &schema.Table{
+		Name:       "validators",
+		Columns:    ValidatorsColumns,
+		PrimaryKey: []*schema.Column{ValidatorsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "validators_chains_validators",
+				Columns:    []*schema.Column{ValidatorsColumns[5]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "validator_address",
+				Unique:  false,
+				Columns: []*schema.Column{ValidatorsColumns[3]},
+			},
+			{
+				Name:    "validator_moniker",
+				Unique:  false,
+				Columns: []*schema.Column{ValidatorsColumns[4]},
+			},
+		},
 	}
 	// AddressTrackerChainProposalsColumns holds the columns for the "address_tracker_chain_proposals" table.
 	AddressTrackerChainProposalsColumns = []*schema.Column{
@@ -391,6 +433,7 @@ var (
 		DiscordChannelsTable,
 		TelegramChatsTable,
 		UsersTable,
+		ValidatorsTable,
 		AddressTrackerChainProposalsTable,
 		DiscordChannelUsersTable,
 		DiscordChannelContractsTable,
@@ -405,8 +448,10 @@ func init() {
 	AddressTrackersTable.ForeignKeys[0].RefTable = ChainsTable
 	AddressTrackersTable.ForeignKeys[1].RefTable = DiscordChannelsTable
 	AddressTrackersTable.ForeignKeys[2].RefTable = TelegramChatsTable
+	AddressTrackersTable.ForeignKeys[3].RefTable = ValidatorsTable
 	ChainProposalsTable.ForeignKeys[0].RefTable = ChainsTable
 	ContractProposalsTable.ForeignKeys[0].RefTable = ContractsTable
+	ValidatorsTable.ForeignKeys[0].RefTable = ChainsTable
 	AddressTrackerChainProposalsTable.ForeignKeys[0].RefTable = AddressTrackersTable
 	AddressTrackerChainProposalsTable.ForeignKeys[1].RefTable = ChainProposalsTable
 	DiscordChannelUsersTable.ForeignKeys[0].RefTable = DiscordChannelsTable

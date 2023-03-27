@@ -14,6 +14,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/schema"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -50,10 +51,6 @@ func init() {
 	chain.DefaultUpdateTime = chainDescUpdateTime.Default.(func() time.Time)
 	// chain.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	chain.UpdateDefaultUpdateTime = chainDescUpdateTime.UpdateDefault.(func() time.Time)
-	// chainDescPath is the schema descriptor for path field.
-	chainDescPath := chainFields[3].Descriptor()
-	// chain.DefaultPath holds the default value on creation for the path field.
-	chain.DefaultPath = chainDescPath.Default.(string)
 	// chainDescDisplay is the schema descriptor for display field.
 	chainDescDisplay := chainFields[4].Descriptor()
 	// chain.DefaultDisplay holds the default value on creation for the display field.
@@ -66,10 +63,6 @@ func init() {
 	chainDescThumbnailURL := chainFields[7].Descriptor()
 	// chain.DefaultThumbnailURL holds the default value on creation for the thumbnail_url field.
 	chain.DefaultThumbnailURL = chainDescThumbnailURL.Default.(string)
-	// chainDescBech32Prefix is the schema descriptor for bech32_prefix field.
-	chainDescBech32Prefix := chainFields[8].Descriptor()
-	// chain.DefaultBech32Prefix holds the default value on creation for the bech32_prefix field.
-	chain.DefaultBech32Prefix = chainDescBech32Prefix.Default.(string)
 	chainproposalMixin := schema.ChainProposal{}.Mixin()
 	chainproposalMixinFields0 := chainproposalMixin[0].Fields()
 	_ = chainproposalMixinFields0
@@ -172,4 +165,19 @@ func init() {
 	user.DefaultUpdateTime = userDescUpdateTime.Default.(func() time.Time)
 	// user.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	user.UpdateDefaultUpdateTime = userDescUpdateTime.UpdateDefault.(func() time.Time)
+	validatorMixin := schema.Validator{}.Mixin()
+	validatorMixinFields0 := validatorMixin[0].Fields()
+	_ = validatorMixinFields0
+	validatorFields := schema.Validator{}.Fields()
+	_ = validatorFields
+	// validatorDescCreateTime is the schema descriptor for create_time field.
+	validatorDescCreateTime := validatorMixinFields0[0].Descriptor()
+	// validator.DefaultCreateTime holds the default value on creation for the create_time field.
+	validator.DefaultCreateTime = validatorDescCreateTime.Default.(func() time.Time)
+	// validatorDescUpdateTime is the schema descriptor for update_time field.
+	validatorDescUpdateTime := validatorMixinFields0[1].Descriptor()
+	// validator.DefaultUpdateTime holds the default value on creation for the update_time field.
+	validator.DefaultUpdateTime = validatorDescUpdateTime.Default.(func() time.Time)
+	// validator.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
+	validator.UpdateDefaultUpdateTime = validatorDescUpdateTime.UpdateDefault.(func() time.Time)
 }

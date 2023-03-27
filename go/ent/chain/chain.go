@@ -41,6 +41,8 @@ const (
 	EdgeDiscordChannels = "discord_channels"
 	// EdgeAddressTrackers holds the string denoting the address_trackers edge name in mutations.
 	EdgeAddressTrackers = "address_trackers"
+	// EdgeValidators holds the string denoting the validators edge name in mutations.
+	EdgeValidators = "validators"
 	// Table holds the table name of the chain in the database.
 	Table = "chains"
 	// ChainProposalsTable is the table that holds the chain_proposals relation/edge.
@@ -67,6 +69,13 @@ const (
 	AddressTrackersInverseTable = "address_trackers"
 	// AddressTrackersColumn is the table column denoting the address_trackers relation/edge.
 	AddressTrackersColumn = "chain_address_trackers"
+	// ValidatorsTable is the table that holds the validators relation/edge.
+	ValidatorsTable = "validators"
+	// ValidatorsInverseTable is the table name for the Validator entity.
+	// It exists in this package in order to avoid circular dependency with the "validator" package.
+	ValidatorsInverseTable = "validators"
+	// ValidatorsColumn is the table column denoting the validators relation/edge.
+	ValidatorsColumn = "chain_validators"
 )
 
 // Columns holds all SQL columns for chain fields.
@@ -111,14 +120,10 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
-	// DefaultPath holds the default value on creation for the "path" field.
-	DefaultPath string
 	// DefaultDisplay holds the default value on creation for the "display" field.
 	DefaultDisplay string
 	// DefaultIsEnabled holds the default value on creation for the "is_enabled" field.
 	DefaultIsEnabled bool
 	// DefaultThumbnailURL holds the default value on creation for the "thumbnail_url" field.
 	DefaultThumbnailURL string
-	// DefaultBech32Prefix holds the default value on creation for the "bech32_prefix" field.
-	DefaultBech32Prefix string
 )

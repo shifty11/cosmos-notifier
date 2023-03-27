@@ -41,13 +41,15 @@ func (AddressTracker) Edges() []ent.Edge {
 			Ref("address_trackers").
 			Unique(),
 		edge.To("chain_proposals", ChainProposal.Type),
+		edge.From("validator", Validator.Type).
+			Ref("address_trackers").
+			Unique(),
 	}
 }
 
 func (AddressTracker) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("address").
-			Edges("chain", "discord_channel", "telegram_chat").
-			Unique(),
+			Edges("chain", "discord_channel", "telegram_chat"),
 	}
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // Client is the client that holds all ent builders.
@@ -45,6 +46,8 @@ type Client struct {
 	TelegramChat *TelegramChatClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Validator is the client for interacting with the Validator builders.
+	Validator *ValidatorClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -66,6 +69,7 @@ func (c *Client) init() {
 	c.DiscordChannel = NewDiscordChannelClient(c.config)
 	c.TelegramChat = NewTelegramChatClient(c.config)
 	c.User = NewUserClient(c.config)
+	c.Validator = NewValidatorClient(c.config)
 }
 
 type (
@@ -156,6 +160,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		DiscordChannel:   NewDiscordChannelClient(cfg),
 		TelegramChat:     NewTelegramChatClient(cfg),
 		User:             NewUserClient(cfg),
+		Validator:        NewValidatorClient(cfg),
 	}, nil
 }
 
@@ -183,6 +188,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		DiscordChannel:   NewDiscordChannelClient(cfg),
 		TelegramChat:     NewTelegramChatClient(cfg),
 		User:             NewUserClient(cfg),
+		Validator:        NewValidatorClient(cfg),
 	}, nil
 }
 
@@ -213,7 +219,7 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.AddressTracker, c.Chain, c.ChainProposal, c.Contract, c.ContractProposal,
-		c.DiscordChannel, c.TelegramChat, c.User,
+		c.DiscordChannel, c.TelegramChat, c.User, c.Validator,
 	} {
 		n.Use(hooks...)
 	}
@@ -224,7 +230,7 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.AddressTracker, c.Chain, c.ChainProposal, c.Contract, c.ContractProposal,
-		c.DiscordChannel, c.TelegramChat, c.User,
+		c.DiscordChannel, c.TelegramChat, c.User, c.Validator,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -249,6 +255,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.TelegramChat.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
+	case *ValidatorMutation:
+		return c.Validator.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -404,6 +412,22 @@ func (c *AddressTrackerClient) QueryChainProposals(at *AddressTracker) *ChainPro
 			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, id),
 			sqlgraph.To(chainproposal.Table, chainproposal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, addresstracker.ChainProposalsTable, addresstracker.ChainProposalsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryValidator queries the validator edge of a AddressTracker.
+func (c *AddressTrackerClient) QueryValidator(at *AddressTracker) *ValidatorQuery {
+	query := (&ValidatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := at.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, id),
+			sqlgraph.To(validator.Table, validator.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, addresstracker.ValidatorTable, addresstracker.ValidatorColumn),
 		)
 		fromV = sqlgraph.Neighbors(at.driver.Dialect(), step)
 		return fromV, nil
@@ -586,6 +610,22 @@ func (c *ChainClient) QueryAddressTrackers(ch *Chain) *AddressTrackerQuery {
 			sqlgraph.From(chain.Table, chain.FieldID, id),
 			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, chain.AddressTrackersTable, chain.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryValidators queries the validators edge of a Chain.
+func (c *ChainClient) QueryValidators(ch *Chain) *ValidatorQuery {
+	query := (&ValidatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ch.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(chain.Table, chain.FieldID, id),
+			sqlgraph.To(validator.Table, validator.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, chain.ValidatorsTable, chain.ValidatorsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ch.driver.Dialect(), step)
 		return fromV, nil
@@ -1582,14 +1622,164 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 	}
 }
 
+// ValidatorClient is a client for the Validator schema.
+type ValidatorClient struct {
+	config
+}
+
+// NewValidatorClient returns a client for the Validator from the given config.
+func NewValidatorClient(c config) *ValidatorClient {
+	return &ValidatorClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `validator.Hooks(f(g(h())))`.
+func (c *ValidatorClient) Use(hooks ...Hook) {
+	c.hooks.Validator = append(c.hooks.Validator, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `validator.Intercept(f(g(h())))`.
+func (c *ValidatorClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Validator = append(c.inters.Validator, interceptors...)
+}
+
+// Create returns a builder for creating a Validator entity.
+func (c *ValidatorClient) Create() *ValidatorCreate {
+	mutation := newValidatorMutation(c.config, OpCreate)
+	return &ValidatorCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Validator entities.
+func (c *ValidatorClient) CreateBulk(builders ...*ValidatorCreate) *ValidatorCreateBulk {
+	return &ValidatorCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Validator.
+func (c *ValidatorClient) Update() *ValidatorUpdate {
+	mutation := newValidatorMutation(c.config, OpUpdate)
+	return &ValidatorUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ValidatorClient) UpdateOne(v *Validator) *ValidatorUpdateOne {
+	mutation := newValidatorMutation(c.config, OpUpdateOne, withValidator(v))
+	return &ValidatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ValidatorClient) UpdateOneID(id int) *ValidatorUpdateOne {
+	mutation := newValidatorMutation(c.config, OpUpdateOne, withValidatorID(id))
+	return &ValidatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Validator.
+func (c *ValidatorClient) Delete() *ValidatorDelete {
+	mutation := newValidatorMutation(c.config, OpDelete)
+	return &ValidatorDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ValidatorClient) DeleteOne(v *Validator) *ValidatorDeleteOne {
+	return c.DeleteOneID(v.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ValidatorClient) DeleteOneID(id int) *ValidatorDeleteOne {
+	builder := c.Delete().Where(validator.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ValidatorDeleteOne{builder}
+}
+
+// Query returns a query builder for Validator.
+func (c *ValidatorClient) Query() *ValidatorQuery {
+	return &ValidatorQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeValidator},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Validator entity by its id.
+func (c *ValidatorClient) Get(ctx context.Context, id int) (*Validator, error) {
+	return c.Query().Where(validator.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ValidatorClient) GetX(ctx context.Context, id int) *Validator {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryChain queries the chain edge of a Validator.
+func (c *ValidatorClient) QueryChain(v *Validator) *ChainQuery {
+	query := (&ChainClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(validator.Table, validator.FieldID, id),
+			sqlgraph.To(chain.Table, chain.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, validator.ChainTable, validator.ChainColumn),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAddressTrackers queries the address_trackers edge of a Validator.
+func (c *ValidatorClient) QueryAddressTrackers(v *Validator) *AddressTrackerQuery {
+	query := (&AddressTrackerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(validator.Table, validator.FieldID, id),
+			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, validator.AddressTrackersTable, validator.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ValidatorClient) Hooks() []Hook {
+	return c.hooks.Validator
+}
+
+// Interceptors returns the client interceptors.
+func (c *ValidatorClient) Interceptors() []Interceptor {
+	return c.inters.Validator
+}
+
+func (c *ValidatorClient) mutate(ctx context.Context, m *ValidatorMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ValidatorCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ValidatorUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ValidatorUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ValidatorDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Validator mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
 		AddressTracker, Chain, ChainProposal, Contract, ContractProposal,
-		DiscordChannel, TelegramChat, User []ent.Hook
+		DiscordChannel, TelegramChat, User, Validator []ent.Hook
 	}
 	inters struct {
 		AddressTracker, Chain, ChainProposal, Contract, ContractProposal,
-		DiscordChannel, TelegramChat, User []ent.Interceptor
+		DiscordChannel, TelegramChat, User, Validator []ent.Interceptor
 	}
 )

@@ -13,6 +13,7 @@ import (
 	discordService "github.com/shifty11/cosmos-notifier/services/discord"
 	"github.com/shifty11/cosmos-notifier/services/grpc"
 	"github.com/shifty11/cosmos-notifier/services/telegram"
+	"github.com/shifty11/cosmos-notifier/services/validator_crawler"
 	"golang.org/x/oauth2"
 	"os"
 	"os/signal"
@@ -64,27 +65,14 @@ var startDiscordBotCmd = &cobra.Command{
 	},
 }
 
-// runChainCrawlerCmd represents the startChainCrawler command
+// runChainCrawlerCmd represents the startValidatorCrawler command
 var runChainCrawlerCmd = &cobra.Command{
-	Use:   "chain-crawler",
-	Short: "Start the chain crawler",
+	Use:   "validator-crawler",
+	Short: "Start the validator crawler",
 	Run: func(cmd *cobra.Command, args []string) {
-		telegramBotToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
-		useTestApi := common.GetEnvAsBoolX("TELEGRAM_USE_TEST_API")
-		assetsPath := common.GetEnvX("ASSETS_PATH")
-		discordBotToken := common.GetEnvX("DISCORD_BOT_TOKEN")
-
-		apiEndpoint := ""
-		if useTestApi {
-			apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
-		}
-
 		managers := database.NewDefaultDbManagers()
-		notifier := notifier.NewChainNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
-		crawler := chain_crawler.NewChainCrawler(managers, notifier, assetsPath)
-		crawler.AddOrUpdateChains()
-		crawler.UpdateProposals()
-		crawler.CheckForVotingReminders()
+		crawler := validator_crawler.NewValidatorCrawler(managers)
+		crawler.AddOrUpdateValidators()
 
 		if cmd.Flag("repeat").Value.String() == "true" {
 			crawler.ScheduleCrawl()
@@ -120,6 +108,38 @@ var runContractCrawlerCmd = &cobra.Command{
 
 		if cmd.Flag("repeat").Value.String() == "true" {
 			c.ScheduleCrawl()
+
+			stop := make(chan os.Signal, 1)
+			signal.Notify(stop, syscall.SIGINT)
+			<-stop
+		}
+	},
+}
+
+// runValidatorCrawlerCmd represents the startChainCrawler command
+var runValidatorCrawlerCmd = &cobra.Command{
+	Use:   "chain-crawler",
+	Short: "Start the chain crawler",
+	Run: func(cmd *cobra.Command, args []string) {
+		telegramBotToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
+		useTestApi := common.GetEnvAsBoolX("TELEGRAM_USE_TEST_API")
+		assetsPath := common.GetEnvX("ASSETS_PATH")
+		discordBotToken := common.GetEnvX("DISCORD_BOT_TOKEN")
+
+		apiEndpoint := ""
+		if useTestApi {
+			apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
+		}
+
+		managers := database.NewDefaultDbManagers()
+		notifier := notifier.NewChainNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
+		crawler := chain_crawler.NewChainCrawler(managers, notifier, assetsPath)
+		crawler.AddOrUpdateChains()
+		crawler.UpdateProposals()
+		crawler.CheckForVotingReminders()
+
+		if cmd.Flag("repeat").Value.String() == "true" {
+			crawler.ScheduleCrawl()
 
 			stop := make(chan os.Signal, 1)
 			signal.Notify(stop, syscall.SIGINT)
@@ -179,8 +199,11 @@ func init() {
 	serviceCmd.AddCommand(startDiscordBotCmd)
 
 	serviceCmd.AddCommand(runChainCrawlerCmd)
-	runChainCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling every hour")
+	runChainCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling periodically")
 
 	serviceCmd.AddCommand(runContractCrawlerCmd)
-	runContractCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling every hour")
+	runContractCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling periodically")
+
+	serviceCmd.AddCommand(runValidatorCrawlerCmd)
+	runValidatorCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling periodically")
 }

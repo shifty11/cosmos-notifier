@@ -368,6 +368,33 @@ func HasChainProposalsWith(preds ...predicate.ChainProposal) predicate.AddressTr
 	})
 }
 
+// HasValidator applies the HasEdge predicate on the "validator" edge.
+func HasValidator() predicate.AddressTracker {
+	return predicate.AddressTracker(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ValidatorTable, ValidatorColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasValidatorWith applies the HasEdge predicate on the "validator" edge with a given conditions (other predicates).
+func HasValidatorWith(preds ...predicate.Validator) predicate.AddressTracker {
+	return predicate.AddressTracker(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ValidatorInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ValidatorTable, ValidatorColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.AddressTracker) predicate.AddressTracker {
 	return predicate.AddressTracker(func(s *sql.Selector) {
