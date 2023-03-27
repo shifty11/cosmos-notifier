@@ -78,7 +78,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     if (state.isNotEmpty) {
       return state.first.chatRoom;
     }
-    return null;
+    return ref.watch(trackerChatRoomsProvider).firstOrNull;
   }
 
   Future<GetTrackersResponse> getTrackers() async {
