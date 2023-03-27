@@ -38,6 +38,10 @@ final hasValidationErrorProvider = Provider<bool>((ref) {
   }));
 });
 
+final showChatRoomColumnProvider = Provider<bool>((ref) {
+  return ref.watch(trackerChatRoomsProvider).length > 1;
+});
+
 class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   TrackerService trackerService;
   MessageNotifier messageNotifier;
