@@ -282,7 +282,7 @@ class TrackingPage extends StatelessWidget {
                   Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 5),
                   const Text(
-                      "Add your wallet address to get a reminder notifications.\nYou will be reminded if you forget to vote.",
+                      "Add your wallet address to get reminder notifications.\nYou will be reminded if you forget to vote.",
                       maxLines: 3),
                   const SizedBox(height: 30),
                   Expanded(
