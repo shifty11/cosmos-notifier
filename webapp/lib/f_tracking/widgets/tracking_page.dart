@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
 import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pbgrpc.dart';
 import 'package:cosmos_notifier/common/header_widget.dart';
@@ -224,16 +223,10 @@ class TrackingPage extends StatelessWidget {
 
   Widget validationError(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-      final trackerRows = ref.watch(trackerNotifierProvider);
       return Builder(
         builder: (BuildContext context) {
-          final trackerRowWithValErr =
-              trackerRows.firstWhereOrNull((trackerRow) => trackerRow.updatedAt == null && !trackerRow.isAddressValid);
-          if (trackerRowWithValErr != null) {
-            return const Padding(
-              padding: EdgeInsets.only(left: 24),
-              child: Text("Invalid address", style: TextStyle(color: Colors.red)),
-            );
+          if (ref.watch(hasValidationErrorProvider)) {
+            return const Text("Invalid address", style: TextStyle(color: Colors.red));
           } else {
             return const SizedBox.shrink();
           }
@@ -259,7 +252,7 @@ class TrackingPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 10),
-                  const Text("Set up your reminders. You will get a notification if you did not vote on a proposal and it is about to end.",
+                  const Text("Add your wallet address to get a reminder notification if you forget to vote on a proposal. You will be reminded before voting ends.",
                       maxLines: 3),
                   const SizedBox(height: 10),
                   Expanded(

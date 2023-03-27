@@ -23,7 +23,7 @@ class AddressInputWidget extends HookWidget {
       controller: controller,
       style: Theme.of(context).textTheme.bodyMedium,
       decoration: InputDecoration(
-        hintText: 'Enter wallet address',
+        hintText: 'Wallet address',
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         hintStyle: TextStyle(color: Colors.grey, fontSize: Theme.of(context).textTheme.bodyMedium!.fontSize),
