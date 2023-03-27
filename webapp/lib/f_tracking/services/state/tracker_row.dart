@@ -55,9 +55,22 @@ class TrackerRow with _$TrackerRow {
   }
 }
 
+// needs same order as in UI (none is not used in UI so it's at the end)
+enum TrackerSortType {
+  address,
+  notificationInterval,
+  chatRoom,
+  none,
+}
+
 @freezed
-class TrackerList with _$TrackerList {
-  const factory TrackerList({
-    required List<TrackerRow> trackers,
-  }) = _TrackerList;
+class TrackerSortState with _$TrackerSortState {
+  const factory TrackerSortState({
+    required bool isAscending,
+    required TrackerSortType sortType,
+  }) = _TrackerSortState;
+
+  const TrackerSortState._();
+
+  factory TrackerSortState.initial() => const TrackerSortState(isAscending: false, sortType: TrackerSortType.none);
 }
