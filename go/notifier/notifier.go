@@ -95,18 +95,44 @@ func (n *chainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) 
 	n.discordNotifier.notify(discordIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 }
 
-func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainProposal) {
-	var remainingTime = data.ChainProposal.VotingEndTime.Sub(time.Now())
-	var remainingTimeText string
+func singularOrPluralText(count int, singular string, plural string) string {
+	if count > 1 {
+		return plural
+	}
+	return singular
+}
+
+func createRemainingTimeText(remainingTime time.Duration) string {
 	if remainingTime > 0 {
+		var dayText = "day"
+		var hourText = "hour"
+		var minuteText = "minute"
 		if remainingTime.Hours() > 24 {
-			remainingTimeText = fmt.Sprintf("%d days %d hours %d minutes", int(remainingTime.Hours()/24), int(remainingTime.Hours())%24, int(remainingTime.Minutes())%60)
+			var remainingDays = int(remainingTime.Hours() / 24)
+			var remainingHours = int(remainingTime.Hours()) % 24
+			var remainingMinutes = int(remainingTime.Minutes()) % 60
+			dayText = singularOrPluralText(remainingDays, "day", "days")
+			hourText = singularOrPluralText(remainingHours, "hour", "hours")
+			minuteText = singularOrPluralText(remainingMinutes, "minute", "minutes")
+			return fmt.Sprintf("%d %s %d %s %d %s", remainingDays, dayText, remainingHours, hourText, remainingMinutes, minuteText)
 		} else if remainingTime.Hours() > 1 {
-			remainingTimeText = fmt.Sprintf("%d hours %d minutes", int(remainingTime.Hours()), int(remainingTime.Minutes())%60)
+			var remainingHours = int(remainingTime.Hours()) % 24
+			var remainingMinutes = int(remainingTime.Minutes()) % 60
+			hourText = singularOrPluralText(remainingHours, "hour", "hours")
+			minuteText = singularOrPluralText(remainingMinutes, "minute", "minutes")
+			return fmt.Sprintf("%d %s %d %s", remainingHours, hourText, remainingMinutes, minuteText)
 		} else {
-			remainingTimeText = fmt.Sprintf("%d minutes", int(remainingTime.Minutes()))
+			var remainingMinutes = int(remainingTime.Minutes()) % 60
+			minuteText = singularOrPluralText(remainingMinutes, "minute", "minutes")
+			return fmt.Sprintf("%d %s", remainingMinutes, minuteText)
 		}
 	}
+	return ""
+}
+
+func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainProposal) {
+	var remainingTime = data.ChainProposal.VotingEndTime.Sub(time.Now())
+	var remainingTimeText = createRemainingTimeText(remainingTime)
 
 	if data.AddressTracker.Edges.TelegramChat != nil {
 		n.telegramNotifier.sendVoteReminder(
