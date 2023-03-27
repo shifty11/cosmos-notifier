@@ -137,6 +137,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
         )
       ];
     }
+    sort();
     return response;
   }
 
