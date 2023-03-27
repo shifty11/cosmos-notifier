@@ -28,8 +28,8 @@ class MyRouter {
     // debugLogDiagnostics: cDebugMode,
     routes: [
       GoRoute(
-        name: rRoot.name,
-        path: rRoot.path,
+        name: rHome.name,
+        path: rHome.path,
         pageBuilder: (context, state) => MaterialPage<void>(
           key: state.pageKey,
           child: const HomePage(),
@@ -111,12 +111,12 @@ class MyRouter {
             return rLogin.path;
           }
           // go to root page if user is not on root or login
-          if (state.subloc != rRoot.path && state.subloc != rLogin.path) {
-            return rRoot.path;
+          if (state.subloc != rHome.path && state.subloc != rLogin.path) {
+            return rHome.path;
           }
           return null;
         },
-        error: (err) => state.subloc == rRoot.path ? null : rRoot.path,
+        error: (err) => state.subloc == rHome.path ? null : rHome.path,
       );
     },
   );

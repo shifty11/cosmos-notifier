@@ -507,7 +507,7 @@ class SubscriptionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const HeaderWidget(),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   title(context),
                   const SizedBox(height: 20),
                   searchWidget(context),

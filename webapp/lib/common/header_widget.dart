@@ -23,11 +23,17 @@ class _HeaderWidgetState extends State<HeaderWidget> {
 
   Iterable<MenuButtonData> getRoutes() {
     return [
-      MenuButtonData("Home", Icons.home, rRoot),
       MenuButtonData("Subscriptions", Icons.notifications, rSubscriptions),
-      if (jwtManager.isAdmin) MenuButtonData("Reminders", Icons.alarm, rTracking),
+      MenuButtonData("Reminders", Icons.alarm, rTracking),
       if (jwtManager.isAdmin) MenuButtonData("Admin", Icons.settings, rAdmin),
     ];
+  }
+
+  Widget homeButton() {
+    return IconButton(
+      icon: Image.asset("images/dove_round.png", width: 36, height: 36),
+      onPressed: () => context.pushNamed(rHome.name),
+    );
   }
 
   Widget getPopupMenu() {
@@ -45,15 +51,24 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         ),
       );
     }).toList();
-    return PopupMenuButton(
-      itemBuilder: (_) => menuItems,
-      child: Row(
-        children: const [
-          Icon(Icons.menu),
-          SizedBox(width: 5),
-          Text("Menu"),
-        ],
-      ),
+    return Column(
+      children: [
+        Row(
+          children: [
+            homeButton(),
+            const SizedBox(width: 8),
+            PopupMenuButton(
+              itemBuilder: (_) => menuItems,
+              child: Row(
+                children: const [
+                  Icon(Icons.menu),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const Divider(),
+      ],
     );
   }
 
@@ -70,18 +85,28 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     return Column(
       children: [
         Row(
-          children: menuItems,
+          children: [
+            homeButton(),
+            const SizedBox(width: 8),
+            ...menuItems,
+          ],
         ),
         const Divider(),
       ],
     );
   }
 
+  bool get shouldCollapse {
+    if (ResponsiveWrapper.of(context).isSmallerThan(TABLET)) {
+      return getRoutes().length > 2;
+    }
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final shouldCollapse = ResponsiveWrapper.of(context).isSmallerThan(TABLET);
         return shouldCollapse
             ? GestureDetector(
                 onTap: () {
