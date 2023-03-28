@@ -7,8 +7,10 @@ import (
 	"github.com/shifty11/cosmos-notifier/services/contract_crawler"
 	"github.com/shifty11/cosmos-notifier/services/grpc/admin"
 	"github.com/shifty11/cosmos-notifier/services/grpc/auth"
+	"github.com/shifty11/cosmos-notifier/services/grpc/dev"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/auth_service"
+	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/dev_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/subscription_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/subscription"
@@ -16,6 +18,7 @@ import (
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"net"
+	"os"
 	"time"
 )
 
@@ -60,6 +63,7 @@ func (s GRPCServer) Run() {
 	subsServer := subscription.NewSubscriptionsServer(s.dbManagers, s.crawlerClient)
 	adminServer := admin.NewAdminServer(s.generalNotifier, s.dbManagers)
 	trackerServer := tracker.NewTrackerServer(s.dbManagers)
+	devServer := dev.NewDevServer(s.dbManagers, jwtManager)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -70,6 +74,9 @@ func (s GRPCServer) Run() {
 	subscription_service.RegisterSubscriptionServiceServer(server, subsServer)
 	admin_service.RegisterAdminServiceServer(server, adminServer)
 	tracker_service.RegisterTrackerServiceServer(server, trackerServer)
+	if os.Getenv("DEV") == "true" {
+		dev_service.RegisterDevServiceServer(server, devServer)
+	}
 
 	lis, err := net.Listen("tcp", s.config.Port)
 	if err != nil {

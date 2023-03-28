@@ -44,6 +44,13 @@ func connect() (*ent.Client, context.Context) {
 	return dbClient, context.Background()
 }
 
+func ConnectDuringDevelopment() (*ent.Client, context.Context) {
+	if os.Getenv("DEV") != "true" {
+		log.Sugar.Panicf("ConnectDuringDevelopment should only be called in development mode")
+	}
+	return connect()
+}
+
 func Close() {
 	if dbClient != nil {
 		err := dbClient.Close()
