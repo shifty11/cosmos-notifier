@@ -7,6 +7,7 @@ import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:collection/collection.dart';
 
 final trackerFutureProvider = FutureProvider<GetTrackersResponse>((ref) async {
   return await ref.read(trackerNotifierProvider.notifier).getTrackers();
@@ -30,12 +31,65 @@ final trackerChatRoomsProvider = Provider<List<TrackerChatRoom>>((ref) {
       );
 });
 
+final hasValidationErrorProvider = Provider<bool>((ref) {
+  return ref.watch(trackerNotifierProvider.select((trackerRows) {
+    final trackerRow = trackerRows.firstWhereOrNull((trackerRow) => !trackerRow.isSaved && !trackerRow.isAddressValid);
+    return trackerRow != null;
+  }));
+});
+
+final showChatRoomColumnProvider = Provider<bool>((ref) {
+  return ref.watch(trackerChatRoomsProvider).length > 1;
+});
+
+final trackerSortProvider = StateProvider<TrackerSortState>((ref) {
+  return const TrackerSortState(isAscending: true, sortType: TrackerSortType.address);
+});
+
 class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   TrackerService trackerService;
   MessageNotifier messageNotifier;
   StateNotifierProviderRef<TrackerNotifier, List<TrackerRow>> ref;
 
   TrackerNotifier(this.trackerService, this.messageNotifier, this.ref) : super([]);
+
+  _sortByAddress(bool isAscending) {
+    state.sort((a, b) => a.address.compareTo(b.address));
+    if (!isAscending) {
+      state = state.reversed.toList();
+    }
+  }
+
+  _sortByNotificationInterval(bool isAscending) {
+    state.sort((a, b) => a.notificationInterval.seconds.compareTo(b.notificationInterval.seconds));
+    if (!isAscending) {
+      state = state.reversed.toList();
+    }
+  }
+
+  _sortByChatRoom(bool isAscending) {
+    state.sort((a, b) => a.chatRoom!.name.compareTo(b.chatRoom!.name));
+    if (!isAscending) {
+      state = state.reversed.toList();
+    }
+  }
+
+  sort() {
+    final sortState = ref.read(trackerSortProvider);
+    switch (sortState.sortType) {
+      case TrackerSortType.none:
+        break;
+      case TrackerSortType.address:
+        _sortByAddress(sortState.isAscending);
+        break;
+      case TrackerSortType.notificationInterval:
+        _sortByNotificationInterval(sortState.isAscending);
+        break;
+      case TrackerSortType.chatRoom:
+        _sortByChatRoom(sortState.isAscending);
+        break;
+    }
+  }
 
   TrackerRow? _getLastModifiedTrackerRow() {
     final sortedTrackers = state
@@ -66,7 +120,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     if (state.isNotEmpty) {
       return state.first.chatRoom;
     }
-    return null;
+    return ref.watch(trackerChatRoomsProvider).firstOrNull;
   }
 
   Future<GetTrackersResponse> getTrackers() async {
@@ -83,6 +137,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
         )
       ];
     }
+    sort();
     return response;
   }
 
@@ -122,7 +177,8 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
             chatRoom: tracker.chatRoom,
           ));
           state = _updateTrackerRowByResponse(tracker, response, isNewTracker: true);
-          messageNotifier.sendMsg(info: "Tracker added");
+          messageNotifier.sendMsg(info: "Reminder added");
+          ref.read(trackerSortProvider.notifier).state = ref.read(trackerSortProvider).copyWith(sortType: TrackerSortType.none);
         } catch (e) {
           messageNotifier.sendMsg(error: e.toString());
           return;
@@ -137,7 +193,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
           chatRoom: tracker.chatRoom,
         ));
         state = _updateTrackerRowByResponse(tracker, response);
-        messageNotifier.sendMsg(info: "Tracker updated");
+        messageNotifier.sendMsg(info: "Reminder updated");
       } catch (e) {
         messageNotifier.sendMsg(error: e.toString());
       }
@@ -174,7 +230,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     try {
       await trackerService.deleteTracker(DeleteTrackerRequest(trackerId: tracker.id));
       state = state.where((element) => element.id != tracker.id).toList();
-      messageNotifier.sendMsg(info: "Tracker deleted");
+      messageNotifier.sendMsg(info: "Reminder deleted");
     } catch (e) {
       messageNotifier.sendMsg(error: e.toString());
     }

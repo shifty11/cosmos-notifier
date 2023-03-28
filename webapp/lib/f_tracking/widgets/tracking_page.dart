@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
 import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pbgrpc.dart';
 import 'package:cosmos_notifier/common/header_widget.dart';
@@ -113,6 +112,7 @@ class TrackingPage extends StatelessWidget {
       final trackerRows = ref.watch(trackerNotifierProvider);
       final showAddTrackerButton = ref.watch(showAddTrackerButtonProvider);
       final trackerChatRooms = ref.watch(trackerChatRoomsProvider);
+      final showChatRoomColumn = ref.watch(showChatRoomColumnProvider);
       return Builder(
         builder: (BuildContext context) {
           if (trackerFuture.isLoading) {
@@ -120,20 +120,47 @@ class TrackingPage extends StatelessWidget {
           } else {
             return DataTable(
                 columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
-                columns: const [
-                  DataColumn(label: Text("Address")),
+                sortAscending: ref.watch(trackerSortProvider).isAscending,
+                sortColumnIndex: ref.watch(trackerSortProvider).sortType.index,
+                columns: [
                   DataColumn(
-                      label: Padding(
-                    padding: EdgeInsets.only(left: 10),
-                    child: Text("Notification"),
-                  )),
-                  DataColumn(label: Text("Chat")),
-                  DataColumn(label: Text("Action")),
+                      label: const Text("Address"),
+                      tooltip: "Wallet address that is being tracked",
+                      onSort: (columnIndex, ascending) {
+                        ref.read(trackerSortProvider.notifier).state =
+                            TrackerSortState(isAscending: ascending, sortType: TrackerSortType.address);
+                        ref.read(trackerNotifierProvider.notifier).sort();
+                      }),
+                  DataColumn(
+                      label: const Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text("Notification"),
+                      ),
+                      tooltip: "Time when the notification will be sent before the proposal ends",
+                      onSort: (columnIndex, ascending) {
+                        ref.read(trackerSortProvider.notifier).state =
+                            TrackerSortState(isAscending: ascending, sortType: TrackerSortType.notificationInterval);
+                        ref.read(trackerNotifierProvider.notifier).sort();
+                      }),
+                  if (showChatRoomColumn)
+                    DataColumn(
+                        label: const Text("Chat"),
+                        tooltip: "Reminder will be sent to this chat",
+                        onSort: (columnIndex, ascending) {
+                          ref.read(trackerSortProvider.notifier).state =
+                              TrackerSortState(isAscending: ascending, sortType: TrackerSortType.chatRoom);
+                          ref.read(trackerNotifierProvider.notifier).sort();
+                        }),
+                  const DataColumn(label: Text("Action")),
                 ],
                 rows: trackerRows.map((trackerRow) {
+                  var addressSize = ResponsiveWrapper.of(context).isSmallerThan(MOBILE) ? AddressSize.veryShort : AddressSize.short;
+                  if (ResponsiveWrapper.of(context).isLargerThan(TABLET)) {
+                    addressSize = AddressSize.long;
+                  }
                   return DataRow(cells: [
                     DataCell(trackerRow.isSaved
-                        ? Text(trackerRow.shortenedAddress(ResponsiveWrapper.of(context).isSmallerThan(TABLET)))
+                        ? Text(trackerRow.shortenedAddress(addressSize))
                         : AddressInputWidget(ref, trackerRow)),
                     DataCell(
                       GestureDetector(
@@ -166,10 +193,9 @@ class TrackingPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    DataCell(
-                      LimitedBox(
-                        maxWidth: 200,
-                        child: DropdownButton<TrackerChatRoom>(
+                    if (showChatRoomColumn)
+                      DataCell(
+                        DropdownButton<TrackerChatRoom>(
                           focusColor: Colors.transparent,
                           value: trackerRow.chatRoom,
                           icon: const Icon(Icons.arrow_downward),
@@ -185,15 +211,17 @@ class TrackingPage extends StatelessWidget {
                           items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
                             return DropdownMenuItem<TrackerChatRoom>(
                               value: trackerChatRoom,
-                              child: Text(
-                                trackerChatRoom.name,
-                                overflow: TextOverflow.ellipsis,
+                              child: LimitedBox(
+                                maxWidth: ResponsiveWrapper.of(context).isSmallerThan(MOBILE) ? 80 : 200,
+                                child: Text(
+                                  trackerChatRoom.name,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             );
                           }).toList(),
                         ),
                       ),
-                    ),
                     DataCell(
                       IconButton(
                         padding: const EdgeInsets.all(0),
@@ -208,7 +236,7 @@ class TrackingPage extends StatelessWidget {
                       DataRow(cells: [
                         const DataCell(Text("")),
                         const DataCell(Text("")),
-                        const DataCell(Text("")),
+                        if (showChatRoomColumn) const DataCell(Text("")),
                         DataCell(IconButton(
                           padding: const EdgeInsets.all(0),
                           onPressed: () async => {ref.read(trackerNotifierProvider.notifier).addTracker()},
@@ -224,16 +252,10 @@ class TrackingPage extends StatelessWidget {
 
   Widget validationError(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-      final trackerRows = ref.watch(trackerNotifierProvider);
       return Builder(
         builder: (BuildContext context) {
-          final trackerRowWithValErr =
-              trackerRows.firstWhereOrNull((trackerRow) => trackerRow.updatedAt == null && !trackerRow.isAddressValid);
-          if (trackerRowWithValErr != null) {
-            return const Padding(
-              padding: EdgeInsets.only(left: 24),
-              child: Text("Invalid address", style: TextStyle(color: Colors.red)),
-            );
+          if (ref.watch(hasValidationErrorProvider)) {
+            return const Text("Invalid address", style: TextStyle(color: Colors.red));
           } else {
             return const SizedBox.shrink();
           }
@@ -256,12 +278,13 @@ class TrackingPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const HeaderWidget(),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                   Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
-                  const SizedBox(height: 10),
-                  const Text("Set up your reminders. You will get a notification if you did not vote on a proposal and it is about to end.",
+                  const SizedBox(height: 5),
+                  const Text(
+                      "Add your wallet address to get reminder notifications.\nYou will be reminded if you forget to vote.",
                       maxLines: 3),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 30),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(

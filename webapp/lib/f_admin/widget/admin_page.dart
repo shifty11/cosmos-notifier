@@ -200,7 +200,7 @@ multiline
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const HeaderWidget(),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     ConstrainedBox(
                       constraints: BoxConstraints(
                         maxHeight: MediaQuery.of(context).size.height - 200,

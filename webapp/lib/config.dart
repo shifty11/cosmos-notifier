@@ -28,7 +28,7 @@ class MyRouteData {
   const MyRouteData(this.name, this.path);
 }
 
-const rRoot = MyRouteData("root", "/");
+const rHome = MyRouteData("home", "/");
 const rLoading = MyRouteData("loading", "/loading");
 const rLogin = MyRouteData("login", "/login");
 const rSubscriptions = MyRouteData("subscriptions", "/subscriptions");
