@@ -107,27 +107,6 @@ class HomePage extends StatelessWidget {
     });
   }
 
-  Widget devEnvLoginButton(BuildContext context) {
-    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child){
-      final auth = ref.watch(authProvider);
-      if (auth.isAuthenticated) {
-        return Container();
-      }
-      return Column(
-        children: [
-          OutlinedButton.icon(
-            onPressed: () => GoRouter.of(context).go(rLogin.path),
-            icon: const Icon(Icons.login),
-            label: const Text("Login"),
-            style: OutlinedButton.styleFrom(
-              minimumSize: const Size(380, 50),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,7 +132,6 @@ class HomePage extends StatelessWidget {
             botButtons(context),
             const Spacer(flex: 1),
             subscriptionButton(),
-            kReleaseMode ? Container() : devEnvLoginButton(context),
             errorMsg(),
             const Spacer(flex: 4),
             const Flexible(flex: 0, child: FooterWidget()),
