@@ -78,6 +78,18 @@ services:
           - node.role != manager
           - node.labels.host == daodao-notifier
 
+  validator-crawler:
+    image: ghcr.io/shifty11/cosmos-notifier-go:latest
+    working_dir: /app
+    secrets:
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service validator-crawler --repeat"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+          - node.labels.host == daodao-notifier
+
   envoy:
     image: ghcr.io/shifty11/cosmos-notifier-envoy:latest
     deploy:

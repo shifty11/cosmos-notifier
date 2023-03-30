@@ -6,13 +6,14 @@
 source ../.env.dev  # set environment variables
 ```
 
-| Service          | Command                                 | Description                        |
-|------------------|:----------------------------------------|------------------------------------|
-| Telegram         | go run main.go service telegram         | Telegram bot                       |
-| Discord          | go run main.go service discord          | Discord bot                        |
-| GRPC             | go run main.go service grpc             | GRPC server                        |
-| Chain Crawler    | go run main.go service chain-crawler    | Crawler to update chains           |
-| Contract Crawler | go run main.go service contract-crawler | Crawler to update DAODAO contracts |
+| Service           | Command                                  | Description                        |
+|-------------------|:-----------------------------------------|------------------------------------|
+| Telegram          | go run main.go service telegram          | Telegram bot                       |
+| Discord           | go run main.go service discord           | Discord bot                        |
+| GRPC              | go run main.go service grpc              | GRPC server                        |
+| Chain Crawler     | go run main.go service chain-crawler     | Crawler to update chains           |
+| Contract Crawler  | go run main.go service contract-crawler  | Crawler to update DAODAO contracts |
+| Validator Crawler | go run main.go service validator-crawler | Crawler to update validators       |
 
 ## Database
 
