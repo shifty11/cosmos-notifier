@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"errors"
+	cosmossdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/bech32"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
@@ -22,15 +24,33 @@ func NewValidatorManager(client *ent.Client, ctx context.Context, addressTracker
 	return &ValidatorManager{client: client, ctx: ctx, addressTrackerManager: addressTrackerManager}
 }
 
+func (c *ValidatorManager) getAccountAddress(operatorAddress string, chainEnt *ent.Chain) (string, error) {
+	_, valAddr, err := bech32.DecodeAndConvert(operatorAddress)
+	if err != nil {
+		return "", err
+	}
+	accAddr, err := cosmossdk.Bech32ifyAddressBytes(chainEnt.Bech32Prefix, valAddr)
+	if err != nil {
+		return "", err
+	}
+	return accAddr, nil
+}
+
 func (manager *ValidatorManager) AddValidator(
 	chainEnt *ent.Chain,
-	address string,
+	operatorAddress string,
 	moniker string,
 ) (*ent.Validator, error) {
+	accountAddress, err := manager.getAccountAddress(operatorAddress, chainEnt)
+	if err != nil {
+		log.Sugar.Errorf("Error while getting account address for validator %v: %v", operatorAddress, err)
+		return nil, err
+	}
 	return manager.client.Validator.
 		Create().
 		SetChain(chainEnt).
-		SetAddress(address).
+		SetOperatorAddress(operatorAddress).
+		SetAddress(accountAddress).
 		SetMoniker(moniker).
 		Save(manager.ctx)
 }

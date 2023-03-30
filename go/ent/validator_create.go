@@ -52,6 +52,12 @@ func (vc *ValidatorCreate) SetNillableUpdateTime(t *time.Time) *ValidatorCreate 
 	return vc
 }
 
+// SetOperatorAddress sets the "operator_address" field.
+func (vc *ValidatorCreate) SetOperatorAddress(s string) *ValidatorCreate {
+	vc.mutation.SetOperatorAddress(s)
+	return vc
+}
+
 // SetAddress sets the "address" field.
 func (vc *ValidatorCreate) SetAddress(s string) *ValidatorCreate {
 	vc.mutation.SetAddress(s)
@@ -173,6 +179,14 @@ func (vc *ValidatorCreate) check() error {
 	if _, ok := vc.mutation.UpdateTime(); !ok {
 		return &ValidationError{Name: "update_time", err: errors.New(`ent: missing required field "Validator.update_time"`)}
 	}
+	if _, ok := vc.mutation.OperatorAddress(); !ok {
+		return &ValidationError{Name: "operator_address", err: errors.New(`ent: missing required field "Validator.operator_address"`)}
+	}
+	if v, ok := vc.mutation.OperatorAddress(); ok {
+		if err := validator.OperatorAddressValidator(v); err != nil {
+			return &ValidationError{Name: "operator_address", err: fmt.Errorf(`ent: validator failed for field "Validator.operator_address": %w`, err)}
+		}
+	}
 	if _, ok := vc.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "Validator.address"`)}
 	}
@@ -225,6 +239,10 @@ func (vc *ValidatorCreate) createSpec() (*Validator, *sqlgraph.CreateSpec) {
 	if value, ok := vc.mutation.UpdateTime(); ok {
 		_spec.SetField(validator.FieldUpdateTime, field.TypeTime, value)
 		_node.UpdateTime = value
+	}
+	if value, ok := vc.mutation.OperatorAddress(); ok {
+		_spec.SetField(validator.FieldOperatorAddress, field.TypeString, value)
+		_node.OperatorAddress = value
 	}
 	if value, ok := vc.mutation.Address(); ok {
 		_spec.SetField(validator.FieldAddress, field.TypeString, value)

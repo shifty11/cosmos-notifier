@@ -21,6 +21,8 @@ type Validator struct {
 	CreateTime time.Time `json:"create_time,omitempty"`
 	// UpdateTime holds the value of the "update_time" field.
 	UpdateTime time.Time `json:"update_time,omitempty"`
+	// OperatorAddress holds the value of the "operator_address" field.
+	OperatorAddress string `json:"operator_address,omitempty"`
 	// Address holds the value of the "address" field.
 	Address string `json:"address,omitempty"`
 	// Moniker holds the value of the "moniker" field.
@@ -93,7 +95,7 @@ func (*Validator) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case validator.FieldID:
 			values[i] = new(sql.NullInt64)
-		case validator.FieldAddress, validator.FieldMoniker:
+		case validator.FieldOperatorAddress, validator.FieldAddress, validator.FieldMoniker:
 			values[i] = new(sql.NullString)
 		case validator.FieldCreateTime, validator.FieldUpdateTime:
 			values[i] = new(sql.NullTime)
@@ -131,6 +133,12 @@ func (v *Validator) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field update_time", values[i])
 			} else if value.Valid {
 				v.UpdateTime = value.Time
+			}
+		case validator.FieldOperatorAddress:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field operator_address", values[i])
+			} else if value.Valid {
+				v.OperatorAddress = value.String
 			}
 		case validator.FieldAddress:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -204,6 +212,9 @@ func (v *Validator) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("update_time=")
 	builder.WriteString(v.UpdateTime.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("operator_address=")
+	builder.WriteString(v.OperatorAddress)
 	builder.WriteString(", ")
 	builder.WriteString("address=")
 	builder.WriteString(v.Address)

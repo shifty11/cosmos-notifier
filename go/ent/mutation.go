@@ -7725,6 +7725,7 @@ type ValidatorMutation struct {
 	id                      *int
 	create_time             *time.Time
 	update_time             *time.Time
+	operator_address        *string
 	address                 *string
 	moniker                 *string
 	clearedFields           map[string]struct{}
@@ -7912,6 +7913,42 @@ func (m *ValidatorMutation) OldUpdateTime(ctx context.Context) (v time.Time, err
 // ResetUpdateTime resets all changes to the "update_time" field.
 func (m *ValidatorMutation) ResetUpdateTime() {
 	m.update_time = nil
+}
+
+// SetOperatorAddress sets the "operator_address" field.
+func (m *ValidatorMutation) SetOperatorAddress(s string) {
+	m.operator_address = &s
+}
+
+// OperatorAddress returns the value of the "operator_address" field in the mutation.
+func (m *ValidatorMutation) OperatorAddress() (r string, exists bool) {
+	v := m.operator_address
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOperatorAddress returns the old "operator_address" field's value of the Validator entity.
+// If the Validator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ValidatorMutation) OldOperatorAddress(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOperatorAddress is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOperatorAddress requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOperatorAddress: %w", err)
+	}
+	return oldValue.OperatorAddress, nil
+}
+
+// ResetOperatorAddress resets all changes to the "operator_address" field.
+func (m *ValidatorMutation) ResetOperatorAddress() {
+	m.operator_address = nil
 }
 
 // SetAddress sets the "address" field.
@@ -8221,12 +8258,15 @@ func (m *ValidatorMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ValidatorMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.create_time != nil {
 		fields = append(fields, validator.FieldCreateTime)
 	}
 	if m.update_time != nil {
 		fields = append(fields, validator.FieldUpdateTime)
+	}
+	if m.operator_address != nil {
+		fields = append(fields, validator.FieldOperatorAddress)
 	}
 	if m.address != nil {
 		fields = append(fields, validator.FieldAddress)
@@ -8246,6 +8286,8 @@ func (m *ValidatorMutation) Field(name string) (ent.Value, bool) {
 		return m.CreateTime()
 	case validator.FieldUpdateTime:
 		return m.UpdateTime()
+	case validator.FieldOperatorAddress:
+		return m.OperatorAddress()
 	case validator.FieldAddress:
 		return m.Address()
 	case validator.FieldMoniker:
@@ -8263,6 +8305,8 @@ func (m *ValidatorMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldCreateTime(ctx)
 	case validator.FieldUpdateTime:
 		return m.OldUpdateTime(ctx)
+	case validator.FieldOperatorAddress:
+		return m.OldOperatorAddress(ctx)
 	case validator.FieldAddress:
 		return m.OldAddress(ctx)
 	case validator.FieldMoniker:
@@ -8289,6 +8333,13 @@ func (m *ValidatorMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdateTime(v)
+		return nil
+	case validator.FieldOperatorAddress:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOperatorAddress(v)
 		return nil
 	case validator.FieldAddress:
 		v, ok := value.(string)
@@ -8358,6 +8409,9 @@ func (m *ValidatorMutation) ResetField(name string) error {
 		return nil
 	case validator.FieldUpdateTime:
 		m.ResetUpdateTime()
+		return nil
+	case validator.FieldOperatorAddress:
+		m.ResetOperatorAddress()
 		return nil
 	case validator.FieldAddress:
 		m.ResetAddress()

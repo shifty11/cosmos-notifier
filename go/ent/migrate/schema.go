@@ -218,6 +218,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
+		{Name: "operator_address", Type: field.TypeString, Unique: true},
 		{Name: "address", Type: field.TypeString, Unique: true},
 		{Name: "moniker", Type: field.TypeString},
 		{Name: "chain_validators", Type: field.TypeInt},
@@ -230,26 +231,36 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "validators_chains_validators",
-				Columns:    []*schema.Column{ValidatorsColumns[5]},
+				Columns:    []*schema.Column{ValidatorsColumns[6]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 		Indexes: []*schema.Index{
 			{
-				Name:    "validator_address",
+				Name:    "validator_operator_address",
 				Unique:  false,
 				Columns: []*schema.Column{ValidatorsColumns[3]},
 			},
 			{
-				Name:    "validator_moniker",
+				Name:    "validator_address",
 				Unique:  false,
 				Columns: []*schema.Column{ValidatorsColumns[4]},
 			},
 			{
+				Name:    "validator_moniker",
+				Unique:  false,
+				Columns: []*schema.Column{ValidatorsColumns[5]},
+			},
+			{
+				Name:    "validator_moniker_operator_address_chain_validators",
+				Unique:  true,
+				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[3], ValidatorsColumns[6]},
+			},
+			{
 				Name:    "validator_moniker_address_chain_validators",
 				Unique:  true,
-				Columns: []*schema.Column{ValidatorsColumns[4], ValidatorsColumns[3], ValidatorsColumns[5]},
+				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[4], ValidatorsColumns[6]},
 			},
 		},
 	}

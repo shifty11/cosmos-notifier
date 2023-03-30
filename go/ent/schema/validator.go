@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 	"entgo.io/ent/schema/mixin"
-	"errors"
+	"github.com/shifty11/cosmos-notifier/common"
 )
 
 // Validator holds the schema definition for the Validator entity.
@@ -23,22 +23,20 @@ func (Validator) Mixin() []ent.Mixin {
 // Fields of the Validator.
 func (Validator) Fields() []ent.Field {
 	return []ent.Field{
+		field.String("operator_address").
+			Immutable().
+			Unique().
+			Validate(func(s string) error {
+				return common.ValidateBech32Address(s)
+			}),
 		field.String("address").
 			Immutable().
 			Unique().
 			Validate(func(s string) error {
-				if s == "" {
-					return errors.New("address is empty")
-				}
-				return nil
+				return common.ValidateBech32Address(s)
 			}),
 		field.String("moniker").
-			Validate(func(s string) error {
-				if s == "" {
-					return errors.New("moniker is empty")
-				}
-				return nil
-			}),
+			NotEmpty(),
 	}
 }
 
@@ -57,8 +55,12 @@ func (Validator) Edges() []ent.Edge {
 
 func (Validator) Indexes() []ent.Index {
 	return []ent.Index{
+		index.Fields("operator_address"),
 		index.Fields("address"),
 		index.Fields("moniker"),
+		index.Fields("moniker", "operator_address").
+			Edges("chain").
+			Unique(),
 		index.Fields("moniker", "address").
 			Edges("chain").
 			Unique(),

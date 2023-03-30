@@ -65,6 +65,11 @@ func UpdateTime(v time.Time) predicate.Validator {
 	return predicate.Validator(sql.FieldEQ(FieldUpdateTime, v))
 }
 
+// OperatorAddress applies equality check predicate on the "operator_address" field. It's identical to OperatorAddressEQ.
+func OperatorAddress(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldEQ(FieldOperatorAddress, v))
+}
+
 // Address applies equality check predicate on the "address" field. It's identical to AddressEQ.
 func Address(v string) predicate.Validator {
 	return predicate.Validator(sql.FieldEQ(FieldAddress, v))
@@ -153,6 +158,71 @@ func UpdateTimeLT(v time.Time) predicate.Validator {
 // UpdateTimeLTE applies the LTE predicate on the "update_time" field.
 func UpdateTimeLTE(v time.Time) predicate.Validator {
 	return predicate.Validator(sql.FieldLTE(FieldUpdateTime, v))
+}
+
+// OperatorAddressEQ applies the EQ predicate on the "operator_address" field.
+func OperatorAddressEQ(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldEQ(FieldOperatorAddress, v))
+}
+
+// OperatorAddressNEQ applies the NEQ predicate on the "operator_address" field.
+func OperatorAddressNEQ(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldNEQ(FieldOperatorAddress, v))
+}
+
+// OperatorAddressIn applies the In predicate on the "operator_address" field.
+func OperatorAddressIn(vs ...string) predicate.Validator {
+	return predicate.Validator(sql.FieldIn(FieldOperatorAddress, vs...))
+}
+
+// OperatorAddressNotIn applies the NotIn predicate on the "operator_address" field.
+func OperatorAddressNotIn(vs ...string) predicate.Validator {
+	return predicate.Validator(sql.FieldNotIn(FieldOperatorAddress, vs...))
+}
+
+// OperatorAddressGT applies the GT predicate on the "operator_address" field.
+func OperatorAddressGT(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldGT(FieldOperatorAddress, v))
+}
+
+// OperatorAddressGTE applies the GTE predicate on the "operator_address" field.
+func OperatorAddressGTE(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldGTE(FieldOperatorAddress, v))
+}
+
+// OperatorAddressLT applies the LT predicate on the "operator_address" field.
+func OperatorAddressLT(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldLT(FieldOperatorAddress, v))
+}
+
+// OperatorAddressLTE applies the LTE predicate on the "operator_address" field.
+func OperatorAddressLTE(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldLTE(FieldOperatorAddress, v))
+}
+
+// OperatorAddressContains applies the Contains predicate on the "operator_address" field.
+func OperatorAddressContains(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldContains(FieldOperatorAddress, v))
+}
+
+// OperatorAddressHasPrefix applies the HasPrefix predicate on the "operator_address" field.
+func OperatorAddressHasPrefix(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldHasPrefix(FieldOperatorAddress, v))
+}
+
+// OperatorAddressHasSuffix applies the HasSuffix predicate on the "operator_address" field.
+func OperatorAddressHasSuffix(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldHasSuffix(FieldOperatorAddress, v))
+}
+
+// OperatorAddressEqualFold applies the EqualFold predicate on the "operator_address" field.
+func OperatorAddressEqualFold(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldEqualFold(FieldOperatorAddress, v))
+}
+
+// OperatorAddressContainsFold applies the ContainsFold predicate on the "operator_address" field.
+func OperatorAddressContainsFold(v string) predicate.Validator {
+	return predicate.Validator(sql.FieldContainsFold(FieldOperatorAddress, v))
 }
 
 // AddressEQ applies the EQ predicate on the "address" field.

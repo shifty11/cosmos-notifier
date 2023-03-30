@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"golang.org/x/exp/slices"
 	"testing"
 )
 
@@ -16,12 +17,12 @@ func newTestValidatorManager(t *testing.T) *ValidatorManager {
 	return manager
 }
 
-func createValidBech32Address(chainEnt *ent.Chain, address string) string {
+func createValidBech32Address(bech32Prefix string, address string) string {
 	_, valAddr, err := bech32.DecodeAndConvert(address)
 	if err != nil {
 		panic(err)
 	}
-	accAddr, err := cosmossdk.Bech32ifyAddressBytes(chainEnt.Bech32Prefix, valAddr)
+	accAddr, err := cosmossdk.Bech32ifyAddressBytes(bech32Prefix, valAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -33,7 +34,7 @@ func addValidators(m *ValidatorManager, chains []*ent.Chain) []*ent.Validator {
 	for _, chainEnt := range chains {
 		val, err := m.AddValidator(
 			chainEnt,
-			createValidBech32Address(chainEnt, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"),
+			createValidBech32Address(chainEnt.Bech32Prefix+"valoper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"),
 			fmt.Sprintf("validator %s", chainEnt.Name),
 		)
 		if err != nil {
@@ -52,17 +53,20 @@ func TestValidatorManager_AddValidator(t *testing.T) {
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", "")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "")
 	if err == nil {
 		t.Error("expected error")
 	}
 
-	val, err := m.AddValidator(chains[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", "validator 1")
+	val, err := m.AddValidator(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "validator 1")
 	if err != nil {
 		t.Error(err)
 	}
-	if val.Address != "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02" {
-		t.Error("expected address to be cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	if val.OperatorAddress != "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf" {
+		t.Error("expected address to be cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf")
+	}
+	if val.Address != "cosmos156gqf9837u7d4c4678yt3rl4ls9c5vuuxyhkw6" {
+		t.Error("expected address to be cosmos156gqf9837u7d4c4678yt3rl4ls9c5vuuxyhkw6")
 	}
 	if val.Moniker != "validator 1" {
 		t.Error("expected moniker to be validator 1")
@@ -71,22 +75,26 @@ func TestValidatorManager_AddValidator(t *testing.T) {
 		t.Error("expected chain id to be 1")
 	}
 
-	// check unique constraints
-	_, err = m.AddValidator(chains[0], "cosmos156gqf9837u7d4c4678yt3rl4ls9c5vuuxyhkw6", "new val")
+	// check constraints and validation
+	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val")
 	if err != nil {
 		t.Error("did not expect error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmos156gqf9837u7d4c4678yt3rl4ls9c5vuuxyhkw6", "new val")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val")
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmos156gqf9837u7d4c4678yt3rl4ls9c5vuuxyhkw6", "other moniker")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "other moniker")
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "other address", "new val")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0", "new val")
 	if err != nil {
 		t.Error("did not expect error")
+	}
+	_, err = m.AddValidator(chains[0], "invalid address", "new val")
+	if err == nil {
+		t.Error("expected error")
 	}
 }
 
@@ -141,19 +149,30 @@ func TestValidatorManager_GetActive(t *testing.T) {
 func TestValidatorManager_GetByMoniker(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
-	for _, chainEnt := range chains {
-		_, err := m.AddValidator(chainEnt, fmt.Sprintf("test-address-%v", chainEnt.Name), "validator")
+	vals := addValidators(m, chains)
+	for _, v := range vals[:2] {
+		_, err := m.client.Validator.
+			UpdateOne(v).
+			SetMoniker("validator").
+			Save(m.ctx)
 		if err != nil {
-			panic(err)
+			t.Error(err)
 		}
 	}
 
 	byMoniker := m.GetByMoniker("validator")
-	if len(byMoniker) != len(chains) {
-		t.Errorf("expected %d validators", len(chains))
+	if len(byMoniker) != 2 {
+		t.Error("expected 2 validators")
 	}
-	if byMoniker[0].Edges.Chain.ID != chains[0].ID {
-		t.Error("expected chain id to be 1")
+	for _, v := range byMoniker {
+		if v.Moniker != "validator" {
+			t.Error("expected moniker to be validator")
+		}
+		if !slices.ContainsFunc(chains[:2], func(c *ent.Chain) bool {
+			return c.ID == v.Edges.Chain.ID
+		}) {
+			t.Error("expected validator to be from one of the chains")
+		}
 	}
 }
 

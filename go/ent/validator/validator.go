@@ -15,6 +15,8 @@ const (
 	FieldCreateTime = "create_time"
 	// FieldUpdateTime holds the string denoting the update_time field in the database.
 	FieldUpdateTime = "update_time"
+	// FieldOperatorAddress holds the string denoting the operator_address field in the database.
+	FieldOperatorAddress = "operator_address"
 	// FieldAddress holds the string denoting the address field in the database.
 	FieldAddress = "address"
 	// FieldMoniker holds the string denoting the moniker field in the database.
@@ -60,6 +62,7 @@ var Columns = []string{
 	FieldID,
 	FieldCreateTime,
 	FieldUpdateTime,
+	FieldOperatorAddress,
 	FieldAddress,
 	FieldMoniker,
 }
@@ -101,6 +104,8 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
+	// OperatorAddressValidator is a validator for the "operator_address" field. It is called by the builders before save.
+	OperatorAddressValidator func(string) error
 	// AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	AddressValidator func(string) error
 	// MonikerValidator is a validator for the "moniker" field. It is called by the builders before save.
