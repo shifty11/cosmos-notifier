@@ -1,13 +1,14 @@
+import 'package:collection/collection.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/duration.pb.dart' as pb;
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/tracker_service.pb.dart';
 import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/message_provider.dart';
 import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
+import 'package:cosmos_notifier/f_tracking/services/state/validator_bundle.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:collection/collection.dart';
 
 final trackerFutureProvider = FutureProvider<GetTrackersResponse>((ref) async {
   return await ref.read(trackerNotifierProvider.notifier).getTrackers();
@@ -46,6 +47,39 @@ final trackerSortProvider = StateProvider<TrackerSortState>((ref) {
   return const TrackerSortState(isAscending: true, sortType: TrackerSortType.address);
 });
 
+final validatorBundleProvider = StateNotifierProvider<ValidatorBundleNotifier, List<FreezedValidatorBundle>>((ref) {
+  return ValidatorBundleNotifier(ref);
+});
+
+class ValidatorBundleNotifier extends StateNotifier<List<FreezedValidatorBundle>> {
+  StateNotifierProviderRef<ValidatorBundleNotifier, List<FreezedValidatorBundle>> ref;
+
+  ValidatorBundleNotifier(this.ref) : super([]) {
+    state = ref.watch(trackerFutureProvider).when(
+          data: (data) {
+            return data.validatorBundles.map((e) => FreezedValidatorBundle.fromProtobuf(e)).toList()..sort();
+          },
+          loading: () => [],
+          error: (_, __) => [],
+        );
+  }
+
+  void selectValidatorBundles(List<FreezedValidatorBundle> added, List<FreezedValidatorBundle> deleted) {
+    final monikerAdded = added.map((e) => e.moniker);
+    final monikerDeleted = deleted.map((e) => e.moniker);
+    state = state.map((bundle) {
+      if (monikerAdded.contains(bundle.moniker)) {
+        return bundle.copyWith(isTracked: true);
+      }
+      if (monikerDeleted.contains(bundle.moniker)) {
+        return bundle.copyWith(isTracked: false);
+      }
+      return bundle;
+    }).toList()
+      ..sort();
+  }
+}
+
 class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   TrackerService trackerService;
   MessageNotifier messageNotifier;
@@ -54,24 +88,27 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   TrackerNotifier(this.trackerService, this.messageNotifier, this.ref) : super([]);
 
   _sortByAddress(bool isAscending) {
-    state.sort((a, b) => a.address.compareTo(b.address));
+    var sorted = state.where((t) => t.isSaved).sorted((a, b) => a.address.compareTo(b.address));
     if (!isAscending) {
-      state = state.reversed.toList();
+      sorted = sorted.reversed.toList();
     }
+    state = [...sorted, ...state.where((t) => !t.isSaved)];
   }
 
   _sortByNotificationInterval(bool isAscending) {
-    state.sort((a, b) => a.notificationInterval.seconds.compareTo(b.notificationInterval.seconds));
+    var sorted = state.where((t) => t.isSaved).sorted((a, b) => a.notificationInterval.seconds.compareTo(b.notificationInterval.seconds));
     if (!isAscending) {
-      state = state.reversed.toList();
+      sorted = sorted.reversed.toList();
     }
+    state = [...sorted, ...state.where((t) => !t.isSaved)];
   }
 
   _sortByChatRoom(bool isAscending) {
-    state.sort((a, b) => a.chatRoom!.name.compareTo(b.chatRoom!.name));
+    var sorted = state.where((t) => t.isSaved).sorted((a, b) => a.chatRoom!.name.compareTo(b.chatRoom!.name));
     if (!isAscending) {
-      state = state.reversed.toList();
+      sorted = sorted.reversed.toList();
     }
+    state = [...sorted, ...state.where((t) => !t.isSaved)];
   }
 
   sort() {
@@ -91,10 +128,8 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     }
   }
 
-  TrackerRow? _getLastModifiedTrackerRow() {
-    final sortedTrackers = state
-        .where((trackerRow) => trackerRow.isSaved)
-        .toList()
+  TrackerRow? getLastModifiedTrackerRow() {
+    final sortedTrackers = state.where((trackerRow) => trackerRow.isSaved).toList()
       ..sort((a, b) => b.updatedAt?.compareTo(a.updatedAt ?? DateTime.fromMicrosecondsSinceEpoch(0)) ?? -1);
     if (sortedTrackers.isEmpty) {
       return null;
@@ -104,16 +139,16 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
 
   /// Returns the default notification interval for a new tracker.
   /// Uses the latest modified tracker's notification interval or 1 day if there are no trackers.
-  pb.Duration _getDefaultNotificationInterval() {
-    final lastModifiedTracker = _getLastModifiedTrackerRow();
+  pb.Duration getDefaultNotificationInterval() {
+    final lastModifiedTracker = getLastModifiedTrackerRow();
     if (lastModifiedTracker == null || lastModifiedTracker.updatedAt == null) {
       return pb.Duration(seconds: Int64(60 * 60 * 24)); // 1 day by default
     }
     return lastModifiedTracker.notificationInterval;
   }
 
-  TrackerChatRoom? _getDefaultChatRoom() {
-    final lastModifiedTracker = _getLastModifiedTrackerRow();
+  TrackerChatRoom? getDefaultChatRoom() {
+    final lastModifiedTracker = getLastModifiedTrackerRow();
     if (lastModifiedTracker != null && lastModifiedTracker.chatRoom != null) {
       return lastModifiedTracker.chatRoom;
     }
@@ -147,8 +182,8 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
       TrackerRow(
         id: Int64(0),
         address: "",
-        notificationInterval: _getDefaultNotificationInterval(),
-        chatRoom: _getDefaultChatRoom(),
+        notificationInterval: getDefaultNotificationInterval(),
+        chatRoom: getDefaultChatRoom(),
         updatedAt: null,
       ),
     ];
@@ -213,13 +248,15 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
   }
 
   List<TrackerRow> _updateTrackerRowByResponse(TrackerRow tracker, Tracker response, {bool? isNewTracker}) {
-    return _updateTrackerRow(tracker.copyWith(
-      id: response.id,
-      address: response.address,
-      notificationInterval: response.notificationInterval,
-      chatRoom: response.chatRoom,
-      updatedAt: response.updatedAt.toDateTime(),
-    ), isNewTracker: isNewTracker);
+    return _updateTrackerRow(
+        tracker.copyWith(
+          id: response.id,
+          address: response.address,
+          notificationInterval: response.notificationInterval,
+          chatRoom: response.chatRoom,
+          updatedAt: response.updatedAt.toDateTime(),
+        ),
+        isNewTracker: isNewTracker);
   }
 
   Future<void> deleteTracker(TrackerRow tracker) async {
@@ -231,6 +268,36 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
       await trackerService.deleteTracker(DeleteTrackerRequest(trackerId: tracker.id));
       state = state.where((element) => element.id != tracker.id).toList();
       messageNotifier.sendMsg(info: "Reminder deleted");
+    } catch (e) {
+      messageNotifier.sendMsg(error: e.toString());
+    }
+  }
+
+  trackValidators(
+    List<FreezedValidatorBundle> toBeTracked,
+    List<FreezedValidatorBundle> toBeAdded,
+    List<FreezedValidatorBundle> toBeDeleted,
+    TrackerChatRoom? chatRoom,
+    Duration? notificationInterval,
+  ) async {
+    try {
+      final monikers = toBeTracked.map((e) => e.moniker).toList();
+      final response = await trackerService.trackValidators(TrackValidatorsRequest(
+        monikers: monikers,
+        notificationInterval: notificationInterval != null ? pb.Duration(seconds: Int64(notificationInterval.inSeconds)) : null,
+        chatRoom: chatRoom,
+      ));
+      state = [
+        ...state.whereNot((trackerRow) => response.deletedTrackerIds.contains(trackerRow.id)),
+        ...response.addedTrackers.map((tracker) => TrackerRow(
+              id: tracker.id,
+              address: tracker.address,
+              notificationInterval: tracker.notificationInterval,
+              chatRoom: tracker.chatRoom,
+              updatedAt: tracker.updatedAt.toDateTime(),
+            ))
+      ];
+      ref.read(validatorBundleProvider.notifier).selectValidatorBundles(toBeAdded, toBeDeleted);
     } catch (e) {
       messageNotifier.sendMsg(error: e.toString());
     }

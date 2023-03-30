@@ -11,41 +11,41 @@ import 'dart:core' as $core;
 
 import 'package:grpc/service_api.dart' as $grpc;
 import 'google/protobuf/empty.pb.dart' as $1;
-import 'subscription_service.pb.dart' as $3;
+import 'subscription_service.pb.dart' as $4;
 export 'subscription_service.pb.dart';
 
 class SubscriptionServiceClient extends $grpc.Client {
   static final _$getSubscriptions =
-      $grpc.ClientMethod<$1.Empty, $3.GetSubscriptionsResponse>(
+      $grpc.ClientMethod<$1.Empty, $4.GetSubscriptionsResponse>(
           '/cosmos_notifier_grpc.SubscriptionService/GetSubscriptions',
           ($1.Empty value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
-              $3.GetSubscriptionsResponse.fromBuffer(value));
+              $4.GetSubscriptionsResponse.fromBuffer(value));
   static final _$toggleChainSubscription = $grpc.ClientMethod<
-          $3.ToggleChainSubscriptionRequest, $3.ToggleSubscriptionResponse>(
+          $4.ToggleChainSubscriptionRequest, $4.ToggleSubscriptionResponse>(
       '/cosmos_notifier_grpc.SubscriptionService/ToggleChainSubscription',
-      ($3.ToggleChainSubscriptionRequest value) => value.writeToBuffer(),
+      ($4.ToggleChainSubscriptionRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
-          $3.ToggleSubscriptionResponse.fromBuffer(value));
+          $4.ToggleSubscriptionResponse.fromBuffer(value));
   static final _$toggleContractSubscription = $grpc.ClientMethod<
-          $3.ToggleContractSubscriptionRequest, $3.ToggleSubscriptionResponse>(
+          $4.ToggleContractSubscriptionRequest, $4.ToggleSubscriptionResponse>(
       '/cosmos_notifier_grpc.SubscriptionService/ToggleContractSubscription',
-      ($3.ToggleContractSubscriptionRequest value) => value.writeToBuffer(),
+      ($4.ToggleContractSubscriptionRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) =>
-          $3.ToggleSubscriptionResponse.fromBuffer(value));
+          $4.ToggleSubscriptionResponse.fromBuffer(value));
   static final _$addDao =
-      $grpc.ClientMethod<$3.AddDaoRequest, $3.AddDaoResponse>(
+      $grpc.ClientMethod<$4.AddDaoRequest, $4.AddDaoResponse>(
           '/cosmos_notifier_grpc.SubscriptionService/AddDao',
-          ($3.AddDaoRequest value) => value.writeToBuffer(),
-          ($core.List<$core.int> value) => $3.AddDaoResponse.fromBuffer(value));
-  static final _$deleteDao = $grpc.ClientMethod<$3.DeleteDaoRequest, $1.Empty>(
+          ($4.AddDaoRequest value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $4.AddDaoResponse.fromBuffer(value));
+  static final _$deleteDao = $grpc.ClientMethod<$4.DeleteDaoRequest, $1.Empty>(
       '/cosmos_notifier_grpc.SubscriptionService/DeleteDao',
-      ($3.DeleteDaoRequest value) => value.writeToBuffer(),
+      ($4.DeleteDaoRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $1.Empty.fromBuffer(value));
   static final _$enableChain =
-      $grpc.ClientMethod<$3.EnableChainRequest, $1.Empty>(
+      $grpc.ClientMethod<$4.EnableChainRequest, $1.Empty>(
           '/cosmos_notifier_grpc.SubscriptionService/EnableChain',
-          ($3.EnableChainRequest value) => value.writeToBuffer(),
+          ($4.EnableChainRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $1.Empty.fromBuffer(value));
 
   SubscriptionServiceClient($grpc.ClientChannel channel,
@@ -53,38 +53,38 @@ class SubscriptionServiceClient extends $grpc.Client {
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
 
-  $grpc.ResponseFuture<$3.GetSubscriptionsResponse> getSubscriptions(
+  $grpc.ResponseFuture<$4.GetSubscriptionsResponse> getSubscriptions(
       $1.Empty request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getSubscriptions, request, options: options);
   }
 
-  $grpc.ResponseFuture<$3.ToggleSubscriptionResponse> toggleChainSubscription(
-      $3.ToggleChainSubscriptionRequest request,
+  $grpc.ResponseFuture<$4.ToggleSubscriptionResponse> toggleChainSubscription(
+      $4.ToggleChainSubscriptionRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$toggleChainSubscription, request,
         options: options);
   }
 
-  $grpc.ResponseFuture<$3.ToggleSubscriptionResponse>
-      toggleContractSubscription($3.ToggleContractSubscriptionRequest request,
+  $grpc.ResponseFuture<$4.ToggleSubscriptionResponse>
+      toggleContractSubscription($4.ToggleContractSubscriptionRequest request,
           {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$toggleContractSubscription, request,
         options: options);
   }
 
-  $grpc.ResponseStream<$3.AddDaoResponse> addDao($3.AddDaoRequest request,
+  $grpc.ResponseStream<$4.AddDaoResponse> addDao($4.AddDaoRequest request,
       {$grpc.CallOptions? options}) {
     return $createStreamingCall(_$addDao, $async.Stream.fromIterable([request]),
         options: options);
   }
 
-  $grpc.ResponseFuture<$1.Empty> deleteDao($3.DeleteDaoRequest request,
+  $grpc.ResponseFuture<$1.Empty> deleteDao($4.DeleteDaoRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$deleteDao, request, options: options);
   }
 
-  $grpc.ResponseFuture<$1.Empty> enableChain($3.EnableChainRequest request,
+  $grpc.ResponseFuture<$1.Empty> enableChain($4.EnableChainRequest request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$enableChain, request, options: options);
   }
@@ -94,97 +94,97 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
   $core.String get $name => 'cosmos_notifier_grpc.SubscriptionService';
 
   SubscriptionServiceBase() {
-    $addMethod($grpc.ServiceMethod<$1.Empty, $3.GetSubscriptionsResponse>(
+    $addMethod($grpc.ServiceMethod<$1.Empty, $4.GetSubscriptionsResponse>(
         'GetSubscriptions',
         getSubscriptions_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
-        ($3.GetSubscriptionsResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$3.ToggleChainSubscriptionRequest,
-            $3.ToggleSubscriptionResponse>(
+        ($4.GetSubscriptionsResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$4.ToggleChainSubscriptionRequest,
+            $4.ToggleSubscriptionResponse>(
         'ToggleChainSubscription',
         toggleChainSubscription_Pre,
         false,
         false,
         ($core.List<$core.int> value) =>
-            $3.ToggleChainSubscriptionRequest.fromBuffer(value),
-        ($3.ToggleSubscriptionResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$3.ToggleContractSubscriptionRequest,
-            $3.ToggleSubscriptionResponse>(
+            $4.ToggleChainSubscriptionRequest.fromBuffer(value),
+        ($4.ToggleSubscriptionResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$4.ToggleContractSubscriptionRequest,
+            $4.ToggleSubscriptionResponse>(
         'ToggleContractSubscription',
         toggleContractSubscription_Pre,
         false,
         false,
         ($core.List<$core.int> value) =>
-            $3.ToggleContractSubscriptionRequest.fromBuffer(value),
-        ($3.ToggleSubscriptionResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$3.AddDaoRequest, $3.AddDaoResponse>(
+            $4.ToggleContractSubscriptionRequest.fromBuffer(value),
+        ($4.ToggleSubscriptionResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$4.AddDaoRequest, $4.AddDaoResponse>(
         'AddDao',
         addDao_Pre,
         false,
         true,
-        ($core.List<$core.int> value) => $3.AddDaoRequest.fromBuffer(value),
-        ($3.AddDaoResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$3.DeleteDaoRequest, $1.Empty>(
+        ($core.List<$core.int> value) => $4.AddDaoRequest.fromBuffer(value),
+        ($4.AddDaoResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$4.DeleteDaoRequest, $1.Empty>(
         'DeleteDao',
         deleteDao_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $3.DeleteDaoRequest.fromBuffer(value),
+        ($core.List<$core.int> value) => $4.DeleteDaoRequest.fromBuffer(value),
         ($1.Empty value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$3.EnableChainRequest, $1.Empty>(
+    $addMethod($grpc.ServiceMethod<$4.EnableChainRequest, $1.Empty>(
         'EnableChain',
         enableChain_Pre,
         false,
         false,
         ($core.List<$core.int> value) =>
-            $3.EnableChainRequest.fromBuffer(value),
+            $4.EnableChainRequest.fromBuffer(value),
         ($1.Empty value) => value.writeToBuffer()));
   }
 
-  $async.Future<$3.GetSubscriptionsResponse> getSubscriptions_Pre(
+  $async.Future<$4.GetSubscriptionsResponse> getSubscriptions_Pre(
       $grpc.ServiceCall call, $async.Future<$1.Empty> request) async {
     return getSubscriptions(call, await request);
   }
 
-  $async.Future<$3.ToggleSubscriptionResponse> toggleChainSubscription_Pre(
+  $async.Future<$4.ToggleSubscriptionResponse> toggleChainSubscription_Pre(
       $grpc.ServiceCall call,
-      $async.Future<$3.ToggleChainSubscriptionRequest> request) async {
+      $async.Future<$4.ToggleChainSubscriptionRequest> request) async {
     return toggleChainSubscription(call, await request);
   }
 
-  $async.Future<$3.ToggleSubscriptionResponse> toggleContractSubscription_Pre(
+  $async.Future<$4.ToggleSubscriptionResponse> toggleContractSubscription_Pre(
       $grpc.ServiceCall call,
-      $async.Future<$3.ToggleContractSubscriptionRequest> request) async {
+      $async.Future<$4.ToggleContractSubscriptionRequest> request) async {
     return toggleContractSubscription(call, await request);
   }
 
-  $async.Stream<$3.AddDaoResponse> addDao_Pre(
-      $grpc.ServiceCall call, $async.Future<$3.AddDaoRequest> request) async* {
+  $async.Stream<$4.AddDaoResponse> addDao_Pre(
+      $grpc.ServiceCall call, $async.Future<$4.AddDaoRequest> request) async* {
     yield* addDao(call, await request);
   }
 
   $async.Future<$1.Empty> deleteDao_Pre($grpc.ServiceCall call,
-      $async.Future<$3.DeleteDaoRequest> request) async {
+      $async.Future<$4.DeleteDaoRequest> request) async {
     return deleteDao(call, await request);
   }
 
   $async.Future<$1.Empty> enableChain_Pre($grpc.ServiceCall call,
-      $async.Future<$3.EnableChainRequest> request) async {
+      $async.Future<$4.EnableChainRequest> request) async {
     return enableChain(call, await request);
   }
 
-  $async.Future<$3.GetSubscriptionsResponse> getSubscriptions(
+  $async.Future<$4.GetSubscriptionsResponse> getSubscriptions(
       $grpc.ServiceCall call, $1.Empty request);
-  $async.Future<$3.ToggleSubscriptionResponse> toggleChainSubscription(
-      $grpc.ServiceCall call, $3.ToggleChainSubscriptionRequest request);
-  $async.Future<$3.ToggleSubscriptionResponse> toggleContractSubscription(
-      $grpc.ServiceCall call, $3.ToggleContractSubscriptionRequest request);
-  $async.Stream<$3.AddDaoResponse> addDao(
-      $grpc.ServiceCall call, $3.AddDaoRequest request);
+  $async.Future<$4.ToggleSubscriptionResponse> toggleChainSubscription(
+      $grpc.ServiceCall call, $4.ToggleChainSubscriptionRequest request);
+  $async.Future<$4.ToggleSubscriptionResponse> toggleContractSubscription(
+      $grpc.ServiceCall call, $4.ToggleContractSubscriptionRequest request);
+  $async.Stream<$4.AddDaoResponse> addDao(
+      $grpc.ServiceCall call, $4.AddDaoRequest request);
   $async.Future<$1.Empty> deleteDao(
-      $grpc.ServiceCall call, $3.DeleteDaoRequest request);
+      $grpc.ServiceCall call, $4.DeleteDaoRequest request);
   $async.Future<$1.Empty> enableChain(
-      $grpc.ServiceCall call, $3.EnableChainRequest request);
+      $grpc.ServiceCall call, $4.EnableChainRequest request);
 }

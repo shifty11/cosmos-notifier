@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class HoverContainer extends StatefulWidget {
   final Widget child;
 
-  HoverContainer({required this.child});
+  const HoverContainer({required this.child, super.key});
 
   @override
   _HoverContainerState createState() => _HoverContainerState();
