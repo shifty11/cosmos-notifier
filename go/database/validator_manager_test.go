@@ -9,6 +9,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"golang.org/x/exp/slices"
 	"testing"
+	"time"
 )
 
 func newTestValidatorManager(t *testing.T) *ValidatorManager {
@@ -142,14 +143,28 @@ func TestValidatorManager_DeleteValidator(t *testing.T) {
 func TestValidatorManager_GetActive(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
-	addValidators(m, chains)
+	vals := addValidators(m, chains)
 
-	vals := m.GetActive()
-	if len(vals) != len(chains) {
+	active := m.GetActive()
+	if len(active) != len(chains) {
 		t.Error("expected all validators to be active")
 	}
-	if vals[0].Edges.Chain.ID != chains[0].ID {
+	if active[0].Edges.Chain.ID != chains[0].ID {
 		t.Error("expected chain id to be 1")
+	}
+
+	firstInactiveTime := time.Now().Add(-timeUntilConsideredInactive - time.Hour)
+	vals[0].Update().SetFirstInactiveTime(firstInactiveTime).SaveX(m.ctx)
+	active = m.GetActive()
+	if len(active) != len(chains)-1 {
+		t.Error("expected one validator to be inactive")
+	}
+
+	firstInactiveTime = time.Now().Add(-timeUntilConsideredInactive + time.Hour)
+	vals[0].Update().SetFirstInactiveTime(firstInactiveTime).SaveX(m.ctx)
+	active = m.GetActive()
+	if len(active) != len(chains) {
+		t.Error("expected all validators to be active")
 	}
 }
 

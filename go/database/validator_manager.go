@@ -15,6 +15,8 @@ import (
 	"time"
 )
 
+const timeUntilConsideredInactive = 24 * time.Hour // TODO: set this to 1 month or so
+
 type ValidatorManager struct {
 	client                *ent.Client
 	ctx                   context.Context
@@ -71,6 +73,7 @@ func (manager *ValidatorManager) UpdateValidator(validatorEnt *ent.Validator, mo
 	return validatorEnt.
 		Update().
 		SetMoniker(moniker).
+		ClearFirstInactiveTime(). // Clear field and set it on the next line if isActive is false
 		SetNillableFirstInactiveTime(manager.getNillableFirstInactiveTime(isActive)).
 		Exec(manager.ctx)
 }
@@ -82,9 +85,12 @@ func (manager *ValidatorManager) DeleteValidator(validatorEnt *ent.Validator) er
 }
 
 func (manager *ValidatorManager) GetActive() []*ent.Validator {
-	// TODO: filter active
 	return manager.client.Validator.
 		Query().
+		Where(validator.Or(
+			validator.FirstInactiveTimeIsNil(),
+			validator.FirstInactiveTimeGT(time.Now().Add(-timeUntilConsideredInactive)),
+		)).
 		WithChain().
 		AllX(manager.ctx)
 }
