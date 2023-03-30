@@ -4928,6 +4928,9 @@ type DiscordChannelMutation struct {
 	address_trackers        map[int]struct{}
 	removedaddress_trackers map[int]struct{}
 	clearedaddress_trackers bool
+	validators              map[int]struct{}
+	removedvalidators       map[int]struct{}
+	clearedvalidators       bool
 	done                    bool
 	oldValue                func(context.Context) (*DiscordChannel, error)
 	predicates              []predicate.DiscordChannel
@@ -5447,6 +5450,60 @@ func (m *DiscordChannelMutation) ResetAddressTrackers() {
 	m.removedaddress_trackers = nil
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by ids.
+func (m *DiscordChannelMutation) AddValidatorIDs(ids ...int) {
+	if m.validators == nil {
+		m.validators = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.validators[ids[i]] = struct{}{}
+	}
+}
+
+// ClearValidators clears the "validators" edge to the Validator entity.
+func (m *DiscordChannelMutation) ClearValidators() {
+	m.clearedvalidators = true
+}
+
+// ValidatorsCleared reports if the "validators" edge to the Validator entity was cleared.
+func (m *DiscordChannelMutation) ValidatorsCleared() bool {
+	return m.clearedvalidators
+}
+
+// RemoveValidatorIDs removes the "validators" edge to the Validator entity by IDs.
+func (m *DiscordChannelMutation) RemoveValidatorIDs(ids ...int) {
+	if m.removedvalidators == nil {
+		m.removedvalidators = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.validators, ids[i])
+		m.removedvalidators[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedValidators returns the removed IDs of the "validators" edge to the Validator entity.
+func (m *DiscordChannelMutation) RemovedValidatorsIDs() (ids []int) {
+	for id := range m.removedvalidators {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ValidatorsIDs returns the "validators" edge IDs in the mutation.
+func (m *DiscordChannelMutation) ValidatorsIDs() (ids []int) {
+	for id := range m.validators {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetValidators resets all changes to the "validators" edge.
+func (m *DiscordChannelMutation) ResetValidators() {
+	m.validators = nil
+	m.clearedvalidators = false
+	m.removedvalidators = nil
+}
+
 // Where appends a list predicates to the DiscordChannelMutation builder.
 func (m *DiscordChannelMutation) Where(ps ...predicate.DiscordChannel) {
 	m.predicates = append(m.predicates, ps...)
@@ -5663,7 +5720,7 @@ func (m *DiscordChannelMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *DiscordChannelMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.users != nil {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
@@ -5675,6 +5732,9 @@ func (m *DiscordChannelMutation) AddedEdges() []string {
 	}
 	if m.address_trackers != nil {
 		edges = append(edges, discordchannel.EdgeAddressTrackers)
+	}
+	if m.validators != nil {
+		edges = append(edges, discordchannel.EdgeValidators)
 	}
 	return edges
 }
@@ -5707,13 +5767,19 @@ func (m *DiscordChannelMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case discordchannel.EdgeValidators:
+		ids := make([]ent.Value, 0, len(m.validators))
+		for id := range m.validators {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *DiscordChannelMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedusers != nil {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
@@ -5725,6 +5791,9 @@ func (m *DiscordChannelMutation) RemovedEdges() []string {
 	}
 	if m.removedaddress_trackers != nil {
 		edges = append(edges, discordchannel.EdgeAddressTrackers)
+	}
+	if m.removedvalidators != nil {
+		edges = append(edges, discordchannel.EdgeValidators)
 	}
 	return edges
 }
@@ -5757,13 +5826,19 @@ func (m *DiscordChannelMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case discordchannel.EdgeValidators:
+		ids := make([]ent.Value, 0, len(m.removedvalidators))
+		for id := range m.removedvalidators {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *DiscordChannelMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedusers {
 		edges = append(edges, discordchannel.EdgeUsers)
 	}
@@ -5775,6 +5850,9 @@ func (m *DiscordChannelMutation) ClearedEdges() []string {
 	}
 	if m.clearedaddress_trackers {
 		edges = append(edges, discordchannel.EdgeAddressTrackers)
+	}
+	if m.clearedvalidators {
+		edges = append(edges, discordchannel.EdgeValidators)
 	}
 	return edges
 }
@@ -5791,6 +5869,8 @@ func (m *DiscordChannelMutation) EdgeCleared(name string) bool {
 		return m.clearedchains
 	case discordchannel.EdgeAddressTrackers:
 		return m.clearedaddress_trackers
+	case discordchannel.EdgeValidators:
+		return m.clearedvalidators
 	}
 	return false
 }
@@ -5818,6 +5898,9 @@ func (m *DiscordChannelMutation) ResetEdge(name string) error {
 		return nil
 	case discordchannel.EdgeAddressTrackers:
 		m.ResetAddressTrackers()
+		return nil
+	case discordchannel.EdgeValidators:
+		m.ResetValidators()
 		return nil
 	}
 	return fmt.Errorf("unknown DiscordChannel edge %s", name)
@@ -5848,6 +5931,9 @@ type TelegramChatMutation struct {
 	address_trackers        map[int]struct{}
 	removedaddress_trackers map[int]struct{}
 	clearedaddress_trackers bool
+	validators              map[int]struct{}
+	removedvalidators       map[int]struct{}
+	clearedvalidators       bool
 	done                    bool
 	oldValue                func(context.Context) (*TelegramChat, error)
 	predicates              []predicate.TelegramChat
@@ -6367,6 +6453,60 @@ func (m *TelegramChatMutation) ResetAddressTrackers() {
 	m.removedaddress_trackers = nil
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by ids.
+func (m *TelegramChatMutation) AddValidatorIDs(ids ...int) {
+	if m.validators == nil {
+		m.validators = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.validators[ids[i]] = struct{}{}
+	}
+}
+
+// ClearValidators clears the "validators" edge to the Validator entity.
+func (m *TelegramChatMutation) ClearValidators() {
+	m.clearedvalidators = true
+}
+
+// ValidatorsCleared reports if the "validators" edge to the Validator entity was cleared.
+func (m *TelegramChatMutation) ValidatorsCleared() bool {
+	return m.clearedvalidators
+}
+
+// RemoveValidatorIDs removes the "validators" edge to the Validator entity by IDs.
+func (m *TelegramChatMutation) RemoveValidatorIDs(ids ...int) {
+	if m.removedvalidators == nil {
+		m.removedvalidators = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.validators, ids[i])
+		m.removedvalidators[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedValidators returns the removed IDs of the "validators" edge to the Validator entity.
+func (m *TelegramChatMutation) RemovedValidatorsIDs() (ids []int) {
+	for id := range m.removedvalidators {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ValidatorsIDs returns the "validators" edge IDs in the mutation.
+func (m *TelegramChatMutation) ValidatorsIDs() (ids []int) {
+	for id := range m.validators {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetValidators resets all changes to the "validators" edge.
+func (m *TelegramChatMutation) ResetValidators() {
+	m.validators = nil
+	m.clearedvalidators = false
+	m.removedvalidators = nil
+}
+
 // Where appends a list predicates to the TelegramChatMutation builder.
 func (m *TelegramChatMutation) Where(ps ...predicate.TelegramChat) {
 	m.predicates = append(m.predicates, ps...)
@@ -6583,7 +6723,7 @@ func (m *TelegramChatMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TelegramChatMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.users != nil {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
@@ -6595,6 +6735,9 @@ func (m *TelegramChatMutation) AddedEdges() []string {
 	}
 	if m.address_trackers != nil {
 		edges = append(edges, telegramchat.EdgeAddressTrackers)
+	}
+	if m.validators != nil {
+		edges = append(edges, telegramchat.EdgeValidators)
 	}
 	return edges
 }
@@ -6627,13 +6770,19 @@ func (m *TelegramChatMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case telegramchat.EdgeValidators:
+		ids := make([]ent.Value, 0, len(m.validators))
+		for id := range m.validators {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TelegramChatMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedusers != nil {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
@@ -6645,6 +6794,9 @@ func (m *TelegramChatMutation) RemovedEdges() []string {
 	}
 	if m.removedaddress_trackers != nil {
 		edges = append(edges, telegramchat.EdgeAddressTrackers)
+	}
+	if m.removedvalidators != nil {
+		edges = append(edges, telegramchat.EdgeValidators)
 	}
 	return edges
 }
@@ -6677,13 +6829,19 @@ func (m *TelegramChatMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case telegramchat.EdgeValidators:
+		ids := make([]ent.Value, 0, len(m.removedvalidators))
+		for id := range m.removedvalidators {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TelegramChatMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedusers {
 		edges = append(edges, telegramchat.EdgeUsers)
 	}
@@ -6695,6 +6853,9 @@ func (m *TelegramChatMutation) ClearedEdges() []string {
 	}
 	if m.clearedaddress_trackers {
 		edges = append(edges, telegramchat.EdgeAddressTrackers)
+	}
+	if m.clearedvalidators {
+		edges = append(edges, telegramchat.EdgeValidators)
 	}
 	return edges
 }
@@ -6711,6 +6872,8 @@ func (m *TelegramChatMutation) EdgeCleared(name string) bool {
 		return m.clearedchains
 	case telegramchat.EdgeAddressTrackers:
 		return m.clearedaddress_trackers
+	case telegramchat.EdgeValidators:
+		return m.clearedvalidators
 	}
 	return false
 }
@@ -6738,6 +6901,9 @@ func (m *TelegramChatMutation) ResetEdge(name string) error {
 		return nil
 	case telegramchat.EdgeAddressTrackers:
 		m.ResetAddressTrackers()
+		return nil
+	case telegramchat.EdgeValidators:
+		m.ResetValidators()
 		return nil
 	}
 	return fmt.Errorf("unknown TelegramChat edge %s", name)
@@ -7567,6 +7733,12 @@ type ValidatorMutation struct {
 	address_trackers        map[int]struct{}
 	removedaddress_trackers map[int]struct{}
 	clearedaddress_trackers bool
+	telegram_chats          map[int]struct{}
+	removedtelegram_chats   map[int]struct{}
+	clearedtelegram_chats   bool
+	discord_channels        map[int]struct{}
+	removeddiscord_channels map[int]struct{}
+	cleareddiscord_channels bool
 	done                    bool
 	oldValue                func(context.Context) (*Validator, error)
 	predicates              []predicate.Validator
@@ -7907,6 +8079,114 @@ func (m *ValidatorMutation) ResetAddressTrackers() {
 	m.removedaddress_trackers = nil
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by ids.
+func (m *ValidatorMutation) AddTelegramChatIDs(ids ...int) {
+	if m.telegram_chats == nil {
+		m.telegram_chats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.telegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTelegramChats clears the "telegram_chats" edge to the TelegramChat entity.
+func (m *ValidatorMutation) ClearTelegramChats() {
+	m.clearedtelegram_chats = true
+}
+
+// TelegramChatsCleared reports if the "telegram_chats" edge to the TelegramChat entity was cleared.
+func (m *ValidatorMutation) TelegramChatsCleared() bool {
+	return m.clearedtelegram_chats
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (m *ValidatorMutation) RemoveTelegramChatIDs(ids ...int) {
+	if m.removedtelegram_chats == nil {
+		m.removedtelegram_chats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.telegram_chats, ids[i])
+		m.removedtelegram_chats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTelegramChats returns the removed IDs of the "telegram_chats" edge to the TelegramChat entity.
+func (m *ValidatorMutation) RemovedTelegramChatsIDs() (ids []int) {
+	for id := range m.removedtelegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TelegramChatsIDs returns the "telegram_chats" edge IDs in the mutation.
+func (m *ValidatorMutation) TelegramChatsIDs() (ids []int) {
+	for id := range m.telegram_chats {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTelegramChats resets all changes to the "telegram_chats" edge.
+func (m *ValidatorMutation) ResetTelegramChats() {
+	m.telegram_chats = nil
+	m.clearedtelegram_chats = false
+	m.removedtelegram_chats = nil
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by ids.
+func (m *ValidatorMutation) AddDiscordChannelIDs(ids ...int) {
+	if m.discord_channels == nil {
+		m.discord_channels = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.discord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiscordChannels clears the "discord_channels" edge to the DiscordChannel entity.
+func (m *ValidatorMutation) ClearDiscordChannels() {
+	m.cleareddiscord_channels = true
+}
+
+// DiscordChannelsCleared reports if the "discord_channels" edge to the DiscordChannel entity was cleared.
+func (m *ValidatorMutation) DiscordChannelsCleared() bool {
+	return m.cleareddiscord_channels
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (m *ValidatorMutation) RemoveDiscordChannelIDs(ids ...int) {
+	if m.removeddiscord_channels == nil {
+		m.removeddiscord_channels = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.discord_channels, ids[i])
+		m.removeddiscord_channels[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiscordChannels returns the removed IDs of the "discord_channels" edge to the DiscordChannel entity.
+func (m *ValidatorMutation) RemovedDiscordChannelsIDs() (ids []int) {
+	for id := range m.removeddiscord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DiscordChannelsIDs returns the "discord_channels" edge IDs in the mutation.
+func (m *ValidatorMutation) DiscordChannelsIDs() (ids []int) {
+	for id := range m.discord_channels {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiscordChannels resets all changes to the "discord_channels" edge.
+func (m *ValidatorMutation) ResetDiscordChannels() {
+	m.discord_channels = nil
+	m.cleareddiscord_channels = false
+	m.removeddiscord_channels = nil
+}
+
 // Where appends a list predicates to the ValidatorMutation builder.
 func (m *ValidatorMutation) Where(ps ...predicate.Validator) {
 	m.predicates = append(m.predicates, ps...)
@@ -8091,12 +8371,18 @@ func (m *ValidatorMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ValidatorMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.chain != nil {
 		edges = append(edges, validator.EdgeChain)
 	}
 	if m.address_trackers != nil {
 		edges = append(edges, validator.EdgeAddressTrackers)
+	}
+	if m.telegram_chats != nil {
+		edges = append(edges, validator.EdgeTelegramChats)
+	}
+	if m.discord_channels != nil {
+		edges = append(edges, validator.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -8115,15 +8401,33 @@ func (m *ValidatorMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case validator.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.telegram_chats))
+		for id := range m.telegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case validator.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.discord_channels))
+		for id := range m.discord_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ValidatorMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.removedaddress_trackers != nil {
 		edges = append(edges, validator.EdgeAddressTrackers)
+	}
+	if m.removedtelegram_chats != nil {
+		edges = append(edges, validator.EdgeTelegramChats)
+	}
+	if m.removeddiscord_channels != nil {
+		edges = append(edges, validator.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -8138,18 +8442,36 @@ func (m *ValidatorMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case validator.EdgeTelegramChats:
+		ids := make([]ent.Value, 0, len(m.removedtelegram_chats))
+		for id := range m.removedtelegram_chats {
+			ids = append(ids, id)
+		}
+		return ids
+	case validator.EdgeDiscordChannels:
+		ids := make([]ent.Value, 0, len(m.removeddiscord_channels))
+		for id := range m.removeddiscord_channels {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ValidatorMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 4)
 	if m.clearedchain {
 		edges = append(edges, validator.EdgeChain)
 	}
 	if m.clearedaddress_trackers {
 		edges = append(edges, validator.EdgeAddressTrackers)
+	}
+	if m.clearedtelegram_chats {
+		edges = append(edges, validator.EdgeTelegramChats)
+	}
+	if m.cleareddiscord_channels {
+		edges = append(edges, validator.EdgeDiscordChannels)
 	}
 	return edges
 }
@@ -8162,6 +8484,10 @@ func (m *ValidatorMutation) EdgeCleared(name string) bool {
 		return m.clearedchain
 	case validator.EdgeAddressTrackers:
 		return m.clearedaddress_trackers
+	case validator.EdgeTelegramChats:
+		return m.clearedtelegram_chats
+	case validator.EdgeDiscordChannels:
+		return m.cleareddiscord_channels
 	}
 	return false
 }
@@ -8186,6 +8512,12 @@ func (m *ValidatorMutation) ResetEdge(name string) error {
 		return nil
 	case validator.EdgeAddressTrackers:
 		m.ResetAddressTrackers()
+		return nil
+	case validator.EdgeTelegramChats:
+		m.ResetTelegramChats()
+		return nil
+	case validator.EdgeDiscordChannels:
+		m.ResetDiscordChannels()
 		return nil
 	}
 	return fmt.Errorf("unknown Validator edge %s", name)

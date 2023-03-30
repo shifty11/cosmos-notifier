@@ -13,7 +13,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
@@ -26,6 +28,8 @@ type ValidatorQuery struct {
 	predicates          []predicate.Validator
 	withChain           *ChainQuery
 	withAddressTrackers *AddressTrackerQuery
+	withTelegramChats   *TelegramChatQuery
+	withDiscordChannels *DiscordChannelQuery
 	withFKs             bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -100,6 +104,50 @@ func (vq *ValidatorQuery) QueryAddressTrackers() *AddressTrackerQuery {
 			sqlgraph.From(validator.Table, validator.FieldID, selector),
 			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, validator.AddressTrackersTable, validator.AddressTrackersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(vq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTelegramChats chains the current query on the "telegram_chats" edge.
+func (vq *ValidatorQuery) QueryTelegramChats() *TelegramChatQuery {
+	query := (&TelegramChatClient{config: vq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := vq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := vq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(validator.Table, validator.FieldID, selector),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, validator.TelegramChatsTable, validator.TelegramChatsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(vq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels chains the current query on the "discord_channels" edge.
+func (vq *ValidatorQuery) QueryDiscordChannels() *DiscordChannelQuery {
+	query := (&DiscordChannelClient{config: vq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := vq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := vq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(validator.Table, validator.FieldID, selector),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, validator.DiscordChannelsTable, validator.DiscordChannelsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(vq.driver.Dialect(), step)
 		return fromU, nil
@@ -301,6 +349,8 @@ func (vq *ValidatorQuery) Clone() *ValidatorQuery {
 		predicates:          append([]predicate.Validator{}, vq.predicates...),
 		withChain:           vq.withChain.Clone(),
 		withAddressTrackers: vq.withAddressTrackers.Clone(),
+		withTelegramChats:   vq.withTelegramChats.Clone(),
+		withDiscordChannels: vq.withDiscordChannels.Clone(),
 		// clone intermediate query.
 		sql:  vq.sql.Clone(),
 		path: vq.path,
@@ -326,6 +376,28 @@ func (vq *ValidatorQuery) WithAddressTrackers(opts ...func(*AddressTrackerQuery)
 		opt(query)
 	}
 	vq.withAddressTrackers = query
+	return vq
+}
+
+// WithTelegramChats tells the query-builder to eager-load the nodes that are connected to
+// the "telegram_chats" edge. The optional arguments are used to configure the query builder of the edge.
+func (vq *ValidatorQuery) WithTelegramChats(opts ...func(*TelegramChatQuery)) *ValidatorQuery {
+	query := (&TelegramChatClient{config: vq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	vq.withTelegramChats = query
+	return vq
+}
+
+// WithDiscordChannels tells the query-builder to eager-load the nodes that are connected to
+// the "discord_channels" edge. The optional arguments are used to configure the query builder of the edge.
+func (vq *ValidatorQuery) WithDiscordChannels(opts ...func(*DiscordChannelQuery)) *ValidatorQuery {
+	query := (&DiscordChannelClient{config: vq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	vq.withDiscordChannels = query
 	return vq
 }
 
@@ -408,9 +480,11 @@ func (vq *ValidatorQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Va
 		nodes       = []*Validator{}
 		withFKs     = vq.withFKs
 		_spec       = vq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [4]bool{
 			vq.withChain != nil,
 			vq.withAddressTrackers != nil,
+			vq.withTelegramChats != nil,
+			vq.withDiscordChannels != nil,
 		}
 	)
 	if vq.withChain != nil {
@@ -447,6 +521,20 @@ func (vq *ValidatorQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Va
 		if err := vq.loadAddressTrackers(ctx, query, nodes,
 			func(n *Validator) { n.Edges.AddressTrackers = []*AddressTracker{} },
 			func(n *Validator, e *AddressTracker) { n.Edges.AddressTrackers = append(n.Edges.AddressTrackers, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := vq.withTelegramChats; query != nil {
+		if err := vq.loadTelegramChats(ctx, query, nodes,
+			func(n *Validator) { n.Edges.TelegramChats = []*TelegramChat{} },
+			func(n *Validator, e *TelegramChat) { n.Edges.TelegramChats = append(n.Edges.TelegramChats, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := vq.withDiscordChannels; query != nil {
+		if err := vq.loadDiscordChannels(ctx, query, nodes,
+			func(n *Validator) { n.Edges.DiscordChannels = []*DiscordChannel{} },
+			func(n *Validator, e *DiscordChannel) { n.Edges.DiscordChannels = append(n.Edges.DiscordChannels, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -513,6 +601,128 @@ func (vq *ValidatorQuery) loadAddressTrackers(ctx context.Context, query *Addres
 			return fmt.Errorf(`unexpected foreign-key "validator_address_trackers" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (vq *ValidatorQuery) loadTelegramChats(ctx context.Context, query *TelegramChatQuery, nodes []*Validator, init func(*Validator), assign func(*Validator, *TelegramChat)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Validator)
+	nids := make(map[int]map[*Validator]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(validator.TelegramChatsTable)
+		s.Join(joinT).On(s.C(telegramchat.FieldID), joinT.C(validator.TelegramChatsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(validator.TelegramChatsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(validator.TelegramChatsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Validator]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*TelegramChat](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "telegram_chats" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (vq *ValidatorQuery) loadDiscordChannels(ctx context.Context, query *DiscordChannelQuery, nodes []*Validator, init func(*Validator), assign func(*Validator, *DiscordChannel)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Validator)
+	nids := make(map[int]map[*Validator]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(validator.DiscordChannelsTable)
+		s.Join(joinT).On(s.C(discordchannel.FieldID), joinT.C(validator.DiscordChannelsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(validator.DiscordChannelsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(validator.DiscordChannelsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Validator]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*DiscordChannel](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "discord_channels" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

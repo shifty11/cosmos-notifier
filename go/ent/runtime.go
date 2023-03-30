@@ -180,4 +180,12 @@ func init() {
 	validator.DefaultUpdateTime = validatorDescUpdateTime.Default.(func() time.Time)
 	// validator.UpdateDefaultUpdateTime holds the default value on update for the update_time field.
 	validator.UpdateDefaultUpdateTime = validatorDescUpdateTime.UpdateDefault.(func() time.Time)
+	// validatorDescAddress is the schema descriptor for address field.
+	validatorDescAddress := validatorFields[0].Descriptor()
+	// validator.AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	validator.AddressValidator = validatorDescAddress.Validators[0].(func(string) error)
+	// validatorDescMoniker is the schema descriptor for moniker field.
+	validatorDescMoniker := validatorFields[1].Descriptor()
+	// validator.MonikerValidator is a validator for the "moniker" field. It is called by the builders before save.
+	validator.MonikerValidator = validatorDescMoniker.Validators[0].(func(string) error)
 }

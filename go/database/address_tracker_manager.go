@@ -24,18 +24,56 @@ func NewAddressTrackerManager(client *ent.Client, ctx context.Context) *AddressT
 	return &AddressTrackerManager{client: client, ctx: ctx}
 }
 
-func (manager *AddressTrackerManager) GetTrackers(userEnt *ent.User) ([]*ent.AddressTracker, error) {
+func (manager *AddressTrackerManager) All(userEnt *ent.User) ([]*ent.AddressTracker, error) {
 	return manager.client.AddressTracker.
 		Query().
-		Where(addresstracker.And(
+		Where(
 			addresstracker.Or(
 				addresstracker.HasDiscordChannelWith(discordchannel.HasUsersWith(user.IDEQ(userEnt.ID))),
 				addresstracker.HasTelegramChatWith(telegramchat.HasUsersWith(user.IDEQ(userEnt.ID))),
 			),
-		)).
+		).
 		WithDiscordChannel().
 		WithTelegramChat().
 		All(manager.ctx)
+}
+
+func (manager *AddressTrackerManager) AllByChatRoomsAndAddress(
+	discordChannelId int,
+	telegramChatId int,
+	address string,
+) ([]*ent.AddressTracker, error) {
+	if discordChannelId == 0 && telegramChatId == 0 {
+		return nil, errors.New("at least one of discordChannelId or telegramChatId must be non-zero")
+	}
+	if discordChannelId != 0 && telegramChatId != 0 {
+		return nil, errors.New("only one of discordChannelId or telegramChatId must be non-zero")
+	}
+	if discordChannelId != 0 {
+		return manager.client.AddressTracker.
+			Query().
+			Where(addresstracker.And(
+				addresstracker.HasDiscordChannelWith(discordchannel.IDEQ(discordChannelId)),
+				addresstracker.AddressEQ(address),
+			)).
+			WithChain().
+			WithDiscordChannel().
+			WithValidator().
+			All(manager.ctx)
+	}
+	if telegramChatId != 0 {
+		return manager.client.AddressTracker.
+			Query().
+			Where(addresstracker.And(
+				addresstracker.HasTelegramChatWith(telegramchat.IDEQ(telegramChatId)),
+				addresstracker.AddressEQ(address),
+			)).
+			WithChain().
+			WithTelegramChat().
+			WithValidator().
+			All(manager.ctx)
+	}
+	return []*ent.AddressTracker{}, nil
 }
 
 func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain) {
@@ -267,11 +305,17 @@ func (manager *AddressTrackerManager) SetNotified(data AddressTrackerWithChainPr
 }
 
 func (manager *AddressTrackerManager) GetChatRooms(userEnt *ent.User) ([]*ent.DiscordChannel, []*ent.TelegramChat, error) {
-	discordChannels, err := userEnt.QueryDiscordChannels().All(manager.ctx)
+	discordChannels, err := userEnt.
+		QueryDiscordChannels().
+		WithValidators().
+		All(manager.ctx)
 	if err != nil {
 		return nil, nil, err
 	}
-	telegramChats, err := userEnt.QueryTelegramChats().All(manager.ctx)
+	telegramChats, err := userEnt.
+		QueryTelegramChats().
+		WithValidators().
+		All(manager.ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -282,4 +326,26 @@ func (manager *AddressTrackerManager) GetChatRooms(userEnt *ent.User) ([]*ent.Di
 		return nil, nil, errors.New("only one of discord channels or telegram chats must be non-zero")
 	}
 	return discordChannels, telegramChats, nil
+}
+
+func (manager *AddressTrackerManager) Exists(discordChannelId int, telegramChatId int, validatorAddress string) bool {
+	if discordChannelId != 0 {
+		return manager.client.AddressTracker.
+			Query().
+			Where(addresstracker.And(
+				addresstracker.HasDiscordChannelWith(discordchannel.IDEQ(discordChannelId)),
+				addresstracker.AddressEQ(validatorAddress),
+			)).
+			ExistX(manager.ctx)
+	}
+	if telegramChatId != 0 {
+		return manager.client.AddressTracker.
+			Query().
+			Where(addresstracker.And(
+				addresstracker.HasTelegramChatWith(telegramchat.IDEQ(telegramChatId)),
+				addresstracker.AddressEQ(validatorAddress),
+			)).
+			ExistX(manager.ctx)
+	}
+	return false
 }

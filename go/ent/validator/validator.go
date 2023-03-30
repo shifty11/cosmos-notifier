@@ -23,6 +23,10 @@ const (
 	EdgeChain = "chain"
 	// EdgeAddressTrackers holds the string denoting the address_trackers edge name in mutations.
 	EdgeAddressTrackers = "address_trackers"
+	// EdgeTelegramChats holds the string denoting the telegram_chats edge name in mutations.
+	EdgeTelegramChats = "telegram_chats"
+	// EdgeDiscordChannels holds the string denoting the discord_channels edge name in mutations.
+	EdgeDiscordChannels = "discord_channels"
 	// Table holds the table name of the validator in the database.
 	Table = "validators"
 	// ChainTable is the table that holds the chain relation/edge.
@@ -39,6 +43,16 @@ const (
 	AddressTrackersInverseTable = "address_trackers"
 	// AddressTrackersColumn is the table column denoting the address_trackers relation/edge.
 	AddressTrackersColumn = "validator_address_trackers"
+	// TelegramChatsTable is the table that holds the telegram_chats relation/edge. The primary key declared below.
+	TelegramChatsTable = "validator_telegram_chats"
+	// TelegramChatsInverseTable is the table name for the TelegramChat entity.
+	// It exists in this package in order to avoid circular dependency with the "telegramchat" package.
+	TelegramChatsInverseTable = "telegram_chats"
+	// DiscordChannelsTable is the table that holds the discord_channels relation/edge. The primary key declared below.
+	DiscordChannelsTable = "validator_discord_channels"
+	// DiscordChannelsInverseTable is the table name for the DiscordChannel entity.
+	// It exists in this package in order to avoid circular dependency with the "discordchannel" package.
+	DiscordChannelsInverseTable = "discord_channels"
 )
 
 // Columns holds all SQL columns for validator fields.
@@ -55,6 +69,15 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"chain_validators",
 }
+
+var (
+	// TelegramChatsPrimaryKey and TelegramChatsColumn2 are the table columns denoting the
+	// primary key for the telegram_chats relation (M2M).
+	TelegramChatsPrimaryKey = []string{"validator_id", "telegram_chat_id"}
+	// DiscordChannelsPrimaryKey and DiscordChannelsColumn2 are the table columns denoting the
+	// primary key for the discord_channels relation (M2M).
+	DiscordChannelsPrimaryKey = []string{"validator_id", "discord_channel_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -78,4 +101,8 @@ var (
 	DefaultUpdateTime func() time.Time
 	// UpdateDefaultUpdateTime holds the default value on update for the "update_time" field.
 	UpdateDefaultUpdateTime func() time.Time
+	// AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	AddressValidator func(string) error
+	// MonikerValidator is a validator for the "moniker" field. It is called by the builders before save.
+	MonikerValidator func(string) error
 )

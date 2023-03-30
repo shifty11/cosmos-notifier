@@ -1265,6 +1265,22 @@ func (c *DiscordChannelClient) QueryAddressTrackers(dc *DiscordChannel) *Address
 	return query
 }
 
+// QueryValidators queries the validators edge of a DiscordChannel.
+func (c *DiscordChannelClient) QueryValidators(dc *DiscordChannel) *ValidatorQuery {
+	query := (&ValidatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := dc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, id),
+			sqlgraph.To(validator.Table, validator.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, discordchannel.ValidatorsTable, discordchannel.ValidatorsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(dc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *DiscordChannelClient) Hooks() []Hook {
 	return c.hooks.DiscordChannel
@@ -1440,6 +1456,22 @@ func (c *TelegramChatClient) QueryAddressTrackers(tc *TelegramChat) *AddressTrac
 			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
 			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, telegramchat.AddressTrackersTable, telegramchat.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryValidators queries the validators edge of a TelegramChat.
+func (c *TelegramChatClient) QueryValidators(tc *TelegramChat) *ValidatorQuery {
+	query := (&ValidatorClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(telegramchat.Table, telegramchat.FieldID, id),
+			sqlgraph.To(validator.Table, validator.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, telegramchat.ValidatorsTable, telegramchat.ValidatorsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
 		return fromV, nil
@@ -1740,6 +1772,38 @@ func (c *ValidatorClient) QueryAddressTrackers(v *Validator) *AddressTrackerQuer
 			sqlgraph.From(validator.Table, validator.FieldID, id),
 			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, validator.AddressTrackersTable, validator.AddressTrackersColumn),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTelegramChats queries the telegram_chats edge of a Validator.
+func (c *ValidatorClient) QueryTelegramChats(v *Validator) *TelegramChatQuery {
+	query := (&TelegramChatClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(validator.Table, validator.FieldID, id),
+			sqlgraph.To(telegramchat.Table, telegramchat.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, validator.TelegramChatsTable, validator.TelegramChatsPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiscordChannels queries the discord_channels edge of a Validator.
+func (c *ValidatorClient) QueryDiscordChannels(v *Validator) *DiscordChannelQuery {
+	query := (&DiscordChannelClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := v.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(validator.Table, validator.FieldID, id),
+			sqlgraph.To(discordchannel.Table, discordchannel.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, validator.DiscordChannelsTable, validator.DiscordChannelsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(v.driver.Dialect(), step)
 		return fromV, nil

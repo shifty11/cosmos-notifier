@@ -339,6 +339,60 @@ func HasAddressTrackersWith(preds ...predicate.AddressTracker) predicate.Validat
 	})
 }
 
+// HasTelegramChats applies the HasEdge predicate on the "telegram_chats" edge.
+func HasTelegramChats() predicate.Validator {
+	return predicate.Validator(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasTelegramChatsWith applies the HasEdge predicate on the "telegram_chats" edge with a given conditions (other predicates).
+func HasTelegramChatsWith(preds ...predicate.TelegramChat) predicate.Validator {
+	return predicate.Validator(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(TelegramChatsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, TelegramChatsTable, TelegramChatsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDiscordChannels applies the HasEdge predicate on the "discord_channels" edge.
+func HasDiscordChannels() predicate.Validator {
+	return predicate.Validator(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDiscordChannelsWith applies the HasEdge predicate on the "discord_channels" edge with a given conditions (other predicates).
+func HasDiscordChannelsWith(preds ...predicate.DiscordChannel) predicate.Validator {
+	return predicate.Validator(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DiscordChannelsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, DiscordChannelsTable, DiscordChannelsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Validator) predicate.Validator {
 	return predicate.Validator(func(s *sql.Selector) {

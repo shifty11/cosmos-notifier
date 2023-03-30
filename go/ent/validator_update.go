@@ -13,7 +13,9 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
@@ -68,6 +70,36 @@ func (vu *ValidatorUpdate) AddAddressTrackers(a ...*AddressTracker) *ValidatorUp
 	return vu.AddAddressTrackerIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (vu *ValidatorUpdate) AddTelegramChatIDs(ids ...int) *ValidatorUpdate {
+	vu.mutation.AddTelegramChatIDs(ids...)
+	return vu
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (vu *ValidatorUpdate) AddTelegramChats(t ...*TelegramChat) *ValidatorUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return vu.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (vu *ValidatorUpdate) AddDiscordChannelIDs(ids ...int) *ValidatorUpdate {
+	vu.mutation.AddDiscordChannelIDs(ids...)
+	return vu
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (vu *ValidatorUpdate) AddDiscordChannels(d ...*DiscordChannel) *ValidatorUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return vu.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ValidatorMutation object of the builder.
 func (vu *ValidatorUpdate) Mutation() *ValidatorMutation {
 	return vu.mutation
@@ -98,6 +130,48 @@ func (vu *ValidatorUpdate) RemoveAddressTrackers(a ...*AddressTracker) *Validato
 		ids[i] = a[i].ID
 	}
 	return vu.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (vu *ValidatorUpdate) ClearTelegramChats() *ValidatorUpdate {
+	vu.mutation.ClearTelegramChats()
+	return vu
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (vu *ValidatorUpdate) RemoveTelegramChatIDs(ids ...int) *ValidatorUpdate {
+	vu.mutation.RemoveTelegramChatIDs(ids...)
+	return vu
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (vu *ValidatorUpdate) RemoveTelegramChats(t ...*TelegramChat) *ValidatorUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return vu.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (vu *ValidatorUpdate) ClearDiscordChannels() *ValidatorUpdate {
+	vu.mutation.ClearDiscordChannels()
+	return vu
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (vu *ValidatorUpdate) RemoveDiscordChannelIDs(ids ...int) *ValidatorUpdate {
+	vu.mutation.RemoveDiscordChannelIDs(ids...)
+	return vu
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (vu *ValidatorUpdate) RemoveDiscordChannels(d ...*DiscordChannel) *ValidatorUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return vu.RemoveDiscordChannelIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -138,6 +212,11 @@ func (vu *ValidatorUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (vu *ValidatorUpdate) check() error {
+	if v, ok := vu.mutation.Moniker(); ok {
+		if err := validator.MonikerValidator(v); err != nil {
+			return &ValidationError{Name: "moniker", err: fmt.Errorf(`ent: validator failed for field "Validator.moniker": %w`, err)}
+		}
+	}
 	if _, ok := vu.mutation.ChainID(); vu.mutation.ChainCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Validator.chain"`)
 	}
@@ -236,6 +315,96 @@ func (vu *ValidatorUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if vu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vu.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !vu.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vu.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if vu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vu.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !vu.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vu.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, vu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{validator.Label}
@@ -294,6 +463,36 @@ func (vuo *ValidatorUpdateOne) AddAddressTrackers(a ...*AddressTracker) *Validat
 	return vuo.AddAddressTrackerIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (vuo *ValidatorUpdateOne) AddTelegramChatIDs(ids ...int) *ValidatorUpdateOne {
+	vuo.mutation.AddTelegramChatIDs(ids...)
+	return vuo
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (vuo *ValidatorUpdateOne) AddTelegramChats(t ...*TelegramChat) *ValidatorUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return vuo.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (vuo *ValidatorUpdateOne) AddDiscordChannelIDs(ids ...int) *ValidatorUpdateOne {
+	vuo.mutation.AddDiscordChannelIDs(ids...)
+	return vuo
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (vuo *ValidatorUpdateOne) AddDiscordChannels(d ...*DiscordChannel) *ValidatorUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return vuo.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ValidatorMutation object of the builder.
 func (vuo *ValidatorUpdateOne) Mutation() *ValidatorMutation {
 	return vuo.mutation
@@ -324,6 +523,48 @@ func (vuo *ValidatorUpdateOne) RemoveAddressTrackers(a ...*AddressTracker) *Vali
 		ids[i] = a[i].ID
 	}
 	return vuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearTelegramChats clears all "telegram_chats" edges to the TelegramChat entity.
+func (vuo *ValidatorUpdateOne) ClearTelegramChats() *ValidatorUpdateOne {
+	vuo.mutation.ClearTelegramChats()
+	return vuo
+}
+
+// RemoveTelegramChatIDs removes the "telegram_chats" edge to TelegramChat entities by IDs.
+func (vuo *ValidatorUpdateOne) RemoveTelegramChatIDs(ids ...int) *ValidatorUpdateOne {
+	vuo.mutation.RemoveTelegramChatIDs(ids...)
+	return vuo
+}
+
+// RemoveTelegramChats removes "telegram_chats" edges to TelegramChat entities.
+func (vuo *ValidatorUpdateOne) RemoveTelegramChats(t ...*TelegramChat) *ValidatorUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return vuo.RemoveTelegramChatIDs(ids...)
+}
+
+// ClearDiscordChannels clears all "discord_channels" edges to the DiscordChannel entity.
+func (vuo *ValidatorUpdateOne) ClearDiscordChannels() *ValidatorUpdateOne {
+	vuo.mutation.ClearDiscordChannels()
+	return vuo
+}
+
+// RemoveDiscordChannelIDs removes the "discord_channels" edge to DiscordChannel entities by IDs.
+func (vuo *ValidatorUpdateOne) RemoveDiscordChannelIDs(ids ...int) *ValidatorUpdateOne {
+	vuo.mutation.RemoveDiscordChannelIDs(ids...)
+	return vuo
+}
+
+// RemoveDiscordChannels removes "discord_channels" edges to DiscordChannel entities.
+func (vuo *ValidatorUpdateOne) RemoveDiscordChannels(d ...*DiscordChannel) *ValidatorUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return vuo.RemoveDiscordChannelIDs(ids...)
 }
 
 // Where appends a list predicates to the ValidatorUpdate builder.
@@ -377,6 +618,11 @@ func (vuo *ValidatorUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (vuo *ValidatorUpdateOne) check() error {
+	if v, ok := vuo.mutation.Moniker(); ok {
+		if err := validator.MonikerValidator(v); err != nil {
+			return &ValidationError{Name: "moniker", err: fmt.Errorf(`ent: validator failed for field "Validator.moniker": %w`, err)}
+		}
+	}
 	if _, ok := vuo.mutation.ChainID(); vuo.mutation.ChainCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Validator.chain"`)
 	}
@@ -485,6 +731,96 @@ func (vuo *ValidatorUpdateOne) sqlSave(ctx context.Context) (_node *Validator, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if vuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vuo.mutation.RemovedTelegramChatsIDs(); len(nodes) > 0 && !vuo.mutation.TelegramChatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vuo.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if vuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vuo.mutation.RemovedDiscordChannelsIDs(); len(nodes) > 0 && !vuo.mutation.DiscordChannelsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := vuo.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

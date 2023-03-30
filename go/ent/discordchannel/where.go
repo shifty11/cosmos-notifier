@@ -383,6 +383,33 @@ func HasAddressTrackersWith(preds ...predicate.AddressTracker) predicate.Discord
 	})
 }
 
+// HasValidators applies the HasEdge predicate on the "validators" edge.
+func HasValidators() predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, ValidatorsTable, ValidatorsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasValidatorsWith applies the HasEdge predicate on the "validators" edge with a given conditions (other predicates).
+func HasValidatorsWith(preds ...predicate.Validator) predicate.DiscordChannel {
+	return predicate.DiscordChannel(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(ValidatorsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, ValidatorsTable, ValidatorsPrimaryKey...),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.DiscordChannel) predicate.DiscordChannel {
 	return predicate.DiscordChannel(func(s *sql.Selector) {

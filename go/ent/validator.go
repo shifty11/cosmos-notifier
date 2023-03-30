@@ -37,9 +37,13 @@ type ValidatorEdges struct {
 	Chain *Chain `json:"chain,omitempty"`
 	// AddressTrackers holds the value of the address_trackers edge.
 	AddressTrackers []*AddressTracker `json:"address_trackers,omitempty"`
+	// TelegramChats holds the value of the telegram_chats edge.
+	TelegramChats []*TelegramChat `json:"telegram_chats,omitempty"`
+	// DiscordChannels holds the value of the discord_channels edge.
+	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [4]bool
 }
 
 // ChainOrErr returns the Chain value or an error if the edge
@@ -62,6 +66,24 @@ func (e ValidatorEdges) AddressTrackersOrErr() ([]*AddressTracker, error) {
 		return e.AddressTrackers, nil
 	}
 	return nil, &NotLoadedError{edge: "address_trackers"}
+}
+
+// TelegramChatsOrErr returns the TelegramChats value or an error if the edge
+// was not loaded in eager-loading.
+func (e ValidatorEdges) TelegramChatsOrErr() ([]*TelegramChat, error) {
+	if e.loadedTypes[2] {
+		return e.TelegramChats, nil
+	}
+	return nil, &NotLoadedError{edge: "telegram_chats"}
+}
+
+// DiscordChannelsOrErr returns the DiscordChannels value or an error if the edge
+// was not loaded in eager-loading.
+func (e ValidatorEdges) DiscordChannelsOrErr() ([]*DiscordChannel, error) {
+	if e.loadedTypes[3] {
+		return e.DiscordChannels, nil
+	}
+	return nil, &NotLoadedError{edge: "discord_channels"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -142,6 +164,16 @@ func (v *Validator) QueryChain() *ChainQuery {
 // QueryAddressTrackers queries the "address_trackers" edge of the Validator entity.
 func (v *Validator) QueryAddressTrackers() *AddressTrackerQuery {
 	return NewValidatorClient(v.config).QueryAddressTrackers(v)
+}
+
+// QueryTelegramChats queries the "telegram_chats" edge of the Validator entity.
+func (v *Validator) QueryTelegramChats() *TelegramChatQuery {
+	return NewValidatorClient(v.config).QueryTelegramChats(v)
+}
+
+// QueryDiscordChannels queries the "discord_channels" edge of the Validator entity.
+func (v *Validator) QueryDiscordChannels() *DiscordChannelQuery {
+	return NewValidatorClient(v.config).QueryDiscordChannels(v)
 }
 
 // Update returns a builder for updating this Validator.

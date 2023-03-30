@@ -20,11 +20,12 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	TrackerService_GetTrackers_FullMethodName    = "/cosmos_notifier_grpc.TrackerService/GetTrackers"
-	TrackerService_IsAddressValid_FullMethodName = "/cosmos_notifier_grpc.TrackerService/IsAddressValid"
-	TrackerService_AddTracker_FullMethodName     = "/cosmos_notifier_grpc.TrackerService/AddTracker"
-	TrackerService_UpdateTracker_FullMethodName  = "/cosmos_notifier_grpc.TrackerService/UpdateTracker"
-	TrackerService_DeleteTracker_FullMethodName  = "/cosmos_notifier_grpc.TrackerService/DeleteTracker"
+	TrackerService_GetTrackers_FullMethodName     = "/cosmos_notifier_grpc.TrackerService/GetTrackers"
+	TrackerService_IsAddressValid_FullMethodName  = "/cosmos_notifier_grpc.TrackerService/IsAddressValid"
+	TrackerService_AddTracker_FullMethodName      = "/cosmos_notifier_grpc.TrackerService/AddTracker"
+	TrackerService_UpdateTracker_FullMethodName   = "/cosmos_notifier_grpc.TrackerService/UpdateTracker"
+	TrackerService_DeleteTracker_FullMethodName   = "/cosmos_notifier_grpc.TrackerService/DeleteTracker"
+	TrackerService_TrackValidators_FullMethodName = "/cosmos_notifier_grpc.TrackerService/TrackValidators"
 )
 
 // TrackerServiceClient is the client API for TrackerService service.
@@ -36,6 +37,7 @@ type TrackerServiceClient interface {
 	AddTracker(ctx context.Context, in *AddTrackerRequest, opts ...grpc.CallOption) (*Tracker, error)
 	UpdateTracker(ctx context.Context, in *UpdateTrackerRequest, opts ...grpc.CallOption) (*Tracker, error)
 	DeleteTracker(ctx context.Context, in *DeleteTrackerRequest, opts ...grpc.CallOption) (*empty.Empty, error)
+	TrackValidators(ctx context.Context, in *TrackValidatorsRequest, opts ...grpc.CallOption) (*TrackValidatorsResponse, error)
 }
 
 type trackerServiceClient struct {
@@ -91,6 +93,15 @@ func (c *trackerServiceClient) DeleteTracker(ctx context.Context, in *DeleteTrac
 	return out, nil
 }
 
+func (c *trackerServiceClient) TrackValidators(ctx context.Context, in *TrackValidatorsRequest, opts ...grpc.CallOption) (*TrackValidatorsResponse, error) {
+	out := new(TrackValidatorsResponse)
+	err := c.cc.Invoke(ctx, TrackerService_TrackValidators_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TrackerServiceServer is the server API for TrackerService service.
 // All implementations must embed UnimplementedTrackerServiceServer
 // for forward compatibility
@@ -100,6 +111,7 @@ type TrackerServiceServer interface {
 	AddTracker(context.Context, *AddTrackerRequest) (*Tracker, error)
 	UpdateTracker(context.Context, *UpdateTrackerRequest) (*Tracker, error)
 	DeleteTracker(context.Context, *DeleteTrackerRequest) (*empty.Empty, error)
+	TrackValidators(context.Context, *TrackValidatorsRequest) (*TrackValidatorsResponse, error)
 	mustEmbedUnimplementedTrackerServiceServer()
 }
 
@@ -121,6 +133,9 @@ func (UnimplementedTrackerServiceServer) UpdateTracker(context.Context, *UpdateT
 }
 func (UnimplementedTrackerServiceServer) DeleteTracker(context.Context, *DeleteTrackerRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteTracker not implemented")
+}
+func (UnimplementedTrackerServiceServer) TrackValidators(context.Context, *TrackValidatorsRequest) (*TrackValidatorsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TrackValidators not implemented")
 }
 func (UnimplementedTrackerServiceServer) mustEmbedUnimplementedTrackerServiceServer() {}
 
@@ -225,6 +240,24 @@ func _TrackerService_DeleteTracker_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TrackerService_TrackValidators_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TrackValidatorsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TrackerServiceServer).TrackValidators(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TrackerService_TrackValidators_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TrackerServiceServer).TrackValidators(ctx, req.(*TrackValidatorsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TrackerService_ServiceDesc is the grpc.ServiceDesc for TrackerService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -251,6 +284,10 @@ var TrackerService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteTracker",
 			Handler:    _TrackerService_DeleteTracker_Handler,
+		},
+		{
+			MethodName: "TrackValidators",
+			Handler:    _TrackerService_TrackValidators_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

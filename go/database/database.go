@@ -60,7 +60,7 @@ func Close() {
 	}
 }
 
-func WithTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) error {
+func withTx(client *ent.Client, ctx context.Context, fn func(tx *ent.Tx) error) error {
 	tx, err := client.Tx(ctx)
 	if err != nil {
 		return err
@@ -82,6 +82,31 @@ func WithTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) 
 		return errors.Wrapf(err, "committing transaction: %v", err)
 	}
 	return nil
+}
+
+func withTxGeneric[T any](client *ent.Client, ctx context.Context, fn func(tx *ent.Tx) (*T, error)) (*T, error) {
+	tx, err := client.Tx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if v := recover(); v != nil {
+			//goland:noinspection GoUnhandledErrorResult
+			tx.Rollback()
+			panic(v)
+		}
+	}()
+	result, err := fn(tx)
+	if err != nil {
+		if rerr := tx.Rollback(); rerr != nil {
+			err = errors.Wrapf(err, "rolling back transaction: %v", rerr)
+		}
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, errors.Wrapf(err, "committing transaction: %v", err)
+	}
+	return result, nil
 }
 
 func MigrateDb() error {
@@ -129,7 +154,7 @@ func NewCustomDbManagers(client *ent.Client, ctx context.Context) *DbManagers {
 	chainProposalManager := NewChainProposalManager(client, ctx)
 	statsManager := NewStatsManager(client, ctx)
 	addressTrackerManager := NewAddressTrackerManager(client, ctx)
-	validatorManager := NewValidatorManager(client, ctx)
+	validatorManager := NewValidatorManager(client, ctx, addressTrackerManager)
 	return &DbManagers{
 		ContractManager:       contractManager,
 		ProposalManager:       proposalManager,

@@ -12,6 +12,8 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/shifty11/cosmos-notifier/ent/addresstracker"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
+	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
+	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
@@ -88,6 +90,36 @@ func (vc *ValidatorCreate) AddAddressTrackers(a ...*AddressTracker) *ValidatorCr
 	return vc.AddAddressTrackerIDs(ids...)
 }
 
+// AddTelegramChatIDs adds the "telegram_chats" edge to the TelegramChat entity by IDs.
+func (vc *ValidatorCreate) AddTelegramChatIDs(ids ...int) *ValidatorCreate {
+	vc.mutation.AddTelegramChatIDs(ids...)
+	return vc
+}
+
+// AddTelegramChats adds the "telegram_chats" edges to the TelegramChat entity.
+func (vc *ValidatorCreate) AddTelegramChats(t ...*TelegramChat) *ValidatorCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return vc.AddTelegramChatIDs(ids...)
+}
+
+// AddDiscordChannelIDs adds the "discord_channels" edge to the DiscordChannel entity by IDs.
+func (vc *ValidatorCreate) AddDiscordChannelIDs(ids ...int) *ValidatorCreate {
+	vc.mutation.AddDiscordChannelIDs(ids...)
+	return vc
+}
+
+// AddDiscordChannels adds the "discord_channels" edges to the DiscordChannel entity.
+func (vc *ValidatorCreate) AddDiscordChannels(d ...*DiscordChannel) *ValidatorCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return vc.AddDiscordChannelIDs(ids...)
+}
+
 // Mutation returns the ValidatorMutation object of the builder.
 func (vc *ValidatorCreate) Mutation() *ValidatorMutation {
 	return vc.mutation
@@ -144,8 +176,18 @@ func (vc *ValidatorCreate) check() error {
 	if _, ok := vc.mutation.Address(); !ok {
 		return &ValidationError{Name: "address", err: errors.New(`ent: missing required field "Validator.address"`)}
 	}
+	if v, ok := vc.mutation.Address(); ok {
+		if err := validator.AddressValidator(v); err != nil {
+			return &ValidationError{Name: "address", err: fmt.Errorf(`ent: validator failed for field "Validator.address": %w`, err)}
+		}
+	}
 	if _, ok := vc.mutation.Moniker(); !ok {
 		return &ValidationError{Name: "moniker", err: errors.New(`ent: missing required field "Validator.moniker"`)}
+	}
+	if v, ok := vc.mutation.Moniker(); ok {
+		if err := validator.MonikerValidator(v); err != nil {
+			return &ValidationError{Name: "moniker", err: fmt.Errorf(`ent: validator failed for field "Validator.moniker": %w`, err)}
+		}
 	}
 	if _, ok := vc.mutation.ChainID(); !ok {
 		return &ValidationError{Name: "chain", err: errors.New(`ent: missing required edge "Validator.chain"`)}
@@ -218,6 +260,38 @@ func (vc *ValidatorCreate) createSpec() (*Validator, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := vc.mutation.TelegramChatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.TelegramChatsTable,
+			Columns: validator.TelegramChatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(telegramchat.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := vc.mutation.DiscordChannelsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   validator.DiscordChannelsTable,
+			Columns: validator.DiscordChannelsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(discordchannel.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

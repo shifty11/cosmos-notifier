@@ -48,7 +48,7 @@ func AccessibleRoles() map[string][]Role {
 		trackerService + "UpdateTracker":           {User, Admin},
 		trackerService + "DeleteTracker":           {User, Admin},
 		trackerService + "IsAddressValid":          {User, Admin},
-		trackerService + "TrackValidator":          {User, Admin},
+		trackerService + "TrackValidators":         {User, Admin},
 		adminService + "BroadcastMessage":          {Admin},
 		adminService + "GetStats":                  {Admin},
 	}

@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // TelegramChatCreate is the builder for creating a TelegramChat entity.
@@ -128,6 +129,21 @@ func (tcc *TelegramChatCreate) AddAddressTrackers(a ...*AddressTracker) *Telegra
 		ids[i] = a[i].ID
 	}
 	return tcc.AddAddressTrackerIDs(ids...)
+}
+
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (tcc *TelegramChatCreate) AddValidatorIDs(ids ...int) *TelegramChatCreate {
+	tcc.mutation.AddValidatorIDs(ids...)
+	return tcc
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (tcc *TelegramChatCreate) AddValidators(v ...*Validator) *TelegramChatCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return tcc.AddValidatorIDs(ids...)
 }
 
 // Mutation returns the TelegramChatMutation object of the builder.
@@ -298,6 +314,22 @@ func (tcc *TelegramChatCreate) createSpec() (*TelegramChat, *sqlgraph.CreateSpec
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tcc.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

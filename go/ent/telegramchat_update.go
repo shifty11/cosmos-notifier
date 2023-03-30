@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // TelegramChatUpdate is the builder for updating TelegramChat entities.
@@ -117,6 +118,21 @@ func (tcu *TelegramChatUpdate) AddAddressTrackers(a ...*AddressTracker) *Telegra
 	return tcu.AddAddressTrackerIDs(ids...)
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (tcu *TelegramChatUpdate) AddValidatorIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.AddValidatorIDs(ids...)
+	return tcu
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (tcu *TelegramChatUpdate) AddValidators(v ...*Validator) *TelegramChatUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return tcu.AddValidatorIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcu *TelegramChatUpdate) Mutation() *TelegramChatMutation {
 	return tcu.mutation
@@ -204,6 +220,27 @@ func (tcu *TelegramChatUpdate) RemoveAddressTrackers(a ...*AddressTracker) *Tele
 		ids[i] = a[i].ID
 	}
 	return tcu.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearValidators clears all "validators" edges to the Validator entity.
+func (tcu *TelegramChatUpdate) ClearValidators() *TelegramChatUpdate {
+	tcu.mutation.ClearValidators()
+	return tcu
+}
+
+// RemoveValidatorIDs removes the "validators" edge to Validator entities by IDs.
+func (tcu *TelegramChatUpdate) RemoveValidatorIDs(ids ...int) *TelegramChatUpdate {
+	tcu.mutation.RemoveValidatorIDs(ids...)
+	return tcu
+}
+
+// RemoveValidators removes "validators" edges to Validator entities.
+func (tcu *TelegramChatUpdate) RemoveValidators(v ...*Validator) *TelegramChatUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return tcu.RemoveValidatorIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -443,6 +480,51 @@ func (tcu *TelegramChatUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tcu.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.RemovedValidatorsIDs(); len(nodes) > 0 && !tcu.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcu.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{telegramchat.Label}
@@ -548,6 +630,21 @@ func (tcuo *TelegramChatUpdateOne) AddAddressTrackers(a ...*AddressTracker) *Tel
 	return tcuo.AddAddressTrackerIDs(ids...)
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (tcuo *TelegramChatUpdateOne) AddValidatorIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.AddValidatorIDs(ids...)
+	return tcuo
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (tcuo *TelegramChatUpdateOne) AddValidators(v ...*Validator) *TelegramChatUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return tcuo.AddValidatorIDs(ids...)
+}
+
 // Mutation returns the TelegramChatMutation object of the builder.
 func (tcuo *TelegramChatUpdateOne) Mutation() *TelegramChatMutation {
 	return tcuo.mutation
@@ -635,6 +732,27 @@ func (tcuo *TelegramChatUpdateOne) RemoveAddressTrackers(a ...*AddressTracker) *
 		ids[i] = a[i].ID
 	}
 	return tcuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearValidators clears all "validators" edges to the Validator entity.
+func (tcuo *TelegramChatUpdateOne) ClearValidators() *TelegramChatUpdateOne {
+	tcuo.mutation.ClearValidators()
+	return tcuo
+}
+
+// RemoveValidatorIDs removes the "validators" edge to Validator entities by IDs.
+func (tcuo *TelegramChatUpdateOne) RemoveValidatorIDs(ids ...int) *TelegramChatUpdateOne {
+	tcuo.mutation.RemoveValidatorIDs(ids...)
+	return tcuo
+}
+
+// RemoveValidators removes "validators" edges to Validator entities.
+func (tcuo *TelegramChatUpdateOne) RemoveValidators(v ...*Validator) *TelegramChatUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return tcuo.RemoveValidatorIDs(ids...)
 }
 
 // Where appends a list predicates to the TelegramChatUpdate builder.
@@ -897,6 +1015,51 @@ func (tcuo *TelegramChatUpdateOne) sqlSave(ctx context.Context) (_node *Telegram
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tcuo.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.RemovedValidatorsIDs(); len(nodes) > 0 && !tcuo.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tcuo.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   telegramchat.ValidatorsTable,
+			Columns: telegramchat.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -29,6 +29,8 @@ const (
 	EdgeChains = "chains"
 	// EdgeAddressTrackers holds the string denoting the address_trackers edge name in mutations.
 	EdgeAddressTrackers = "address_trackers"
+	// EdgeValidators holds the string denoting the validators edge name in mutations.
+	EdgeValidators = "validators"
 	// Table holds the table name of the telegramchat in the database.
 	Table = "telegram_chats"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -53,6 +55,11 @@ const (
 	AddressTrackersInverseTable = "address_trackers"
 	// AddressTrackersColumn is the table column denoting the address_trackers relation/edge.
 	AddressTrackersColumn = "telegram_chat_address_trackers"
+	// ValidatorsTable is the table that holds the validators relation/edge. The primary key declared below.
+	ValidatorsTable = "validator_telegram_chats"
+	// ValidatorsInverseTable is the table name for the Validator entity.
+	// It exists in this package in order to avoid circular dependency with the "validator" package.
+	ValidatorsInverseTable = "validators"
 )
 
 // Columns holds all SQL columns for telegramchat fields.
@@ -75,6 +82,9 @@ var (
 	// ChainsPrimaryKey and ChainsColumn2 are the table columns denoting the
 	// primary key for the chains relation (M2M).
 	ChainsPrimaryKey = []string{"telegram_chat_id", "chain_id"}
+	// ValidatorsPrimaryKey and ValidatorsColumn2 are the table columns denoting the
+	// primary key for the validators relation (M2M).
+	ValidatorsPrimaryKey = []string{"validator_id", "telegram_chat_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -9,5 +9,13 @@ import (
 func main() {
 	defer log.SyncLogger()
 	defer database.Close()
+
+	defer func() {
+		if err := recover(); err != nil {
+			log.Sugar.Panic(err)
+			return
+		}
+	}()
+
 	cmd.Execute()
 }

@@ -34,6 +34,7 @@ require (
 )
 
 require (
+	ariga.io/entviz v0.0.0-20230125130633-6c9be8e08c7c // indirect
 	cosmossdk.io/errors v1.0.0-beta.7 // indirect
 	cosmossdk.io/math v1.0.0-beta.3 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
