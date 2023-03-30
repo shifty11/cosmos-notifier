@@ -27,6 +27,9 @@ class ValidatorMultiSelectDialogField<ValidatorBundle> extends MultiSelectDialog
     required super.items,
     required super.onConfirm,
     required super.initialValue,
+    required super.itemsTextStyle,
+    required super.selectedItemsTextStyle,
+    required super.unselectedColor,
     super.searchable = true,
     super.key,
     super.buttonText = const Text("Select validators"),
@@ -293,6 +296,9 @@ class TrackingPage extends StatelessWidget {
           .toList();
       return ValidatorMultiSelectDialogField(
         items: items,
+        itemsTextStyle: Theme.of(context).textTheme.bodyMedium,
+        selectedItemsTextStyle: Theme.of(context).textTheme.bodyMedium,
+        unselectedColor: Theme.of(context).disabledColor,
         initialValue: List<FreezedValidatorBundle>.from(items.where((item) => item.selected).map((item) => item.value)),
         onConfirm: (List<FreezedValidatorBundle> result) {
           final toBeAdded = result.where((val) => !val.isTracked).toList();

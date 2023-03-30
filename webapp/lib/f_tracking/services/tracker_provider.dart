@@ -298,6 +298,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
             ))
       ];
       ref.read(validatorBundleProvider.notifier).selectValidatorBundles(toBeAdded, toBeDeleted);
+      // TODO: show message
     } catch (e) {
       messageNotifier.sendMsg(error: e.toString());
     }
