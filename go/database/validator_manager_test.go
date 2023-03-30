@@ -292,6 +292,8 @@ func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
 	}
 }
 
+// TODO: test transactional behaviour of TrackValidator
+
 func TestValidatorManager_TrackValidator(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
