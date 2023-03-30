@@ -36,6 +36,7 @@ func addValidators(m *ValidatorManager, chains []*ent.Chain) []*ent.Validator {
 			chainEnt,
 			createValidBech32Address(chainEnt.Bech32Prefix+"valoper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"),
 			fmt.Sprintf("validator %s", chainEnt.Name),
+			true,
 		)
 		if err != nil {
 			panic(err)
@@ -49,16 +50,12 @@ func TestValidatorManager_AddValidator(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
 
-	_, err := m.AddValidator(chains[0], "", "validator 1")
-	if err == nil {
-		t.Error("expected error")
-	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "")
+	_, err := m.AddValidator(chains[0], "", "validator 1", true)
 	if err == nil {
 		t.Error("expected error")
 	}
 
-	val, err := m.AddValidator(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "validator 1")
+	val, err := m.AddValidator(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "validator 1", true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -74,25 +71,36 @@ func TestValidatorManager_AddValidator(t *testing.T) {
 	if val.QueryChain().AllX(m.ctx)[0].ID != chains[0].ID {
 		t.Error("expected chain id to be 1")
 	}
+	if val.FirstInactiveTime != nil {
+		t.Error("expected first inactive time to be nil")
+	}
+
+	val, err = m.AddValidator(chains[0], "cosmosvaloper1vvwtk805lxehwle9l4yudmq6mn0g32px9xtkhc", "other val", false)
+	if err != nil {
+		t.Error(err)
+	}
+	if val.FirstInactiveTime == nil {
+		t.Error("expected first inactive time to be set")
+	}
 
 	// check constraints and validation
-	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val", true)
 	if err != nil {
 		t.Error("did not expect error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val", true)
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "other moniker")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "other moniker", true)
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0", "new val")
+	_, err = m.AddValidator(chains[0], "cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0", "new val", true)
 	if err != nil {
 		t.Error("did not expect error")
 	}
-	_, err = m.AddValidator(chains[0], "invalid address", "new val")
+	_, err = m.AddValidator(chains[0], "invalid address", "new val", true)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -103,13 +111,12 @@ func TestValidatorManager_UpdateValidator(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains[:1])
 
-	err := m.UpdateValidator(vals[0], "")
-	if err == nil {
-		t.Error("expected error")
-	}
-	err = m.UpdateValidator(vals[0], "validator 2")
+	err := m.UpdateValidator(vals[0], "validator 2", false)
 	if err != nil {
 		t.Error(err)
+	}
+	if m.client.Validator.GetX(m.ctx, vals[0].ID).FirstInactiveTime == nil {
+		t.Error("expected first inactive time to be set")
 	}
 }
 

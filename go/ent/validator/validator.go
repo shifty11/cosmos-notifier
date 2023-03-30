@@ -21,6 +21,8 @@ const (
 	FieldAddress = "address"
 	// FieldMoniker holds the string denoting the moniker field in the database.
 	FieldMoniker = "moniker"
+	// FieldFirstInactiveTime holds the string denoting the first_inactive_time field in the database.
+	FieldFirstInactiveTime = "first_inactive_time"
 	// EdgeChain holds the string denoting the chain edge name in mutations.
 	EdgeChain = "chain"
 	// EdgeAddressTrackers holds the string denoting the address_trackers edge name in mutations.
@@ -65,6 +67,7 @@ var Columns = []string{
 	FieldOperatorAddress,
 	FieldAddress,
 	FieldMoniker,
+	FieldFirstInactiveTime,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "validators"
@@ -108,6 +111,4 @@ var (
 	OperatorAddressValidator func(string) error
 	// AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	AddressValidator func(string) error
-	// MonikerValidator is a validator for the "moniker" field. It is called by the builders before save.
-	MonikerValidator func(string) error
 )

@@ -7728,6 +7728,7 @@ type ValidatorMutation struct {
 	operator_address        *string
 	address                 *string
 	moniker                 *string
+	first_inactive_time     *time.Time
 	clearedFields           map[string]struct{}
 	chain                   *int
 	clearedchain            bool
@@ -8023,6 +8024,55 @@ func (m *ValidatorMutation) ResetMoniker() {
 	m.moniker = nil
 }
 
+// SetFirstInactiveTime sets the "first_inactive_time" field.
+func (m *ValidatorMutation) SetFirstInactiveTime(t time.Time) {
+	m.first_inactive_time = &t
+}
+
+// FirstInactiveTime returns the value of the "first_inactive_time" field in the mutation.
+func (m *ValidatorMutation) FirstInactiveTime() (r time.Time, exists bool) {
+	v := m.first_inactive_time
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFirstInactiveTime returns the old "first_inactive_time" field's value of the Validator entity.
+// If the Validator object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ValidatorMutation) OldFirstInactiveTime(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFirstInactiveTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFirstInactiveTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFirstInactiveTime: %w", err)
+	}
+	return oldValue.FirstInactiveTime, nil
+}
+
+// ClearFirstInactiveTime clears the value of the "first_inactive_time" field.
+func (m *ValidatorMutation) ClearFirstInactiveTime() {
+	m.first_inactive_time = nil
+	m.clearedFields[validator.FieldFirstInactiveTime] = struct{}{}
+}
+
+// FirstInactiveTimeCleared returns if the "first_inactive_time" field was cleared in this mutation.
+func (m *ValidatorMutation) FirstInactiveTimeCleared() bool {
+	_, ok := m.clearedFields[validator.FieldFirstInactiveTime]
+	return ok
+}
+
+// ResetFirstInactiveTime resets all changes to the "first_inactive_time" field.
+func (m *ValidatorMutation) ResetFirstInactiveTime() {
+	m.first_inactive_time = nil
+	delete(m.clearedFields, validator.FieldFirstInactiveTime)
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by id.
 func (m *ValidatorMutation) SetChainID(id int) {
 	m.chain = &id
@@ -8258,7 +8308,7 @@ func (m *ValidatorMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ValidatorMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.create_time != nil {
 		fields = append(fields, validator.FieldCreateTime)
 	}
@@ -8273,6 +8323,9 @@ func (m *ValidatorMutation) Fields() []string {
 	}
 	if m.moniker != nil {
 		fields = append(fields, validator.FieldMoniker)
+	}
+	if m.first_inactive_time != nil {
+		fields = append(fields, validator.FieldFirstInactiveTime)
 	}
 	return fields
 }
@@ -8292,6 +8345,8 @@ func (m *ValidatorMutation) Field(name string) (ent.Value, bool) {
 		return m.Address()
 	case validator.FieldMoniker:
 		return m.Moniker()
+	case validator.FieldFirstInactiveTime:
+		return m.FirstInactiveTime()
 	}
 	return nil, false
 }
@@ -8311,6 +8366,8 @@ func (m *ValidatorMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldAddress(ctx)
 	case validator.FieldMoniker:
 		return m.OldMoniker(ctx)
+	case validator.FieldFirstInactiveTime:
+		return m.OldFirstInactiveTime(ctx)
 	}
 	return nil, fmt.Errorf("unknown Validator field %s", name)
 }
@@ -8355,6 +8412,13 @@ func (m *ValidatorMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMoniker(v)
 		return nil
+	case validator.FieldFirstInactiveTime:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFirstInactiveTime(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Validator field %s", name)
 }
@@ -8384,7 +8448,11 @@ func (m *ValidatorMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *ValidatorMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(validator.FieldFirstInactiveTime) {
+		fields = append(fields, validator.FieldFirstInactiveTime)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -8397,6 +8465,11 @@ func (m *ValidatorMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *ValidatorMutation) ClearField(name string) error {
+	switch name {
+	case validator.FieldFirstInactiveTime:
+		m.ClearFirstInactiveTime()
+		return nil
+	}
 	return fmt.Errorf("unknown Validator nullable field %s", name)
 }
 
@@ -8418,6 +8491,9 @@ func (m *ValidatorMutation) ResetField(name string) error {
 		return nil
 	case validator.FieldMoniker:
 		m.ResetMoniker()
+		return nil
+	case validator.FieldFirstInactiveTime:
+		m.ResetFirstInactiveTime()
 		return nil
 	}
 	return fmt.Errorf("unknown Validator field %s", name)

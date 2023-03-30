@@ -12,6 +12,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"github.com/shifty11/cosmos-notifier/ent/validator"
 	"github.com/shifty11/cosmos-notifier/log"
+	"time"
 )
 
 type ValidatorManager struct {
@@ -24,7 +25,7 @@ func NewValidatorManager(client *ent.Client, ctx context.Context, addressTracker
 	return &ValidatorManager{client: client, ctx: ctx, addressTrackerManager: addressTrackerManager}
 }
 
-func (c *ValidatorManager) getAccountAddress(operatorAddress string, chainEnt *ent.Chain) (string, error) {
+func (manager *ValidatorManager) getAccountAddress(operatorAddress string, chainEnt *ent.Chain) (string, error) {
 	_, valAddr, err := bech32.DecodeAndConvert(operatorAddress)
 	if err != nil {
 		return "", err
@@ -36,10 +37,20 @@ func (c *ValidatorManager) getAccountAddress(operatorAddress string, chainEnt *e
 	return accAddr, nil
 }
 
+func (manager *ValidatorManager) getNillableFirstInactiveTime(isActive bool) *time.Time {
+	var firstInactiveTime *time.Time
+	if !isActive {
+		var now = time.Now()
+		firstInactiveTime = &now
+	}
+	return firstInactiveTime
+}
+
 func (manager *ValidatorManager) AddValidator(
 	chainEnt *ent.Chain,
 	operatorAddress string,
 	moniker string,
+	isActive bool,
 ) (*ent.Validator, error) {
 	accountAddress, err := manager.getAccountAddress(operatorAddress, chainEnt)
 	if err != nil {
@@ -52,13 +63,15 @@ func (manager *ValidatorManager) AddValidator(
 		SetOperatorAddress(operatorAddress).
 		SetAddress(accountAddress).
 		SetMoniker(moniker).
+		SetNillableFirstInactiveTime(manager.getNillableFirstInactiveTime(isActive)).
 		Save(manager.ctx)
 }
 
-func (manager *ValidatorManager) UpdateValidator(validatorEnt *ent.Validator, moniker string) error {
+func (manager *ValidatorManager) UpdateValidator(validatorEnt *ent.Validator, moniker string, isActive bool) error {
 	return validatorEnt.
 		Update().
 		SetMoniker(moniker).
+		SetNillableFirstInactiveTime(manager.getNillableFirstInactiveTime(isActive)).
 		Exec(manager.ctx)
 }
 

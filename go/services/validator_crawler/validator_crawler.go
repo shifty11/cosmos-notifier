@@ -14,6 +14,7 @@ import (
 )
 
 const urlValidators = "https://rest.cosmos.directory/%v/cosmos/staking/v1beta1/validators"
+const urlValidatorSet = "https://rest.cosmos.directory/%v/cosmos/base/tendermint/v1beta1/validatorsets/latest"
 
 type ValidatorCrawler struct {
 	httpClient            *http.Client
@@ -34,12 +35,14 @@ func NewValidatorCrawler(dbManagers *database.DbManagers) *ValidatorCrawler {
 	}
 }
 
-func (c *ValidatorCrawler) validatorNeedsUpdate(validatorEnt *ent.Validator, data *types.Validator) bool {
-	return validatorEnt.Moniker != data.Description.Moniker
+func validatorNeedsUpdate(validatorEnt *ent.Validator, data *types.Validator, isValidatorInActiveSet bool) bool {
+	return validatorEnt.Moniker != data.Description.Moniker ||
+		(validatorEnt.FirstInactiveTime != nil && isValidatorInActiveSet) ||
+		(validatorEnt.FirstInactiveTime == nil && !isValidatorInActiveSet)
 }
 
-func (c *ValidatorCrawler) isValidatorValid(data *types.Validator) bool {
-	return data.OperatorAddress != "" && data.Description.Moniker != ""
+func isValidatorValid(data *types.Validator) bool {
+	return data.OperatorAddress != ""
 }
 
 func getExistingValidator(validators []*ent.Validator, validator *types.Validator) *ent.Validator {
@@ -49,6 +52,15 @@ func getExistingValidator(validators []*ent.Validator, validator *types.Validato
 		}
 	}
 	return nil
+}
+
+func isValidatorInActiveSet(operatorAddress string, activeValidatorSet []types.ValidatorSetValidator) bool {
+	for _, val := range activeValidatorSet {
+		if val.Address == operatorAddress {
+			return true
+		}
+	}
+	return false
 }
 
 func (c *ValidatorCrawler) AddOrUpdateValidators() {
@@ -62,29 +74,43 @@ func (c *ValidatorCrawler) AddOrUpdateValidators() {
 			log.Sugar.Errorf("error calling %v: %v", url, err)
 			continue
 		}
+
+		var validatorSetResponse types.ValidatorSetResponse
+		url = fmt.Sprintf(urlValidatorSet, chainEnt.Path)
+		_, err = common.GetJson(c.httpClient, url, &validatorSetResponse)
+		if err != nil {
+			log.Sugar.Errorf("error calling %v: %v", url, err)
+			continue
+		}
+
 		existingValidators, err := chainEnt.QueryValidators().All(context.Background())
 		if err != nil {
 			log.Sugar.Panicf("error getting validators for chain %v: %v", chainEnt.PrettyName, err)
 		}
 
 		for _, validator := range validatorsResponse.Validators {
-			if !c.isValidatorValid(&validator) {
+			if isValidatorValid(&validator) {
+				var isValidatorInActiveSet = isValidatorInActiveSet(validator.OperatorAddress, validatorSetResponse.Validators)
 				var existingValidator = getExistingValidator(existingValidators, &validator)
 				if existingValidator != nil {
-					log.Sugar.Infof("Updating validator %v", validator.Description.Moniker)
-					err := c.validatorManager.UpdateValidator(existingValidator, validator.Description.Moniker)
-					if err != nil {
-						log.Sugar.Errorf("error updating validator %v: %v", existingValidator.Address, err)
-						break
+					if validatorNeedsUpdate(existingValidator, &validator, isValidatorInActiveSet) {
+						log.Sugar.Infof("Updating validator %v %v", validator.OperatorAddress, validator.Description.Moniker)
+						err := c.validatorManager.UpdateValidator(existingValidator, validator.Description.Moniker, isValidatorInActiveSet)
+						if err != nil {
+							log.Sugar.Errorf("error updating validator %v: %v", existingValidator.Address, err)
+							continue
+						}
 					}
 				} else {
-					log.Sugar.Infof("Creating validator %v", validator.Description.Moniker)
-					_, err = c.validatorManager.AddValidator(chainEnt, validator.OperatorAddress, validator.Description.Moniker)
+					log.Sugar.Infof("Creating validator %v %v", validator.OperatorAddress, validator.Description.Moniker)
+					_, err = c.validatorManager.AddValidator(chainEnt, validator.OperatorAddress, validator.Description.Moniker, isValidatorInActiveSet)
 					if err != nil {
 						log.Sugar.Errorf("error creating validator %v: %v", validator.OperatorAddress, err)
 						continue
 					}
 				}
+			} else {
+				log.Sugar.Debugf("Validator %v %v is invalid", validator.OperatorAddress, validator.Description.Moniker)
 			}
 		}
 	}

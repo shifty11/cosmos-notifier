@@ -80,6 +80,11 @@ func Moniker(v string) predicate.Validator {
 	return predicate.Validator(sql.FieldEQ(FieldMoniker, v))
 }
 
+// FirstInactiveTime applies equality check predicate on the "first_inactive_time" field. It's identical to FirstInactiveTimeEQ.
+func FirstInactiveTime(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldEQ(FieldFirstInactiveTime, v))
+}
+
 // CreateTimeEQ applies the EQ predicate on the "create_time" field.
 func CreateTimeEQ(v time.Time) predicate.Validator {
 	return predicate.Validator(sql.FieldEQ(FieldCreateTime, v))
@@ -353,6 +358,56 @@ func MonikerEqualFold(v string) predicate.Validator {
 // MonikerContainsFold applies the ContainsFold predicate on the "moniker" field.
 func MonikerContainsFold(v string) predicate.Validator {
 	return predicate.Validator(sql.FieldContainsFold(FieldMoniker, v))
+}
+
+// FirstInactiveTimeEQ applies the EQ predicate on the "first_inactive_time" field.
+func FirstInactiveTimeEQ(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldEQ(FieldFirstInactiveTime, v))
+}
+
+// FirstInactiveTimeNEQ applies the NEQ predicate on the "first_inactive_time" field.
+func FirstInactiveTimeNEQ(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldNEQ(FieldFirstInactiveTime, v))
+}
+
+// FirstInactiveTimeIn applies the In predicate on the "first_inactive_time" field.
+func FirstInactiveTimeIn(vs ...time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldIn(FieldFirstInactiveTime, vs...))
+}
+
+// FirstInactiveTimeNotIn applies the NotIn predicate on the "first_inactive_time" field.
+func FirstInactiveTimeNotIn(vs ...time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldNotIn(FieldFirstInactiveTime, vs...))
+}
+
+// FirstInactiveTimeGT applies the GT predicate on the "first_inactive_time" field.
+func FirstInactiveTimeGT(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldGT(FieldFirstInactiveTime, v))
+}
+
+// FirstInactiveTimeGTE applies the GTE predicate on the "first_inactive_time" field.
+func FirstInactiveTimeGTE(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldGTE(FieldFirstInactiveTime, v))
+}
+
+// FirstInactiveTimeLT applies the LT predicate on the "first_inactive_time" field.
+func FirstInactiveTimeLT(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldLT(FieldFirstInactiveTime, v))
+}
+
+// FirstInactiveTimeLTE applies the LTE predicate on the "first_inactive_time" field.
+func FirstInactiveTimeLTE(v time.Time) predicate.Validator {
+	return predicate.Validator(sql.FieldLTE(FieldFirstInactiveTime, v))
+}
+
+// FirstInactiveTimeIsNil applies the IsNil predicate on the "first_inactive_time" field.
+func FirstInactiveTimeIsNil() predicate.Validator {
+	return predicate.Validator(sql.FieldIsNull(FieldFirstInactiveTime))
+}
+
+// FirstInactiveTimeNotNil applies the NotNil predicate on the "first_inactive_time" field.
+func FirstInactiveTimeNotNil() predicate.Validator {
+	return predicate.Validator(sql.FieldNotNull(FieldFirstInactiveTime))
 }
 
 // HasChain applies the HasEdge predicate on the "chain" edge.

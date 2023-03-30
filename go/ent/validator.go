@@ -27,6 +27,8 @@ type Validator struct {
 	Address string `json:"address,omitempty"`
 	// Moniker holds the value of the "moniker" field.
 	Moniker string `json:"moniker,omitempty"`
+	// FirstInactiveTime holds the value of the "first_inactive_time" field.
+	FirstInactiveTime *time.Time `json:"first_inactive_time,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the ValidatorQuery when eager-loading is set.
 	Edges            ValidatorEdges `json:"edges"`
@@ -97,7 +99,7 @@ func (*Validator) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case validator.FieldOperatorAddress, validator.FieldAddress, validator.FieldMoniker:
 			values[i] = new(sql.NullString)
-		case validator.FieldCreateTime, validator.FieldUpdateTime:
+		case validator.FieldCreateTime, validator.FieldUpdateTime, validator.FieldFirstInactiveTime:
 			values[i] = new(sql.NullTime)
 		case validator.ForeignKeys[0]: // chain_validators
 			values[i] = new(sql.NullInt64)
@@ -151,6 +153,13 @@ func (v *Validator) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field moniker", values[i])
 			} else if value.Valid {
 				v.Moniker = value.String
+			}
+		case validator.FieldFirstInactiveTime:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field first_inactive_time", values[i])
+			} else if value.Valid {
+				v.FirstInactiveTime = new(time.Time)
+				*v.FirstInactiveTime = value.Time
 			}
 		case validator.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -221,6 +230,11 @@ func (v *Validator) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("moniker=")
 	builder.WriteString(v.Moniker)
+	builder.WriteString(", ")
+	if v := v.FirstInactiveTime; v != nil {
+		builder.WriteString("first_inactive_time=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

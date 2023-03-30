@@ -41,3 +41,22 @@ type ValidatorsResponse struct {
 		Total   string `json:"total"`
 	} `json:"pagination"`
 }
+
+type ValidatorSetValidator struct {
+	Address string `json:"address"`
+	PubKey  struct {
+		Type string `json:"@type"`
+		Key  string `json:"key"`
+	} `json:"pub_key"`
+	VotingPower      string `json:"voting_power"`
+	ProposerPriority string `json:"proposer_priority"`
+}
+
+type ValidatorSetResponse struct {
+	BlockHeight string                  `json:"block_height"`
+	Validators  []ValidatorSetValidator `json:"validators"`
+	Pagination  struct {
+		NextKey any    `json:"next_key"`
+		Total   string `json:"total"`
+	} `json:"pagination"`
+}

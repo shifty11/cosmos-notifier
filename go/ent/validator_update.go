@@ -44,6 +44,26 @@ func (vu *ValidatorUpdate) SetMoniker(s string) *ValidatorUpdate {
 	return vu
 }
 
+// SetFirstInactiveTime sets the "first_inactive_time" field.
+func (vu *ValidatorUpdate) SetFirstInactiveTime(t time.Time) *ValidatorUpdate {
+	vu.mutation.SetFirstInactiveTime(t)
+	return vu
+}
+
+// SetNillableFirstInactiveTime sets the "first_inactive_time" field if the given value is not nil.
+func (vu *ValidatorUpdate) SetNillableFirstInactiveTime(t *time.Time) *ValidatorUpdate {
+	if t != nil {
+		vu.SetFirstInactiveTime(*t)
+	}
+	return vu
+}
+
+// ClearFirstInactiveTime clears the value of the "first_inactive_time" field.
+func (vu *ValidatorUpdate) ClearFirstInactiveTime() *ValidatorUpdate {
+	vu.mutation.ClearFirstInactiveTime()
+	return vu
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by ID.
 func (vu *ValidatorUpdate) SetChainID(id int) *ValidatorUpdate {
 	vu.mutation.SetChainID(id)
@@ -212,11 +232,6 @@ func (vu *ValidatorUpdate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (vu *ValidatorUpdate) check() error {
-	if v, ok := vu.mutation.Moniker(); ok {
-		if err := validator.MonikerValidator(v); err != nil {
-			return &ValidationError{Name: "moniker", err: fmt.Errorf(`ent: validator failed for field "Validator.moniker": %w`, err)}
-		}
-	}
 	if _, ok := vu.mutation.ChainID(); vu.mutation.ChainCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Validator.chain"`)
 	}
@@ -240,6 +255,12 @@ func (vu *ValidatorUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := vu.mutation.Moniker(); ok {
 		_spec.SetField(validator.FieldMoniker, field.TypeString, value)
+	}
+	if value, ok := vu.mutation.FirstInactiveTime(); ok {
+		_spec.SetField(validator.FieldFirstInactiveTime, field.TypeTime, value)
+	}
+	if vu.mutation.FirstInactiveTimeCleared() {
+		_spec.ClearField(validator.FieldFirstInactiveTime, field.TypeTime)
 	}
 	if vu.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -437,6 +458,26 @@ func (vuo *ValidatorUpdateOne) SetMoniker(s string) *ValidatorUpdateOne {
 	return vuo
 }
 
+// SetFirstInactiveTime sets the "first_inactive_time" field.
+func (vuo *ValidatorUpdateOne) SetFirstInactiveTime(t time.Time) *ValidatorUpdateOne {
+	vuo.mutation.SetFirstInactiveTime(t)
+	return vuo
+}
+
+// SetNillableFirstInactiveTime sets the "first_inactive_time" field if the given value is not nil.
+func (vuo *ValidatorUpdateOne) SetNillableFirstInactiveTime(t *time.Time) *ValidatorUpdateOne {
+	if t != nil {
+		vuo.SetFirstInactiveTime(*t)
+	}
+	return vuo
+}
+
+// ClearFirstInactiveTime clears the value of the "first_inactive_time" field.
+func (vuo *ValidatorUpdateOne) ClearFirstInactiveTime() *ValidatorUpdateOne {
+	vuo.mutation.ClearFirstInactiveTime()
+	return vuo
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by ID.
 func (vuo *ValidatorUpdateOne) SetChainID(id int) *ValidatorUpdateOne {
 	vuo.mutation.SetChainID(id)
@@ -618,11 +659,6 @@ func (vuo *ValidatorUpdateOne) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (vuo *ValidatorUpdateOne) check() error {
-	if v, ok := vuo.mutation.Moniker(); ok {
-		if err := validator.MonikerValidator(v); err != nil {
-			return &ValidationError{Name: "moniker", err: fmt.Errorf(`ent: validator failed for field "Validator.moniker": %w`, err)}
-		}
-	}
 	if _, ok := vuo.mutation.ChainID(); vuo.mutation.ChainCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Validator.chain"`)
 	}
@@ -663,6 +699,12 @@ func (vuo *ValidatorUpdateOne) sqlSave(ctx context.Context) (_node *Validator, e
 	}
 	if value, ok := vuo.mutation.Moniker(); ok {
 		_spec.SetField(validator.FieldMoniker, field.TypeString, value)
+	}
+	if value, ok := vuo.mutation.FirstInactiveTime(); ok {
+		_spec.SetField(validator.FieldFirstInactiveTime, field.TypeTime, value)
+	}
+	if vuo.mutation.FirstInactiveTimeCleared() {
+		_spec.ClearField(validator.FieldFirstInactiveTime, field.TypeTime)
 	}
 	if vuo.mutation.ChainCleared() {
 		edge := &sqlgraph.EdgeSpec{

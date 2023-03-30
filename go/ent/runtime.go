@@ -188,8 +188,4 @@ func init() {
 	validatorDescAddress := validatorFields[1].Descriptor()
 	// validator.AddressValidator is a validator for the "address" field. It is called by the builders before save.
 	validator.AddressValidator = validatorDescAddress.Validators[0].(func(string) error)
-	// validatorDescMoniker is the schema descriptor for moniker field.
-	validatorDescMoniker := validatorFields[2].Descriptor()
-	// validator.MonikerValidator is a validator for the "moniker" field. It is called by the builders before save.
-	validator.MonikerValidator = validatorDescMoniker.Validators[0].(func(string) error)
 }

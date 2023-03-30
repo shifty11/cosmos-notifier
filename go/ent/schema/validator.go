@@ -35,8 +35,10 @@ func (Validator) Fields() []ent.Field {
 			Validate(func(s string) error {
 				return common.ValidateBech32Address(s)
 			}),
-		field.String("moniker").
-			NotEmpty(),
+		field.String("moniker"),
+		field.Time("first_inactive_time").
+			Nillable().
+			Optional(),
 	}
 }
 

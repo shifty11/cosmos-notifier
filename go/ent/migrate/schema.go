@@ -221,6 +221,7 @@ var (
 		{Name: "operator_address", Type: field.TypeString, Unique: true},
 		{Name: "address", Type: field.TypeString, Unique: true},
 		{Name: "moniker", Type: field.TypeString},
+		{Name: "first_inactive_time", Type: field.TypeTime, Nullable: true},
 		{Name: "chain_validators", Type: field.TypeInt},
 	}
 	// ValidatorsTable holds the schema information for the "validators" table.
@@ -231,7 +232,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "validators_chains_validators",
-				Columns:    []*schema.Column{ValidatorsColumns[6]},
+				Columns:    []*schema.Column{ValidatorsColumns[7]},
 				RefColumns: []*schema.Column{ChainsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -255,12 +256,12 @@ var (
 			{
 				Name:    "validator_moniker_operator_address_chain_validators",
 				Unique:  true,
-				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[3], ValidatorsColumns[6]},
+				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[3], ValidatorsColumns[7]},
 			},
 			{
 				Name:    "validator_moniker_address_chain_validators",
 				Unique:  true,
-				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[4], ValidatorsColumns[6]},
+				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[4], ValidatorsColumns[7]},
 			},
 		},
 	}

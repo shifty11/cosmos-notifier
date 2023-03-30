@@ -70,6 +70,20 @@ func (vc *ValidatorCreate) SetMoniker(s string) *ValidatorCreate {
 	return vc
 }
 
+// SetFirstInactiveTime sets the "first_inactive_time" field.
+func (vc *ValidatorCreate) SetFirstInactiveTime(t time.Time) *ValidatorCreate {
+	vc.mutation.SetFirstInactiveTime(t)
+	return vc
+}
+
+// SetNillableFirstInactiveTime sets the "first_inactive_time" field if the given value is not nil.
+func (vc *ValidatorCreate) SetNillableFirstInactiveTime(t *time.Time) *ValidatorCreate {
+	if t != nil {
+		vc.SetFirstInactiveTime(*t)
+	}
+	return vc
+}
+
 // SetChainID sets the "chain" edge to the Chain entity by ID.
 func (vc *ValidatorCreate) SetChainID(id int) *ValidatorCreate {
 	vc.mutation.SetChainID(id)
@@ -198,11 +212,6 @@ func (vc *ValidatorCreate) check() error {
 	if _, ok := vc.mutation.Moniker(); !ok {
 		return &ValidationError{Name: "moniker", err: errors.New(`ent: missing required field "Validator.moniker"`)}
 	}
-	if v, ok := vc.mutation.Moniker(); ok {
-		if err := validator.MonikerValidator(v); err != nil {
-			return &ValidationError{Name: "moniker", err: fmt.Errorf(`ent: validator failed for field "Validator.moniker": %w`, err)}
-		}
-	}
 	if _, ok := vc.mutation.ChainID(); !ok {
 		return &ValidationError{Name: "chain", err: errors.New(`ent: missing required edge "Validator.chain"`)}
 	}
@@ -251,6 +260,10 @@ func (vc *ValidatorCreate) createSpec() (*Validator, *sqlgraph.CreateSpec) {
 	if value, ok := vc.mutation.Moniker(); ok {
 		_spec.SetField(validator.FieldMoniker, field.TypeString, value)
 		_node.Moniker = value
+	}
+	if value, ok := vc.mutation.FirstInactiveTime(); ok {
+		_spec.SetField(validator.FieldFirstInactiveTime, field.TypeTime, value)
+		_node.FirstInactiveTime = &value
 	}
 	if nodes := vc.mutation.ChainIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
