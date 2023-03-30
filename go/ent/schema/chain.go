@@ -29,8 +29,7 @@ func (Chain) Fields() []ent.Field {
 			Unique(),
 		field.String("pretty_name").
 			Unique(),
-		field.String("path").
-			Default(""),
+		field.String("path"),
 		field.String("display").
 			Default(""),
 		field.Bool("is_enabled").
@@ -38,11 +37,7 @@ func (Chain) Fields() []ent.Field {
 		field.String("image_url"),
 		field.String("thumbnail_url").
 			Default(""),
-		field.String("bech32_prefix").
-			Default(""),
-		//TODO change field to unique after migration/run of the crawler
-		//field.String("bech32_prefix").
-		//	Unique(),
+		field.String("bech32_prefix"),
 	}
 }
 
@@ -64,6 +59,10 @@ func (Chain) Edges() []ent.Edge {
 				OnDelete: entsql.Cascade,
 			}),
 		edge.To("address_trackers", AddressTracker.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
+		edge.To("validators", Validator.Type).
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),

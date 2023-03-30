@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // AddressTrackerQuery is the builder for querying AddressTracker entities.
@@ -30,6 +31,7 @@ type AddressTrackerQuery struct {
 	withDiscordChannel *DiscordChannelQuery
 	withTelegramChat   *TelegramChatQuery
 	withChainProposals *ChainProposalQuery
+	withValidator      *ValidatorQuery
 	withFKs            bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -148,6 +150,28 @@ func (atq *AddressTrackerQuery) QueryChainProposals() *ChainProposalQuery {
 			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, selector),
 			sqlgraph.To(chainproposal.Table, chainproposal.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, addresstracker.ChainProposalsTable, addresstracker.ChainProposalsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryValidator chains the current query on the "validator" edge.
+func (atq *AddressTrackerQuery) QueryValidator() *ValidatorQuery {
+	query := (&ValidatorClient{config: atq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := atq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := atq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(addresstracker.Table, addresstracker.FieldID, selector),
+			sqlgraph.To(validator.Table, validator.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, addresstracker.ValidatorTable, addresstracker.ValidatorColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(atq.driver.Dialect(), step)
 		return fromU, nil
@@ -351,6 +375,7 @@ func (atq *AddressTrackerQuery) Clone() *AddressTrackerQuery {
 		withDiscordChannel: atq.withDiscordChannel.Clone(),
 		withTelegramChat:   atq.withTelegramChat.Clone(),
 		withChainProposals: atq.withChainProposals.Clone(),
+		withValidator:      atq.withValidator.Clone(),
 		// clone intermediate query.
 		sql:  atq.sql.Clone(),
 		path: atq.path,
@@ -398,6 +423,17 @@ func (atq *AddressTrackerQuery) WithChainProposals(opts ...func(*ChainProposalQu
 		opt(query)
 	}
 	atq.withChainProposals = query
+	return atq
+}
+
+// WithValidator tells the query-builder to eager-load the nodes that are connected to
+// the "validator" edge. The optional arguments are used to configure the query builder of the edge.
+func (atq *AddressTrackerQuery) WithValidator(opts ...func(*ValidatorQuery)) *AddressTrackerQuery {
+	query := (&ValidatorClient{config: atq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	atq.withValidator = query
 	return atq
 }
 
@@ -480,14 +516,15 @@ func (atq *AddressTrackerQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		nodes       = []*AddressTracker{}
 		withFKs     = atq.withFKs
 		_spec       = atq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			atq.withChain != nil,
 			atq.withDiscordChannel != nil,
 			atq.withTelegramChat != nil,
 			atq.withChainProposals != nil,
+			atq.withValidator != nil,
 		}
 	)
-	if atq.withChain != nil || atq.withDiscordChannel != nil || atq.withTelegramChat != nil {
+	if atq.withChain != nil || atq.withDiscordChannel != nil || atq.withTelegramChat != nil || atq.withValidator != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -533,6 +570,12 @@ func (atq *AddressTrackerQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		if err := atq.loadChainProposals(ctx, query, nodes,
 			func(n *AddressTracker) { n.Edges.ChainProposals = []*ChainProposal{} },
 			func(n *AddressTracker, e *ChainProposal) { n.Edges.ChainProposals = append(n.Edges.ChainProposals, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := atq.withValidator; query != nil {
+		if err := atq.loadValidator(ctx, query, nodes, nil,
+			func(n *AddressTracker, e *Validator) { n.Edges.Validator = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -692,6 +735,38 @@ func (atq *AddressTrackerQuery) loadChainProposals(ctx context.Context, query *C
 		}
 		for kn := range nodes {
 			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (atq *AddressTrackerQuery) loadValidator(ctx context.Context, query *ValidatorQuery, nodes []*AddressTracker, init func(*AddressTracker), assign func(*AddressTracker, *Validator)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*AddressTracker)
+	for i := range nodes {
+		if nodes[i].validator_address_trackers == nil {
+			continue
+		}
+		fk := *nodes[i].validator_address_trackers
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(validator.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "validator_address_trackers" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil

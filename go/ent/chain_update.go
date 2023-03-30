@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // ChainUpdate is the builder for updating Chain entities.
@@ -59,14 +60,6 @@ func (cu *ChainUpdate) SetPrettyName(s string) *ChainUpdate {
 // SetPath sets the "path" field.
 func (cu *ChainUpdate) SetPath(s string) *ChainUpdate {
 	cu.mutation.SetPath(s)
-	return cu
-}
-
-// SetNillablePath sets the "path" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillablePath(s *string) *ChainUpdate {
-	if s != nil {
-		cu.SetPath(*s)
-	}
 	return cu
 }
 
@@ -121,14 +114,6 @@ func (cu *ChainUpdate) SetNillableThumbnailURL(s *string) *ChainUpdate {
 // SetBech32Prefix sets the "bech32_prefix" field.
 func (cu *ChainUpdate) SetBech32Prefix(s string) *ChainUpdate {
 	cu.mutation.SetBech32Prefix(s)
-	return cu
-}
-
-// SetNillableBech32Prefix sets the "bech32_prefix" field if the given value is not nil.
-func (cu *ChainUpdate) SetNillableBech32Prefix(s *string) *ChainUpdate {
-	if s != nil {
-		cu.SetBech32Prefix(*s)
-	}
 	return cu
 }
 
@@ -190,6 +175,21 @@ func (cu *ChainUpdate) AddAddressTrackers(a ...*AddressTracker) *ChainUpdate {
 		ids[i] = a[i].ID
 	}
 	return cu.AddAddressTrackerIDs(ids...)
+}
+
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (cu *ChainUpdate) AddValidatorIDs(ids ...int) *ChainUpdate {
+	cu.mutation.AddValidatorIDs(ids...)
+	return cu
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (cu *ChainUpdate) AddValidators(v ...*Validator) *ChainUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return cu.AddValidatorIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -279,6 +279,27 @@ func (cu *ChainUpdate) RemoveAddressTrackers(a ...*AddressTracker) *ChainUpdate 
 		ids[i] = a[i].ID
 	}
 	return cu.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearValidators clears all "validators" edges to the Validator entity.
+func (cu *ChainUpdate) ClearValidators() *ChainUpdate {
+	cu.mutation.ClearValidators()
+	return cu
+}
+
+// RemoveValidatorIDs removes the "validators" edge to Validator entities by IDs.
+func (cu *ChainUpdate) RemoveValidatorIDs(ids ...int) *ChainUpdate {
+	cu.mutation.RemoveValidatorIDs(ids...)
+	return cu
+}
+
+// RemoveValidators removes "validators" edges to Validator entities.
+func (cu *ChainUpdate) RemoveValidators(v ...*Validator) *ChainUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return cu.RemoveValidatorIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -536,6 +557,51 @@ func (cu *ChainUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if cu.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.RemovedValidatorsIDs(); len(nodes) > 0 && !cu.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cu.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{chain.Label}
@@ -583,14 +649,6 @@ func (cuo *ChainUpdateOne) SetPrettyName(s string) *ChainUpdateOne {
 // SetPath sets the "path" field.
 func (cuo *ChainUpdateOne) SetPath(s string) *ChainUpdateOne {
 	cuo.mutation.SetPath(s)
-	return cuo
-}
-
-// SetNillablePath sets the "path" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillablePath(s *string) *ChainUpdateOne {
-	if s != nil {
-		cuo.SetPath(*s)
-	}
 	return cuo
 }
 
@@ -645,14 +703,6 @@ func (cuo *ChainUpdateOne) SetNillableThumbnailURL(s *string) *ChainUpdateOne {
 // SetBech32Prefix sets the "bech32_prefix" field.
 func (cuo *ChainUpdateOne) SetBech32Prefix(s string) *ChainUpdateOne {
 	cuo.mutation.SetBech32Prefix(s)
-	return cuo
-}
-
-// SetNillableBech32Prefix sets the "bech32_prefix" field if the given value is not nil.
-func (cuo *ChainUpdateOne) SetNillableBech32Prefix(s *string) *ChainUpdateOne {
-	if s != nil {
-		cuo.SetBech32Prefix(*s)
-	}
 	return cuo
 }
 
@@ -714,6 +764,21 @@ func (cuo *ChainUpdateOne) AddAddressTrackers(a ...*AddressTracker) *ChainUpdate
 		ids[i] = a[i].ID
 	}
 	return cuo.AddAddressTrackerIDs(ids...)
+}
+
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (cuo *ChainUpdateOne) AddValidatorIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.AddValidatorIDs(ids...)
+	return cuo
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (cuo *ChainUpdateOne) AddValidators(v ...*Validator) *ChainUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return cuo.AddValidatorIDs(ids...)
 }
 
 // Mutation returns the ChainMutation object of the builder.
@@ -803,6 +868,27 @@ func (cuo *ChainUpdateOne) RemoveAddressTrackers(a ...*AddressTracker) *ChainUpd
 		ids[i] = a[i].ID
 	}
 	return cuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearValidators clears all "validators" edges to the Validator entity.
+func (cuo *ChainUpdateOne) ClearValidators() *ChainUpdateOne {
+	cuo.mutation.ClearValidators()
+	return cuo
+}
+
+// RemoveValidatorIDs removes the "validators" edge to Validator entities by IDs.
+func (cuo *ChainUpdateOne) RemoveValidatorIDs(ids ...int) *ChainUpdateOne {
+	cuo.mutation.RemoveValidatorIDs(ids...)
+	return cuo
+}
+
+// RemoveValidators removes "validators" edges to Validator entities.
+func (cuo *ChainUpdateOne) RemoveValidators(v ...*Validator) *ChainUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return cuo.RemoveValidatorIDs(ids...)
 }
 
 // Where appends a list predicates to the ChainUpdate builder.
@@ -1083,6 +1169,51 @@ func (cuo *ChainUpdateOne) sqlSave(ctx context.Context) (_node *Chain, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if cuo.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.RemovedValidatorsIDs(); len(nodes) > 0 && !cuo.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := cuo.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

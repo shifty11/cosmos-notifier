@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // DiscordChannelQuery is the builder for querying DiscordChannel entities.
@@ -30,6 +31,7 @@ type DiscordChannelQuery struct {
 	withContracts       *ContractQuery
 	withChains          *ChainQuery
 	withAddressTrackers *AddressTrackerQuery
+	withValidators      *ValidatorQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -147,6 +149,28 @@ func (dcq *DiscordChannelQuery) QueryAddressTrackers() *AddressTrackerQuery {
 			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
 			sqlgraph.To(addresstracker.Table, addresstracker.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, discordchannel.AddressTrackersTable, discordchannel.AddressTrackersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryValidators chains the current query on the "validators" edge.
+func (dcq *DiscordChannelQuery) QueryValidators() *ValidatorQuery {
+	query := (&ValidatorClient{config: dcq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := dcq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := dcq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(discordchannel.Table, discordchannel.FieldID, selector),
+			sqlgraph.To(validator.Table, validator.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, discordchannel.ValidatorsTable, discordchannel.ValidatorsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(dcq.driver.Dialect(), step)
 		return fromU, nil
@@ -350,6 +374,7 @@ func (dcq *DiscordChannelQuery) Clone() *DiscordChannelQuery {
 		withContracts:       dcq.withContracts.Clone(),
 		withChains:          dcq.withChains.Clone(),
 		withAddressTrackers: dcq.withAddressTrackers.Clone(),
+		withValidators:      dcq.withValidators.Clone(),
 		// clone intermediate query.
 		sql:  dcq.sql.Clone(),
 		path: dcq.path,
@@ -397,6 +422,17 @@ func (dcq *DiscordChannelQuery) WithAddressTrackers(opts ...func(*AddressTracker
 		opt(query)
 	}
 	dcq.withAddressTrackers = query
+	return dcq
+}
+
+// WithValidators tells the query-builder to eager-load the nodes that are connected to
+// the "validators" edge. The optional arguments are used to configure the query builder of the edge.
+func (dcq *DiscordChannelQuery) WithValidators(opts ...func(*ValidatorQuery)) *DiscordChannelQuery {
+	query := (&ValidatorClient{config: dcq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	dcq.withValidators = query
 	return dcq
 }
 
@@ -478,11 +514,12 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	var (
 		nodes       = []*DiscordChannel{}
 		_spec       = dcq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			dcq.withUsers != nil,
 			dcq.withContracts != nil,
 			dcq.withChains != nil,
 			dcq.withAddressTrackers != nil,
+			dcq.withValidators != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -530,6 +567,13 @@ func (dcq *DiscordChannelQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 			func(n *DiscordChannel, e *AddressTracker) {
 				n.Edges.AddressTrackers = append(n.Edges.AddressTrackers, e)
 			}); err != nil {
+			return nil, err
+		}
+	}
+	if query := dcq.withValidators; query != nil {
+		if err := dcq.loadValidators(ctx, query, nodes,
+			func(n *DiscordChannel) { n.Edges.Validators = []*Validator{} },
+			func(n *DiscordChannel, e *Validator) { n.Edges.Validators = append(n.Edges.Validators, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -747,6 +791,67 @@ func (dcq *DiscordChannelQuery) loadAddressTrackers(ctx context.Context, query *
 			return fmt.Errorf(`unexpected foreign-key "discord_channel_address_trackers" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (dcq *DiscordChannelQuery) loadValidators(ctx context.Context, query *ValidatorQuery, nodes []*DiscordChannel, init func(*DiscordChannel), assign func(*DiscordChannel, *Validator)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*DiscordChannel)
+	nids := make(map[int]map[*DiscordChannel]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(discordchannel.ValidatorsTable)
+		s.Join(joinT).On(s.C(validator.FieldID), joinT.C(discordchannel.ValidatorsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(discordchannel.ValidatorsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(discordchannel.ValidatorsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*DiscordChannel]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Validator](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "validators" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // ChainCreate is the builder for creating a Chain entity.
@@ -76,14 +77,6 @@ func (cc *ChainCreate) SetPath(s string) *ChainCreate {
 	return cc
 }
 
-// SetNillablePath sets the "path" field if the given value is not nil.
-func (cc *ChainCreate) SetNillablePath(s *string) *ChainCreate {
-	if s != nil {
-		cc.SetPath(*s)
-	}
-	return cc
-}
-
 // SetDisplay sets the "display" field.
 func (cc *ChainCreate) SetDisplay(s string) *ChainCreate {
 	cc.mutation.SetDisplay(s)
@@ -135,14 +128,6 @@ func (cc *ChainCreate) SetNillableThumbnailURL(s *string) *ChainCreate {
 // SetBech32Prefix sets the "bech32_prefix" field.
 func (cc *ChainCreate) SetBech32Prefix(s string) *ChainCreate {
 	cc.mutation.SetBech32Prefix(s)
-	return cc
-}
-
-// SetNillableBech32Prefix sets the "bech32_prefix" field if the given value is not nil.
-func (cc *ChainCreate) SetNillableBech32Prefix(s *string) *ChainCreate {
-	if s != nil {
-		cc.SetBech32Prefix(*s)
-	}
 	return cc
 }
 
@@ -206,6 +191,21 @@ func (cc *ChainCreate) AddAddressTrackers(a ...*AddressTracker) *ChainCreate {
 	return cc.AddAddressTrackerIDs(ids...)
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (cc *ChainCreate) AddValidatorIDs(ids ...int) *ChainCreate {
+	cc.mutation.AddValidatorIDs(ids...)
+	return cc
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (cc *ChainCreate) AddValidators(v ...*Validator) *ChainCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return cc.AddValidatorIDs(ids...)
+}
+
 // Mutation returns the ChainMutation object of the builder.
 func (cc *ChainCreate) Mutation() *ChainMutation {
 	return cc.mutation
@@ -249,10 +249,6 @@ func (cc *ChainCreate) defaults() {
 		v := chain.DefaultUpdateTime()
 		cc.mutation.SetUpdateTime(v)
 	}
-	if _, ok := cc.mutation.Path(); !ok {
-		v := chain.DefaultPath
-		cc.mutation.SetPath(v)
-	}
 	if _, ok := cc.mutation.Display(); !ok {
 		v := chain.DefaultDisplay
 		cc.mutation.SetDisplay(v)
@@ -264,10 +260,6 @@ func (cc *ChainCreate) defaults() {
 	if _, ok := cc.mutation.ThumbnailURL(); !ok {
 		v := chain.DefaultThumbnailURL
 		cc.mutation.SetThumbnailURL(v)
-	}
-	if _, ok := cc.mutation.Bech32Prefix(); !ok {
-		v := chain.DefaultBech32Prefix
-		cc.mutation.SetBech32Prefix(v)
 	}
 }
 
@@ -433,6 +425,22 @@ func (cc *ChainCreate) createSpec() (*Chain, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   chain.ValidatorsTable,
+			Columns: []string{chain.ValidatorsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -37,17 +37,42 @@ const Tracker$json = const {
 
 /// Descriptor for `Tracker`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List trackerDescriptor = $convert.base64Decode('CgdUcmFja2VyEg4KAmlkGAEgASgDUgJpZBIYCgdhZGRyZXNzGAIgASgJUgdhZGRyZXNzEk0KFG5vdGlmaWNhdGlvbkludGVydmFsGAMgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uUhRub3RpZmljYXRpb25JbnRlcnZhbBJBCghjaGF0Um9vbRgEIAEoCzIlLmNvc21vc19ub3RpZmllcl9ncnBjLlRyYWNrZXJDaGF0Um9vbVIIY2hhdFJvb20SOAoJdXBkYXRlZEF0GAUgASgLMhouZ29vZ2xlLnByb3RvYnVmLlRpbWVzdGFtcFIJdXBkYXRlZEF0');
+@$core.Deprecated('Use validatorDescriptor instead')
+const Validator$json = const {
+  '1': 'Validator',
+  '2': const [
+    const {'1': 'id', '3': 1, '4': 1, '5': 3, '10': 'id'},
+    const {'1': 'address', '3': 2, '4': 1, '5': 9, '10': 'address'},
+    const {'1': 'chain_name', '3': 3, '4': 1, '5': 9, '10': 'chainName'},
+  ],
+};
+
+/// Descriptor for `Validator`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List validatorDescriptor = $convert.base64Decode('CglWYWxpZGF0b3ISDgoCaWQYASABKANSAmlkEhgKB2FkZHJlc3MYAiABKAlSB2FkZHJlc3MSHQoKY2hhaW5fbmFtZRgDIAEoCVIJY2hhaW5OYW1l');
+@$core.Deprecated('Use validatorBundleDescriptor instead')
+const ValidatorBundle$json = const {
+  '1': 'ValidatorBundle',
+  '2': const [
+    const {'1': 'moniker', '3': 1, '4': 1, '5': 9, '10': 'moniker'},
+    const {'1': 'validators', '3': 2, '4': 3, '5': 11, '6': '.cosmos_notifier_grpc.Validator', '10': 'validators'},
+    const {'1': 'is_tracked', '3': 3, '4': 1, '5': 8, '10': 'isTracked'},
+  ],
+};
+
+/// Descriptor for `ValidatorBundle`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List validatorBundleDescriptor = $convert.base64Decode('Cg9WYWxpZGF0b3JCdW5kbGUSGAoHbW9uaWtlchgBIAEoCVIHbW9uaWtlchI/Cgp2YWxpZGF0b3JzGAIgAygLMh8uY29zbW9zX25vdGlmaWVyX2dycGMuVmFsaWRhdG9yUgp2YWxpZGF0b3JzEh0KCmlzX3RyYWNrZWQYAyABKAhSCWlzVHJhY2tlZA==');
 @$core.Deprecated('Use getTrackersResponseDescriptor instead')
 const GetTrackersResponse$json = const {
   '1': 'GetTrackersResponse',
   '2': const [
     const {'1': 'trackers', '3': 1, '4': 3, '5': 11, '6': '.cosmos_notifier_grpc.Tracker', '10': 'trackers'},
     const {'1': 'chatRooms', '3': 2, '4': 3, '5': 11, '6': '.cosmos_notifier_grpc.TrackerChatRoom', '10': 'chatRooms'},
+    const {'1': 'validator_bundles', '3': 3, '4': 3, '5': 11, '6': '.cosmos_notifier_grpc.ValidatorBundle', '10': 'validatorBundles'},
   ],
 };
 
 /// Descriptor for `GetTrackersResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List getTrackersResponseDescriptor = $convert.base64Decode('ChNHZXRUcmFja2Vyc1Jlc3BvbnNlEjkKCHRyYWNrZXJzGAEgAygLMh0uY29zbW9zX25vdGlmaWVyX2dycGMuVHJhY2tlclIIdHJhY2tlcnMSQwoJY2hhdFJvb21zGAIgAygLMiUuY29zbW9zX25vdGlmaWVyX2dycGMuVHJhY2tlckNoYXRSb29tUgljaGF0Um9vbXM=');
+final $typed_data.Uint8List getTrackersResponseDescriptor = $convert.base64Decode('ChNHZXRUcmFja2Vyc1Jlc3BvbnNlEjkKCHRyYWNrZXJzGAEgAygLMh0uY29zbW9zX25vdGlmaWVyX2dycGMuVHJhY2tlclIIdHJhY2tlcnMSQwoJY2hhdFJvb21zGAIgAygLMiUuY29zbW9zX25vdGlmaWVyX2dycGMuVHJhY2tlckNoYXRSb29tUgljaGF0Um9vbXMSUgoRdmFsaWRhdG9yX2J1bmRsZXMYAyADKAsyJS5jb3Ntb3Nfbm90aWZpZXJfZ3JwYy5WYWxpZGF0b3JCdW5kbGVSEHZhbGlkYXRvckJ1bmRsZXM=');
 @$core.Deprecated('Use isAddressValidRequestDescriptor instead')
 const IsAddressValidRequest$json = const {
   '1': 'IsAddressValidRequest',
@@ -102,3 +127,26 @@ const DeleteTrackerRequest$json = const {
 
 /// Descriptor for `DeleteTrackerRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List deleteTrackerRequestDescriptor = $convert.base64Decode('ChREZWxldGVUcmFja2VyUmVxdWVzdBIcCgl0cmFja2VySWQYASABKANSCXRyYWNrZXJJZA==');
+@$core.Deprecated('Use trackValidatorsRequestDescriptor instead')
+const TrackValidatorsRequest$json = const {
+  '1': 'TrackValidatorsRequest',
+  '2': const [
+    const {'1': 'monikers', '3': 1, '4': 3, '5': 9, '10': 'monikers'},
+    const {'1': 'notificationInterval', '3': 2, '4': 1, '5': 11, '6': '.google.protobuf.Duration', '10': 'notificationInterval'},
+    const {'1': 'chatRoom', '3': 3, '4': 1, '5': 11, '6': '.cosmos_notifier_grpc.TrackerChatRoom', '10': 'chatRoom'},
+  ],
+};
+
+/// Descriptor for `TrackValidatorsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List trackValidatorsRequestDescriptor = $convert.base64Decode('ChZUcmFja1ZhbGlkYXRvcnNSZXF1ZXN0EhoKCG1vbmlrZXJzGAEgAygJUghtb25pa2VycxJNChRub3RpZmljYXRpb25JbnRlcnZhbBgCIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvblIUbm90aWZpY2F0aW9uSW50ZXJ2YWwSQQoIY2hhdFJvb20YAyABKAsyJS5jb3Ntb3Nfbm90aWZpZXJfZ3JwYy5UcmFja2VyQ2hhdFJvb21SCGNoYXRSb29t');
+@$core.Deprecated('Use trackValidatorsResponseDescriptor instead')
+const TrackValidatorsResponse$json = const {
+  '1': 'TrackValidatorsResponse',
+  '2': const [
+    const {'1': 'addedTrackers', '3': 1, '4': 3, '5': 11, '6': '.cosmos_notifier_grpc.Tracker', '10': 'addedTrackers'},
+    const {'1': 'deletedTrackerIds', '3': 2, '4': 3, '5': 3, '10': 'deletedTrackerIds'},
+  ],
+};
+
+/// Descriptor for `TrackValidatorsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List trackValidatorsResponseDescriptor = $convert.base64Decode('ChdUcmFja1ZhbGlkYXRvcnNSZXNwb25zZRJDCg1hZGRlZFRyYWNrZXJzGAEgAygLMh0uY29zbW9zX25vdGlmaWVyX2dycGMuVHJhY2tlclINYWRkZWRUcmFja2VycxIsChFkZWxldGVkVHJhY2tlcklkcxgCIAMoA1IRZGVsZXRlZFRyYWNrZXJJZHM=');

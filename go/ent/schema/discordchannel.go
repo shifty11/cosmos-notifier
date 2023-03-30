@@ -41,5 +41,7 @@ func (DiscordChannel) Edges() []ent.Edge {
 			Annotations(entsql.Annotation{
 				OnDelete: entsql.Cascade,
 			}),
+		edge.From("validators", Validator.Type).
+			Ref("discord_channels"),
 	}
 }

@@ -12,19 +12,23 @@ import (
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/pbcommon"
 	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service"
+	"golang.org/x/exp/slices"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"sort"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
 type TrackerServer struct {
 	pb.UnimplementedTrackerServiceServer
 	addressTrackerManager *database.AddressTrackerManager
+	validatorManager      *database.ValidatorManager
 }
 
 func NewTrackerServer(managers *database.DbManagers) pb.TrackerServiceServer {
 	return &TrackerServer{
 		addressTrackerManager: managers.AddressTrackerManager,
+		validatorManager:      managers.ValidatorManager,
 	}
 }
 
@@ -99,6 +103,35 @@ func getTelegramChatIdOrZero(chatRoom *pb.TrackerChatRoom) int {
 	}
 }
 
+func toValidatorBundles(validators []*ent.Validator, trackedMonikers map[string]bool) []*pb.ValidatorBundle {
+	bundles := make(map[string]*pb.ValidatorBundle)
+	for _, validator := range validators {
+		var pbValidator = &pb.Validator{
+			Id:        int64(validator.ID),
+			Address:   validator.Address,
+			ChainName: validator.Edges.Chain.PrettyName,
+		}
+		if _, ok := bundles[validator.Moniker]; ok {
+			bundles[validator.Moniker].Validators = append(bundles[validator.Moniker].Validators, pbValidator)
+		} else {
+			var isTracked = trackedMonikers[validator.Moniker]
+			bundles[validator.Moniker] = &pb.ValidatorBundle{
+				Moniker:    validator.Moniker,
+				Validators: []*pb.Validator{pbValidator},
+				IsTracked:  isTracked,
+			}
+		}
+	}
+	validatorBundles := make([]*pb.ValidatorBundle, 0, len(bundles))
+	for _, bundle := range bundles {
+		validatorBundles = append(validatorBundles, bundle)
+	}
+	sort.Slice(validatorBundles, func(i, j int) bool {
+		return validatorBundles[i].Moniker < validatorBundles[j].Moniker
+	})
+	return validatorBundles
+}
+
 func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*pb.GetTrackersResponse, error) {
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
@@ -106,7 +139,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	trackers, err := server.addressTrackerManager.GetTrackers(userEnt)
+	trackers, err := server.addressTrackerManager.All(userEnt)
 	if err != nil {
 		log.Sugar.Error(err)
 		return nil, status.Errorf(codes.Internal, "error while getting trackers")
@@ -128,6 +161,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 	}
 
 	var pbTrackerChatRooms []*pb.TrackerChatRoom
+	var trackedMonikers = make(map[string]bool)
 	discordChannels, telegramChats, err := server.addressTrackerManager.GetChatRooms(userEnt)
 	if err != nil {
 		log.Sugar.Error(err)
@@ -141,6 +175,11 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 				ChannelId: trackerChatRoom.ChannelID,
 			}},
 		})
+		if trackerChatRoom.Edges.Validators != nil {
+			for _, validator := range trackerChatRoom.Edges.Validators {
+				trackedMonikers[validator.Moniker] = true
+			}
+		}
 	}
 	for _, trackerChatRoom := range telegramChats {
 		pbTrackerChatRooms = append(pbTrackerChatRooms, &pb.TrackerChatRoom{
@@ -150,8 +189,21 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 				ChatId: trackerChatRoom.ChatID,
 			}},
 		})
+		if trackerChatRoom.Edges.Validators != nil {
+			for _, validator := range trackerChatRoom.Edges.Validators {
+				trackedMonikers[validator.Moniker] = true
+			}
+		}
 	}
-	return &pb.GetTrackersResponse{Trackers: pbTrackers, ChatRooms: pbTrackerChatRooms}, nil
+
+	validators := server.validatorManager.GetActive()
+	pbValidatorBundles := toValidatorBundles(validators, trackedMonikers)
+
+	return &pb.GetTrackersResponse{
+		Trackers:         pbTrackers,
+		ChatRooms:        pbTrackerChatRooms,
+		ValidatorBundles: pbValidatorBundles,
+	}, nil
 }
 
 func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddressValidRequest) (*pb.IsAddressValidResponse, error) {
@@ -250,4 +302,97 @@ func (server *TrackerServer) DeleteTracker(ctx context.Context, req *pb.DeleteTr
 	}
 
 	return &empty.Empty{}, nil
+}
+
+func (server *TrackerServer) getToBeUntrackedValidators(req *pb.TrackValidatorsRequest, previousValidators []*ent.Validator) []*ent.Validator {
+	var validators []*ent.Validator
+	for _, previousValidator := range previousValidators {
+		if !slices.Contains(req.GetMonikers(), previousValidator.Moniker) {
+			validators = append(validators, previousValidator)
+		}
+	}
+	return validators
+}
+
+func (server *TrackerServer) getToBeTrackedValidators(req *pb.TrackValidatorsRequest, previousValidators []*ent.Validator) []*ent.Validator {
+	var newValidators []*ent.Validator
+	for _, moniker := range req.GetMonikers() {
+		validators := server.validatorManager.GetByMoniker(moniker)
+		for _, validator := range validators {
+			containsFunc := func(prev *ent.Validator) bool {
+				return prev.Address == validator.Address
+			}
+			if !slices.ContainsFunc(previousValidators, containsFunc) {
+				newValidators = append(newValidators, validator)
+			}
+		}
+	}
+	return newValidators
+}
+
+func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackValidatorsRequest) (*pb.TrackValidatorsResponse, error) {
+	userEnt, ok := ctx.Value("user").(*ent.User)
+	if !ok {
+		log.Sugar.Error("invalid user")
+		return nil, status.Errorf(codes.NotFound, "invalid user")
+	}
+
+	var deletedTrackerIds []int64
+	previousValidators, err := server.validatorManager.GetForUser(userEnt)
+	if err != nil {
+		log.Sugar.Errorf("error while getting previous validators: %v", err)
+		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+	}
+
+	var toBeTrackedValidators = server.getToBeTrackedValidators(req, previousValidators)
+	if len(toBeTrackedValidators) > 0 {
+		if req.NotificationInterval == nil || req.NotificationInterval.Seconds < 0 {
+			return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
+		}
+		if err := validateChatRoom(req.ChatRoom); err != nil {
+			return nil, err
+		}
+	}
+	var toBeUntrackedValidators = server.getToBeUntrackedValidators(req, previousValidators)
+
+	// TODO: can I do the deletion and addition in a single transaction?
+	for _, previousValidator := range toBeUntrackedValidators {
+		result, err := server.validatorManager.UntrackValidator(userEnt, previousValidator)
+		if err != nil {
+			log.Sugar.Errorf("error while untracking validator: %v", err)
+			return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+		}
+		for _, id := range result {
+			deletedTrackerIds = append(deletedTrackerIds, int64(id))
+		}
+	}
+
+	var trackers []*pb.Tracker
+	for _, newValidator := range toBeTrackedValidators {
+		discordChannelId := getDiscordChannelIdOrZero(req.ChatRoom)
+		telegramChatId := getTelegramChatIdOrZero(req.ChatRoom)
+		tracker, err := server.validatorManager.TrackValidator(userEnt, newValidator, discordChannelId, telegramChatId, req.NotificationInterval.Seconds)
+		if err != nil {
+			log.Sugar.Errorf("error while tracking validator: %v", err)
+			return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+		}
+		if tracker != nil {
+			chatRoom, err := getTrackerChatRoom(tracker)
+			if err != nil {
+				return nil, status.Errorf(codes.Internal, "error while adding tracker")
+			}
+			trackers = append(trackers, &pb.Tracker{
+				Id:                   int64(tracker.ID),
+				Address:              tracker.Address,
+				NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
+				ChatRoom:             chatRoom,
+				UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
+			})
+		}
+	}
+
+	return &pb.TrackValidatorsResponse{
+		AddedTrackers:     trackers,
+		DeletedTrackerIds: deletedTrackerIds,
+	}, nil
 }

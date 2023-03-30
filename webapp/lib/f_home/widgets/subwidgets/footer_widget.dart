@@ -1,7 +1,9 @@
+import 'package:cosmos_notifier/config.dart';
+import 'package:cosmos_notifier/f_home/widgets/subwidgets/admin_widget.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:cosmos_notifier/config.dart';
 
 class FooterWidget extends StatelessWidget {
   const FooterWidget({Key? key}) : super(key: key);
@@ -47,6 +49,7 @@ class FooterWidget extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
+        kReleaseMode ? Container() : const AdminWidget(),
       ],
     );
   }

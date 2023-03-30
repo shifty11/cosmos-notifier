@@ -18,6 +18,7 @@ var (
 		{Name: "chain_address_trackers", Type: field.TypeInt},
 		{Name: "discord_channel_address_trackers", Type: field.TypeInt, Nullable: true},
 		{Name: "telegram_chat_address_trackers", Type: field.TypeInt, Nullable: true},
+		{Name: "validator_address_trackers", Type: field.TypeInt, Nullable: true},
 	}
 	// AddressTrackersTable holds the schema information for the "address_trackers" table.
 	AddressTrackersTable = &schema.Table{
@@ -43,11 +44,17 @@ var (
 				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
+			{
+				Symbol:     "address_trackers_validators_address_trackers",
+				Columns:    []*schema.Column{AddressTrackersColumns[8]},
+				RefColumns: []*schema.Column{ValidatorsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 		},
 		Indexes: []*schema.Index{
 			{
 				Name:    "addresstracker_address_chain_address_trackers_discord_channel_address_trackers_telegram_chat_address_trackers",
-				Unique:  true,
+				Unique:  false,
 				Columns: []*schema.Column{AddressTrackersColumns[3], AddressTrackersColumns[5], AddressTrackersColumns[6], AddressTrackersColumns[7]},
 			},
 		},
@@ -60,12 +67,12 @@ var (
 		{Name: "chain_id", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "pretty_name", Type: field.TypeString, Unique: true},
-		{Name: "path", Type: field.TypeString, Default: ""},
+		{Name: "path", Type: field.TypeString},
 		{Name: "display", Type: field.TypeString, Default: ""},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
 		{Name: "image_url", Type: field.TypeString},
 		{Name: "thumbnail_url", Type: field.TypeString, Default: ""},
-		{Name: "bech32_prefix", Type: field.TypeString, Default: ""},
+		{Name: "bech32_prefix", Type: field.TypeString},
 	}
 	// ChainsTable holds the schema information for the "chains" table.
 	ChainsTable = &schema.Table{
@@ -205,6 +212,58 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// ValidatorsColumns holds the columns for the "validators" table.
+	ValidatorsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "create_time", Type: field.TypeTime},
+		{Name: "update_time", Type: field.TypeTime},
+		{Name: "operator_address", Type: field.TypeString, Unique: true},
+		{Name: "address", Type: field.TypeString, Unique: true},
+		{Name: "moniker", Type: field.TypeString},
+		{Name: "first_inactive_time", Type: field.TypeTime, Nullable: true},
+		{Name: "chain_validators", Type: field.TypeInt},
+	}
+	// ValidatorsTable holds the schema information for the "validators" table.
+	ValidatorsTable = &schema.Table{
+		Name:       "validators",
+		Columns:    ValidatorsColumns,
+		PrimaryKey: []*schema.Column{ValidatorsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "validators_chains_validators",
+				Columns:    []*schema.Column{ValidatorsColumns[7]},
+				RefColumns: []*schema.Column{ChainsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+		Indexes: []*schema.Index{
+			{
+				Name:    "validator_operator_address",
+				Unique:  false,
+				Columns: []*schema.Column{ValidatorsColumns[3]},
+			},
+			{
+				Name:    "validator_address",
+				Unique:  false,
+				Columns: []*schema.Column{ValidatorsColumns[4]},
+			},
+			{
+				Name:    "validator_moniker",
+				Unique:  false,
+				Columns: []*schema.Column{ValidatorsColumns[5]},
+			},
+			{
+				Name:    "validator_moniker_operator_address_chain_validators",
+				Unique:  true,
+				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[3], ValidatorsColumns[7]},
+			},
+			{
+				Name:    "validator_moniker_address_chain_validators",
+				Unique:  true,
+				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[4], ValidatorsColumns[7]},
+			},
+		},
 	}
 	// AddressTrackerChainProposalsColumns holds the columns for the "address_tracker_chain_proposals" table.
 	AddressTrackerChainProposalsColumns = []*schema.Column{
@@ -381,6 +440,56 @@ var (
 			},
 		},
 	}
+	// ValidatorTelegramChatsColumns holds the columns for the "validator_telegram_chats" table.
+	ValidatorTelegramChatsColumns = []*schema.Column{
+		{Name: "validator_id", Type: field.TypeInt},
+		{Name: "telegram_chat_id", Type: field.TypeInt},
+	}
+	// ValidatorTelegramChatsTable holds the schema information for the "validator_telegram_chats" table.
+	ValidatorTelegramChatsTable = &schema.Table{
+		Name:       "validator_telegram_chats",
+		Columns:    ValidatorTelegramChatsColumns,
+		PrimaryKey: []*schema.Column{ValidatorTelegramChatsColumns[0], ValidatorTelegramChatsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "validator_telegram_chats_validator_id",
+				Columns:    []*schema.Column{ValidatorTelegramChatsColumns[0]},
+				RefColumns: []*schema.Column{ValidatorsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "validator_telegram_chats_telegram_chat_id",
+				Columns:    []*schema.Column{ValidatorTelegramChatsColumns[1]},
+				RefColumns: []*schema.Column{TelegramChatsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// ValidatorDiscordChannelsColumns holds the columns for the "validator_discord_channels" table.
+	ValidatorDiscordChannelsColumns = []*schema.Column{
+		{Name: "validator_id", Type: field.TypeInt},
+		{Name: "discord_channel_id", Type: field.TypeInt},
+	}
+	// ValidatorDiscordChannelsTable holds the schema information for the "validator_discord_channels" table.
+	ValidatorDiscordChannelsTable = &schema.Table{
+		Name:       "validator_discord_channels",
+		Columns:    ValidatorDiscordChannelsColumns,
+		PrimaryKey: []*schema.Column{ValidatorDiscordChannelsColumns[0], ValidatorDiscordChannelsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "validator_discord_channels_validator_id",
+				Columns:    []*schema.Column{ValidatorDiscordChannelsColumns[0]},
+				RefColumns: []*schema.Column{ValidatorsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "validator_discord_channels_discord_channel_id",
+				Columns:    []*schema.Column{ValidatorDiscordChannelsColumns[1]},
+				RefColumns: []*schema.Column{DiscordChannelsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AddressTrackersTable,
@@ -391,6 +500,7 @@ var (
 		DiscordChannelsTable,
 		TelegramChatsTable,
 		UsersTable,
+		ValidatorsTable,
 		AddressTrackerChainProposalsTable,
 		DiscordChannelUsersTable,
 		DiscordChannelContractsTable,
@@ -398,6 +508,8 @@ var (
 		TelegramChatUsersTable,
 		TelegramChatContractsTable,
 		TelegramChatChainsTable,
+		ValidatorTelegramChatsTable,
+		ValidatorDiscordChannelsTable,
 	}
 )
 
@@ -405,8 +517,10 @@ func init() {
 	AddressTrackersTable.ForeignKeys[0].RefTable = ChainsTable
 	AddressTrackersTable.ForeignKeys[1].RefTable = DiscordChannelsTable
 	AddressTrackersTable.ForeignKeys[2].RefTable = TelegramChatsTable
+	AddressTrackersTable.ForeignKeys[3].RefTable = ValidatorsTable
 	ChainProposalsTable.ForeignKeys[0].RefTable = ChainsTable
 	ContractProposalsTable.ForeignKeys[0].RefTable = ContractsTable
+	ValidatorsTable.ForeignKeys[0].RefTable = ChainsTable
 	AddressTrackerChainProposalsTable.ForeignKeys[0].RefTable = AddressTrackersTable
 	AddressTrackerChainProposalsTable.ForeignKeys[1].RefTable = ChainProposalsTable
 	DiscordChannelUsersTable.ForeignKeys[0].RefTable = DiscordChannelsTable
@@ -421,4 +535,8 @@ func init() {
 	TelegramChatContractsTable.ForeignKeys[1].RefTable = ContractsTable
 	TelegramChatChainsTable.ForeignKeys[0].RefTable = TelegramChatsTable
 	TelegramChatChainsTable.ForeignKeys[1].RefTable = ChainsTable
+	ValidatorTelegramChatsTable.ForeignKeys[0].RefTable = ValidatorsTable
+	ValidatorTelegramChatsTable.ForeignKeys[1].RefTable = TelegramChatsTable
+	ValidatorDiscordChannelsTable.ForeignKeys[0].RefTable = ValidatorsTable
+	ValidatorDiscordChannelsTable.ForeignKeys[1].RefTable = DiscordChannelsTable
 }

@@ -13,6 +13,7 @@ import (
 	discordService "github.com/shifty11/cosmos-notifier/services/discord"
 	"github.com/shifty11/cosmos-notifier/services/grpc"
 	"github.com/shifty11/cosmos-notifier/services/telegram"
+	"github.com/shifty11/cosmos-notifier/services/validator_crawler"
 	"golang.org/x/oauth2"
 	"os"
 	"os/signal"
@@ -128,6 +129,25 @@ var runContractCrawlerCmd = &cobra.Command{
 	},
 }
 
+// runValidatorCrawlerCmd represents the startValidatorCrawler command
+var runValidatorCrawlerCmd = &cobra.Command{
+	Use:   "validator-crawler",
+	Short: "Start the validator crawler",
+	Run: func(cmd *cobra.Command, args []string) {
+		managers := database.NewDefaultDbManagers()
+		crawler := validator_crawler.NewValidatorCrawler(managers)
+		crawler.AddOrUpdateValidators()
+
+		if cmd.Flag("repeat").Value.String() == "true" {
+			crawler.ScheduleCrawl()
+
+			stop := make(chan os.Signal, 1)
+			signal.Notify(stop, syscall.SIGINT)
+			<-stop
+		}
+	},
+}
+
 // startGrpcServerCmd represents the grpc command
 var startGrpcServerCmd = &cobra.Command{
 	Use:   "grpc",
@@ -179,8 +199,11 @@ func init() {
 	serviceCmd.AddCommand(startDiscordBotCmd)
 
 	serviceCmd.AddCommand(runChainCrawlerCmd)
-	runChainCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling every hour")
+	runChainCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling periodically")
 
 	serviceCmd.AddCommand(runContractCrawlerCmd)
-	runContractCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling every hour")
+	runContractCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling periodically")
+
+	serviceCmd.AddCommand(runValidatorCrawlerCmd)
+	runValidatorCrawlerCmd.PersistentFlags().Bool("repeat", false, "Repeat crawling periodically")
 }

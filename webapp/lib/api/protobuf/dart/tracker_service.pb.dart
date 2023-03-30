@@ -10,9 +10,9 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'pbcommon.pb.dart' as $5;
-import 'google/protobuf/duration.pb.dart' as $6;
-import 'google/protobuf/timestamp.pb.dart' as $7;
+import 'pbcommon.pb.dart' as $6;
+import 'google/protobuf/duration.pb.dart' as $7;
+import 'google/protobuf/timestamp.pb.dart' as $8;
 
 enum TrackerChatRoom_Type {
   discord, 
@@ -29,16 +29,16 @@ class TrackerChatRoom extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackerChatRoom', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..oo(0, [2, 3])
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOM<$5.DiscordType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discord', subBuilder: $5.DiscordType.create)
-    ..aOM<$5.TelegramType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegram', subBuilder: $5.TelegramType.create)
+    ..aOM<$6.DiscordType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discord', subBuilder: $6.DiscordType.create)
+    ..aOM<$6.TelegramType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegram', subBuilder: $6.TelegramType.create)
     ..hasRequiredFields = false
   ;
 
   TrackerChatRoom._() : super();
   factory TrackerChatRoom({
     $core.String? name,
-    $5.DiscordType? discord,
-    $5.TelegramType? telegram,
+    $6.DiscordType? discord,
+    $6.TelegramType? telegram,
   }) {
     final _result = create();
     if (name != null) {
@@ -86,35 +86,35 @@ class TrackerChatRoom extends $pb.GeneratedMessage {
   void clearName() => clearField(1);
 
   @$pb.TagNumber(2)
-  $5.DiscordType get discord => $_getN(1);
+  $6.DiscordType get discord => $_getN(1);
   @$pb.TagNumber(2)
-  set discord($5.DiscordType v) { setField(2, v); }
+  set discord($6.DiscordType v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasDiscord() => $_has(1);
   @$pb.TagNumber(2)
   void clearDiscord() => clearField(2);
   @$pb.TagNumber(2)
-  $5.DiscordType ensureDiscord() => $_ensure(1);
+  $6.DiscordType ensureDiscord() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $5.TelegramType get telegram => $_getN(2);
+  $6.TelegramType get telegram => $_getN(2);
   @$pb.TagNumber(3)
-  set telegram($5.TelegramType v) { setField(3, v); }
+  set telegram($6.TelegramType v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasTelegram() => $_has(2);
   @$pb.TagNumber(3)
   void clearTelegram() => clearField(3);
   @$pb.TagNumber(3)
-  $5.TelegramType ensureTelegram() => $_ensure(2);
+  $6.TelegramType ensureTelegram() => $_ensure(2);
 }
 
 class Tracker extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Tracker', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$6.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $6.Duration.create)
+    ..aOM<$7.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
     ..aOM<TrackerChatRoom>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
-    ..aOM<$7.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $7.Timestamp.create)
+    ..aOM<$8.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $8.Timestamp.create)
     ..hasRequiredFields = false
   ;
 
@@ -122,9 +122,9 @@ class Tracker extends $pb.GeneratedMessage {
   factory Tracker({
     $fixnum.Int64? id,
     $core.String? address,
-    $6.Duration? notificationInterval,
+    $7.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
-    $7.Timestamp? updatedAt,
+    $8.Timestamp? updatedAt,
   }) {
     final _result = create();
     if (id != null) {
@@ -184,15 +184,15 @@ class Tracker extends $pb.GeneratedMessage {
   void clearAddress() => clearField(2);
 
   @$pb.TagNumber(3)
-  $6.Duration get notificationInterval => $_getN(2);
+  $7.Duration get notificationInterval => $_getN(2);
   @$pb.TagNumber(3)
-  set notificationInterval($6.Duration v) { setField(3, v); }
+  set notificationInterval($7.Duration v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasNotificationInterval() => $_has(2);
   @$pb.TagNumber(3)
   void clearNotificationInterval() => clearField(3);
   @$pb.TagNumber(3)
-  $6.Duration ensureNotificationInterval() => $_ensure(2);
+  $7.Duration ensureNotificationInterval() => $_ensure(2);
 
   @$pb.TagNumber(4)
   TrackerChatRoom get chatRoom => $_getN(3);
@@ -206,21 +206,166 @@ class Tracker extends $pb.GeneratedMessage {
   TrackerChatRoom ensureChatRoom() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $7.Timestamp get updatedAt => $_getN(4);
+  $8.Timestamp get updatedAt => $_getN(4);
   @$pb.TagNumber(5)
-  set updatedAt($7.Timestamp v) { setField(5, v); }
+  set updatedAt($8.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasUpdatedAt() => $_has(4);
   @$pb.TagNumber(5)
   void clearUpdatedAt() => clearField(5);
   @$pb.TagNumber(5)
-  $7.Timestamp ensureUpdatedAt() => $_ensure(4);
+  $8.Timestamp ensureUpdatedAt() => $_ensure(4);
+}
+
+class Validator extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Validator', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
+    ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
+    ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chainName')
+    ..hasRequiredFields = false
+  ;
+
+  Validator._() : super();
+  factory Validator({
+    $fixnum.Int64? id,
+    $core.String? address,
+    $core.String? chainName,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (address != null) {
+      _result.address = address;
+    }
+    if (chainName != null) {
+      _result.chainName = chainName;
+    }
+    return _result;
+  }
+  factory Validator.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory Validator.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  Validator clone() => Validator()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  Validator copyWith(void Function(Validator) updates) => super.copyWith((message) => updates(message as Validator)) as Validator; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Validator create() => Validator._();
+  Validator createEmptyInstance() => create();
+  static $pb.PbList<Validator> createRepeated() => $pb.PbList<Validator>();
+  @$core.pragma('dart2js:noInline')
+  static Validator getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Validator>(create);
+  static Validator? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 v) { $_setInt64(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get address => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set address($core.String v) { $_setString(1, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasAddress() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAddress() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get chainName => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set chainName($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasChainName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearChainName() => clearField(3);
+}
+
+class ValidatorBundle extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ValidatorBundle', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'moniker')
+    ..pc<Validator>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validators', $pb.PbFieldType.PM, subBuilder: Validator.create)
+    ..aOB(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'isTracked')
+    ..hasRequiredFields = false
+  ;
+
+  ValidatorBundle._() : super();
+  factory ValidatorBundle({
+    $core.String? moniker,
+    $core.Iterable<Validator>? validators,
+    $core.bool? isTracked,
+  }) {
+    final _result = create();
+    if (moniker != null) {
+      _result.moniker = moniker;
+    }
+    if (validators != null) {
+      _result.validators.addAll(validators);
+    }
+    if (isTracked != null) {
+      _result.isTracked = isTracked;
+    }
+    return _result;
+  }
+  factory ValidatorBundle.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ValidatorBundle.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  ValidatorBundle clone() => ValidatorBundle()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  ValidatorBundle copyWith(void Function(ValidatorBundle) updates) => super.copyWith((message) => updates(message as ValidatorBundle)) as ValidatorBundle; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ValidatorBundle create() => ValidatorBundle._();
+  ValidatorBundle createEmptyInstance() => create();
+  static $pb.PbList<ValidatorBundle> createRepeated() => $pb.PbList<ValidatorBundle>();
+  @$core.pragma('dart2js:noInline')
+  static ValidatorBundle getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ValidatorBundle>(create);
+  static ValidatorBundle? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get moniker => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set moniker($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasMoniker() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearMoniker() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.List<Validator> get validators => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.bool get isTracked => $_getBF(2);
+  @$pb.TagNumber(3)
+  set isTracked($core.bool v) { $_setBool(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasIsTracked() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearIsTracked() => clearField(3);
 }
 
 class GetTrackersResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetTrackersResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..pc<Tracker>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackers', $pb.PbFieldType.PM, subBuilder: Tracker.create)
     ..pc<TrackerChatRoom>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRooms', $pb.PbFieldType.PM, protoName: 'chatRooms', subBuilder: TrackerChatRoom.create)
+    ..pc<ValidatorBundle>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorBundles', $pb.PbFieldType.PM, subBuilder: ValidatorBundle.create)
     ..hasRequiredFields = false
   ;
 
@@ -228,6 +373,7 @@ class GetTrackersResponse extends $pb.GeneratedMessage {
   factory GetTrackersResponse({
     $core.Iterable<Tracker>? trackers,
     $core.Iterable<TrackerChatRoom>? chatRooms,
+    $core.Iterable<ValidatorBundle>? validatorBundles,
   }) {
     final _result = create();
     if (trackers != null) {
@@ -235,6 +381,9 @@ class GetTrackersResponse extends $pb.GeneratedMessage {
     }
     if (chatRooms != null) {
       _result.chatRooms.addAll(chatRooms);
+    }
+    if (validatorBundles != null) {
+      _result.validatorBundles.addAll(validatorBundles);
     }
     return _result;
   }
@@ -264,6 +413,9 @@ class GetTrackersResponse extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(2)
   $core.List<TrackerChatRoom> get chatRooms => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $core.List<ValidatorBundle> get validatorBundles => $_getList(2);
 }
 
 class IsAddressValidRequest extends $pb.GeneratedMessage {
@@ -363,7 +515,7 @@ class IsAddressValidResponse extends $pb.GeneratedMessage {
 class AddTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$6.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $6.Duration.create)
+    ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
     ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
@@ -371,7 +523,7 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
   AddTrackerRequest._() : super();
   factory AddTrackerRequest({
     $core.String? address,
-    $6.Duration? notificationInterval,
+    $7.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
@@ -417,15 +569,15 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
   void clearAddress() => clearField(1);
 
   @$pb.TagNumber(2)
-  $6.Duration get notificationInterval => $_getN(1);
+  $7.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($6.Duration v) { setField(2, v); }
+  set notificationInterval($7.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
   @$pb.TagNumber(2)
-  $6.Duration ensureNotificationInterval() => $_ensure(1);
+  $7.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   TrackerChatRoom get chatRoom => $_getN(2);
@@ -442,7 +594,7 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
 class UpdateTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
-    ..aOM<$6.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $6.Duration.create)
+    ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
     ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
@@ -450,7 +602,7 @@ class UpdateTrackerRequest extends $pb.GeneratedMessage {
   UpdateTrackerRequest._() : super();
   factory UpdateTrackerRequest({
     $fixnum.Int64? trackerId,
-    $6.Duration? notificationInterval,
+    $7.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
@@ -496,15 +648,15 @@ class UpdateTrackerRequest extends $pb.GeneratedMessage {
   void clearTrackerId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $6.Duration get notificationInterval => $_getN(1);
+  $7.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($6.Duration v) { setField(2, v); }
+  set notificationInterval($7.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
   @$pb.TagNumber(2)
-  $6.Duration ensureNotificationInterval() => $_ensure(1);
+  $7.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   TrackerChatRoom get chatRoom => $_getN(2);
@@ -563,5 +715,127 @@ class DeleteTrackerRequest extends $pb.GeneratedMessage {
   $core.bool hasTrackerId() => $_has(0);
   @$pb.TagNumber(1)
   void clearTrackerId() => clearField(1);
+}
+
+class TrackValidatorsRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackValidatorsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'monikers')
+    ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
+    ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
+    ..hasRequiredFields = false
+  ;
+
+  TrackValidatorsRequest._() : super();
+  factory TrackValidatorsRequest({
+    $core.Iterable<$core.String>? monikers,
+    $7.Duration? notificationInterval,
+    TrackerChatRoom? chatRoom,
+  }) {
+    final _result = create();
+    if (monikers != null) {
+      _result.monikers.addAll(monikers);
+    }
+    if (notificationInterval != null) {
+      _result.notificationInterval = notificationInterval;
+    }
+    if (chatRoom != null) {
+      _result.chatRoom = chatRoom;
+    }
+    return _result;
+  }
+  factory TrackValidatorsRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory TrackValidatorsRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  TrackValidatorsRequest clone() => TrackValidatorsRequest()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  TrackValidatorsRequest copyWith(void Function(TrackValidatorsRequest) updates) => super.copyWith((message) => updates(message as TrackValidatorsRequest)) as TrackValidatorsRequest; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TrackValidatorsRequest create() => TrackValidatorsRequest._();
+  TrackValidatorsRequest createEmptyInstance() => create();
+  static $pb.PbList<TrackValidatorsRequest> createRepeated() => $pb.PbList<TrackValidatorsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static TrackValidatorsRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackValidatorsRequest>(create);
+  static TrackValidatorsRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<$core.String> get monikers => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $7.Duration get notificationInterval => $_getN(1);
+  @$pb.TagNumber(2)
+  set notificationInterval($7.Duration v) { setField(2, v); }
+  @$pb.TagNumber(2)
+  $core.bool hasNotificationInterval() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearNotificationInterval() => clearField(2);
+  @$pb.TagNumber(2)
+  $7.Duration ensureNotificationInterval() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  TrackerChatRoom get chatRoom => $_getN(2);
+  @$pb.TagNumber(3)
+  set chatRoom(TrackerChatRoom v) { setField(3, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasChatRoom() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearChatRoom() => clearField(3);
+  @$pb.TagNumber(3)
+  TrackerChatRoom ensureChatRoom() => $_ensure(2);
+}
+
+class TrackValidatorsResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackValidatorsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+    ..pc<Tracker>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'addedTrackers', $pb.PbFieldType.PM, protoName: 'addedTrackers', subBuilder: Tracker.create)
+    ..p<$fixnum.Int64>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'deletedTrackerIds', $pb.PbFieldType.K6, protoName: 'deletedTrackerIds')
+    ..hasRequiredFields = false
+  ;
+
+  TrackValidatorsResponse._() : super();
+  factory TrackValidatorsResponse({
+    $core.Iterable<Tracker>? addedTrackers,
+    $core.Iterable<$fixnum.Int64>? deletedTrackerIds,
+  }) {
+    final _result = create();
+    if (addedTrackers != null) {
+      _result.addedTrackers.addAll(addedTrackers);
+    }
+    if (deletedTrackerIds != null) {
+      _result.deletedTrackerIds.addAll(deletedTrackerIds);
+    }
+    return _result;
+  }
+  factory TrackValidatorsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory TrackValidatorsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  TrackValidatorsResponse clone() => TrackValidatorsResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  TrackValidatorsResponse copyWith(void Function(TrackValidatorsResponse) updates) => super.copyWith((message) => updates(message as TrackValidatorsResponse)) as TrackValidatorsResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TrackValidatorsResponse create() => TrackValidatorsResponse._();
+  TrackValidatorsResponse createEmptyInstance() => create();
+  static $pb.PbList<TrackValidatorsResponse> createRepeated() => $pb.PbList<TrackValidatorsResponse>();
+  @$core.pragma('dart2js:noInline')
+  static TrackValidatorsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackValidatorsResponse>(create);
+  static TrackValidatorsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<Tracker> get addedTrackers => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<$fixnum.Int64> get deletedTrackerIds => $_getList(1);
 }
 

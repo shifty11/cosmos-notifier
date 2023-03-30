@@ -15,6 +15,7 @@ service TrackerService {
   rpc AddTracker (AddTrackerRequest) returns (Tracker) {}
   rpc UpdateTracker (UpdateTrackerRequest) returns (Tracker) {}
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
+  rpc TrackValidators (TrackValidatorsRequest) returns (TrackValidatorsResponse) {}
 }
 
 message TrackerChatRoom {
@@ -33,9 +34,22 @@ message Tracker {
   google.protobuf.Timestamp updatedAt = 5;
 }
 
+message Validator {
+  int64 id = 1;
+  string address = 2;
+  string chain_name = 3;
+}
+
+message ValidatorBundle {
+  string moniker = 1;
+  repeated Validator validators = 2;
+  bool is_tracked = 3;
+}
+
 message GetTrackersResponse {
   repeated Tracker trackers = 1;
   repeated TrackerChatRoom chatRooms = 2;
+  repeated ValidatorBundle validator_bundles = 3;
 }
 
 message IsAddressValidRequest {
@@ -60,4 +74,15 @@ message UpdateTrackerRequest {
 
 message DeleteTrackerRequest {
   int64 trackerId = 1;
+}
+
+message TrackValidatorsRequest {
+  repeated string monikers = 1;
+  google.protobuf.Duration notificationInterval = 2;
+  TrackerChatRoom chatRoom = 3;
+}
+
+message TrackValidatorsResponse {
+  repeated Tracker addedTrackers = 1;
+  repeated int64 deletedTrackerIds = 2;
 }

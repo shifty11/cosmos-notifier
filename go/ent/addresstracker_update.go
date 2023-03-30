@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // AddressTrackerUpdate is the builder for updating AddressTracker entities.
@@ -121,6 +122,25 @@ func (atu *AddressTrackerUpdate) AddChainProposals(c ...*ChainProposal) *Address
 	return atu.AddChainProposalIDs(ids...)
 }
 
+// SetValidatorID sets the "validator" edge to the Validator entity by ID.
+func (atu *AddressTrackerUpdate) SetValidatorID(id int) *AddressTrackerUpdate {
+	atu.mutation.SetValidatorID(id)
+	return atu
+}
+
+// SetNillableValidatorID sets the "validator" edge to the Validator entity by ID if the given value is not nil.
+func (atu *AddressTrackerUpdate) SetNillableValidatorID(id *int) *AddressTrackerUpdate {
+	if id != nil {
+		atu = atu.SetValidatorID(*id)
+	}
+	return atu
+}
+
+// SetValidator sets the "validator" edge to the Validator entity.
+func (atu *AddressTrackerUpdate) SetValidator(v *Validator) *AddressTrackerUpdate {
+	return atu.SetValidatorID(v.ID)
+}
+
 // Mutation returns the AddressTrackerMutation object of the builder.
 func (atu *AddressTrackerUpdate) Mutation() *AddressTrackerMutation {
 	return atu.mutation
@@ -163,6 +183,12 @@ func (atu *AddressTrackerUpdate) RemoveChainProposals(c ...*ChainProposal) *Addr
 		ids[i] = c[i].ID
 	}
 	return atu.RemoveChainProposalIDs(ids...)
+}
+
+// ClearValidator clears the "validator" edge to the Validator entity.
+func (atu *AddressTrackerUpdate) ClearValidator() *AddressTrackerUpdate {
+	atu.mutation.ClearValidator()
+	return atu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -365,6 +391,35 @@ func (atu *AddressTrackerUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if atu.mutation.ValidatorCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   addresstracker.ValidatorTable,
+			Columns: []string{addresstracker.ValidatorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := atu.mutation.ValidatorIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   addresstracker.ValidatorTable,
+			Columns: []string{addresstracker.ValidatorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, atu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{addresstracker.Label}
@@ -474,6 +529,25 @@ func (atuo *AddressTrackerUpdateOne) AddChainProposals(c ...*ChainProposal) *Add
 	return atuo.AddChainProposalIDs(ids...)
 }
 
+// SetValidatorID sets the "validator" edge to the Validator entity by ID.
+func (atuo *AddressTrackerUpdateOne) SetValidatorID(id int) *AddressTrackerUpdateOne {
+	atuo.mutation.SetValidatorID(id)
+	return atuo
+}
+
+// SetNillableValidatorID sets the "validator" edge to the Validator entity by ID if the given value is not nil.
+func (atuo *AddressTrackerUpdateOne) SetNillableValidatorID(id *int) *AddressTrackerUpdateOne {
+	if id != nil {
+		atuo = atuo.SetValidatorID(*id)
+	}
+	return atuo
+}
+
+// SetValidator sets the "validator" edge to the Validator entity.
+func (atuo *AddressTrackerUpdateOne) SetValidator(v *Validator) *AddressTrackerUpdateOne {
+	return atuo.SetValidatorID(v.ID)
+}
+
 // Mutation returns the AddressTrackerMutation object of the builder.
 func (atuo *AddressTrackerUpdateOne) Mutation() *AddressTrackerMutation {
 	return atuo.mutation
@@ -516,6 +590,12 @@ func (atuo *AddressTrackerUpdateOne) RemoveChainProposals(c ...*ChainProposal) *
 		ids[i] = c[i].ID
 	}
 	return atuo.RemoveChainProposalIDs(ids...)
+}
+
+// ClearValidator clears the "validator" edge to the Validator entity.
+func (atuo *AddressTrackerUpdateOne) ClearValidator() *AddressTrackerUpdateOne {
+	atuo.mutation.ClearValidator()
+	return atuo
 }
 
 // Where appends a list predicates to the AddressTrackerUpdate builder.
@@ -741,6 +821,35 @@ func (atuo *AddressTrackerUpdateOne) sqlSave(ctx context.Context) (_node *Addres
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(chainproposal.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if atuo.mutation.ValidatorCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   addresstracker.ValidatorTable,
+			Columns: []string{addresstracker.ValidatorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := atuo.mutation.ValidatorIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   addresstracker.ValidatorTable,
+			Columns: []string{addresstracker.ValidatorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

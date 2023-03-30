@@ -1,9 +1,10 @@
+import 'package:cosmos_notifier/api/protobuf/dart/dev_service.pbenum.dart';
 import 'package:cosmos_notifier/api/protobuf/dart/google/protobuf/empty.pb.dart';
+import 'package:cosmos_notifier/config.dart';
 import 'package:cosmos_notifier/f_home/services/canny_query_param_provider.dart';
+import 'package:cosmos_notifier/f_home/services/state/auth_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cosmos_notifier/config.dart';
-import 'package:cosmos_notifier/f_home/services/state/auth_state.dart';
 
 import 'auth_service.dart';
 
@@ -57,6 +58,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       state = const AuthState.loading();
       await _authService.init();
+      var cannySSOResult = await _getCannySSO();
+      state = AuthState.authenticated(true, cannySSOResult);
+    } catch (e) {
+      if (cDebugMode) {
+        print("AuthNotifier: error -> $e");
+      }
+      state = AuthState.error(e as Exception);
+    }
+  }
+
+  Future<void> devLogin({required int userId, required DevLoginRequest_UserType userType, required DevLoginRequest_Role roleType}) async {
+    if (kReleaseMode) {
+      return;
+    }
+    try {
+      state = const AuthState.loading();
+      await _authService.devLogin(userId: userId, userType: userType, roleType: roleType);
       var cannySSOResult = await _getCannySSO();
       state = AuthState.authenticated(true, cannySSOResult);
     } catch (e) {

@@ -75,6 +75,7 @@ func (manager *ChainManager) Create(chainData *types.Chain, thumbnailUrl string)
 		Create().
 		SetChainID(chainData.ChainId).
 		SetName(chainData.Name).
+		SetPath(chainData.Path).
 		SetPrettyName(chainData.PrettyName).
 		SetBech32Prefix(chainData.Bech32Prefix).
 		SetImageURL(chainData.Image).

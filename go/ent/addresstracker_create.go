@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/chainproposal"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // AddressTrackerCreate is the builder for creating a AddressTracker entity.
@@ -126,6 +127,25 @@ func (atc *AddressTrackerCreate) AddChainProposals(c ...*ChainProposal) *Address
 		ids[i] = c[i].ID
 	}
 	return atc.AddChainProposalIDs(ids...)
+}
+
+// SetValidatorID sets the "validator" edge to the Validator entity by ID.
+func (atc *AddressTrackerCreate) SetValidatorID(id int) *AddressTrackerCreate {
+	atc.mutation.SetValidatorID(id)
+	return atc
+}
+
+// SetNillableValidatorID sets the "validator" edge to the Validator entity by ID if the given value is not nil.
+func (atc *AddressTrackerCreate) SetNillableValidatorID(id *int) *AddressTrackerCreate {
+	if id != nil {
+		atc = atc.SetValidatorID(*id)
+	}
+	return atc
+}
+
+// SetValidator sets the "validator" edge to the Validator entity.
+func (atc *AddressTrackerCreate) SetValidator(v *Validator) *AddressTrackerCreate {
+	return atc.SetValidatorID(v.ID)
 }
 
 // Mutation returns the AddressTrackerMutation object of the builder.
@@ -297,6 +317,23 @@ func (atc *AddressTrackerCreate) createSpec() (*AddressTracker, *sqlgraph.Create
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := atc.mutation.ValidatorIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   addresstracker.ValidatorTable,
+			Columns: []string{addresstracker.ValidatorColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.validator_address_trackers = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

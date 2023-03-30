@@ -1,5 +1,6 @@
 import 'package:cosmos_notifier/env.dart';
 import 'package:cosmos_notifier/f_admin/widget/services/admin_service.dart';
+import 'package:cosmos_notifier/f_admin/widget/services/dev_service.dart';
 import 'package:cosmos_notifier/f_home/services/auth_interceptor.dart';
 import 'package:cosmos_notifier/f_home/services/auth_service.dart';
 import 'package:cosmos_notifier/f_home/services/jwt_manager.dart';
@@ -14,7 +15,8 @@ final channel = GrpcWebClientChannel.xhr(Uri.parse(uri));
 
 final jwtManager = JwtManager();
 final authInterceptor = AuthInterceptor(jwtManager);
-final authService = AuthService(channel, [authInterceptor], jwtManager, refreshBeforeExpDuration);
+final devService = DevService(channel, [authInterceptor]);
+final authService = AuthService(channel, [authInterceptor], jwtManager, refreshBeforeExpDuration, devService);
 final subsService = SubscriptionService(channel, [authInterceptor]);
 final adminService = AdminService(channel, [authInterceptor]);
 final trackerService = TrackerService(channel, [authInterceptor]);

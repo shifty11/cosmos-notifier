@@ -16,23 +16,28 @@ func newTestTelegramChatManager(t *testing.T) *TelegramChatManager {
 
 func addTelegramChats(m *TelegramChatManager, users []*ent.User) []*ent.TelegramChat {
 	var chats []*ent.TelegramChat
+	var nextChatID = int64(m.client.TelegramChat.Query().CountX(m.ctx) + 1)
 	for _, userDto := range users {
-		c := m.client.TelegramChat.
-			Create().
-			SetChatID(1).
-			SetName("channel-1").
-			SetIsGroup(false).
-			AddUsers(userDto).
-			SaveX(m.ctx)
-		chats = append(chats, c)
-		c = m.client.TelegramChat.
-			Create().
-			SetChatID(2).
-			SetName("channel-2").
-			SetIsGroup(true).
-			AddUsers(userDto).
-			SaveX(m.ctx)
-		chats = append(chats, c)
+		if userDto.Type == user.TypeTelegram {
+			c := m.client.TelegramChat.
+				Create().
+				SetChatID(nextChatID).
+				SetName("channel-1").
+				SetIsGroup(false).
+				AddUsers(userDto).
+				SaveX(m.ctx)
+			chats = append(chats, c)
+			nextChatID++
+			c = m.client.TelegramChat.
+				Create().
+				SetChatID(nextChatID).
+				SetName("channel-2").
+				SetIsGroup(true).
+				AddUsers(userDto).
+				SaveX(m.ctx)
+			chats = append(chats, c)
+			nextChatID++
+		}
 	}
 	return chats
 }

@@ -6,16 +6,32 @@ import 'package:cosmos_notifier/f_home/services/message_provider.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/bottom_navigation_bar_widget.dart';
 import 'package:cosmos_notifier/f_home/widgets/subwidgets/footer_widget.dart';
 import 'package:cosmos_notifier/f_tracking/services/state/tracker_row.dart';
+import 'package:cosmos_notifier/f_tracking/services/state/validator_bundle.dart';
 import 'package:cosmos_notifier/f_tracking/services/tracker_provider.dart';
 import 'package:cosmos_notifier/f_tracking/widgets/subwidgets/address_input_widget.dart';
 import 'package:cosmos_notifier/f_tracking/widgets/subwidgets/hover_container.dart';
+import 'package:cosmos_notifier/f_tracking/widgets/subwidgets/validation_form_widget.dart';
 import 'package:cosmos_notifier/style.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
+import 'package:multi_select_flutter/util/multi_select_item.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:riverpod_messages/riverpod_messages.dart';
+
+// ignore: must_be_immutable
+class ValidatorMultiSelectDialogField<ValidatorBundle> extends MultiSelectDialogField<FreezedValidatorBundle> {
+  ValidatorMultiSelectDialogField({
+    required super.items,
+    required super.onConfirm,
+    required super.initialValue,
+    super.searchable = true,
+    super.key,
+    super.buttonText = const Text("Select validators"),
+  });
+}
 
 class TrackingPage extends StatelessWidget {
   static const iconSize = 24.0;
@@ -108,23 +124,20 @@ class TrackingPage extends StatelessWidget {
 
   Widget table(BuildContext context) {
     return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
-      final trackerFuture = ref.watch(trackerFutureProvider);
-      final trackerRows = ref.watch(trackerNotifierProvider);
-      final showAddTrackerButton = ref.watch(showAddTrackerButtonProvider);
-      final trackerChatRooms = ref.watch(trackerChatRoomsProvider);
-      final showChatRoomColumn = ref.watch(showChatRoomColumnProvider);
       return Builder(
         builder: (BuildContext context) {
-          if (trackerFuture.isLoading) {
+          if (ref.watch(trackerFutureProvider).isLoading) {
             return const Center(child: CircularProgressIndicator());
           } else {
+            final trackerRows = ref.watch(trackerNotifierProvider);
+            final showChatRoomColumn = ref.watch(showChatRoomColumnProvider);
             return DataTable(
                 columnSpacing: ResponsiveWrapper.of(context).isSmallerThan(TABLET) ? 10 : null,
                 sortAscending: ref.watch(trackerSortProvider).isAscending,
                 sortColumnIndex: ref.watch(trackerSortProvider).sortType.index,
                 columns: [
                   DataColumn(
-                      label: const Text("Address"),
+                      label: Text("Address (${trackerRows.length})"),
                       tooltip: "Wallet address that is being tracked",
                       onSort: (columnIndex, ascending) {
                         ref.read(trackerSortProvider.notifier).state =
@@ -159,9 +172,7 @@ class TrackingPage extends StatelessWidget {
                     addressSize = AddressSize.long;
                   }
                   return DataRow(cells: [
-                    DataCell(trackerRow.isSaved
-                        ? Text(trackerRow.shortenedAddress(addressSize))
-                        : AddressInputWidget(ref, trackerRow)),
+                    DataCell(trackerRow.isSaved ? Text(trackerRow.shortenedAddress(addressSize)) : AddressInputWidget(ref, trackerRow)),
                     DataCell(
                       GestureDetector(
                         onTap: () async =>
@@ -208,7 +219,7 @@ class TrackingPage extends StatelessWidget {
                             trackerRow = trackerRow.copyWith(chatRoom: newValue);
                             await ref.read(trackerNotifierProvider.notifier).updateTracker(trackerRow);
                           },
-                          items: trackerChatRooms.map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
+                          items: ref.watch(trackerChatRoomsProvider).map<DropdownMenuItem<TrackerChatRoom>>((trackerChatRoom) {
                             return DropdownMenuItem<TrackerChatRoom>(
                               value: trackerChatRoom,
                               child: LimitedBox(
@@ -232,7 +243,7 @@ class TrackingPage extends StatelessWidget {
                   ]);
                 }).toList()
                   ..addAll([
-                    if (showAddTrackerButton)
+                    if (ref.watch(showAddTrackerButtonProvider))
                       DataRow(cells: [
                         const DataCell(Text("")),
                         const DataCell(Text("")),
@@ -264,6 +275,41 @@ class TrackingPage extends StatelessWidget {
     });
   }
 
+  showValidationChangePopup(BuildContext context, List<FreezedValidatorBundle> toBeTracked, List<FreezedValidatorBundle> toBeAdded,
+      List<FreezedValidatorBundle> toBeDeleted) {
+    showDialog(
+      context: context,
+      builder: (_) {
+        return ValidatorForm(toBeTracked, toBeAdded, toBeDeleted);
+      },
+    );
+  }
+
+  Widget validatorSelection() {
+    return Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child) {
+      final validators = ref.watch(validatorBundleProvider);
+      final items = validators
+          .map((bundle) => MultiSelectItem(bundle, "${bundle.moniker} (${bundle.validators.length})")..selected = bundle.isTracked)
+          .toList();
+      return ValidatorMultiSelectDialogField(
+        items: items,
+        initialValue: List<FreezedValidatorBundle>.from(items.where((item) => item.selected).map((item) => item.value)),
+        onConfirm: (List<FreezedValidatorBundle> result) {
+          final toBeAdded = result.where((val) => !val.isTracked).toList();
+          final toBeTracked = items.where((item) => item.selected).map((item) => item.value).toList();
+          final toBeDeleted = items.where((item) => !item.selected).map((item) => item.value).where((val) => val.isTracked).toList();
+          if (toBeAdded.isNotEmpty) {
+            showValidationChangePopup(context, toBeTracked, toBeAdded, toBeDeleted);
+          } else if (toBeDeleted.isNotEmpty) {
+            ref
+                .read(trackerNotifierProvider.notifier)
+                .trackValidators(toBeTracked, toBeAdded, toBeDeleted, TrackerChatRoom(), Duration.zero);
+          }
+        },
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -281,14 +327,15 @@ class TrackingPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   Text("Reminders", style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 5),
-                  const Text(
-                      "Add your wallet address to get reminder notifications.\nYou will be reminded if you forget to vote.",
+                  const Text("Track your validator and get notified when it's time to vote.\nYou can also add custom addresses.",
                       maxLines: 3),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
                         children: [
+                          validatorSelection(),
+                          const SizedBox(height: 10),
                           table(context),
                           validationError(context),
                         ],

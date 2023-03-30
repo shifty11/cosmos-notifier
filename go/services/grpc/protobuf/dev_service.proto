@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "auth_service.proto";
+
+package cosmos_notifier_grpc;
+
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/dev_service";
+
+service DevService {
+  rpc Login (DevLoginRequest) returns (LoginResponse) {}
+}
+
+message DevLoginRequest {
+  int64 user_id = 1;
+  enum UserType {
+    TELEGRAM = 0;
+    DISCORD = 1;
+  }
+  UserType type = 2;
+  enum Role {
+    ADMIN = 0;
+    USER = 1;
+  }
+  Role role = 3;
+}

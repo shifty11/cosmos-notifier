@@ -41,9 +41,11 @@ type TelegramChatEdges struct {
 	Chains []*Chain `json:"chains,omitempty"`
 	// AddressTrackers holds the value of the address_trackers edge.
 	AddressTrackers []*AddressTracker `json:"address_trackers,omitempty"`
+	// Validators holds the value of the validators edge.
+	Validators []*Validator `json:"validators,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // UsersOrErr returns the Users value or an error if the edge
@@ -80,6 +82,15 @@ func (e TelegramChatEdges) AddressTrackersOrErr() ([]*AddressTracker, error) {
 		return e.AddressTrackers, nil
 	}
 	return nil, &NotLoadedError{edge: "address_trackers"}
+}
+
+// ValidatorsOrErr returns the Validators value or an error if the edge
+// was not loaded in eager-loading.
+func (e TelegramChatEdges) ValidatorsOrErr() ([]*Validator, error) {
+	if e.loadedTypes[4] {
+		return e.Validators, nil
+	}
+	return nil, &NotLoadedError{edge: "validators"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -169,6 +180,11 @@ func (tc *TelegramChat) QueryChains() *ChainQuery {
 // QueryAddressTrackers queries the "address_trackers" edge of the TelegramChat entity.
 func (tc *TelegramChat) QueryAddressTrackers() *AddressTrackerQuery {
 	return NewTelegramChatClient(tc.config).QueryAddressTrackers(tc)
+}
+
+// QueryValidators queries the "validators" edge of the TelegramChat entity.
+func (tc *TelegramChat) QueryValidators() *ValidatorQuery {
+	return NewTelegramChatClient(tc.config).QueryValidators(tc)
 }
 
 // Update returns a builder for updating this TelegramChat.

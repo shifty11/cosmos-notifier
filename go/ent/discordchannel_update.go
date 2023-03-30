@@ -17,6 +17,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/predicate"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // DiscordChannelUpdate is the builder for updating DiscordChannel entities.
@@ -117,6 +118,21 @@ func (dcu *DiscordChannelUpdate) AddAddressTrackers(a ...*AddressTracker) *Disco
 	return dcu.AddAddressTrackerIDs(ids...)
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (dcu *DiscordChannelUpdate) AddValidatorIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.AddValidatorIDs(ids...)
+	return dcu
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (dcu *DiscordChannelUpdate) AddValidators(v ...*Validator) *DiscordChannelUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return dcu.AddValidatorIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcu *DiscordChannelUpdate) Mutation() *DiscordChannelMutation {
 	return dcu.mutation
@@ -204,6 +220,27 @@ func (dcu *DiscordChannelUpdate) RemoveAddressTrackers(a ...*AddressTracker) *Di
 		ids[i] = a[i].ID
 	}
 	return dcu.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearValidators clears all "validators" edges to the Validator entity.
+func (dcu *DiscordChannelUpdate) ClearValidators() *DiscordChannelUpdate {
+	dcu.mutation.ClearValidators()
+	return dcu
+}
+
+// RemoveValidatorIDs removes the "validators" edge to Validator entities by IDs.
+func (dcu *DiscordChannelUpdate) RemoveValidatorIDs(ids ...int) *DiscordChannelUpdate {
+	dcu.mutation.RemoveValidatorIDs(ids...)
+	return dcu
+}
+
+// RemoveValidators removes "validators" edges to Validator entities.
+func (dcu *DiscordChannelUpdate) RemoveValidators(v ...*Validator) *DiscordChannelUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return dcu.RemoveValidatorIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -443,6 +480,51 @@ func (dcu *DiscordChannelUpdate) sqlSave(ctx context.Context) (n int, err error)
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if dcu.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.RemovedValidatorsIDs(); len(nodes) > 0 && !dcu.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcu.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, dcu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{discordchannel.Label}
@@ -548,6 +630,21 @@ func (dcuo *DiscordChannelUpdateOne) AddAddressTrackers(a ...*AddressTracker) *D
 	return dcuo.AddAddressTrackerIDs(ids...)
 }
 
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (dcuo *DiscordChannelUpdateOne) AddValidatorIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.AddValidatorIDs(ids...)
+	return dcuo
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (dcuo *DiscordChannelUpdateOne) AddValidators(v ...*Validator) *DiscordChannelUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return dcuo.AddValidatorIDs(ids...)
+}
+
 // Mutation returns the DiscordChannelMutation object of the builder.
 func (dcuo *DiscordChannelUpdateOne) Mutation() *DiscordChannelMutation {
 	return dcuo.mutation
@@ -635,6 +732,27 @@ func (dcuo *DiscordChannelUpdateOne) RemoveAddressTrackers(a ...*AddressTracker)
 		ids[i] = a[i].ID
 	}
 	return dcuo.RemoveAddressTrackerIDs(ids...)
+}
+
+// ClearValidators clears all "validators" edges to the Validator entity.
+func (dcuo *DiscordChannelUpdateOne) ClearValidators() *DiscordChannelUpdateOne {
+	dcuo.mutation.ClearValidators()
+	return dcuo
+}
+
+// RemoveValidatorIDs removes the "validators" edge to Validator entities by IDs.
+func (dcuo *DiscordChannelUpdateOne) RemoveValidatorIDs(ids ...int) *DiscordChannelUpdateOne {
+	dcuo.mutation.RemoveValidatorIDs(ids...)
+	return dcuo
+}
+
+// RemoveValidators removes "validators" edges to Validator entities.
+func (dcuo *DiscordChannelUpdateOne) RemoveValidators(v ...*Validator) *DiscordChannelUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return dcuo.RemoveValidatorIDs(ids...)
 }
 
 // Where appends a list predicates to the DiscordChannelUpdate builder.
@@ -897,6 +1015,51 @@ func (dcuo *DiscordChannelUpdateOne) sqlSave(ctx context.Context) (_node *Discor
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if dcuo.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.RemovedValidatorsIDs(); len(nodes) > 0 && !dcuo.mutation.ValidatorsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := dcuo.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

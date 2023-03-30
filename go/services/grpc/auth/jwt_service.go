@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"os"
 	"time"
 )
 
@@ -29,8 +30,9 @@ func AccessibleRoles() map[string][]Role {
 	const subsService = path + ".SubscriptionService/"
 	const adminService = path + ".AdminService/"
 	const trackerService = path + ".TrackerService/"
+	const devService = path + ".DevService/"
 
-	return map[string][]Role{
+	roles := map[string][]Role{
 		authService + "TelegramLogin":              {Unauthenticated, User, Admin},
 		authService + "DiscordLogin":               {Unauthenticated, User, Admin},
 		authService + "RefreshAccessToken":         {Unauthenticated, User, Admin},
@@ -46,9 +48,14 @@ func AccessibleRoles() map[string][]Role {
 		trackerService + "UpdateTracker":           {User, Admin},
 		trackerService + "DeleteTracker":           {User, Admin},
 		trackerService + "IsAddressValid":          {User, Admin},
+		trackerService + "TrackValidators":         {User, Admin},
 		adminService + "BroadcastMessage":          {Admin},
 		adminService + "GetStats":                  {Admin},
 	}
+	if os.Getenv("DEV") == "true" {
+		roles[devService+"Login"] = []Role{Unauthenticated, User, Admin}
+	}
+	return roles
 }
 
 type Claims struct {

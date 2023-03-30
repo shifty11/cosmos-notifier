@@ -53,9 +53,11 @@ type ChainEdges struct {
 	DiscordChannels []*DiscordChannel `json:"discord_channels,omitempty"`
 	// AddressTrackers holds the value of the address_trackers edge.
 	AddressTrackers []*AddressTracker `json:"address_trackers,omitempty"`
+	// Validators holds the value of the validators edge.
+	Validators []*Validator `json:"validators,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // ChainProposalsOrErr returns the ChainProposals value or an error if the edge
@@ -92,6 +94,15 @@ func (e ChainEdges) AddressTrackersOrErr() ([]*AddressTracker, error) {
 		return e.AddressTrackers, nil
 	}
 	return nil, &NotLoadedError{edge: "address_trackers"}
+}
+
+// ValidatorsOrErr returns the Validators value or an error if the edge
+// was not loaded in eager-loading.
+func (e ChainEdges) ValidatorsOrErr() ([]*Validator, error) {
+	if e.loadedTypes[4] {
+		return e.Validators, nil
+	}
+	return nil, &NotLoadedError{edge: "validators"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -217,6 +228,11 @@ func (c *Chain) QueryDiscordChannels() *DiscordChannelQuery {
 // QueryAddressTrackers queries the "address_trackers" edge of the Chain entity.
 func (c *Chain) QueryAddressTrackers() *AddressTrackerQuery {
 	return NewChainClient(c.config).QueryAddressTrackers(c)
+}
+
+// QueryValidators queries the "validators" edge of the Chain entity.
+func (c *Chain) QueryValidators() *ValidatorQuery {
+	return NewChainClient(c.config).QueryValidators(c)
 }
 
 // Update returns a builder for updating this Chain.

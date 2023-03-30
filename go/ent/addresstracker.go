@@ -12,6 +12,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // AddressTracker is the model entity for the AddressTracker schema.
@@ -33,6 +34,7 @@ type AddressTracker struct {
 	chain_address_trackers           *int
 	discord_channel_address_trackers *int
 	telegram_chat_address_trackers   *int
+	validator_address_trackers       *int
 }
 
 // AddressTrackerEdges holds the relations/edges for other nodes in the graph.
@@ -45,9 +47,11 @@ type AddressTrackerEdges struct {
 	TelegramChat *TelegramChat `json:"telegram_chat,omitempty"`
 	// ChainProposals holds the value of the chain_proposals edge.
 	ChainProposals []*ChainProposal `json:"chain_proposals,omitempty"`
+	// Validator holds the value of the validator edge.
+	Validator *Validator `json:"validator,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // ChainOrErr returns the Chain value or an error if the edge
@@ -98,6 +102,19 @@ func (e AddressTrackerEdges) ChainProposalsOrErr() ([]*ChainProposal, error) {
 	return nil, &NotLoadedError{edge: "chain_proposals"}
 }
 
+// ValidatorOrErr returns the Validator value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e AddressTrackerEdges) ValidatorOrErr() (*Validator, error) {
+	if e.loadedTypes[4] {
+		if e.Validator == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: validator.Label}
+		}
+		return e.Validator, nil
+	}
+	return nil, &NotLoadedError{edge: "validator"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*AddressTracker) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -114,6 +131,8 @@ func (*AddressTracker) scanValues(columns []string) ([]any, error) {
 		case addresstracker.ForeignKeys[1]: // discord_channel_address_trackers
 			values[i] = new(sql.NullInt64)
 		case addresstracker.ForeignKeys[2]: // telegram_chat_address_trackers
+			values[i] = new(sql.NullInt64)
+		case addresstracker.ForeignKeys[3]: // validator_address_trackers
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type AddressTracker", columns[i])
@@ -181,6 +200,13 @@ func (at *AddressTracker) assignValues(columns []string, values []any) error {
 				at.telegram_chat_address_trackers = new(int)
 				*at.telegram_chat_address_trackers = int(value.Int64)
 			}
+		case addresstracker.ForeignKeys[3]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field validator_address_trackers", value)
+			} else if value.Valid {
+				at.validator_address_trackers = new(int)
+				*at.validator_address_trackers = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -204,6 +230,11 @@ func (at *AddressTracker) QueryTelegramChat() *TelegramChatQuery {
 // QueryChainProposals queries the "chain_proposals" edge of the AddressTracker entity.
 func (at *AddressTracker) QueryChainProposals() *ChainProposalQuery {
 	return NewAddressTrackerClient(at.config).QueryChainProposals(at)
+}
+
+// QueryValidator queries the "validator" edge of the AddressTracker entity.
+func (at *AddressTracker) QueryValidator() *ValidatorQuery {
+	return NewAddressTrackerClient(at.config).QueryValidator(at)
 }
 
 // Update returns a builder for updating this AddressTracker.

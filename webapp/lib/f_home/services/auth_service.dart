@@ -4,9 +4,12 @@ library script.js;
 import 'dart:async';
 
 import 'package:cosmos_notifier/api/protobuf/dart/auth_service.pbgrpc.dart';
+import 'package:cosmos_notifier/api/protobuf/dart/dev_service.pb.dart';
 import 'package:cosmos_notifier/config.dart';
+import 'package:cosmos_notifier/f_admin/widget/services/dev_service.dart';
 import 'package:cosmos_notifier/f_home/services/jwt_manager.dart';
 import 'package:cosmos_notifier/f_home/services/type/login_data.dart';
+import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:grpc/grpc.dart';
 import 'package:grpc/grpc_connection_interface.dart';
@@ -28,12 +31,13 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
 
   final Duration refreshBeforeExpDuration;
   final JwtManager jwtManager;
+  final DevService devService;
 
   factory AuthService(
-          ClientChannelBase channel, Iterable<ClientInterceptor> interceptors, JwtManager jwtManager, refreshBeforeExpDuration) =>
-      _singleton ??= AuthService._internal(channel, interceptors, jwtManager, refreshBeforeExpDuration);
+          ClientChannelBase channel, Iterable<ClientInterceptor> interceptors, JwtManager jwtManager, refreshBeforeExpDuration, DevService devService) =>
+      _singleton ??= AuthService._internal(channel, interceptors, jwtManager, refreshBeforeExpDuration, devService);
 
-  AuthService._internal(ClientChannelBase channel, Iterable<ClientInterceptor> interceptors, this.jwtManager, this.refreshBeforeExpDuration)
+  AuthService._internal(ClientChannelBase channel, Iterable<ClientInterceptor> interceptors, this.jwtManager, this.refreshBeforeExpDuration, this.devService)
       : super(channel, interceptors: interceptors);
 
   bool get hasLoginData => _isTelegramLogin() || _isDiscordLogin();
@@ -204,6 +208,23 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
       }
       _logout();
       return;
+    }
+  }
+
+  devLogin({required int userId, required DevLoginRequest_UserType userType, required DevLoginRequest_Role roleType}) async {
+    if (kReleaseMode) {
+      throw Exception("devLogin is only available in development mode");
+    }
+    try {
+      final response = await devService.login(DevLoginRequest(
+          userId: Int64(userId),
+          type: userType,
+          role: roleType,
+      ));
+      jwtManager.accessToken = response.accessToken;
+      jwtManager.refreshToken = response.refreshToken;
+    } catch (e) {
+      rethrow;
     }
   }
 }

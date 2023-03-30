@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/contract"
 	"github.com/shifty11/cosmos-notifier/ent/discordchannel"
 	"github.com/shifty11/cosmos-notifier/ent/user"
+	"github.com/shifty11/cosmos-notifier/ent/validator"
 )
 
 // DiscordChannelCreate is the builder for creating a DiscordChannel entity.
@@ -128,6 +129,21 @@ func (dcc *DiscordChannelCreate) AddAddressTrackers(a ...*AddressTracker) *Disco
 		ids[i] = a[i].ID
 	}
 	return dcc.AddAddressTrackerIDs(ids...)
+}
+
+// AddValidatorIDs adds the "validators" edge to the Validator entity by IDs.
+func (dcc *DiscordChannelCreate) AddValidatorIDs(ids ...int) *DiscordChannelCreate {
+	dcc.mutation.AddValidatorIDs(ids...)
+	return dcc
+}
+
+// AddValidators adds the "validators" edges to the Validator entity.
+func (dcc *DiscordChannelCreate) AddValidators(v ...*Validator) *DiscordChannelCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
+	}
+	return dcc.AddValidatorIDs(ids...)
 }
 
 // Mutation returns the DiscordChannelMutation object of the builder.
@@ -298,6 +314,22 @@ func (dcc *DiscordChannelCreate) createSpec() (*DiscordChannel, *sqlgraph.Create
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(addresstracker.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := dcc.mutation.ValidatorsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   discordchannel.ValidatorsTable,
+			Columns: discordchannel.ValidatorsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(validator.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
