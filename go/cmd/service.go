@@ -65,14 +65,27 @@ var startDiscordBotCmd = &cobra.Command{
 	},
 }
 
-// runChainCrawlerCmd represents the startValidatorCrawler command
+// runChainCrawlerCmd represents the startChainCrawler command
 var runChainCrawlerCmd = &cobra.Command{
-	Use:   "validator-crawler",
-	Short: "Start the validator crawler",
+	Use:   "chain-crawler",
+	Short: "Start the chain crawler",
 	Run: func(cmd *cobra.Command, args []string) {
+		telegramBotToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
+		useTestApi := common.GetEnvAsBoolX("TELEGRAM_USE_TEST_API")
+		assetsPath := common.GetEnvX("ASSETS_PATH")
+		discordBotToken := common.GetEnvX("DISCORD_BOT_TOKEN")
+
+		apiEndpoint := ""
+		if useTestApi {
+			apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
+		}
+
 		managers := database.NewDefaultDbManagers()
-		crawler := validator_crawler.NewValidatorCrawler(managers)
-		crawler.AddOrUpdateValidators()
+		notifier := notifier.NewChainNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
+		crawler := chain_crawler.NewChainCrawler(managers, notifier, assetsPath)
+		crawler.AddOrUpdateChains()
+		crawler.UpdateProposals()
+		crawler.CheckForVotingReminders()
 
 		if cmd.Flag("repeat").Value.String() == "true" {
 			crawler.ScheduleCrawl()
@@ -116,27 +129,14 @@ var runContractCrawlerCmd = &cobra.Command{
 	},
 }
 
-// runValidatorCrawlerCmd represents the startChainCrawler command
+// runValidatorCrawlerCmd represents the startValidatorCrawler command
 var runValidatorCrawlerCmd = &cobra.Command{
-	Use:   "chain-crawler",
-	Short: "Start the chain crawler",
+	Use:   "validator-crawler",
+	Short: "Start the validator crawler",
 	Run: func(cmd *cobra.Command, args []string) {
-		telegramBotToken := common.GetEnvX("TELEGRAM_BOT_TOKEN")
-		useTestApi := common.GetEnvAsBoolX("TELEGRAM_USE_TEST_API")
-		assetsPath := common.GetEnvX("ASSETS_PATH")
-		discordBotToken := common.GetEnvX("DISCORD_BOT_TOKEN")
-
-		apiEndpoint := ""
-		if useTestApi {
-			apiEndpoint = "https://api.telegram.org/bot%s/test/%s"
-		}
-
 		managers := database.NewDefaultDbManagers()
-		notifier := notifier.NewChainNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
-		crawler := chain_crawler.NewChainCrawler(managers, notifier, assetsPath)
-		crawler.AddOrUpdateChains()
-		crawler.UpdateProposals()
-		crawler.CheckForVotingReminders()
+		crawler := validator_crawler.NewValidatorCrawler(managers)
+		crawler.AddOrUpdateValidators()
 
 		if cmd.Flag("repeat").Value.String() == "true" {
 			crawler.ScheduleCrawl()
