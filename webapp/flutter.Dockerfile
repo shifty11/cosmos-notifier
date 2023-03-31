@@ -25,7 +25,7 @@ WORKDIR /app/
 ARG CONFIG_FILE
 COPY ${CONFIG_FILE} /app/lib/env.dart
 
-RUN flutter build web --web-renderer canvaskit --release
+RUN flutter build web --release
 
 # Stage 2 - Create the run-time image
 FROM caddy:2.5.2-alpine
