@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/user"
@@ -188,7 +189,7 @@ func (s *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccess
 }
 
 func (s *AuthServer) CannySSO(ctx context.Context, _ *emptypb.Empty) (*pb.CannySSOResponse, error) {
-	entUser, ok := ctx.Value("user").(*ent.User)
+	entUser, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")

@@ -3,6 +3,7 @@ package admin
 import (
 	"context"
 	"fmt"
+	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
@@ -28,7 +29,7 @@ func NewAdminServer(notifier notifier.GeneralNotifier, managers *database.DbMana
 }
 
 func (server *AdminServer) BroadcastMessage(req *pb.BroadcastMessageRequest, stream pb.AdminService_BroadcastMessageServer) error {
-	entUser, ok := stream.Context().Value("user").(*ent.User)
+	entUser, ok := stream.Context().Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return status.Errorf(codes.NotFound, "invalid user")

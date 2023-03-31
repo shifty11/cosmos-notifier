@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
@@ -32,7 +33,7 @@ func NewSubscriptionsServer(managers *database.DbManagers, crawlerClient *contra
 }
 
 func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *emptypb.Empty) (*pb.GetSubscriptionsResponse, error) {
-	entUser, ok := ctx.Value("user").(*ent.User)
+	entUser, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")
@@ -45,7 +46,7 @@ func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *empty
 }
 
 func (server *SubscriptionServer) ToggleChainSubscription(ctx context.Context, req *pb.ToggleChainSubscriptionRequest) (*pb.ToggleSubscriptionResponse, error) {
-	entUser, ok := ctx.Value("user").(*ent.User)
+	entUser, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")
@@ -63,7 +64,7 @@ func (server *SubscriptionServer) ToggleChainSubscription(ctx context.Context, r
 }
 
 func (server *SubscriptionServer) ToggleContractSubscription(ctx context.Context, req *pb.ToggleContractSubscriptionRequest) (*pb.ToggleSubscriptionResponse, error) {
-	entUser, ok := ctx.Value("user").(*ent.User)
+	entUser, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, status.Errorf(codes.NotFound, "invalid user")
@@ -81,7 +82,7 @@ func (server *SubscriptionServer) ToggleContractSubscription(ctx context.Context
 }
 
 func (server *SubscriptionServer) AddDao(req *pb.AddDaoRequest, stream pb.SubscriptionService_AddDaoServer) error {
-	entUser, ok := stream.Context().Value("user").(*ent.User)
+	entUser, ok := stream.Context().Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return status.Errorf(codes.NotFound, "invalid user")

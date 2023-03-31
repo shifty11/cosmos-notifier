@@ -7,6 +7,7 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
@@ -134,7 +135,7 @@ func toValidatorBundles(validators []*ent.Validator, trackedMonikers map[string]
 }
 
 func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*pb.GetTrackersResponse, error) {
-	userEnt, ok := ctx.Value("user").(*ent.User)
+	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, types.UserNotFoundErr
@@ -215,7 +216,7 @@ func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddress
 }
 
 func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerRequest) (*pb.Tracker, error) {
-	userEnt, ok := ctx.Value("user").(*ent.User)
+	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, types.UserNotFoundErr
@@ -254,7 +255,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 }
 
 func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTrackerRequest) (*pb.Tracker, error) {
-	userEnt, ok := ctx.Value("user").(*ent.User)
+	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, types.UserNotFoundErr
@@ -292,7 +293,7 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 }
 
 func (server *TrackerServer) DeleteTracker(ctx context.Context, req *pb.DeleteTrackerRequest) (*empty.Empty, error) {
-	userEnt, ok := ctx.Value("user").(*ent.User)
+	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, types.UserNotFoundErr
@@ -333,7 +334,7 @@ func (server *TrackerServer) getToBeTrackedValidators(req *pb.TrackValidatorsReq
 }
 
 func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackValidatorsRequest) (*pb.TrackValidatorsResponse, error) {
-	userEnt, ok := ctx.Value("user").(*ent.User)
+	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
 		return nil, types.UserNotFoundErr
