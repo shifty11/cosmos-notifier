@@ -98,6 +98,7 @@ func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain)
 }
 
 func (manager *AddressTrackerManager) AddTracker(
+	ctx context.Context,
 	userEnt *ent.User,
 	address string,
 	discordChannelId int,
@@ -117,8 +118,9 @@ func (manager *AddressTrackerManager) AddTracker(
 	if notificationInterval < 0 {
 		return nil, errors.New("notification interval must be non-negative")
 	}
+	client := getClient(ctx, manager.client)
 
-	createQuery := manager.client.AddressTracker.
+	createQuery := client.AddressTracker.
 		Create().
 		SetChain(chainEnt).
 		SetAddress(address).
@@ -127,7 +129,7 @@ func (manager *AddressTrackerManager) AddTracker(
 	if discordChannelId != 0 {
 		exist, err := userEnt.QueryDiscordChannels().
 			Where(discordchannel.IDEQ(discordChannelId)).
-			Exist(manager.ctx)
+			Exist(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +140,7 @@ func (manager *AddressTrackerManager) AddTracker(
 	} else {
 		exist, err := userEnt.QueryTelegramChats().
 			Where(telegramchat.IDEQ(telegramChatId)).
-			Exist(manager.ctx)
+			Exist(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -148,16 +150,16 @@ func (manager *AddressTrackerManager) AddTracker(
 		createQuery.SetTelegramChatID(telegramChatId)
 	}
 
-	created, err := createQuery.Save(manager.ctx)
+	created, err := createQuery.Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return manager.client.AddressTracker.Query().
+	return client.AddressTracker.Query().
 		Where(addresstracker.IDEQ(created.ID)).
 		WithChain().
 		WithDiscordChannel().
 		WithTelegramChat().
-		Only(manager.ctx)
+		Only(ctx)
 }
 
 func (manager *AddressTrackerManager) UpdateTracker(

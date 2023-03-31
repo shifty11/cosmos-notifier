@@ -12,6 +12,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/pbcommon"
 	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service"
+	"github.com/shifty11/cosmos-notifier/services/grpc/types"
 	"golang.org/x/exp/slices"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -136,7 +137,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.NotFound, "invalid user")
+		return nil, types.UserNotFoundErr
 	}
 
 	trackers, err := server.addressTrackerManager.All(userEnt)
@@ -217,7 +218,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.NotFound, "invalid user")
+		return nil, types.UserNotFoundErr
 	}
 	if req.NotificationInterval == nil || req.NotificationInterval.Seconds < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
@@ -227,6 +228,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 	}
 
 	tracker, err := server.addressTrackerManager.AddTracker(
+		ctx,
 		userEnt,
 		req.Address,
 		getDiscordChannelIdOrZero(req.ChatRoom),
@@ -255,7 +257,7 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.NotFound, "invalid user")
+		return nil, types.UserNotFoundErr
 	}
 	if req.NotificationInterval == nil || req.NotificationInterval.Seconds < 0 {
 		return nil, status.Errorf(codes.InvalidArgument, "notification-interval must be greater than 0")
@@ -293,7 +295,7 @@ func (server *TrackerServer) DeleteTracker(ctx context.Context, req *pb.DeleteTr
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.NotFound, "invalid user")
+		return nil, types.UserNotFoundErr
 	}
 
 	if err := server.addressTrackerManager.DeleteTracker(userEnt, int(req.TrackerId)); err != nil {
@@ -334,14 +336,14 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 	userEnt, ok := ctx.Value("user").(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
-		return nil, status.Errorf(codes.NotFound, "invalid user")
+		return nil, types.UserNotFoundErr
 	}
 
 	var deletedTrackerIds []int64
 	previousValidators, err := server.validatorManager.GetForUser(userEnt)
 	if err != nil {
 		log.Sugar.Errorf("error while getting previous validators: %v", err)
-		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+		return nil, types.UnknownErr
 	}
 
 	var toBeTrackedValidators = server.getToBeTrackedValidators(req, previousValidators)
@@ -355,12 +357,23 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 	}
 	var toBeUntrackedValidators = server.getToBeUntrackedValidators(req, previousValidators)
 
-	// TODO: can I do the deletion and addition in a single transaction?
+	ctx, err = server.validatorManager.StartTx(ctx)
+	if err != nil {
+		log.Sugar.Errorf("error while starting transaction: %v", err)
+		return nil, types.UnknownErr
+	}
+	defer func() {
+		_, err := database.RollbackTxIfUncommitted(ctx)
+		if err != nil {
+			log.Sugar.Errorf("error while rolling back transaction: %v", err)
+		}
+	}()
+
 	for _, previousValidator := range toBeUntrackedValidators {
-		result, err := server.validatorManager.UntrackValidator(userEnt, previousValidator)
+		result, err := server.validatorManager.UntrackValidator(ctx, userEnt, previousValidator)
 		if err != nil {
 			log.Sugar.Errorf("error while untracking validator: %v", err)
-			return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+			return nil, types.UnknownErr
 		}
 		for _, id := range result {
 			deletedTrackerIds = append(deletedTrackerIds, int64(id))
@@ -371,10 +384,17 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 	for _, newValidator := range toBeTrackedValidators {
 		discordChannelId := getDiscordChannelIdOrZero(req.ChatRoom)
 		telegramChatId := getTelegramChatIdOrZero(req.ChatRoom)
-		tracker, err := server.validatorManager.TrackValidator(userEnt, newValidator, discordChannelId, telegramChatId, req.NotificationInterval.Seconds)
+		tracker, err := server.validatorManager.TrackValidator(
+			ctx,
+			userEnt,
+			newValidator,
+			discordChannelId,
+			telegramChatId,
+			req.NotificationInterval.Seconds,
+		)
 		if err != nil {
 			log.Sugar.Errorf("error while tracking validator: %v", err)
-			return nil, status.Errorf(codes.Internal, "Unknown error occurred")
+			return nil, types.UnknownErr
 		}
 		if tracker != nil {
 			chatRoom, err := getTrackerChatRoom(tracker)
@@ -389,6 +409,11 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 				UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
 			})
 		}
+	}
+	ctx, err = database.CommitTx(ctx)
+	if err != nil {
+		log.Sugar.Errorf("error while committing transaction: %v", err)
+		return nil, types.UnknownErr
 	}
 
 	return &pb.TrackValidatorsResponse{

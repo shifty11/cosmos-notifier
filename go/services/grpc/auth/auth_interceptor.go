@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	grpcmiddleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/log"
 	"golang.org/x/exp/slices"
@@ -94,7 +95,7 @@ func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string
 			if err != nil {
 				return nil, status.Error(codes.Internal, "user not found")
 			}
-			return context.WithValue(ctx, "user", entUser), nil
+			return context.WithValue(ctx, common.ContextKeyUser, entUser), nil
 		}
 	}
 

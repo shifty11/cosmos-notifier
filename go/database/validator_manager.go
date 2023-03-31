@@ -27,6 +27,10 @@ func NewValidatorManager(client *ent.Client, ctx context.Context, addressTracker
 	return &ValidatorManager{client: client, ctx: ctx, addressTrackerManager: addressTrackerManager}
 }
 
+func (manager *ValidatorManager) StartTx(ctx context.Context) (context.Context, error) {
+	return startTx(ctx, manager.client)
+}
+
 func (manager *ValidatorManager) getAccountAddress(operatorAddress string, chainEnt *ent.Chain) (string, error) {
 	_, valAddr, err := bech32.DecodeAndConvert(operatorAddress)
 	if err != nil {
@@ -107,14 +111,12 @@ func (manager *ValidatorManager) GetForUser(userEnt *ent.User) ([]*ent.Validator
 	if userEnt.Type == user.TypeTelegram {
 		return userEnt.
 			QueryTelegramChats().
-			//Where(telegramchat.IDEQ(telegramChatId)).
 			QueryValidators().
 			WithAddressTrackers().
 			All(manager.ctx)
 	} else {
 		return userEnt.
 			QueryDiscordChannels().
-			//Where(discordchannel.IDEQ(discordChannelId)).
 			QueryValidators().
 			WithAddressTrackers().
 			All(manager.ctx)
@@ -125,6 +127,7 @@ func (manager *ValidatorManager) GetForUser(userEnt *ent.User) ([]*ent.Validator
 // It adds the validator to the user's list of tracked validators (via Discord/Telegram relation)
 // and creates a new AddressTracker if it doesn't exist.
 func (manager *ValidatorManager) TrackValidator(
+	ctx context.Context,
 	userEnt *ent.User,
 	validatorEnt *ent.Validator,
 	discordChannelId int,
@@ -137,29 +140,28 @@ func (manager *ValidatorManager) TrackValidator(
 	if telegramChatId != 0 && discordChannelId != 0 {
 		return nil, errors.New("only a telegram chat or a discord channel can be provided")
 	}
-	updateQuery := manager.client.Validator.UpdateOne(validatorEnt)
+	client := getClient(ctx, manager.client)
+	updateQuery := client.Validator.UpdateOne(validatorEnt)
 	if telegramChatId != 0 {
 		updateQuery = updateQuery.AddTelegramChatIDs(telegramChatId)
 	} else {
 		updateQuery = updateQuery.AddDiscordChannelIDs(discordChannelId)
 	}
 	if !manager.addressTrackerManager.Exists(discordChannelId, telegramChatId, validatorEnt.Address) {
-		tracker, err := withTxGeneric(manager.client, manager.ctx, func(tx *ent.Tx) (*ent.AddressTracker, error) {
-			tracker, err := manager.addressTrackerManager.AddTracker(
-				userEnt,
-				validatorEnt.Address,
-				discordChannelId,
-				telegramChatId,
-				notificationInterval,
-			)
-			if err != nil {
-				return nil, err
-			}
-			return tracker, updateQuery.
-				AddAddressTrackers(tracker).
-				Exec(manager.ctx)
-		})
-		return tracker, err
+		tracker, err := manager.addressTrackerManager.AddTracker(
+			ctx,
+			userEnt,
+			validatorEnt.Address,
+			discordChannelId,
+			telegramChatId,
+			notificationInterval,
+		)
+		if err != nil {
+			return nil, err
+		}
+		return tracker, updateQuery.
+			AddAddressTrackers(tracker).
+			Exec(ctx)
 	} else {
 		trackers, err := manager.addressTrackerManager.
 			AllByChatRoomsAndAddress(discordChannelId, telegramChatId, validatorEnt.Address)
@@ -172,11 +174,12 @@ func (manager *ValidatorManager) TrackValidator(
 		}
 		return trackers[0], updateQuery.
 			AddAddressTrackers(trackers[0]).
-			Exec(manager.ctx)
+			Exec(ctx)
 	}
 }
 
-func (manager *ValidatorManager) UntrackValidator(userEnt *ent.User, validatorEnt *ent.Validator) ([]int, error) {
+func (manager *ValidatorManager) UntrackValidator(ctx context.Context, userEnt *ent.User, validatorEnt *ent.Validator) ([]int, error) {
+	client := getClient(ctx, manager.client)
 	toBeDeletedIds, err := validatorEnt.
 		QueryAddressTrackers().
 		Where(
@@ -185,15 +188,15 @@ func (manager *ValidatorManager) UntrackValidator(userEnt *ent.User, validatorEn
 				addresstracker.HasTelegramChatWith(telegramchat.HasUsersWith(user.IDEQ(userEnt.ID))),
 			),
 		).
-		IDs(manager.ctx)
+		IDs(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(toBeDeletedIds) != 0 {
-		_, err := manager.client.AddressTracker.
+		_, err := client.AddressTracker.
 			Delete().
 			Where(addresstracker.IDIn(toBeDeletedIds...)).
-			Exec(manager.ctx)
+			Exec(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -203,15 +206,15 @@ func (manager *ValidatorManager) UntrackValidator(userEnt *ent.User, validatorEn
 		ids, err := validatorEnt.
 			QueryTelegramChats().
 			Where(telegramchat.HasUsersWith(user.IDEQ(userEnt.ID))).
-			IDs(manager.ctx)
+			IDs(ctx)
 		if err != nil {
 			return nil, err
 		}
 		if len(ids) != 0 {
-			err := manager.client.Validator.
+			err := client.Validator.
 				UpdateOne(validatorEnt).
 				RemoveTelegramChatIDs(ids...).
-				Exec(manager.ctx)
+				Exec(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -220,15 +223,15 @@ func (manager *ValidatorManager) UntrackValidator(userEnt *ent.User, validatorEn
 		ids, err := validatorEnt.
 			QueryDiscordChannels().
 			Where(discordchannel.HasUsersWith(user.IDEQ(userEnt.ID))).
-			IDs(manager.ctx)
+			IDs(ctx)
 		if err != nil {
 			return nil, err
 		}
 		if len(ids) != 0 {
-			err := manager.client.Validator.
+			err := client.Validator.
 				UpdateOne(validatorEnt).
 				RemoveDiscordChannelIDs(ids...).
-				Exec(manager.ctx)
+				Exec(ctx)
 			if err != nil {
 				return nil, err
 			}

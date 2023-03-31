@@ -300,11 +300,11 @@ func TestValidatorManager_TrackValidator(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	_, err := m.TrackValidator(users[0], vals[0], 0, 0, 0)
+	_, err := m.TrackValidator(m.ctx, users[0], vals[0], 0, 0, 0)
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.TrackValidator(users[0], vals[0], 1, 1, 0)
+	_, err = m.TrackValidator(m.ctx, users[0], vals[0], 1, 1, 0)
 	if err == nil {
 		t.Error("expected error")
 	}
@@ -317,7 +317,7 @@ func TestValidatorManager_TrackValidator_Discord(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	tracker, err := m.TrackValidator(users[0], vals[0], channels[0].ID, 0, 100)
+	tracker, err := m.TrackValidator(m.ctx, users[0], vals[0], channels[0].ID, 0, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -344,7 +344,7 @@ func TestValidatorManager_TrackValidator_Discord(t *testing.T) {
 	}
 
 	addAddressTrackers(newTestAddressTrackerManager(t), []string{vals[0].Address}, channels[1:2], []*ent.TelegramChat{})
-	tracker, err = m.TrackValidator(users[0], vals[0], channels[1].ID, 0, 100)
+	tracker, err = m.TrackValidator(m.ctx, users[0], vals[0], channels[1].ID, 0, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -378,7 +378,7 @@ func TestValidatorManager_TrackValidator_Telegram(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	tracker, err := m.TrackValidator(users[0], vals[0], 0, telegramChats[0].ID, 100)
+	tracker, err := m.TrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -405,7 +405,7 @@ func TestValidatorManager_TrackValidator_Telegram(t *testing.T) {
 	}
 
 	addAddressTrackers(newTestAddressTrackerManager(t), []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, []*ent.DiscordChannel{}, telegramChats[1:2])
-	tracker, err = m.TrackValidator(users[0], vals[0], 0, telegramChats[1].ID, 100)
+	tracker, err = m.TrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[1].ID, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -442,7 +442,7 @@ func TestValidatorManager_UntrackValidator_Discord(t *testing.T) {
 	if vals[0].QueryDiscordChannels().CountX(m.ctx) != 0 {
 		panic("expected no discord channels")
 	}
-	deletedIds, err := m.UntrackValidator(users[0], vals[0])
+	deletedIds, err := m.UntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -453,7 +453,7 @@ func TestValidatorManager_UntrackValidator_Discord(t *testing.T) {
 	trackers := addAddressTrackers(newTestAddressTrackerManager(t), []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels[:1], []*ent.TelegramChat{})
 	trackers[0].Update().SetValidator(vals[0]).SaveX(m.ctx)
 
-	deletedIds, err = m.UntrackValidator(users[0], vals[0])
+	deletedIds, err = m.UntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -475,7 +475,7 @@ func TestValidatorManager_UntrackValidator_Telegram(t *testing.T) {
 	if vals[0].QueryTelegramChats().CountX(m.ctx) != 0 {
 		panic("expected no telegram chats")
 	}
-	deletedIds, err := m.UntrackValidator(users[0], vals[0])
+	deletedIds, err := m.UntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -486,7 +486,7 @@ func TestValidatorManager_UntrackValidator_Telegram(t *testing.T) {
 	trackers := addAddressTrackers(newTestAddressTrackerManager(t), []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, []*ent.DiscordChannel{}, telegramChats[:1])
 	trackers[0].Update().SetValidator(vals[0]).SaveX(m.ctx)
 
-	deletedIds, err = m.UntrackValidator(users[0], vals[0])
+	deletedIds, err = m.UntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -504,7 +504,8 @@ func TestValidatorManager_CascadeDelete(t *testing.T) {
 	telegramChats := addTelegramChats(newTestTelegramChatManager(t), users[:2])
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
-	tracker, err := m.TrackValidator(users[0], vals[0], 0, telegramChats[0].ID, 100)
+
+	tracker, err := m.TrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
 	if err != nil {
 		panic(err)
 	}
