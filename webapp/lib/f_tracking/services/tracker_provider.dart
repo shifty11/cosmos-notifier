@@ -298,7 +298,11 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
             ))
       ];
       ref.read(validatorBundleProvider.notifier).selectValidatorBundles(toBeAdded, toBeDeleted);
-      // TODO: show message
+      if (toBeAdded.isNotEmpty) {
+        messageNotifier.sendMsg(info: "Validators are being tracked");
+      } else if (toBeDeleted.isNotEmpty) {
+        messageNotifier.sendMsg(info: "Validators are no longer being tracked");
+      }
     } catch (e) {
       messageNotifier.sendMsg(error: e.toString());
     }
