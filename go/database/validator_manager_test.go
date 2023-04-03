@@ -119,6 +119,14 @@ func TestValidatorManager_Update(t *testing.T) {
 	if m.client.Validator.GetX(m.ctx, vals[0].ID).FirstInactiveTime == nil {
 		t.Error("expected first inactive time to be set")
 	}
+
+	err = m.Update(vals[0], "validator 2", true)
+	if err != nil {
+		t.Error(err)
+	}
+	if m.client.Validator.GetX(m.ctx, vals[0].ID).FirstInactiveTime != nil {
+		t.Error("expected first inactive time to be nil")
+	}
 }
 
 func TestValidatorManager_Delete(t *testing.T) {

@@ -43,15 +43,6 @@ func (manager *ValidatorManager) getAccountAddress(operatorAddress string, chain
 	return accAddr, nil
 }
 
-func (manager *ValidatorManager) getNillableFirstInactiveTime(isActive bool) *time.Time {
-	var firstInactiveTime *time.Time
-	if !isActive {
-		var now = time.Now()
-		firstInactiveTime = &now
-	}
-	return firstInactiveTime
-}
-
 func (manager *ValidatorManager) Create(
 	chainEnt *ent.Chain,
 	operatorAddress string,
@@ -63,22 +54,30 @@ func (manager *ValidatorManager) Create(
 		log.Sugar.Errorf("Error while getting account address for validator %v: %v", operatorAddress, err)
 		return nil, err
 	}
+	var firstInactiveTime *time.Time
+	if !isActive {
+		var now = time.Now()
+		firstInactiveTime = &now
+	}
 	return manager.client.Validator.
 		Create().
 		SetChain(chainEnt).
 		SetOperatorAddress(operatorAddress).
 		SetAddress(accountAddress).
 		SetMoniker(moniker).
-		SetNillableFirstInactiveTime(manager.getNillableFirstInactiveTime(isActive)).
+		SetNillableFirstInactiveTime(firstInactiveTime).
 		Save(manager.ctx)
 }
 
 func (manager *ValidatorManager) Update(validatorEnt *ent.Validator, moniker string, isActive bool) error {
-	return validatorEnt.
-		Update().
+	updateQuery := validatorEnt.Update()
+	if isActive {
+		updateQuery.ClearFirstInactiveTime()
+	} else {
+		updateQuery.SetFirstInactiveTime(time.Now())
+	}
+	return updateQuery.
 		SetMoniker(moniker).
-		ClearFirstInactiveTime(). // Clear field and set it on the next line if isActive is false
-		SetNillableFirstInactiveTime(manager.getNillableFirstInactiveTime(isActive)).
 		Exec(manager.ctx)
 }
 
