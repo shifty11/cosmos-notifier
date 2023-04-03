@@ -107,6 +107,148 @@ func TestValidatorManager_Create(t *testing.T) {
 	}
 }
 
+func TestValidatorManager_Create_WitheExistingAddressTrackers_Discord(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
+	channels := addDiscordChannels(newTestDiscordChannelManager(t), users[:1])
+
+	m := newTestValidatorManager(t)
+	vals := addValidators(m, chains[:1])
+
+	trackerOne, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], channels[0].ID, 0, 1000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cntTrackers := m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 1 {
+		t.Error("expected 1 address trackers")
+	}
+
+	operatorAddress := createValidBech32Address("osmovaloper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	createdVal, err := m.Create(chains[1], operatorAddress, vals[0].Moniker, true)
+	if err != nil {
+		t.Error(err)
+	}
+	cntTrackers = m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 2 {
+		t.Error("expected 2 address trackers")
+	}
+
+	trackers := createdVal.QueryAddressTrackers().AllX(m.ctx)
+	if len(trackers) != 1 {
+		t.Error("expected 1 address tracker")
+	}
+	if trackerOne.NotificationInterval != trackers[0].NotificationInterval {
+		t.Error("expected notification interval to be the same")
+	}
+
+	m.client.AddressTracker.UpdateOneID(trackers[0].ID).SetNotificationInterval(99).ExecX(m.ctx)
+
+	operatorAddress = createValidBech32Address("junovaloper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	createdVal, err = m.Create(chains[2], operatorAddress, vals[0].Moniker, true)
+	if err != nil {
+		t.Error(err)
+	}
+	cntTrackers = m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 3 {
+		t.Error("expected 3 address trackers")
+	}
+	if createdVal.QueryAddressTrackers().CountX(m.ctx) != 1 {
+		t.Error("expected 1 address tracker")
+	}
+	if createdVal.QueryAddressTrackers().AllX(m.ctx)[0].NotificationInterval != 99 {
+		t.Error("expected notification interval to be 99")
+	}
+
+	m.client.Validator.DeleteOne(createdVal).ExecX(m.ctx)
+	m.client.AddressTracker.UpdateOneID(trackerOne.ID).SetNotificationInterval(88).ExecX(m.ctx)
+	createdVal, err = m.Create(chains[2], operatorAddress, vals[0].Moniker, true)
+	if err != nil {
+		t.Error(err)
+	}
+	cntTrackers = m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 3 {
+		t.Error("expected 3 address trackers")
+	}
+	if createdVal.QueryAddressTrackers().CountX(m.ctx) != 1 {
+		t.Error("expected 1 address tracker")
+	}
+	if createdVal.QueryAddressTrackers().AllX(m.ctx)[0].NotificationInterval != 88 {
+		t.Error("expected notification interval to be 88")
+	}
+}
+
+func TestValidatorManager_Create_WitheExistingAddressTrackers_Telegram(t *testing.T) {
+	chains := addChains(newTestChainManager(t))
+	users := addUsers(newTestUserManager(t), 2, user.TypeTelegram)
+	chats := addTelegramChats(newTestTelegramChatManager(t), users[:1])
+
+	m := newTestValidatorManager(t)
+	vals := addValidators(m, chains[:1])
+
+	trackerOne, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], 0, chats[0].ID, 1000)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cntTrackers := m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 1 {
+		t.Error("expected 1 address trackers")
+	}
+
+	operatorAddress := createValidBech32Address("osmovaloper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	createdVal, err := m.Create(chains[1], operatorAddress, vals[0].Moniker, true)
+	if err != nil {
+		t.Error(err)
+	}
+	cntTrackers = m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 2 {
+		t.Error("expected 2 address trackers")
+	}
+
+	trackers := createdVal.QueryAddressTrackers().AllX(m.ctx)
+	if len(trackers) != 1 {
+		t.Error("expected 1 address tracker")
+	}
+	if trackerOne.NotificationInterval != trackers[0].NotificationInterval {
+		t.Error("expected notification interval to be the same")
+	}
+
+	m.client.AddressTracker.UpdateOneID(trackers[0].ID).SetNotificationInterval(99).ExecX(m.ctx)
+
+	operatorAddress = createValidBech32Address("junovaloper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	createdVal, err = m.Create(chains[2], operatorAddress, vals[0].Moniker, true)
+	if err != nil {
+		t.Error(err)
+	}
+	cntTrackers = m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 3 {
+		t.Error("expected 3 address trackers")
+	}
+	if createdVal.QueryAddressTrackers().CountX(m.ctx) != 1 {
+		t.Error("expected 1 address tracker")
+	}
+	if createdVal.QueryAddressTrackers().AllX(m.ctx)[0].NotificationInterval != 99 {
+		t.Error("expected notification interval to be 99")
+	}
+
+	m.client.Validator.DeleteOne(createdVal).ExecX(m.ctx)
+	m.client.AddressTracker.UpdateOneID(trackerOne.ID).SetNotificationInterval(88).ExecX(m.ctx)
+	createdVal, err = m.Create(chains[2], operatorAddress, vals[0].Moniker, true)
+	if err != nil {
+		t.Error(err)
+	}
+	cntTrackers = m.client.AddressTracker.Query().CountX(m.ctx)
+	if cntTrackers != 3 {
+		t.Error("expected 3 address trackers")
+	}
+	if createdVal.QueryAddressTrackers().CountX(m.ctx) != 1 {
+		t.Error("expected 1 address tracker")
+	}
+	if createdVal.QueryAddressTrackers().AllX(m.ctx)[0].NotificationInterval != 88 {
+		t.Error("expected notification interval to be 88")
+	}
+}
+
 func TestValidatorManager_Update(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
@@ -513,20 +655,29 @@ func TestValidatorManager_CascadeDelete(t *testing.T) {
 
 	tracker, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 	if tracker == nil {
-		panic(err)
+		t.Fatal(err)
 	}
-	m.client.Validator.
-		DeleteOne(vals[0]).
-		ExecX(m.ctx)
 	if m.client.AddressTracker.Query().CountX(m.ctx) != 1 {
 		t.Errorf("expected 1 address trackers, got %d", m.client.AddressTracker.Query().CountX(m.ctx))
 	}
-
-	m.client.Chain.DeleteOne(chains[0]).ExecX(m.ctx)
+	err = m.Delete(vals[0])
+	if err != nil {
+		t.Error(err)
+	}
 	if m.client.AddressTracker.Query().CountX(m.ctx) != 0 {
 		t.Errorf("expected 0 address trackers, got %d", m.client.AddressTracker.Query().CountX(m.ctx))
 	}
+	tgChat := m.client.TelegramChat.Query().WithAddressTrackers().WithValidators().FirstX(m.ctx)
+	if len(tgChat.Edges.Validators) != 0 {
+		t.Errorf("expected 0 validators, got %d", len(tgChat.Edges.Validators))
+	}
+	if len(tgChat.Edges.AddressTrackers) != 0 {
+		t.Errorf("expected 0 address trackers, got %d", len(tgChat.Edges.AddressTrackers))
+	}
 }
+
+// TODO: if a chain gets deleted then all validators should be deleted and removed from discord/telegram channels
+// This does not work yet. To implement this we need to add a hook to the chain manager that deletes all validators and updates discord/telegram

@@ -2,6 +2,7 @@ package schema
 
 import (
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -47,7 +48,10 @@ func (Validator) Edges() []ent.Edge {
 			Ref("validators").
 			Unique().
 			Required(),
-		edge.To("address_trackers", AddressTracker.Type),
+		edge.To("address_trackers", AddressTracker.Type).
+			Annotations(entsql.Annotation{
+				OnDelete: entsql.Cascade,
+			}),
 		edge.To("telegram_chats", TelegramChat.Type),
 		edge.To("discord_channels", DiscordChannel.Type),
 	}

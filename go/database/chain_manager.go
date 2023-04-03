@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/chain"
 	"github.com/shifty11/cosmos-notifier/log"

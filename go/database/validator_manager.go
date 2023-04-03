@@ -59,13 +59,82 @@ func (manager *ValidatorManager) Create(
 		var now = time.Now()
 		firstInactiveTime = &now
 	}
-	return manager.client.Validator.
+	validatorEnt, err := manager.client.Validator.
 		Create().
 		SetChain(chainEnt).
 		SetOperatorAddress(operatorAddress).
 		SetAddress(accountAddress).
 		SetMoniker(moniker).
 		SetNillableFirstInactiveTime(firstInactiveTime).
+		Save(manager.ctx)
+	if err != nil {
+		return nil, err
+	}
+	discordChannels, err := manager.client.AddressTracker.
+		Query().
+		Where(addresstracker.HasValidatorWith(validator.MonikerEQ(moniker))).
+		QueryDiscordChannel().
+		Where(discordchannel.HasAddressTrackersWith(addresstracker.HasValidatorWith(validator.MonikerEQ(moniker)))).
+		WithUsers().
+		All(manager.ctx)
+	if err != nil {
+		return nil, err
+	}
+	telegramChats, err := manager.client.AddressTracker.
+		Query().
+		Where(addresstracker.HasValidatorWith(validator.MonikerEQ(moniker))).
+		QueryTelegramChat().
+		Where(telegramchat.HasAddressTrackersWith(addresstracker.HasValidatorWith(validator.MonikerEQ(moniker)))).
+		WithUsers().
+		All(manager.ctx)
+	if err != nil {
+		return nil, err
+	}
+	var trackerIds []int
+	for _, discordChannel := range discordChannels {
+		for _, userEnt := range discordChannel.Edges.Users {
+			firstTracker, err := discordChannel.
+				QueryAddressTrackers().
+				Where(addresstracker.And(
+					addresstracker.HasValidatorWith(validator.MonikerEQ(moniker)),
+				)).
+				Order(ent.Desc(addresstracker.FieldUpdateTime)).
+				First(manager.ctx)
+			if err != nil {
+				return nil, err
+			}
+			tracker, err := manager.addressTrackerManager.Create(manager.ctx, userEnt, validatorEnt.Address, discordChannel.ID, 0, firstTracker.NotificationInterval)
+			if err != nil {
+				return nil, err
+			}
+			trackerIds = append(trackerIds, tracker.ID)
+		}
+	}
+	for _, telegramChat := range telegramChats {
+		for _, userEnt := range telegramChat.Edges.Users {
+			firstTracker, err := telegramChat.
+				QueryAddressTrackers().
+				Where(addresstracker.And(
+					addresstracker.HasValidatorWith(validator.MonikerEQ(moniker)),
+				)).
+				Order(ent.Desc(addresstracker.FieldUpdateTime)).
+				First(manager.ctx)
+			if err != nil {
+				return nil, err
+			}
+			tracker, err := manager.addressTrackerManager.Create(manager.ctx, userEnt, validatorEnt.Address, 0, telegramChat.ID, firstTracker.NotificationInterval)
+			if err != nil {
+				return nil, err
+			}
+			trackerIds = append(trackerIds, tracker.ID)
+		}
+	}
+	if len(trackerIds) == 0 {
+		return validatorEnt, nil
+	}
+	return validatorEnt.
+		Update().
+		AddAddressTrackerIDs(trackerIds...).
 		Save(manager.ctx)
 }
 
@@ -82,6 +151,34 @@ func (manager *ValidatorManager) Update(validatorEnt *ent.Validator, moniker str
 }
 
 func (manager *ValidatorManager) Delete(validatorEnt *ent.Validator) error {
+	for _, tracker := range validatorEnt.QueryAddressTrackers().AllX(manager.ctx) {
+		channel, err := tracker.QueryDiscordChannel().Only(manager.ctx)
+		if err != nil && !ent.IsNotFound(err) {
+			return err
+		}
+		if channel != nil {
+			err := channel.
+				Update().
+				RemoveAddressTrackers(tracker).
+				Exec(manager.ctx)
+			if err != nil {
+				return err
+			}
+		}
+		chat, err := tracker.QueryTelegramChat().Only(manager.ctx)
+		if err != nil && !ent.IsNotFound(err) {
+			return err
+		}
+		if chat != nil {
+			err := chat.
+				Update().
+				RemoveAddressTrackers(tracker).
+				Exec(manager.ctx)
+			if err != nil {
+				return err
+			}
+		}
+	}
 	return manager.client.Validator.
 		DeleteOne(validatorEnt).
 		Exec(manager.ctx)
