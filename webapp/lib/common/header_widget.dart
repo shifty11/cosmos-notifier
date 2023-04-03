@@ -86,9 +86,9 @@ class _HeaderWidgetState extends State<HeaderWidget> {
       children: [
         Row(
           children: [
-            homeButton(),
-            const SizedBox(width: 8),
             ...menuItems,
+            const Spacer(),
+            homeButton(),
           ],
         ),
         const Divider(),
