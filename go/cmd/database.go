@@ -33,6 +33,8 @@ var migrateCmd = &cobra.Command{
 		err := database.MigrateDb()
 		if err != nil {
 			log.Sugar.Panicf("failed to migrate database: %v", err)
+		} else {
+			log.Sugar.Info("database migrated successfully")
 		}
 	},
 }

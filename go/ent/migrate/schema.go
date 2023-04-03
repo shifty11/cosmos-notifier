@@ -97,7 +97,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD"}},
 		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainProposalsTable holds the schema information for the "chain_proposals" table.
@@ -218,8 +218,8 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "create_time", Type: field.TypeTime},
 		{Name: "update_time", Type: field.TypeTime},
-		{Name: "operator_address", Type: field.TypeString, Unique: true},
-		{Name: "address", Type: field.TypeString, Unique: true},
+		{Name: "operator_address", Type: field.TypeString},
+		{Name: "address", Type: field.TypeString},
 		{Name: "moniker", Type: field.TypeString},
 		{Name: "first_inactive_time", Type: field.TypeTime, Nullable: true},
 		{Name: "chain_validators", Type: field.TypeInt},
@@ -262,6 +262,16 @@ var (
 				Name:    "validator_moniker_address_chain_validators",
 				Unique:  true,
 				Columns: []*schema.Column{ValidatorsColumns[5], ValidatorsColumns[4], ValidatorsColumns[7]},
+			},
+			{
+				Name:    "validator_address_chain_validators",
+				Unique:  true,
+				Columns: []*schema.Column{ValidatorsColumns[4], ValidatorsColumns[7]},
+			},
+			{
+				Name:    "validator_operator_address_chain_validators",
+				Unique:  true,
+				Columns: []*schema.Column{ValidatorsColumns[3], ValidatorsColumns[7]},
 			},
 		},
 	}

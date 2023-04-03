@@ -25,13 +25,11 @@ func (Validator) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("operator_address").
 			Immutable().
-			Unique().
 			Validate(func(s string) error {
 				return common.ValidateBech32Address(s)
 			}),
 		field.String("address").
 			Immutable().
-			Unique().
 			Validate(func(s string) error {
 				return common.ValidateBech32Address(s)
 			}),
@@ -66,5 +64,11 @@ func (Validator) Indexes() []ent.Index {
 		index.Fields("moniker", "address").
 			Edges("chain").
 			Unique(),
+		index.Fields("address"). // address is unique per chain but not globally (ex: terra and terra2)
+						Edges("chain").
+						Unique(),
+		index.Fields("operator_address"). // same as address
+							Edges("chain").
+							Unique(),
 	}
 }
