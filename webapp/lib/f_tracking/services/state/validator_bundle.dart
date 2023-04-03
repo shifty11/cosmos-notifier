@@ -40,7 +40,9 @@ class FreezedValidatorBundle with _$FreezedValidatorBundle implements Comparable
     } else if (!isTracked && other.isTracked) {
       return 1;
     } else {
-      return moniker.compareTo(other.moniker);
+      // compare length of validators and if they are equal compare moniker
+      final validatorsLengthComparison = other.validators.length.compareTo(validators.length);
+      return validatorsLengthComparison == 0 ? moniker.compareTo(other.moniker) : validatorsLengthComparison;
     }
   }
 }
