@@ -91,7 +91,7 @@ func (interceptor *AuthInterceptor) authorize(ctx context.Context, method string
 
 	for _, role := range accessibleRoles {
 		if role == claims.Role {
-			entUser, err := interceptor.userManager.Get(claims.UserId, claims.Type)
+			entUser, err := interceptor.userManager.QueryById(claims.UserId, claims.Type)
 			if err != nil {
 				return nil, status.Error(codes.Internal, "user not found")
 			}

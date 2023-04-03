@@ -18,21 +18,21 @@ func NewChainManager(client *ent.Client, ctx context.Context) *ChainManager {
 	return &ChainManager{client: client, ctx: ctx}
 }
 
-func (manager *ChainManager) ByName(name string) (*ent.Chain, error) {
+func (manager *ChainManager) QueryByName(name string) (*ent.Chain, error) {
 	return manager.client.Chain.
 		Query().
 		Where(chain.NameEQ(name)).
 		Only(manager.ctx)
 }
 
-func (manager *ChainManager) Enable(chainId int, isEnabled bool) error {
+func (manager *ChainManager) UpdateSetEnabled(chainId int, isEnabled bool) error {
 	return manager.client.Chain.
 		UpdateOneID(chainId).
 		SetIsEnabled(isEnabled).
 		Exec(manager.ctx)
 }
 
-func (manager *ChainManager) Enabled() []*ent.Chain {
+func (manager *ChainManager) QueryEnabled() []*ent.Chain {
 	query := manager.client.Chain.
 		Query().
 		Where(chain.IsEnabledEQ(true)).
@@ -44,7 +44,7 @@ func (manager *ChainManager) Enabled() []*ent.Chain {
 	return allChains
 }
 
-func (manager *ChainManager) All() []*ent.Chain {
+func (manager *ChainManager) QueryAll() []*ent.Chain {
 	chains, err := manager.client.Chain.
 		Query().
 		Order(ent.Asc(chain.FieldPrettyName)).
@@ -55,17 +55,10 @@ func (manager *ChainManager) All() []*ent.Chain {
 	return chains
 }
 
-func (manager *ChainManager) Get(id int) (*ent.Chain, error) {
+func (manager *ChainManager) QueryById(id int) (*ent.Chain, error) {
 	return manager.client.Chain.
 		Query().
 		Where(chain.IDEQ(id)).
-		Only(manager.ctx)
-}
-
-func (manager *ChainManager) GetByName(name string) (*ent.Chain, error) {
-	return manager.client.Chain.
-		Query().
-		Where(chain.NameEQ(name)).
 		Only(manager.ctx)
 }
 

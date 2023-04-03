@@ -43,12 +43,12 @@ func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 	chatName := getChatName(update)
 	isGroup := isGroupX(update)
 
-	client.TelegramChatManager.CreateOrUpdateChat(userId, userName, chatId, chatName, isGroup)
+	client.TelegramChatManager.CreateOrUpdate(userId, userName, chatId, chatName, isGroup)
 
 	adminText := ""
 	if isGroup {
 		adminText += "\n👮‍♂ Bot admins in this chat\n"
-		for _, user := range client.TelegramChatManager.GetChatUsers(chatId) {
+		for _, user := range client.TelegramChatManager.QueryUsers(chatId) {
 			adminText += fmt.Sprintf("- @%v\n", user.Name)
 		}
 	}
@@ -59,7 +59,7 @@ func (client TelegramClient) handleStart(update *tgbotapi.Update) {
 	buttons = append(buttons, client.getSubscriptionButtonRow(update))
 	replyMarkup := createKeyboard(buttons)
 
-	cnt := client.TelegramChatManager.CountSubscriptions(chatId)
+	cnt := client.TelegramChatManager.QuerySubscriptionsCount(chatId)
 	msg := tgbotapi.NewMessage(chatId, fmt.Sprintf(subscriptionsMsg, adminText, cnt))
 	msg.ReplyMarkup = replyMarkup
 	msg.ParseMode = "html"

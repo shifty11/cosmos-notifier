@@ -43,13 +43,13 @@ var (
 			params.Add("scope", "identify")
 			params.Add("state", state)
 			redirectUrl := fmt.Sprintf("https://discord.com/oauth2/authorize?%v", params.Encode())
-			dc.discordChannelManager.CreateOrUpdateChannel(userId, userName, channelId, channelName, isGroup)
-			cntSubs := dc.discordChannelManager.CountSubscriptions(channelId)
+			dc.discordChannelManager.CreateOrUpdate(userId, userName, channelId, channelName, isGroup)
+			cntSubs := dc.discordChannelManager.QuerySubscriptionsCount(channelId)
 
 			text := ""
 			if isGroup {
 				adminText := ""
-				for _, user := range dc.discordChannelManager.GetChannelUsers(channelId) {
+				for _, user := range dc.discordChannelManager.QueryUsers(channelId) {
 					adminText += fmt.Sprintf("- `%v`\n", user.Name)
 				}
 				text = fmt.Sprintf(":rocket: Cosmos Notifier started\n\n") +

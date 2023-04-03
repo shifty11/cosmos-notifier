@@ -13,15 +13,15 @@ import (
 )
 
 type ITelegramChatManager interface {
-	AddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error)
-	AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error)
-	CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool)
-	GetSubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult
+	UpdateAddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error)
+	UpdateAddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error)
+	CreateOrUpdate(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool)
+	QuerySubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult
 	Delete(userId int64, chatId int64) error
 	DeleteMultiple(chatIds []int64)
-	CountSubscriptions(chatId int64) int
-	GetChatUsers(chatId int64) []*ent.User
-	GetAllIds() []types.TgChatQueryResult
+	QuerySubscriptionsCount(chatId int64) int
+	QueryUsers(chatId int64) []*ent.User
+	QueryAllIds() []types.TgChatQueryResult
 }
 
 type TelegramChatManager struct {
@@ -48,9 +48,9 @@ func NewTelegramChatManager(
 	}
 }
 
-// AddOrRemoveChain adds or removes a chain from a telegram chat
+// UpdateAddOrRemoveChain adds or removes a chain from a telegram chat
 // Returns true if the contract is now added to the chat
-func (m *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error) {
+func (m *TelegramChatManager) UpdateAddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error) {
 	log.Sugar.Debugf("Adding or removing chain %d from telegram chat %d", chainId, tgChatId)
 	tgChat, err := m.client.TelegramChat.
 		Query().
@@ -60,7 +60,7 @@ func (m *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int) (has
 		return false, err
 	}
 
-	entChain, err := m.chainManager.Get(chainId)
+	entChain, err := m.chainManager.QueryById(chainId)
 	if err != nil {
 		return false, err
 	}
@@ -92,9 +92,9 @@ func (m *TelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int) (has
 	return !exists, nil
 }
 
-// AddOrRemoveContract adds or removes a contract from a telegram chat
+// UpdateAddOrRemoveContract adds or removes a contract from a telegram chat
 // Returns true if the contract is now added to the chat
-func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error) {
+func (m *TelegramChatManager) UpdateAddOrRemoveContract(tgChatId int64, contractId int) (hasContract bool, err error) {
 	log.Sugar.Debugf("Adding or removing contract %d from telegram chat %d", contractId, tgChatId)
 	tgChat, err := m.client.TelegramChat.
 		Query().
@@ -104,7 +104,7 @@ func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int
 		return false, err
 	}
 
-	dbContract, err := m.contractManager.Get(contractId)
+	dbContract, err := m.contractManager.QueryById(contractId)
 	if err != nil {
 		return false, err
 	}
@@ -136,9 +136,9 @@ func (m *TelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int
 	return !exists, nil
 }
 
-func (m *TelegramChatManager) CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool) {
+func (m *TelegramChatManager) CreateOrUpdate(userId int64, userName string, tgChatId int64, name string, isGroup bool) (tc *ent.TelegramChat, created bool) {
 	log.Sugar.Debugf("Create or update Telegram chat %s (%d) for user %s (%d)", name, tgChatId, userName, userId)
-	entUser := m.userManager.createOrUpdateUser(userId, userName, user.TypeTelegram)
+	entUser := m.userManager.createOrUpdate(userId, userName, user.TypeTelegram)
 	tgChat, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(tgChatId)).
@@ -190,7 +190,7 @@ func (m *TelegramChatManager) CreateOrUpdateChat(userId int64, userName string, 
 	return tgChat, false
 }
 
-func (m *TelegramChatManager) GetSubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult {
+func (m *TelegramChatManager) QuerySubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult {
 	var v []types.TgChatQueryResult
 	err := query.
 		Select(telegramchat.FieldChatID, telegramchat.FieldName).
@@ -201,8 +201,8 @@ func (m *TelegramChatManager) GetSubscribedIds(query *ent.TelegramChatQuery) []t
 	return v
 }
 
-func (m *TelegramChatManager) GetAllIds() []types.TgChatQueryResult {
-	return m.GetSubscribedIds(m.client.TelegramChat.Query())
+func (m *TelegramChatManager) QueryAllIds() []types.TgChatQueryResult {
+	return m.QuerySubscribedIds(m.client.TelegramChat.Query())
 }
 
 // Delete deletes a telegram chat for a user
@@ -272,7 +272,7 @@ func (m *TelegramChatManager) DeleteMultiple(chatIds []int64) {
 	}
 }
 
-func (m *TelegramChatManager) CountSubscriptions(chatId int64) int {
+func (m *TelegramChatManager) QuerySubscriptionsCount(chatId int64) int {
 	countChains, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(chatId)).
@@ -292,7 +292,7 @@ func (m *TelegramChatManager) CountSubscriptions(chatId int64) int {
 	return countChains + countContracts
 }
 
-func (m *TelegramChatManager) GetChatUsers(chatId int64) []*ent.User {
+func (m *TelegramChatManager) QueryUsers(chatId int64) []*ent.User {
 	users, err := m.client.TelegramChat.
 		Query().
 		Where(telegramchat.ChatIDEQ(chatId)).

@@ -35,10 +35,10 @@ func (m *MockIDiscordChannelManager) EXPECT() *MockIDiscordChannelManagerMockRec
 	return m.recorder
 }
 
-// AddOrRemoveChain mocks base method.
-func (m *MockIDiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainId int) (bool, error) {
+// UpdateAddOrRemoveChain mocks base method.
+func (m *MockIDiscordChannelManager) UpdateAddOrRemoveChain(tgChatId int64, chainId int) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddOrRemoveChain", tgChatId, chainId)
+	ret := m.ctrl.Call(m, "UpdateAddOrRemoveChain", tgChatId, chainId)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -47,13 +47,13 @@ func (m *MockIDiscordChannelManager) AddOrRemoveChain(tgChatId int64, chainId in
 // AddOrRemoveChain indicates an expected call of AddOrRemoveChain.
 func (mr *MockIDiscordChannelManagerMockRecorder) AddOrRemoveChain(tgChatId, chainId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrRemoveChain", reflect.TypeOf((*MockIDiscordChannelManager)(nil).AddOrRemoveChain), tgChatId, chainId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAddOrRemoveChain", reflect.TypeOf((*MockIDiscordChannelManager)(nil).UpdateAddOrRemoveChain), tgChatId, chainId)
 }
 
-// AddOrRemoveContract mocks base method.
-func (m *MockIDiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId int) (bool, error) {
+// UpdateAddOrRemoveContract mocks base method.
+func (m *MockIDiscordChannelManager) UpdateAddOrRemoveContract(dChannelId int64, contractId int) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddOrRemoveContract", dChannelId, contractId)
+	ret := m.ctrl.Call(m, "UpdateAddOrRemoveContract", dChannelId, contractId)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -62,13 +62,13 @@ func (m *MockIDiscordChannelManager) AddOrRemoveContract(dChannelId int64, contr
 // AddOrRemoveContract indicates an expected call of AddOrRemoveContract.
 func (mr *MockIDiscordChannelManagerMockRecorder) AddOrRemoveContract(dChannelId, contractId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrRemoveContract", reflect.TypeOf((*MockIDiscordChannelManager)(nil).AddOrRemoveContract), dChannelId, contractId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAddOrRemoveContract", reflect.TypeOf((*MockIDiscordChannelManager)(nil).UpdateAddOrRemoveContract), dChannelId, contractId)
 }
 
-// CountSubscriptions mocks base method.
-func (m *MockIDiscordChannelManager) CountSubscriptions(channelId int64) int {
+// QueryCountSubscriptions mocks base method.
+func (m *MockIDiscordChannelManager) QuerySubscriptionsCount(channelId int64) int {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountSubscriptions", channelId)
+	ret := m.ctrl.Call(m, "QuerySubscriptionsCount", channelId)
 	ret0, _ := ret[0].(int)
 	return ret0
 }
@@ -76,13 +76,13 @@ func (m *MockIDiscordChannelManager) CountSubscriptions(channelId int64) int {
 // CountSubscriptions indicates an expected call of CountSubscriptions.
 func (mr *MockIDiscordChannelManagerMockRecorder) CountSubscriptions(channelId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountSubscriptions", reflect.TypeOf((*MockIDiscordChannelManager)(nil).CountSubscriptions), channelId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QuerySubscriptionsCount", reflect.TypeOf((*MockIDiscordChannelManager)(nil).QuerySubscriptionsCount), channelId)
 }
 
 // CreateOrUpdateChannel mocks base method.
-func (m *MockIDiscordChannelManager) CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (*ent.DiscordChannel, bool) {
+func (m *MockIDiscordChannelManager) CreateOrUpdate(userId int64, userName string, channelId int64, name string, isGroup bool) (*ent.DiscordChannel, bool) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrUpdateChannel", userId, userName, channelId, name, isGroup)
+	ret := m.ctrl.Call(m, "CreateOrUpdate", userId, userName, channelId, name, isGroup)
 	ret0, _ := ret[0].(*ent.DiscordChannel)
 	ret1, _ := ret[1].(bool)
 	return ret0, ret1
@@ -91,7 +91,7 @@ func (m *MockIDiscordChannelManager) CreateOrUpdateChannel(userId int64, userNam
 // CreateOrUpdateChannel indicates an expected call of CreateOrUpdateChannel.
 func (mr *MockIDiscordChannelManagerMockRecorder) CreateOrUpdateChannel(userId, userName, channelId, name, isGroup interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateChannel", reflect.TypeOf((*MockIDiscordChannelManager)(nil).CreateOrUpdateChannel), userId, userName, channelId, name, isGroup)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdate", reflect.TypeOf((*MockIDiscordChannelManager)(nil).CreateOrUpdate), userId, userName, channelId, name, isGroup)
 }
 
 // Delete mocks base method.
@@ -120,10 +120,10 @@ func (mr *MockIDiscordChannelManagerMockRecorder) DeleteMultiple(channelIds inte
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteMultiple", reflect.TypeOf((*MockIDiscordChannelManager)(nil).DeleteMultiple), channelIds)
 }
 
-// GetAllIds mocks base method.
-func (m *MockIDiscordChannelManager) GetAllIds() []types.DiscordChannelQueryResult {
+// QueryAllIds mocks base method.
+func (m *MockIDiscordChannelManager) QueryAllIds() []types.DiscordChannelQueryResult {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllIds")
+	ret := m.ctrl.Call(m, "QueryAllIds")
 	ret0, _ := ret[0].([]types.DiscordChannelQueryResult)
 	return ret0
 }
@@ -131,13 +131,13 @@ func (m *MockIDiscordChannelManager) GetAllIds() []types.DiscordChannelQueryResu
 // GetAllIds indicates an expected call of GetAllIds.
 func (mr *MockIDiscordChannelManagerMockRecorder) GetAllIds() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllIds", reflect.TypeOf((*MockIDiscordChannelManager)(nil).GetAllIds))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllIds", reflect.TypeOf((*MockIDiscordChannelManager)(nil).QueryAllIds))
 }
 
 // GetChannelUsers mocks base method.
-func (m *MockIDiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
+func (m *MockIDiscordChannelManager) QueryUsers(channelId int64) []*ent.User {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChannelUsers", channelId)
+	ret := m.ctrl.Call(m, "QueryUsers", channelId)
 	ret0, _ := ret[0].([]*ent.User)
 	return ret0
 }
@@ -145,13 +145,13 @@ func (m *MockIDiscordChannelManager) GetChannelUsers(channelId int64) []*ent.Use
 // GetChannelUsers indicates an expected call of GetChannelUsers.
 func (mr *MockIDiscordChannelManagerMockRecorder) GetChannelUsers(channelId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChannelUsers", reflect.TypeOf((*MockIDiscordChannelManager)(nil).GetChannelUsers), channelId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryUsers", reflect.TypeOf((*MockIDiscordChannelManager)(nil).QueryUsers), channelId)
 }
 
-// GetSubscribedIds mocks base method.
-func (m *MockIDiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult {
+// QuerySubscribedIds mocks base method.
+func (m *MockIDiscordChannelManager) QuerySubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSubscribedIds", query)
+	ret := m.ctrl.Call(m, "QuerySubscribedIds", query)
 	ret0, _ := ret[0].([]types.DiscordChannelQueryResult)
 	return ret0
 }
@@ -159,5 +159,5 @@ func (m *MockIDiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQ
 // GetSubscribedIds indicates an expected call of GetSubscribedIds.
 func (mr *MockIDiscordChannelManagerMockRecorder) GetSubscribedIds(query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscribedIds", reflect.TypeOf((*MockIDiscordChannelManager)(nil).GetSubscribedIds), query)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QuerySubscribedIds", reflect.TypeOf((*MockIDiscordChannelManager)(nil).QuerySubscribedIds), query)
 }

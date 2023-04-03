@@ -62,10 +62,10 @@ func NewContractNotifier(
 func (n *contractNotifier) Notify(entContract *ent.Contract, entProp *ent.ContractProposal) {
 	log.Sugar.Infof("Notifying for proposal %v on contract %v", entProp.ProposalID, entContract.Name)
 
-	tgIds := n.telegramChatManager.GetSubscribedIds(entContract.QueryTelegramChats())
+	tgIds := n.telegramChatManager.QuerySubscribedIds(entContract.QueryTelegramChats())
 	n.telegramNotifier.notify(tgIds, entContract.Name, entProp.ProposalID, entProp.Title, entProp.Description)
 
-	discordIds := n.discordChannelManager.GetSubscribedIds(entContract.QueryDiscordChannels())
+	discordIds := n.discordChannelManager.QuerySubscribedIds(entContract.QueryDiscordChannels())
 	n.discordNotifier.notify(discordIds, entContract.Name, entProp.ProposalID, entProp.Title, entProp.Description)
 }
 
@@ -88,10 +88,10 @@ func NewChainNotifier(managers *database.DbManagers, telegramBotToken string, te
 func (n *chainNotifier) Notify(entChain *ent.Chain, entProp *ent.ChainProposal) {
 	log.Sugar.Infof("Notifying for proposal %v on chain %v", entProp.ProposalID, entChain.PrettyName)
 
-	tgIds := n.telegramChatManager.GetSubscribedIds(entChain.QueryTelegramChats())
+	tgIds := n.telegramChatManager.QuerySubscribedIds(entChain.QueryTelegramChats())
 	n.telegramNotifier.notify(tgIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 
-	discordIds := n.discordChannelManager.GetSubscribedIds(entChain.QueryDiscordChannels())
+	discordIds := n.discordChannelManager.QuerySubscribedIds(entChain.QueryDiscordChannels())
 	n.discordNotifier.notify(discordIds, entChain.PrettyName, entProp.ProposalID, entProp.Title, entProp.Description)
 }
 
@@ -181,24 +181,24 @@ type BroadcastMessageResult struct {
 func (n *generalNotifier) BroadcastMessage(message string, receiver pb.BroadcastMessageRequest_MessageType, entUser *ent.User, waitc chan BroadcastMessageResult) BroadcastMessageResult {
 	switch receiver {
 	case pb.BroadcastMessageRequest_TELEGRAM:
-		tgIds := n.telegramChatManager.GetAllIds()
+		tgIds := n.telegramChatManager.QueryAllIds()
 		waitc <- BroadcastMessageResult{ChatCnt: len(tgIds), IsSending: true}
 		errCnt := n.telegramNotifier.broadcastMessage(tgIds, message)
 		return BroadcastMessageResult{ChatCnt: len(tgIds) - errCnt, ErrorCnt: errCnt}
 	case pb.BroadcastMessageRequest_DISCORD:
-		discordIds := n.discordChannelManager.GetAllIds()
+		discordIds := n.discordChannelManager.QueryAllIds()
 		waitc <- BroadcastMessageResult{ChatCnt: len(discordIds), IsSending: true}
 		errCnt := n.discordNotifier.broadcastMessage(discordIds, message)
 		return BroadcastMessageResult{ChatCnt: len(discordIds) - errCnt, ErrorCnt: errCnt}
 	case pb.BroadcastMessageRequest_TELEGRAM_TEST:
-		ids := n.telegramChatManager.GetSubscribedIds(entUser.QueryTelegramChats())
+		ids := n.telegramChatManager.QuerySubscribedIds(entUser.QueryTelegramChats())
 		if len(ids) == 0 {
 			return BroadcastMessageResult{Error: errors.New("no telegram chats found")}
 		}
 		errCnt := n.telegramNotifier.broadcastMessage(ids[:1], message)
 		return BroadcastMessageResult{ChatCnt: 1 - errCnt, ErrorCnt: errCnt, SingleChatName: ids[0].Name}
 	case pb.BroadcastMessageRequest_DISCORD_TEST:
-		ids := n.discordChannelManager.GetSubscribedIds(entUser.QueryDiscordChannels())
+		ids := n.discordChannelManager.QuerySubscribedIds(entUser.QueryDiscordChannels())
 		if len(ids) == 0 {
 			return BroadcastMessageResult{Error: errors.New("no discord channels found")}
 		}

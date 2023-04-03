@@ -42,14 +42,14 @@ func addDiscordChannels(m *DiscordChannelManager, users []*ent.User) []*ent.Disc
 	return channels
 }
 
-func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
+func TestDiscordChannelManager_UpdateAddOrRemoveChain(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
-	_, err := m.AddOrRemoveChain(1, 1)
+	_, err := m.UpdateAddOrRemoveChain(1, 1)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 
-	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.
 		Create().
@@ -59,7 +59,7 @@ func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
 		SetIsGroup(false).
 		SaveX(m.ctx)
 
-	_, err = m.AddOrRemoveChain(1, 1)
+	_, err = m.UpdateAddOrRemoveChain(1, 1)
 	if !ent.IsNotFound(err) {
 		t.Fatalf("Expected not found error, got %s", err)
 	}
@@ -73,7 +73,7 @@ func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
 	}
 
 	c := m.chainManager.Create(data, data.Image)
-	added, err := m.AddOrRemoveChain(dc.ChannelID, c.ID)
+	added, err := m.UpdateAddOrRemoveChain(dc.ChannelID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -81,7 +81,7 @@ func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
 		t.Fatal("Expected true, got false")
 	}
 
-	added, err = m.AddOrRemoveChain(dc.ChannelID, c.ID)
+	added, err = m.UpdateAddOrRemoveChain(dc.ChannelID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -90,14 +90,14 @@ func TestDiscordChannelManager_AddOrRemoveChain(t *testing.T) {
 	}
 }
 
-func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
+func TestDiscordChannelManager_UpdateAddOrRemoveContract(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
-	_, err := m.AddOrRemoveContract(1, 1)
+	_, err := m.UpdateAddOrRemoveContract(1, 1)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 
-	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.
 		Create().
@@ -107,7 +107,7 @@ func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
 		SetIsGroup(false).
 		SaveX(m.ctx)
 
-	_, err = m.AddOrRemoveContract(1, 1)
+	_, err = m.UpdateAddOrRemoveContract(1, 1)
 	if !ent.IsNotFound(err) {
 		t.Fatalf("Expected not found error, got %s", err)
 	}
@@ -121,7 +121,7 @@ func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
 	}
 
 	c, _ := m.contractManager.Create(data)
-	added, err := m.AddOrRemoveContract(dc.ChannelID, c.ID)
+	added, err := m.UpdateAddOrRemoveContract(dc.ChannelID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -129,7 +129,7 @@ func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
 		t.Fatal("Expected true, got false")
 	}
 
-	added, err = m.AddOrRemoveContract(dc.ChannelID, c.ID)
+	added, err = m.UpdateAddOrRemoveContract(dc.ChannelID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -138,10 +138,10 @@ func TestDiscordChannelManager_AddOrRemoveContract(t *testing.T) {
 	}
 }
 
-func TestDiscordChannelManager_CreateOrUpdateChannel(t *testing.T) {
+func TestDiscordChannelManager_CreateOrUpdate(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
 
-	dc, created := m.CreateOrUpdateChannel(1, "username", 1, "channelname", true)
+	dc, created := m.CreateOrUpdate(1, "username", 1, "channelname", true)
 	if !created {
 		t.Fatal("Expected true, got false")
 	}
@@ -159,7 +159,7 @@ func TestDiscordChannelManager_CreateOrUpdateChannel(t *testing.T) {
 		t.Fatalf("Expected nil, got %s", err)
 	}
 
-	dc, created = m.CreateOrUpdateChannel(1, "updated", 1, "updated", true)
+	dc, created = m.CreateOrUpdate(1, "updated", 1, "updated", true)
 	u, err := dc.QueryUsers().Only(m.ctx)
 	if u.Name != "updated" {
 		t.Fatalf("Expected updated, got %s", dc.Edges.Users[0].Name)
@@ -171,7 +171,7 @@ func TestDiscordChannelManager_CreateOrUpdateChannel(t *testing.T) {
 		t.Fatalf("Expected updated, got %s", dc.Name)
 	}
 
-	dc, created = m.CreateOrUpdateChannel(2, "newuser", 1, "updated", true)
+	dc, created = m.CreateOrUpdate(2, "newuser", 1, "updated", true)
 	users := dc.QueryUsers().AllX(m.ctx)
 	if len(users) != 2 {
 		t.Fatalf("Expected 2, got %d", len(users))
@@ -182,7 +182,7 @@ func TestDiscordChannelManager_CreateOrUpdateChannel(t *testing.T) {
 
 }
 
-func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
+func TestDiscordChannelManager_QuerySubscribedIds(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
 
 	data := &types.ContractData{
@@ -195,7 +195,7 @@ func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
 
 	c1, _ := m.contractManager.Create(data)
 
-	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.
 		Create().
@@ -205,13 +205,13 @@ func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
 		AddUsers(u).
 		SaveX(m.ctx)
 
-	ids := m.GetSubscribedIds(c1.QueryDiscordChannels())
+	ids := m.QuerySubscribedIds(c1.QueryDiscordChannels())
 	if len(ids) != 0 {
 		t.Fatalf("Expected 0, got %d", len(ids))
 	}
 
-	_, _ = m.AddOrRemoveContract(dc.ChannelID, c1.ID)
-	ids = m.GetSubscribedIds(c1.QueryDiscordChannels())
+	_, _ = m.UpdateAddOrRemoveContract(dc.ChannelID, c1.ID)
+	ids = m.QuerySubscribedIds(c1.QueryDiscordChannels())
 	if len(ids) != 1 {
 		t.Fatalf("Expected 1, got %d", len(ids))
 	}
@@ -229,8 +229,8 @@ func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
 		SetIsGroup(false).
 		AddUsers(u).
 		SaveX(m.ctx)
-	_, _ = m.AddOrRemoveContract(dc.ChannelID, c1.ID)
-	ids = m.GetSubscribedIds(c1.QueryDiscordChannels())
+	_, _ = m.UpdateAddOrRemoveContract(dc.ChannelID, c1.ID)
+	ids = m.QuerySubscribedIds(c1.QueryDiscordChannels())
 	if len(ids) != 2 {
 		t.Fatalf("Expected 2, got %d", len(ids))
 	}
@@ -251,8 +251,8 @@ func TestDiscordChannelManager_GetSubscribedIds(t *testing.T) {
 
 func TestDiscordChannelManager_Delete(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeDiscord)
+	u1 := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
+	u2 := m.userManager.createOrUpdate(2, "username", user.TypeDiscord)
 
 	err := m.Delete(1, 100)
 	if !ent.IsNotFound(err) {
@@ -306,8 +306,8 @@ func TestDiscordChannelManager_Delete(t *testing.T) {
 
 func TestDiscordChannelManager_DeleteMultiple(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeDiscord)
+	u1 := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
+	u2 := m.userManager.createOrUpdate(2, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.
 		Create().
@@ -332,8 +332,8 @@ func TestDiscordChannelManager_DeleteMultiple(t *testing.T) {
 
 func TestDiscordChannelManager_DeleteMultiple_KeepOneUser(t *testing.T) {
 	m := newTestDiscordChannelManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeDiscord)
+	u1 := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
+	u2 := m.userManager.createOrUpdate(2, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.
 		Create().

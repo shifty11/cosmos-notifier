@@ -11,10 +11,10 @@ import (
 type IContractManager interface {
 	Create(data *types.ContractData) (*ent.Contract, error)
 	Update(c *ent.Contract, data *types.ContractData) *ent.Contract
-	All() []*ent.Contract
-	Get(id int) (*ent.Contract, error)
-	SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract
-	ByAddress(contractAddress string) (*ent.Contract, error)
+	QueryAll() []*ent.Contract
+	QueryById(id int) (*ent.Contract, error)
+	UpdateSetThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract
+	QueryByAddress(contractAddress string) (*ent.Contract, error)
 	Delete(id int) error
 }
 
@@ -66,7 +66,7 @@ func (m *ContractManager) Update(c *ent.Contract, data *types.ContractData) *ent
 	return c
 }
 
-func (m *ContractManager) All() []*ent.Contract {
+func (m *ContractManager) QueryAll() []*ent.Contract {
 	all, err := m.client.Contract.
 		Query().
 		Order(ent.Asc(contract.FieldName)).
@@ -77,14 +77,14 @@ func (m *ContractManager) All() []*ent.Contract {
 	return all
 }
 
-func (m *ContractManager) Get(id int) (*ent.Contract, error) {
+func (m *ContractManager) QueryById(id int) (*ent.Contract, error) {
 	return m.client.Contract.
 		Query().
 		Where(contract.ID(id)).
 		Only(m.ctx)
 }
 
-func (m *ContractManager) SaveThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract {
+func (m *ContractManager) UpdateSetThumbnailUrl(entContract *ent.Contract, url string) *ent.Contract {
 	updated, err := m.client.Contract.
 		UpdateOne(entContract).
 		SetThumbnailURL(url).
@@ -95,7 +95,7 @@ func (m *ContractManager) SaveThumbnailUrl(entContract *ent.Contract, url string
 	return updated
 }
 
-func (m *ContractManager) ByAddress(contractAddress string) (*ent.Contract, error) {
+func (m *ContractManager) QueryByAddress(contractAddress string) (*ent.Contract, error) {
 	return m.client.Contract.
 		Query().
 		Where(contract.AddressEQ(contractAddress)).

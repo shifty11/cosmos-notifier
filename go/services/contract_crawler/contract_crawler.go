@@ -36,7 +36,7 @@ func NewContractCrawler(managers *database.DbManagers, notifier notifier.Contrac
 func (c *ContractCrawler) UpdateContracts() {
 	log.Sugar.Info("Updating contracts")
 
-	contracts := c.contractManager.All()
+	contracts := c.contractManager.QueryAll()
 	var cntSuccess, cntFails = 0, len(contracts)
 	for _, contract := range contracts {
 		client := NewContractClient(c.apiUrl, contract.Address, contract.RPCEndpoint)
@@ -79,10 +79,10 @@ func (c *ContractCrawler) UpdateContracts() {
 				if err != nil {
 					log.Sugar.Infof("error while downloading image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, err)
 				} else {
-					c.contractManager.SaveThumbnailUrl(updatedContract, im.ThumbnailUrl)
+					c.contractManager.UpdateSetThumbnailUrl(updatedContract, im.ThumbnailUrl)
 				}
 			} else if oldImageUrl != updatedContract.ImageURL {
-				c.contractManager.SaveThumbnailUrl(updatedContract, "")
+				c.contractManager.UpdateSetThumbnailUrl(updatedContract, "")
 				e := os.RemoveAll(im.ThumbnailPath)
 				if e != nil {
 					log.Sugar.Errorf("error while removing image for contract %v (%v): %v", updatedContract.Name, updatedContract.Address, e)
@@ -118,12 +118,12 @@ func (c *ContractCrawler) AddContracts() {
 		log.Sugar.Errorf("while querying daos: %v", err)
 	}
 
-	junoChain, err := c.chainManager.GetByName("juno")
+	junoChain, err := c.chainManager.QueryByName("juno")
 	if err != nil {
 		log.Sugar.Panicf("chain Juno not found")
 	}
 
-	contracts := c.contractManager.All()
+	contracts := c.contractManager.QueryAll()
 	for _, dao := range query.Daos.Nodes {
 		found := false
 		for _, contract := range contracts {
@@ -178,14 +178,14 @@ func (c *ContractCrawler) AddContract(chain *ent.Chain, contractAddr string, pro
 	if err != nil {
 		log.Sugar.Infof("while downloading image for contract %v: %v", contractAddr, err)
 	} else {
-		c.contractManager.SaveThumbnailUrl(contract, im.ThumbnailUrl)
+		c.contractManager.UpdateSetThumbnailUrl(contract, im.ThumbnailUrl)
 	}
 
 	return contract, nil
 }
 
 func (c *ContractCrawler) ByAddress(contractAddr string) (*ent.Contract, error) {
-	return c.contractManager.ByAddress(contractAddr)
+	return c.contractManager.QueryByAddress(contractAddr)
 }
 
 func (c *ContractCrawler) ScheduleCrawl() {

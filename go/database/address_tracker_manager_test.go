@@ -20,7 +20,7 @@ func addAddressTrackers(m *AddressTrackerManager, addresses []string, discordCha
 	for _, address := range addresses {
 		for _, discordChannel := range discordChannels {
 			userEnt := discordChannel.QueryUsers().FirstX(m.ctx)
-			addressTracker, err := m.AddTracker(m.ctx, userEnt, address, discordChannel.ID, 0, 10000)
+			addressTracker, err := m.Create(m.ctx, userEnt, address, discordChannel.ID, 0, 10000)
 			addressTrackers = append(addressTrackers, addressTracker)
 			if err != nil {
 				panic(err)
@@ -28,7 +28,7 @@ func addAddressTrackers(m *AddressTrackerManager, addresses []string, discordCha
 		}
 		for _, telegramChat := range telegramChats {
 			userEnt := telegramChat.QueryUsers().FirstX(m.ctx)
-			addressTracker, err := m.AddTracker(m.ctx, userEnt, address, 0, telegramChat.ID, 10000)
+			addressTracker, err := m.Create(m.ctx, userEnt, address, 0, telegramChat.ID, 10000)
 			addressTrackers = append(addressTrackers, addressTracker)
 			if err != nil {
 				panic(err)
@@ -38,7 +38,7 @@ func addAddressTrackers(m *AddressTrackerManager, addresses []string, discordCha
 	return addressTrackers
 }
 
-func TestAddressTrackerManager_GetTrackers(t *testing.T) {
+func TestAddressTrackerManager_QueryByUser(t *testing.T) {
 	addChains(newTestChainManager(t))
 	discordUsers := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
 	telegramUsers := addUsers(newTestUserManager(t), 1, user.TypeTelegram)
@@ -49,7 +49,7 @@ func TestAddressTrackerManager_GetTrackers(t *testing.T) {
 	addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, []*ent.TelegramChat{})
 	addAddressTrackers(m, []string{"osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq", "comdex1cx82d7pm4dgffy7a93rl6ul5g84vjgxkqfyp2m"}, []*ent.DiscordChannel{}, telegramChats)
 
-	trackers, err := m.All(discordUsers[0])
+	trackers, err := m.QueryByUser(discordUsers[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestAddressTrackerManager_GetTrackers(t *testing.T) {
 		t.Error("Telegram chat is not nil")
 	}
 
-	trackers, err = m.All(telegramUsers[0])
+	trackers, err = m.QueryByUser(telegramUsers[0])
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,18 +95,18 @@ func TestAddressTrackerManager_GetTrackers(t *testing.T) {
 	}
 }
 
-func TestAddressTrackerManager_IsValid(t *testing.T) {
+func TestAddressTrackerManager_QueryIsValid(t *testing.T) {
 	m := newTestAddressTrackerManager(t)
 
 	addChains(newTestChainManager(t))
 
-	if isValid, _ := m.IsValid(""); isValid {
+	if isValid, _ := m.QueryIsValid(""); isValid {
 		t.Error("Empty address is valid")
 	}
-	if isValid, _ := m.IsValid("juno1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"); isValid {
+	if isValid, _ := m.QueryIsValid("juno1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"); isValid {
 		t.Error("Address of unknown chain is valid")
 	}
-	if isValid, _ := m.IsValid("cosmos1"); isValid {
+	if isValid, _ := m.QueryIsValid("cosmos1"); isValid {
 		t.Error("Invalid address is valid")
 	}
 
@@ -116,14 +116,14 @@ func TestAddressTrackerManager_IsValid(t *testing.T) {
 		{"comdex1cx82d7pm4dgffy7a93rl6ul5g84vjgxkqfyp2m", "Comdex"},
 	}
 	for _, address := range addresses {
-		isValid, chain := m.IsValid(address[0])
+		isValid, chain := m.QueryIsValid(address[0])
 		if !isValid || chain.Name != address[1] {
 			t.Errorf("Address %s of chain %s is invalid", address[0], address[1])
 		}
 	}
 }
 
-func TestAddressTrackerManager_AddTrackerForDiscordChannel(t *testing.T) {
+func TestAddressTrackerManager_Create_DiscordChannel(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -132,17 +132,17 @@ func TestAddressTrackerManager_AddTrackerForDiscordChannel(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	if _, err := m.AddTracker(m.ctx, users[0], "", 0, 0, 10000); err == nil {
+	if _, err := m.Create(m.ctx, users[0], "", 0, 0, 10000); err == nil {
 		t.Error("Empty address is valid")
 	}
-	if _, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 0, 10000); err == nil {
+	if _, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 0, 10000); err == nil {
 		t.Error("Empty discordChannelId and telegramChatId is valid")
 	}
-	if _, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 1, 10000); err == nil {
+	if _, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 1, 10000); err == nil {
 		t.Error("Both discordChannelId and telegramChatId are valid")
 	}
 
-	tracker, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
+	tracker, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -176,7 +176,7 @@ func TestAddressTrackerManager_AddTrackerForDiscordChannel(t *testing.T) {
 	}
 }
 
-func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
+func TestAddressTrackerManager_Create_TelegramChat(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -185,7 +185,7 @@ func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	tracker, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
+	tracker, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -219,7 +219,7 @@ func TestAddressTrackerManager_AddTrackerForTelegramChat(t *testing.T) {
 	}
 }
 
-func TestAddressTrackerManager_AddTrackerForDiscordChannel_Twice(t *testing.T) {
+func TestAddressTrackerManager_Create_DiscordChannel_Twice(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -228,11 +228,11 @@ func TestAddressTrackerManager_AddTrackerForDiscordChannel_Twice(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	_, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
+	_, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
+	_, err = m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -241,7 +241,7 @@ func TestAddressTrackerManager_AddTrackerForDiscordChannel_Twice(t *testing.T) {
 	}
 }
 
-func TestAddressTrackerManager_AddTrackerForTelegramChat_Twice(t *testing.T) {
+func TestAddressTrackerManager_Create_TelegramChat_Twice(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -250,11 +250,11 @@ func TestAddressTrackerManager_AddTrackerForTelegramChat_Twice(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	_, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
+	_, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
+	_, err = m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -268,13 +268,13 @@ func TestAddressTracker_NoDiscordChannel(t *testing.T) {
 	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
 
 	m := newTestAddressTrackerManager(t)
-	_, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 0, 10000)
+	_, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 1, 0, 10000)
 	if err == nil {
 		t.Error("Address is added without user")
 	}
 
 	channels := addDiscordChannels(newTestDiscordChannelManager(t), users)
-	_, err = m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
+	_, err = m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", channels[0].ID, 0, 10000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -285,13 +285,13 @@ func TestAddressTracker_NoTelegramChat(t *testing.T) {
 	users := addUsers(newTestUserManager(t), 1, user.TypeTelegram)
 
 	m := newTestAddressTrackerManager(t)
-	_, err := m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 1, 10000)
+	_, err := m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, 1, 10000)
 	if err == nil {
 		t.Error("Address is added without user")
 	}
 
 	chats := addTelegramChats(newTestTelegramChatManager(t), users)
-	_, err = m.AddTracker(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
+	_, err = m.Create(m.ctx, users[0], "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02", 0, chats[0].ID, 10000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -348,7 +348,7 @@ func TestAddressTracker_CascadeDeleteForTelegramChat(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_UpdateTracker_Discord(t *testing.T) {
+func TestAddressTracker_Update_Discord(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -358,7 +358,7 @@ func TestAddressTracker_UpdateTracker_Discord(t *testing.T) {
 
 	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, []*ent.TelegramChat{})
 
-	tracker, err := m.UpdateTracker(users[0], trackers[0].ID, 2, 0, 999)
+	tracker, err := m.Update(users[0], trackers[0].ID, 2, 0, 999)
 	if err != nil {
 		t.Error(err)
 	}
@@ -376,7 +376,7 @@ func TestAddressTracker_UpdateTracker_Discord(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_UpdateTracker_Telegram(t *testing.T) {
+func TestAddressTracker_Update_Telegram(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -386,7 +386,7 @@ func TestAddressTracker_UpdateTracker_Telegram(t *testing.T) {
 
 	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, []*ent.DiscordChannel{}, tgChats)
 
-	tracker, err := m.UpdateTracker(users[0], trackers[0].ID, 0, 2, 999)
+	tracker, err := m.Update(users[0], trackers[0].ID, 0, 2, 999)
 	if err != nil {
 		t.Error(err)
 	}
@@ -404,7 +404,7 @@ func TestAddressTracker_UpdateTracker_Telegram(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_UpdateTracker_Failure(t *testing.T) {
+func TestAddressTracker_Update_Failure(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 
@@ -414,33 +414,33 @@ func TestAddressTracker_UpdateTracker_Failure(t *testing.T) {
 
 	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, []*ent.DiscordChannel{}, tgChats)
 
-	_, err := m.UpdateTracker(users[0], 999, 0, 2, 999)
+	_, err := m.Update(users[0], 999, 0, 2, 999)
 	if err == nil {
 		t.Error("Should fail")
 	}
 
-	_, err = m.UpdateTracker(users[0], trackers[0].ID, 0, 0, 999)
+	_, err = m.Update(users[0], trackers[0].ID, 0, 0, 999)
 	if err == nil {
 		t.Error("Should fail")
 	}
 
-	_, err = m.UpdateTracker(users[0], trackers[0].ID, 999, 2, 999)
+	_, err = m.Update(users[0], trackers[0].ID, 999, 2, 999)
 	if err == nil {
 		t.Error("Should fail")
 	}
 
-	_, err = m.UpdateTracker(users[0], trackers[0].ID, 0, 999, 999)
+	_, err = m.Update(users[0], trackers[0].ID, 0, 999, 999)
 	if err == nil {
 		t.Error("Should fail")
 	}
 
-	_, err = m.UpdateTracker(users[0], trackers[0].ID, 0, 2, -1)
+	_, err = m.Update(users[0], trackers[0].ID, 0, 2, -1)
 	if err == nil {
 		t.Error("Should fail")
 	}
 }
 
-func TestAddressTracker_GetAllUnnotifiedTrackers(t *testing.T) {
+func TestAddressTracker_QueryUnnotifiedTrackers(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 	discordUsers := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
@@ -457,7 +457,7 @@ func TestAddressTracker_GetAllUnnotifiedTrackers(t *testing.T) {
 			ExecX(m.ctx)
 	}
 
-	unnotifiedTrackers := m.GetAllUnnotifiedTrackers()
+	unnotifiedTrackers := m.QueryUnnotifiedTrackers()
 	if len(unnotifiedTrackers) != 4 {
 		t.Error("Wrong number of unnotifiedTrackers")
 	}
@@ -471,7 +471,7 @@ func TestAddressTracker_GetAllUnnotifiedTrackers(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_GetAllUnnotifiedTrackers_CheckTime(t *testing.T) {
+func TestAddressTracker_QueryUnnotifiedTrackers_CheckTime(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
@@ -481,7 +481,7 @@ func TestAddressTracker_GetAllUnnotifiedTrackers_CheckTime(t *testing.T) {
 
 	trackers := addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, tgChats)
 
-	unnotifiedTrackers := m.GetAllUnnotifiedTrackers()
+	unnotifiedTrackers := m.QueryUnnotifiedTrackers()
 	if len(unnotifiedTrackers) != 0 {
 		t.Error("Wrong number of unnotifiedTrackers")
 	}
@@ -491,13 +491,13 @@ func TestAddressTracker_GetAllUnnotifiedTrackers_CheckTime(t *testing.T) {
 		SetNotificationInterval(int64(twoWeeksDuration.Seconds())).
 		ExecX(m.ctx)
 
-	unnotifiedTrackers = m.GetAllUnnotifiedTrackers()
+	unnotifiedTrackers = m.QueryUnnotifiedTrackers()
 	if len(unnotifiedTrackers) != 1 {
 		t.Error("Wrong number of unnotifiedTrackers")
 	}
 }
 
-func TestAddressTracker_GetAllUnnotifiedTrackers_SetNotified(t *testing.T) {
+func TestAddressTracker_QueryUnnotifiedTrackers_UpdateSetNotified(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 	users := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
@@ -512,19 +512,19 @@ func TestAddressTracker_GetAllUnnotifiedTrackers_SetNotified(t *testing.T) {
 		SetNotificationInterval(int64(twoWeeksDuration.Seconds())).
 		ExecX(m.ctx)
 
-	unnotifiedTrackers := m.GetAllUnnotifiedTrackers()
+	unnotifiedTrackers := m.QueryUnnotifiedTrackers()
 	if len(unnotifiedTrackers) != 1 {
 		t.Error("Wrong number of unnotifiedTrackers")
 	}
 
-	m.SetNotified(unnotifiedTrackers[0])
-	unnotifiedTrackers = m.GetAllUnnotifiedTrackers()
+	m.UpdateSetNotified(unnotifiedTrackers[0])
+	unnotifiedTrackers = m.QueryUnnotifiedTrackers()
 	if len(unnotifiedTrackers) != 0 {
 		t.Error("Wrong number of unnotifiedTrackers")
 	}
 }
 
-func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
+func TestAddressTracker_QueryChatRooms_Discord(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 	dUsers := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
@@ -532,7 +532,7 @@ func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
 
 	m := newTestAddressTrackerManager(t)
 
-	discordChannels, telegramChats, err := m.GetChatRooms(dUsers[0])
+	discordChannels, telegramChats, err := m.QueryChatRooms(dUsers[0])
 	if err == nil {
 		t.Error(err)
 	}
@@ -540,7 +540,7 @@ func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
 	addDiscordChannels(newTestDiscordChannelManager(t), dUsers[:1])
 	addTelegramChats(newTestTelegramChatManager(t), tgUsers[:1])
 
-	discordChannels, telegramChats, err = m.GetChatRooms(dUsers[0])
+	discordChannels, telegramChats, err = m.QueryChatRooms(dUsers[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -551,7 +551,7 @@ func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
 		t.Error("Wrong number of telegram chats")
 	}
 
-	discordChannels, telegramChats, err = m.GetChatRooms(tgUsers[0])
+	discordChannels, telegramChats, err = m.QueryChatRooms(tgUsers[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -563,7 +563,7 @@ func TestAddressTracker_GetChatRooms_Discord(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_DeleteTracker(t *testing.T) {
+func TestAddressTracker_Delete(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 	discordUsers := addUsers(newTestUserManager(t), 1, user.TypeDiscord)
@@ -577,7 +577,7 @@ func TestAddressTracker_DeleteTracker(t *testing.T) {
 		t.Error("Wrong number of trackers")
 	}
 
-	err := m.DeleteTracker(discordUsers[0], trackers[0].ID)
+	err := m.Delete(discordUsers[0], trackers[0].ID)
 	if err != nil {
 		return
 	}
@@ -585,7 +585,7 @@ func TestAddressTracker_DeleteTracker(t *testing.T) {
 		t.Error("Wrong number of trackers")
 	}
 
-	err = m.DeleteTracker(telegramUsers[0], trackers[0].ID)
+	err = m.Delete(telegramUsers[0], trackers[0].ID)
 	if err != nil {
 		return
 	}
@@ -593,7 +593,7 @@ func TestAddressTracker_DeleteTracker(t *testing.T) {
 		t.Error("Wrong number of trackers")
 	}
 
-	err = m.DeleteTracker(telegramUsers[0], trackers[2].ID)
+	err = m.Delete(telegramUsers[0], trackers[2].ID)
 	if err != nil {
 		return
 	}
@@ -612,7 +612,7 @@ func TestAddressTracker_AllByChatRoomsAndAddress(t *testing.T) {
 	m := newTestAddressTrackerManager(t)
 	addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels, tgChats)
 
-	trackers, err := m.AllByChatRoomsAndAddress(channels[0].ID, 0, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	trackers, err := m.QueryByChatRoomsAndAddress(channels[0].ID, 0, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
 	if err != nil {
 		t.Error(err)
 	}
@@ -626,7 +626,7 @@ func TestAddressTracker_AllByChatRoomsAndAddress(t *testing.T) {
 		t.Error("Wrong discord channel")
 	}
 
-	trackers, err = m.AllByChatRoomsAndAddress(0, tgChats[0].ID, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
+	trackers, err = m.QueryByChatRoomsAndAddress(0, tgChats[0].ID, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02")
 	if err != nil {
 		t.Error(err)
 	}
@@ -641,7 +641,7 @@ func TestAddressTracker_AllByChatRoomsAndAddress(t *testing.T) {
 	}
 }
 
-func TestAddressTracker_Exists(t *testing.T) {
+func TestAddressTracker_QueryDoesExist(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	addChainProposals(newTestChainProposalManager(t), chains)
 	discordUsers := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
@@ -651,22 +651,22 @@ func TestAddressTracker_Exists(t *testing.T) {
 	m := newTestAddressTrackerManager(t)
 	addAddressTrackers(m, []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels[:1], tgChats[:1])
 
-	if !m.Exists(channels[0].ID, 0, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
+	if !m.QueryDoesExist(channels[0].ID, 0, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
 		t.Error("Tracker should exist")
 	}
-	if !m.Exists(0, tgChats[0].ID, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
+	if !m.QueryDoesExist(0, tgChats[0].ID, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
 		t.Error("Tracker should exist")
 	}
-	if m.Exists(channels[0].ID, 0, "osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq") {
+	if m.QueryDoesExist(channels[0].ID, 0, "osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq") {
 		t.Error("Tracker should not exist")
 	}
-	if m.Exists(0, tgChats[0].ID, "osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq") {
+	if m.QueryDoesExist(0, tgChats[0].ID, "osmo166y8reslaeuedyc6gd83m8r5p0pmdnvq0dggsq") {
 		t.Error("Tracker should not exist")
 	}
-	if m.Exists(channels[1].ID, 0, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
+	if m.QueryDoesExist(channels[1].ID, 0, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
 		t.Error("Tracker should not exist")
 	}
-	if m.Exists(0, tgChats[1].ID, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
+	if m.QueryDoesExist(0, tgChats[1].ID, "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02") {
 		t.Error("Tracker should not exist")
 	}
 }

@@ -142,7 +142,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 		return nil, types.UserNotFoundErr
 	}
 
-	trackers, err := server.addressTrackerManager.All(userEnt)
+	trackers, err := server.addressTrackerManager.QueryByUser(userEnt)
 	if err != nil {
 		log.Sugar.Error(err)
 		return nil, status.Errorf(codes.Internal, "error while getting trackers")
@@ -165,7 +165,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 
 	var pbTrackerChatRooms []*pb.TrackerChatRoom
 	var trackedMonikers = make(map[string]bool)
-	discordChannels, telegramChats, err := server.addressTrackerManager.GetChatRooms(userEnt)
+	discordChannels, telegramChats, err := server.addressTrackerManager.QueryChatRooms(userEnt)
 	if err != nil {
 		log.Sugar.Error(err)
 		return nil, status.Errorf(codes.Internal, "error while getting trackers")
@@ -199,7 +199,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 		}
 	}
 
-	validators := server.validatorManager.GetActive()
+	validators := server.validatorManager.QueryActive()
 	pbValidatorBundles := toValidatorBundles(validators, trackedMonikers)
 
 	return &pb.GetTrackersResponse{
@@ -210,7 +210,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 }
 
 func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddressValidRequest) (*pb.IsAddressValidResponse, error) {
-	isValid, _ := server.addressTrackerManager.IsValid(req.Address)
+	isValid, _ := server.addressTrackerManager.QueryIsValid(req.Address)
 	return &pb.IsAddressValidResponse{
 		IsValid: isValid,
 	}, nil
@@ -229,7 +229,7 @@ func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerR
 		return nil, err
 	}
 
-	tracker, err := server.addressTrackerManager.AddTracker(
+	tracker, err := server.addressTrackerManager.Create(
 		ctx,
 		userEnt,
 		req.Address,
@@ -268,7 +268,7 @@ func (server *TrackerServer) UpdateTracker(ctx context.Context, req *pb.UpdateTr
 		return nil, err
 	}
 
-	tracker, err := server.addressTrackerManager.UpdateTracker(
+	tracker, err := server.addressTrackerManager.Update(
 		userEnt,
 		int(req.TrackerId),
 		getDiscordChannelIdOrZero(req.ChatRoom),
@@ -300,7 +300,7 @@ func (server *TrackerServer) DeleteTracker(ctx context.Context, req *pb.DeleteTr
 		return nil, types.UserNotFoundErr
 	}
 
-	if err := server.addressTrackerManager.DeleteTracker(userEnt, int(req.TrackerId)); err != nil {
+	if err := server.addressTrackerManager.Delete(userEnt, int(req.TrackerId)); err != nil {
 		log.Sugar.Errorf("error while deleting tracker: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
 	}
@@ -321,7 +321,7 @@ func (server *TrackerServer) getToBeUntrackedValidators(req *pb.TrackValidatorsR
 func (server *TrackerServer) getToBeTrackedValidators(req *pb.TrackValidatorsRequest, previousValidators []*ent.Validator) []*ent.Validator {
 	var newValidators []*ent.Validator
 	for _, moniker := range req.GetMonikers() {
-		validators := server.validatorManager.GetByMoniker(moniker)
+		validators := server.validatorManager.QueryByMoniker(moniker)
 		for _, validator := range validators {
 			containsFunc := func(prev *ent.Validator) bool {
 				return prev.Address == validator.Address
@@ -342,7 +342,7 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 	}
 
 	var deletedTrackerIds []int64
-	previousValidators, err := server.validatorManager.GetForUser(userEnt)
+	previousValidators, err := server.validatorManager.QueryByUser(userEnt)
 	if err != nil {
 		log.Sugar.Errorf("error while getting previous validators: %v", err)
 		return nil, types.UnknownErr
@@ -372,7 +372,7 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 	}()
 
 	for _, previousValidator := range toBeUntrackedValidators {
-		result, err := server.validatorManager.UntrackValidator(ctx, userEnt, previousValidator)
+		result, err := server.validatorManager.UpdateUntrackValidator(ctx, userEnt, previousValidator)
 		if err != nil {
 			log.Sugar.Errorf("error while untracking validator: %v", err)
 			return nil, types.UnknownErr
@@ -386,7 +386,7 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 	for _, newValidator := range toBeTrackedValidators {
 		discordChannelId := getDiscordChannelIdOrZero(req.ChatRoom)
 		telegramChatId := getTelegramChatIdOrZero(req.ChatRoom)
-		tracker, err := server.validatorManager.TrackValidator(
+		tracker, err := server.validatorManager.UpdateTrackValidator(
 			ctx,
 			userEnt,
 			newValidator,

@@ -36,9 +36,9 @@ func (m *MockITelegramChatManager) EXPECT() *MockITelegramChatManagerMockRecorde
 }
 
 // AddOrRemoveChain mocks base method.
-func (m *MockITelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int) (bool, error) {
+func (m *MockITelegramChatManager) UpdateAddOrRemoveChain(tgChatId int64, chainId int) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddOrRemoveChain", tgChatId, chainId)
+	ret := m.ctrl.Call(m, "UpdateAddOrRemoveChain", tgChatId, chainId)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -47,13 +47,13 @@ func (m *MockITelegramChatManager) AddOrRemoveChain(tgChatId int64, chainId int)
 // AddOrRemoveChain indicates an expected call of AddOrRemoveChain.
 func (mr *MockITelegramChatManagerMockRecorder) AddOrRemoveChain(tgChatId, chainId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrRemoveChain", reflect.TypeOf((*MockITelegramChatManager)(nil).AddOrRemoveChain), tgChatId, chainId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAddOrRemoveChain", reflect.TypeOf((*MockITelegramChatManager)(nil).UpdateAddOrRemoveChain), tgChatId, chainId)
 }
 
 // AddOrRemoveContract mocks base method.
-func (m *MockITelegramChatManager) AddOrRemoveContract(tgChatId int64, contractId int) (bool, error) {
+func (m *MockITelegramChatManager) UpdateAddOrRemoveContract(tgChatId int64, contractId int) (bool, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddOrRemoveContract", tgChatId, contractId)
+	ret := m.ctrl.Call(m, "UpdateAddOrRemoveContract", tgChatId, contractId)
 	ret0, _ := ret[0].(bool)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -62,13 +62,13 @@ func (m *MockITelegramChatManager) AddOrRemoveContract(tgChatId int64, contractI
 // AddOrRemoveContract indicates an expected call of AddOrRemoveContract.
 func (mr *MockITelegramChatManagerMockRecorder) AddOrRemoveContract(tgChatId, contractId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddOrRemoveContract", reflect.TypeOf((*MockITelegramChatManager)(nil).AddOrRemoveContract), tgChatId, contractId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAddOrRemoveContract", reflect.TypeOf((*MockITelegramChatManager)(nil).UpdateAddOrRemoveContract), tgChatId, contractId)
 }
 
 // CountSubscriptions mocks base method.
-func (m *MockITelegramChatManager) CountSubscriptions(chatId int64) int {
+func (m *MockITelegramChatManager) QuerySubscriptionsCount(chatId int64) int {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountSubscriptions", chatId)
+	ret := m.ctrl.Call(m, "QuerySubscriptionsCount", chatId)
 	ret0, _ := ret[0].(int)
 	return ret0
 }
@@ -76,13 +76,13 @@ func (m *MockITelegramChatManager) CountSubscriptions(chatId int64) int {
 // CountSubscriptions indicates an expected call of CountSubscriptions.
 func (mr *MockITelegramChatManagerMockRecorder) CountSubscriptions(chatId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountSubscriptions", reflect.TypeOf((*MockITelegramChatManager)(nil).CountSubscriptions), chatId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QuerySubscriptionsCount", reflect.TypeOf((*MockITelegramChatManager)(nil).QuerySubscriptionsCount), chatId)
 }
 
 // CreateOrUpdateChat mocks base method.
-func (m *MockITelegramChatManager) CreateOrUpdateChat(userId int64, userName string, tgChatId int64, name string, isGroup bool) (*ent.TelegramChat, bool) {
+func (m *MockITelegramChatManager) CreateOrUpdate(userId int64, userName string, tgChatId int64, name string, isGroup bool) (*ent.TelegramChat, bool) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrUpdateChat", userId, userName, tgChatId, name, isGroup)
+	ret := m.ctrl.Call(m, "CreateOrUpdate", userId, userName, tgChatId, name, isGroup)
 	ret0, _ := ret[0].(*ent.TelegramChat)
 	ret1, _ := ret[1].(bool)
 	return ret0, ret1
@@ -91,7 +91,7 @@ func (m *MockITelegramChatManager) CreateOrUpdateChat(userId int64, userName str
 // CreateOrUpdateChat indicates an expected call of CreateOrUpdateChat.
 func (mr *MockITelegramChatManagerMockRecorder) CreateOrUpdateChat(userId, userName, tgChatId, name, isGroup interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateChat", reflect.TypeOf((*MockITelegramChatManager)(nil).CreateOrUpdateChat), userId, userName, tgChatId, name, isGroup)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdate", reflect.TypeOf((*MockITelegramChatManager)(nil).CreateOrUpdate), userId, userName, tgChatId, name, isGroup)
 }
 
 // Delete mocks base method.
@@ -121,9 +121,9 @@ func (mr *MockITelegramChatManagerMockRecorder) DeleteMultiple(chatIds interface
 }
 
 // GetAllIds mocks base method.
-func (m *MockITelegramChatManager) GetAllIds() []types.TgChatQueryResult {
+func (m *MockITelegramChatManager) QueryAllIds() []types.TgChatQueryResult {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllIds")
+	ret := m.ctrl.Call(m, "QueryAllIds")
 	ret0, _ := ret[0].([]types.TgChatQueryResult)
 	return ret0
 }
@@ -131,13 +131,13 @@ func (m *MockITelegramChatManager) GetAllIds() []types.TgChatQueryResult {
 // GetAllIds indicates an expected call of GetAllIds.
 func (mr *MockITelegramChatManagerMockRecorder) GetAllIds() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllIds", reflect.TypeOf((*MockITelegramChatManager)(nil).GetAllIds))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryAllIds", reflect.TypeOf((*MockITelegramChatManager)(nil).QueryAllIds))
 }
 
 // GetChatUsers mocks base method.
-func (m *MockITelegramChatManager) GetChatUsers(chatId int64) []*ent.User {
+func (m *MockITelegramChatManager) QueryUsers(chatId int64) []*ent.User {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetChatUsers", chatId)
+	ret := m.ctrl.Call(m, "QueryUsers", chatId)
 	ret0, _ := ret[0].([]*ent.User)
 	return ret0
 }
@@ -145,13 +145,13 @@ func (m *MockITelegramChatManager) GetChatUsers(chatId int64) []*ent.User {
 // GetChatUsers indicates an expected call of GetChatUsers.
 func (mr *MockITelegramChatManagerMockRecorder) GetChatUsers(chatId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChatUsers", reflect.TypeOf((*MockITelegramChatManager)(nil).GetChatUsers), chatId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueryUsers", reflect.TypeOf((*MockITelegramChatManager)(nil).QueryUsers), chatId)
 }
 
 // GetSubscribedIds mocks base method.
-func (m *MockITelegramChatManager) GetSubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult {
+func (m *MockITelegramChatManager) QuerySubscribedIds(query *ent.TelegramChatQuery) []types.TgChatQueryResult {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSubscribedIds", query)
+	ret := m.ctrl.Call(m, "QuerySubscribedIds", query)
 	ret0, _ := ret[0].([]types.TgChatQueryResult)
 	return ret0
 }
@@ -159,5 +159,5 @@ func (m *MockITelegramChatManager) GetSubscribedIds(query *ent.TelegramChatQuery
 // GetSubscribedIds indicates an expected call of GetSubscribedIds.
 func (mr *MockITelegramChatManagerMockRecorder) GetSubscribedIds(query interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSubscribedIds", reflect.TypeOf((*MockITelegramChatManager)(nil).GetSubscribedIds), query)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QuerySubscribedIds", reflect.TypeOf((*MockITelegramChatManager)(nil).QuerySubscribedIds), query)
 }

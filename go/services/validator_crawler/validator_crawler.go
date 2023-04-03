@@ -67,7 +67,7 @@ func isValidatorInActiveSet(pubKey string, activeValidatorSet []types.ValidatorS
 
 func (c *ValidatorCrawler) AddOrUpdateValidators() {
 	log.Sugar.Info("Getting all validators")
-	for _, chainEnt := range c.chainManager.Enabled() {
+	for _, chainEnt := range c.chainManager.QueryEnabled() {
 		log.Sugar.Infof("Getting validators for chain %v", chainEnt.PrettyName)
 		url := fmt.Sprintf(urlValidators, chainEnt.Path)
 		var validatorsResponse types.ValidatorsResponse
@@ -100,7 +100,7 @@ func (c *ValidatorCrawler) AddOrUpdateValidators() {
 				if existingValidator != nil {
 					if validatorNeedsUpdate(existingValidator, &validator, isInActiveSet) {
 						log.Sugar.Infof("Updating validator %v %v", validator.OperatorAddress, validator.Description.Moniker)
-						err := c.validatorManager.UpdateValidator(existingValidator, validator.Description.Moniker, isInActiveSet)
+						err := c.validatorManager.Update(existingValidator, validator.Description.Moniker, isInActiveSet)
 						if err != nil {
 							log.Sugar.Errorf("error updating validator %v: %v", existingValidator.Address, err)
 							continue
@@ -108,7 +108,7 @@ func (c *ValidatorCrawler) AddOrUpdateValidators() {
 					}
 				} else {
 					log.Sugar.Infof("Creating validator %v %v", validator.OperatorAddress, validator.Description.Moniker)
-					_, err = c.validatorManager.AddValidator(chainEnt, validator.OperatorAddress, validator.Description.Moniker, isInActiveSet)
+					_, err = c.validatorManager.Create(chainEnt, validator.OperatorAddress, validator.Description.Moniker, isInActiveSet)
 					if err != nil {
 						log.Sugar.Errorf("error creating validator %v: %v", validator.OperatorAddress, err)
 						continue

@@ -42,14 +42,14 @@ func addTelegramChats(m *TelegramChatManager, users []*ent.User) []*ent.Telegram
 	return chats
 }
 
-func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
+func TestTelegramChatManager_UpdateAddOrRemoveChain(t *testing.T) {
 	m := newTestTelegramChatManager(t)
-	_, err := m.AddOrRemoveChain(1, 1)
+	_, err := m.UpdateAddOrRemoveChain(1, 1)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 
-	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dc := m.client.TelegramChat.
 		Create().
@@ -59,7 +59,7 @@ func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
 		SetIsGroup(false).
 		SaveX(m.ctx)
 
-	_, err = m.AddOrRemoveChain(1, 1)
+	_, err = m.UpdateAddOrRemoveChain(1, 1)
 	if !ent.IsNotFound(err) {
 		t.Fatalf("Expected not found error, got %s", err)
 	}
@@ -73,7 +73,7 @@ func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
 	}
 
 	c := m.chainManager.Create(data, data.Image)
-	hasChain, err := m.AddOrRemoveChain(dc.ChatID, c.ID)
+	hasChain, err := m.UpdateAddOrRemoveChain(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -81,7 +81,7 @@ func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
 		t.Fatal("Expected true, got false")
 	}
 
-	hasChain, err = m.AddOrRemoveChain(dc.ChatID, c.ID)
+	hasChain, err = m.UpdateAddOrRemoveChain(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -90,14 +90,14 @@ func TestTelegramChatManager_AddOrRemoveChain(t *testing.T) {
 	}
 }
 
-func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
+func TestTelegramChatManager_UpdateAddOrRemoveContract(t *testing.T) {
 	m := newTestTelegramChatManager(t)
-	_, err := m.AddOrRemoveContract(1, 1)
+	_, err := m.UpdateAddOrRemoveContract(1, 1)
 	if err == nil {
 		t.Fatal("Expected error, got nil")
 	}
 
-	u := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dc := m.client.TelegramChat.
 		Create().
@@ -107,7 +107,7 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 		SetIsGroup(false).
 		SaveX(m.ctx)
 
-	_, err = m.AddOrRemoveContract(1, 1)
+	_, err = m.UpdateAddOrRemoveContract(1, 1)
 	if !ent.IsNotFound(err) {
 		t.Fatalf("Expected not found error, got %s", err)
 	}
@@ -121,7 +121,7 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 	}
 
 	c, _ := m.contractManager.Create(data)
-	hasContract, err := m.AddOrRemoveContract(dc.ChatID, c.ID)
+	hasContract, err := m.UpdateAddOrRemoveContract(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -129,7 +129,7 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 		t.Fatal("Expected true, got false")
 	}
 
-	hasContract, err = m.AddOrRemoveContract(dc.ChatID, c.ID)
+	hasContract, err = m.UpdateAddOrRemoveContract(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}
@@ -138,10 +138,10 @@ func TestTelegramChatManager_AddOrRemoveContract(t *testing.T) {
 	}
 }
 
-func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {
+func TestTelegramChatManager_CreateOrUpdate(t *testing.T) {
 	m := newTestTelegramChatManager(t)
 
-	dc, created := m.CreateOrUpdateChat(1, "username", 1, "channelname", true)
+	dc, created := m.CreateOrUpdate(1, "username", 1, "channelname", true)
 	if !created {
 		t.Fatal("Expected true, got false")
 	}
@@ -159,7 +159,7 @@ func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {
 		t.Fatalf("Expected nil, got %s", err)
 	}
 
-	dc, created = m.CreateOrUpdateChat(1, "updated", 1, "updated", true)
+	dc, created = m.CreateOrUpdate(1, "updated", 1, "updated", true)
 	u, err := dc.QueryUsers().Only(m.ctx)
 	if u.Name != "updated" {
 		t.Fatalf("Expected updated, got %s", dc.Edges.Users[0].Name)
@@ -171,7 +171,7 @@ func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {
 		t.Fatalf("Expected updated, got %s", dc.Name)
 	}
 
-	dc, created = m.CreateOrUpdateChat(2, "newuser", 1, "updated", true)
+	dc, created = m.CreateOrUpdate(2, "newuser", 1, "updated", true)
 	users := dc.QueryUsers().AllX(m.ctx)
 	if len(users) != 2 {
 		t.Fatalf("Expected 2, got %d", len(users))
@@ -182,7 +182,7 @@ func TestTelegramChatManager_CreateOrUpdateChat(t *testing.T) {
 
 }
 
-func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
+func TestTelegramChatManager_QuerySubscribedIds(t *testing.T) {
 	m := newTestTelegramChatManager(t)
 
 	data := &types.ContractData{
@@ -195,7 +195,7 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 
 	c1, _ := m.contractManager.Create(data)
 
-	u := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
+	u := m.userManager.createOrUpdate(1, "username", user.TypeTelegram)
 
 	tg := m.client.TelegramChat.
 		Create().
@@ -205,13 +205,13 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 		AddUsers(u).
 		SaveX(m.ctx)
 
-	ids := m.GetSubscribedIds(c1.QueryTelegramChats())
+	ids := m.QuerySubscribedIds(c1.QueryTelegramChats())
 	if len(ids) != 0 {
 		t.Fatalf("Expected 0, got %d", len(ids))
 	}
 
-	_, _ = m.AddOrRemoveContract(tg.ChatID, c1.ID)
-	ids = m.GetSubscribedIds(c1.QueryTelegramChats())
+	_, _ = m.UpdateAddOrRemoveContract(tg.ChatID, c1.ID)
+	ids = m.QuerySubscribedIds(c1.QueryTelegramChats())
 	if len(ids) != 1 {
 		t.Fatalf("Expected 1, got %d", len(ids))
 	}
@@ -229,8 +229,8 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 		SetIsGroup(false).
 		AddUsers(u).
 		SaveX(m.ctx)
-	_, _ = m.AddOrRemoveContract(tg.ChatID, c1.ID)
-	ids = m.GetSubscribedIds(c1.QueryTelegramChats())
+	_, _ = m.UpdateAddOrRemoveContract(tg.ChatID, c1.ID)
+	ids = m.QuerySubscribedIds(c1.QueryTelegramChats())
 	if len(ids) != 2 {
 		t.Fatalf("Expected 2, got %d", len(ids))
 	}
@@ -251,8 +251,8 @@ func TestTelegramChatManager_GetSubscribedIds(t *testing.T) {
 
 func TestTelegramChatManager_Delete(t *testing.T) {
 	m := newTestTelegramChatManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeTelegram)
+	u1 := m.userManager.createOrUpdate(1, "username", user.TypeTelegram)
+	u2 := m.userManager.createOrUpdate(2, "username", user.TypeTelegram)
 
 	err := m.Delete(1, 100)
 	if !ent.IsNotFound(err) {
@@ -306,8 +306,8 @@ func TestTelegramChatManager_Delete(t *testing.T) {
 
 func TestTelegramChatManager_DeleteMultiple(t *testing.T) {
 	m := newTestTelegramChatManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeTelegram)
+	u1 := m.userManager.createOrUpdate(1, "username", user.TypeTelegram)
+	u2 := m.userManager.createOrUpdate(2, "username", user.TypeTelegram)
 
 	dc := m.client.TelegramChat.
 		Create().
@@ -331,8 +331,8 @@ func TestTelegramChatManager_DeleteMultiple(t *testing.T) {
 
 func TestTelegramChatManager_DeleteMultiple_KeepOneUser(t *testing.T) {
 	m := newTestTelegramChatManager(t)
-	u1 := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
-	u2 := m.userManager.createOrUpdateUser(2, "username", user.TypeTelegram)
+	u1 := m.userManager.createOrUpdate(1, "username", user.TypeTelegram)
+	u2 := m.userManager.createOrUpdate(2, "username", user.TypeTelegram)
 
 	dc := m.client.TelegramChat.
 		Create().
