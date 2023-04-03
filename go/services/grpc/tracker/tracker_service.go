@@ -17,7 +17,7 @@ import (
 	"golang.org/x/exp/slices"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"sort"
+	"strings"
 )
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -118,7 +118,7 @@ func toValidatorBundles(validators []*ent.Validator, trackedMonikers map[string]
 		} else {
 			var isTracked = trackedMonikers[validator.Moniker]
 			bundles[validator.Moniker] = &pb.ValidatorBundle{
-				Moniker:    validator.Moniker,
+				Moniker:    strings.Trim(validator.Moniker, " \t"), // remove leading and trailing spaces
 				Validators: []*pb.Validator{pbValidator},
 				IsTracked:  isTracked,
 			}
@@ -128,9 +128,10 @@ func toValidatorBundles(validators []*ent.Validator, trackedMonikers map[string]
 	for _, bundle := range bundles {
 		validatorBundles = append(validatorBundles, bundle)
 	}
-	sort.Slice(validatorBundles, func(i, j int) bool {
-		return validatorBundles[i].Moniker < validatorBundles[j].Moniker
-	})
+	//sort.Slice(validatorBundles, func(i, j int) bool {
+	//	return len(validatorBundles[i].Validators) > len(validatorBundles[j].Validators) ||
+	//		validatorBundles[i].Moniker < validatorBundles[j].Moniker
+	//})
 	return validatorBundles
 }
 
