@@ -96,7 +96,7 @@ func (s *AuthServer) login(entUser *ent.User, username string) (*pb.LoginRespons
 	}
 
 	if username != entUser.Name {
-		entUser, err = s.userManager.SetName(entUser, username)
+		entUser, err = s.userManager.UpdateName(entUser, username)
 		if err != nil {
 			log.Sugar.Errorf("Could not update username of user %v (%v): %v", entUser.Name, entUser.ID, err)
 			return nil, ErrorInternal
@@ -116,7 +116,7 @@ func (s *AuthServer) TelegramLogin(_ context.Context, req *pb.TelegramLoginReque
 		return nil, ErrorLoginExpired
 	}
 
-	entUser, err := s.userManager.Get(req.UserId, user.TypeTelegram)
+	entUser, err := s.userManager.QueryById(req.UserId, user.TypeTelegram)
 	if err != nil {
 		return nil, ErrorUserNotFound
 	}
@@ -158,7 +158,7 @@ func (s *AuthServer) DiscordLogin(_ context.Context, req *pb.DiscordLoginRequest
 		log.Sugar.Infof("Error converting id to int64: %v", err)
 		return nil, ErrorInternal
 	}
-	entUser, err := s.userManager.Get(id, user.TypeDiscord)
+	entUser, err := s.userManager.QueryById(id, user.TypeDiscord)
 	if err != nil {
 		return nil, ErrorUserNotFound
 	}
@@ -172,7 +172,7 @@ func (s *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccess
 		return nil, ErrorLoginFailed
 	}
 
-	entUser, err := s.userManager.Get(claims.UserId, claims.Type)
+	entUser, err := s.userManager.QueryById(claims.UserId, claims.Type)
 	if err != nil {
 		log.Sugar.Errorf("Could not find user %v (%v): %v", claims.UserId, claims.UserId, err)
 		return nil, ErrorUserNotFound

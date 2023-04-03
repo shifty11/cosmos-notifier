@@ -15,9 +15,9 @@ func newTestContractManager(t *testing.T) *ContractManager {
 	return manager
 }
 
-func TestContractManager_All(t *testing.T) {
+func TestContractManager_QueryAll(t *testing.T) {
 	m := newTestContractManager(t)
-	contracts := m.All()
+	contracts := m.QueryAll()
 	if len(contracts) != 0 {
 		t.Errorf("Expected 0 contracts, got %d", len(contracts))
 	}
@@ -37,7 +37,7 @@ func TestContractManager_All(t *testing.T) {
 		SetThumbnailURL(thumbnailUrl).
 		SaveX(m.ctx)
 
-	contracts = m.All()
+	contracts = m.QueryAll()
 	if len(contracts) != 1 {
 		t.Errorf("Expected 1 contract, got %d", len(contracts))
 	}
@@ -58,9 +58,9 @@ func TestContractManager_All(t *testing.T) {
 	}
 }
 
-func TestContractManager_Get(t *testing.T) {
+func TestContractManager_QueryById(t *testing.T) {
 	m := newTestContractManager(t)
-	_, err := m.Get(1)
+	_, err := m.QueryById(1)
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
@@ -80,7 +80,7 @@ func TestContractManager_Get(t *testing.T) {
 		SetThumbnailURL(thumbnailUrl).
 		SaveX(m.ctx)
 
-	c, err := m.Get(contract.ID)
+	c, err := m.QueryById(contract.ID)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -146,7 +146,7 @@ func TestContractManager_Update(t *testing.T) {
 	}
 }
 
-func TestContractManager_SaveThumbnailUrl(t *testing.T) {
+func TestContractManager_UpdateSetThumbnailUrl(t *testing.T) {
 	m := newTestContractManager(t)
 	name := "test"
 	description := "description"
@@ -163,13 +163,13 @@ func TestContractManager_SaveThumbnailUrl(t *testing.T) {
 		SetThumbnailURL(thumbnailUrl).
 		SaveX(m.ctx)
 
-	contract = m.SaveThumbnailUrl(contract, "https://updated.com")
+	contract = m.UpdateSetThumbnailUrl(contract, "https://updated.com")
 	if contract.ThumbnailURL != "https://updated.com" {
 		t.Errorf("Expected thumbnail url %s, got %s", "https://updated.com", contract.ThumbnailURL)
 	}
 }
 
-func TestContractManager_ByAddress(t *testing.T) {
+func TestContractManager_QueryByAddress(t *testing.T) {
 	m := newTestContractManager(t)
 
 	name := "test"
@@ -187,7 +187,7 @@ func TestContractManager_ByAddress(t *testing.T) {
 		SetThumbnailURL(thumbnailUrl).
 		SaveX(m.ctx)
 
-	c, err := m.ByAddress(address)
+	c, err := m.QueryByAddress(address)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -208,10 +208,10 @@ func TestContractManager_ByAddress(t *testing.T) {
 	}
 }
 
-func TestContractManager_ByAddress_NotFound(t *testing.T) {
+func TestContractManager_QueryByAddress_NotFound(t *testing.T) {
 	m := newTestContractManager(t)
 
-	_, err := m.ByAddress("0x123")
+	_, err := m.QueryByAddress("0x123")
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}

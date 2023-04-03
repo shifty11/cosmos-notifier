@@ -33,7 +33,7 @@ func createValidBech32Address(bech32Prefix string, address string) string {
 func addValidators(m *ValidatorManager, chains []*ent.Chain) []*ent.Validator {
 	var validators []*ent.Validator
 	for _, chainEnt := range chains {
-		val, err := m.AddValidator(
+		val, err := m.Create(
 			chainEnt,
 			createValidBech32Address(chainEnt.Bech32Prefix+"valoper", "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"),
 			fmt.Sprintf("validator %s", chainEnt.Name),
@@ -47,16 +47,16 @@ func addValidators(m *ValidatorManager, chains []*ent.Chain) []*ent.Validator {
 	return validators
 }
 
-func TestValidatorManager_AddValidator(t *testing.T) {
+func TestValidatorManager_Create(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
 
-	_, err := m.AddValidator(chains[0], "", "validator 1", true)
+	_, err := m.Create(chains[0], "", "validator 1", true)
 	if err == nil {
 		t.Error("expected error")
 	}
 
-	val, err := m.AddValidator(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "validator 1", true)
+	val, err := m.Create(chains[0], "cosmosvaloper156gqf9837u7d4c4678yt3rl4ls9c5vuursrrzf", "validator 1", true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -76,7 +76,7 @@ func TestValidatorManager_AddValidator(t *testing.T) {
 		t.Error("expected first inactive time to be nil")
 	}
 
-	val, err = m.AddValidator(chains[0], "cosmosvaloper1vvwtk805lxehwle9l4yudmq6mn0g32px9xtkhc", "other val", false)
+	val, err = m.Create(chains[0], "cosmosvaloper1vvwtk805lxehwle9l4yudmq6mn0g32px9xtkhc", "other val", false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -85,34 +85,34 @@ func TestValidatorManager_AddValidator(t *testing.T) {
 	}
 
 	// check constraints and validation
-	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val", true)
+	_, err = m.Create(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val", true)
 	if err != nil {
 		t.Error("did not expect error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val", true)
+	_, err = m.Create(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "new val", true)
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "other moniker", true)
+	_, err = m.Create(chains[0], "cosmosvaloper196ax4vc0lwpxndu9dyhvca7jhxp70rmcvrj90c", "other moniker", true)
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.AddValidator(chains[0], "cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0", "new val", true)
+	_, err = m.Create(chains[0], "cosmosvaloper1sjllsnramtg3ewxqwwrwjxfgc4n4ef9u2lcnj0", "new val", true)
 	if err != nil {
 		t.Error("did not expect error")
 	}
-	_, err = m.AddValidator(chains[0], "invalid address", "new val", true)
+	_, err = m.Create(chains[0], "invalid address", "new val", true)
 	if err == nil {
 		t.Error("expected error")
 	}
 }
 
-func TestValidatorManager_UpdateValidator(t *testing.T) {
+func TestValidatorManager_Update(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains[:1])
 
-	err := m.UpdateValidator(vals[0], "validator 2", false)
+	err := m.Update(vals[0], "validator 2", false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -121,7 +121,7 @@ func TestValidatorManager_UpdateValidator(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_DeleteValidator(t *testing.T) {
+func TestValidatorManager_Delete(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains[:1])
@@ -130,7 +130,7 @@ func TestValidatorManager_DeleteValidator(t *testing.T) {
 	if cnt != 1 {
 		t.Error("expected 1 validator")
 	}
-	err := m.DeleteValidator(vals[0])
+	err := m.Delete(vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -140,12 +140,12 @@ func TestValidatorManager_DeleteValidator(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_GetActive(t *testing.T) {
+func TestValidatorManager_QueryActive(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	active := m.GetActive()
+	active := m.QueryActive()
 	if len(active) != len(chains) {
 		t.Error("expected all validators to be active")
 	}
@@ -155,20 +155,20 @@ func TestValidatorManager_GetActive(t *testing.T) {
 
 	firstInactiveTime := time.Now().Add(-timeUntilConsideredInactive - time.Hour)
 	vals[0].Update().SetFirstInactiveTime(firstInactiveTime).SaveX(m.ctx)
-	active = m.GetActive()
+	active = m.QueryActive()
 	if len(active) != len(chains)-1 {
 		t.Error("expected one validator to be inactive")
 	}
 
 	firstInactiveTime = time.Now().Add(-timeUntilConsideredInactive + time.Hour)
 	vals[0].Update().SetFirstInactiveTime(firstInactiveTime).SaveX(m.ctx)
-	active = m.GetActive()
+	active = m.QueryActive()
 	if len(active) != len(chains) {
 		t.Error("expected all validators to be active")
 	}
 }
 
-func TestValidatorManager_GetByMoniker(t *testing.T) {
+func TestValidatorManager_QueryByMoniker(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
@@ -182,7 +182,7 @@ func TestValidatorManager_GetByMoniker(t *testing.T) {
 		}
 	}
 
-	byMoniker := m.GetByMoniker("validator")
+	byMoniker := m.QueryByMoniker("validator")
 	if len(byMoniker) != 2 {
 		t.Error("expected 2 validators")
 	}
@@ -198,7 +198,7 @@ func TestValidatorManager_GetByMoniker(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_GetForUser_Discord(t *testing.T) {
+func TestValidatorManager_QueryByUser_Discord(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
 	channels := addDiscordChannels(newTestDiscordChannelManager(t), users[:1])
@@ -207,7 +207,7 @@ func TestValidatorManager_GetForUser_Discord(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	forUser, err := m.GetForUser(users[0])
+	forUser, err := m.QueryByUser(users[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -215,7 +215,7 @@ func TestValidatorManager_GetForUser_Discord(t *testing.T) {
 		t.Errorf("expected 0 validators, got %d", len(forUser))
 	}
 	channels[0].Update().AddValidators(vals[0]).ExecX(m.ctx)
-	forUser, err = m.GetForUser(users[0])
+	forUser, err = m.QueryByUser(users[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -226,7 +226,7 @@ func TestValidatorManager_GetForUser_Discord(t *testing.T) {
 		t.Error("expected 0 address trackers")
 	}
 
-	forUser, err = m.GetForUser(users[1])
+	forUser, err = m.QueryByUser(users[1])
 	if err != nil {
 		t.Error(err)
 	}
@@ -236,7 +236,7 @@ func TestValidatorManager_GetForUser_Discord(t *testing.T) {
 
 	vals[0].Update().AddAddressTrackers(addressTrackers...).ExecX(m.ctx)
 
-	forUser, err = m.GetForUser(users[0])
+	forUser, err = m.QueryByUser(users[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -245,7 +245,7 @@ func TestValidatorManager_GetForUser_Discord(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
+func TestValidatorManager_QueryByUser_Telegram(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeTelegram)
 	telegramChats := addTelegramChats(newTestTelegramChatManager(t), users[:1])
@@ -254,7 +254,7 @@ func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	forUser, err := m.GetForUser(users[0])
+	forUser, err := m.QueryByUser(users[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -262,7 +262,7 @@ func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
 		t.Error("expected 0 validators")
 	}
 	telegramChats[0].Update().AddValidators(vals[0]).ExecX(m.ctx)
-	forUser, err = m.GetForUser(users[0])
+	forUser, err = m.QueryByUser(users[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -273,7 +273,7 @@ func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
 		t.Error("expected 0 address trackers")
 	}
 
-	forUser, err = m.GetForUser(users[1])
+	forUser, err = m.QueryByUser(users[1])
 	if err != nil {
 		t.Error(err)
 	}
@@ -283,7 +283,7 @@ func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
 
 	vals[0].Update().AddAddressTrackers(addressTrackers...).ExecX(m.ctx)
 
-	forUser, err = m.GetForUser(users[0])
+	forUser, err = m.QueryByUser(users[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -292,32 +292,30 @@ func TestValidatorManager_GetForUser_Telegram(t *testing.T) {
 	}
 }
 
-// TODO: test transactional behaviour of TrackValidator
-
-func TestValidatorManager_TrackValidator(t *testing.T) {
+func TestValidatorManager_UpdateTrackValidator(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	_, err := m.TrackValidator(m.ctx, users[0], vals[0], 0, 0, 0)
+	_, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], 0, 0, 0)
 	if err == nil {
 		t.Error("expected error")
 	}
-	_, err = m.TrackValidator(m.ctx, users[0], vals[0], 1, 1, 0)
+	_, err = m.UpdateTrackValidator(m.ctx, users[0], vals[0], 1, 1, 0)
 	if err == nil {
 		t.Error("expected error")
 	}
 }
 
-func TestValidatorManager_TrackValidator_Discord(t *testing.T) {
+func TestValidatorManager_UpdateTrackValidator_Discord(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
 	channels := addDiscordChannels(newTestDiscordChannelManager(t), users[:2])
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	tracker, err := m.TrackValidator(m.ctx, users[0], vals[0], channels[0].ID, 0, 100)
+	tracker, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], channels[0].ID, 0, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -344,7 +342,7 @@ func TestValidatorManager_TrackValidator_Discord(t *testing.T) {
 	}
 
 	addAddressTrackers(newTestAddressTrackerManager(t), []string{vals[0].Address}, channels[1:2], []*ent.TelegramChat{})
-	tracker, err = m.TrackValidator(m.ctx, users[0], vals[0], channels[1].ID, 0, 100)
+	tracker, err = m.UpdateTrackValidator(m.ctx, users[0], vals[0], channels[1].ID, 0, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -371,14 +369,14 @@ func TestValidatorManager_TrackValidator_Discord(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_TrackValidator_Telegram(t *testing.T) {
+func TestValidatorManager_UpdateTrackValidator_Telegram(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeTelegram)
 	telegramChats := addTelegramChats(newTestTelegramChatManager(t), users[:2])
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	tracker, err := m.TrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
+	tracker, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -405,7 +403,7 @@ func TestValidatorManager_TrackValidator_Telegram(t *testing.T) {
 	}
 
 	addAddressTrackers(newTestAddressTrackerManager(t), []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, []*ent.DiscordChannel{}, telegramChats[1:2])
-	tracker, err = m.TrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[1].ID, 100)
+	tracker, err = m.UpdateTrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[1].ID, 100)
 	if err != nil {
 		t.Error(err)
 	}
@@ -432,7 +430,7 @@ func TestValidatorManager_TrackValidator_Telegram(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_UntrackValidator_Discord(t *testing.T) {
+func TestValidatorManager_UpdateUntrackValidator_Discord(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeDiscord)
 	channels := addDiscordChannels(newTestDiscordChannelManager(t), users[:2])
@@ -442,7 +440,7 @@ func TestValidatorManager_UntrackValidator_Discord(t *testing.T) {
 	if vals[0].QueryDiscordChannels().CountX(m.ctx) != 0 {
 		panic("expected no discord channels")
 	}
-	deletedIds, err := m.UntrackValidator(m.ctx, users[0], vals[0])
+	deletedIds, err := m.UpdateUntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -453,7 +451,7 @@ func TestValidatorManager_UntrackValidator_Discord(t *testing.T) {
 	trackers := addAddressTrackers(newTestAddressTrackerManager(t), []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, channels[:1], []*ent.TelegramChat{})
 	trackers[0].Update().SetValidator(vals[0]).SaveX(m.ctx)
 
-	deletedIds, err = m.UntrackValidator(m.ctx, users[0], vals[0])
+	deletedIds, err = m.UpdateUntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -465,7 +463,7 @@ func TestValidatorManager_UntrackValidator_Discord(t *testing.T) {
 	}
 }
 
-func TestValidatorManager_UntrackValidator_Telegram(t *testing.T) {
+func TestValidatorManager_UpdateUntrackValidator_Telegram(t *testing.T) {
 	chains := addChains(newTestChainManager(t))
 	users := addUsers(newTestUserManager(t), 2, user.TypeTelegram)
 	telegramChats := addTelegramChats(newTestTelegramChatManager(t), users[:2])
@@ -475,7 +473,7 @@ func TestValidatorManager_UntrackValidator_Telegram(t *testing.T) {
 	if vals[0].QueryTelegramChats().CountX(m.ctx) != 0 {
 		panic("expected no telegram chats")
 	}
-	deletedIds, err := m.UntrackValidator(m.ctx, users[0], vals[0])
+	deletedIds, err := m.UpdateUntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -486,7 +484,7 @@ func TestValidatorManager_UntrackValidator_Telegram(t *testing.T) {
 	trackers := addAddressTrackers(newTestAddressTrackerManager(t), []string{"cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0eph6dd02"}, []*ent.DiscordChannel{}, telegramChats[:1])
 	trackers[0].Update().SetValidator(vals[0]).SaveX(m.ctx)
 
-	deletedIds, err = m.UntrackValidator(m.ctx, users[0], vals[0])
+	deletedIds, err = m.UpdateUntrackValidator(m.ctx, users[0], vals[0])
 	if err != nil {
 		t.Error(err)
 	}
@@ -505,7 +503,7 @@ func TestValidatorManager_CascadeDelete(t *testing.T) {
 	m := newTestValidatorManager(t)
 	vals := addValidators(m, chains)
 
-	tracker, err := m.TrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
+	tracker, err := m.UpdateTrackValidator(m.ctx, users[0], vals[0], 0, telegramChats[0].ID, 100)
 	if err != nil {
 		panic(err)
 	}

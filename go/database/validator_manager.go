@@ -52,7 +52,7 @@ func (manager *ValidatorManager) getNillableFirstInactiveTime(isActive bool) *ti
 	return firstInactiveTime
 }
 
-func (manager *ValidatorManager) AddValidator(
+func (manager *ValidatorManager) Create(
 	chainEnt *ent.Chain,
 	operatorAddress string,
 	moniker string,
@@ -73,7 +73,7 @@ func (manager *ValidatorManager) AddValidator(
 		Save(manager.ctx)
 }
 
-func (manager *ValidatorManager) UpdateValidator(validatorEnt *ent.Validator, moniker string, isActive bool) error {
+func (manager *ValidatorManager) Update(validatorEnt *ent.Validator, moniker string, isActive bool) error {
 	return validatorEnt.
 		Update().
 		SetMoniker(moniker).
@@ -82,13 +82,13 @@ func (manager *ValidatorManager) UpdateValidator(validatorEnt *ent.Validator, mo
 		Exec(manager.ctx)
 }
 
-func (manager *ValidatorManager) DeleteValidator(validatorEnt *ent.Validator) error {
+func (manager *ValidatorManager) Delete(validatorEnt *ent.Validator) error {
 	return manager.client.Validator.
 		DeleteOne(validatorEnt).
 		Exec(manager.ctx)
 }
 
-func (manager *ValidatorManager) GetActive() []*ent.Validator {
+func (manager *ValidatorManager) QueryActive() []*ent.Validator {
 	return manager.client.Validator.
 		Query().
 		Where(validator.Or(
@@ -99,7 +99,7 @@ func (manager *ValidatorManager) GetActive() []*ent.Validator {
 		AllX(manager.ctx)
 }
 
-func (manager *ValidatorManager) GetByMoniker(moniker string) []*ent.Validator {
+func (manager *ValidatorManager) QueryByMoniker(moniker string) []*ent.Validator {
 	return manager.client.Validator.
 		Query().
 		Where(validator.Moniker(moniker)).
@@ -107,7 +107,7 @@ func (manager *ValidatorManager) GetByMoniker(moniker string) []*ent.Validator {
 		AllX(manager.ctx)
 }
 
-func (manager *ValidatorManager) GetForUser(userEnt *ent.User) ([]*ent.Validator, error) {
+func (manager *ValidatorManager) QueryByUser(userEnt *ent.User) ([]*ent.Validator, error) {
 	if userEnt.Type == user.TypeTelegram {
 		return userEnt.
 			QueryTelegramChats().
@@ -123,10 +123,10 @@ func (manager *ValidatorManager) GetForUser(userEnt *ent.User) ([]*ent.Validator
 	}
 }
 
-// TrackValidator tracks a validator for a user.
+// UpdateTrackValidator tracks a validator for a user.
 // It adds the validator to the user's list of tracked validators (via Discord/Telegram relation)
 // and creates a new AddressTracker if it doesn't exist.
-func (manager *ValidatorManager) TrackValidator(
+func (manager *ValidatorManager) UpdateTrackValidator(
 	ctx context.Context,
 	userEnt *ent.User,
 	validatorEnt *ent.Validator,
@@ -147,8 +147,8 @@ func (manager *ValidatorManager) TrackValidator(
 	} else {
 		updateQuery = updateQuery.AddDiscordChannelIDs(discordChannelId)
 	}
-	if !manager.addressTrackerManager.Exists(discordChannelId, telegramChatId, validatorEnt.Address) {
-		tracker, err := manager.addressTrackerManager.AddTracker(
+	if !manager.addressTrackerManager.QueryDoesExist(discordChannelId, telegramChatId, validatorEnt.Address) {
+		tracker, err := manager.addressTrackerManager.Create(
 			ctx,
 			userEnt,
 			validatorEnt.Address,
@@ -164,7 +164,7 @@ func (manager *ValidatorManager) TrackValidator(
 			Exec(ctx)
 	} else {
 		trackers, err := manager.addressTrackerManager.
-			AllByChatRoomsAndAddress(discordChannelId, telegramChatId, validatorEnt.Address)
+			QueryByChatRoomsAndAddress(discordChannelId, telegramChatId, validatorEnt.Address)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +178,7 @@ func (manager *ValidatorManager) TrackValidator(
 	}
 }
 
-func (manager *ValidatorManager) UntrackValidator(ctx context.Context, userEnt *ent.User, validatorEnt *ent.Validator) ([]int, error) {
+func (manager *ValidatorManager) UpdateUntrackValidator(ctx context.Context, userEnt *ent.User, validatorEnt *ent.Validator) ([]int, error) {
 	client := getClient(ctx, manager.client)
 	toBeDeletedIds, err := validatorEnt.
 		QueryAddressTrackers().

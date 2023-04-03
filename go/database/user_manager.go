@@ -16,7 +16,7 @@ func NewUserManager(client *ent.Client, ctx context.Context) *UserManager {
 	return &UserManager{client: client, ctx: ctx}
 }
 
-func (m *UserManager) Get(userId int64, userType user.Type) (*ent.User, error) {
+func (m *UserManager) QueryById(userId int64, userType user.Type) (*ent.User, error) {
 	return m.client.User.
 		Query().
 		Where(user.And(
@@ -26,20 +26,20 @@ func (m *UserManager) Get(userId int64, userType user.Type) (*ent.User, error) {
 		Only(m.ctx)
 }
 
-func (m *UserManager) GetAdmins() ([]*ent.User, error) {
+func (m *UserManager) QueryAdmins() ([]*ent.User, error) {
 	return m.client.User.
 		Query().
 		Where(user.RoleEQ(user.RoleAdmin)).
 		All(m.ctx)
 }
 
-func (m *UserManager) SetName(entUser *ent.User, name string) (*ent.User, error) {
+func (m *UserManager) UpdateName(entUser *ent.User, name string) (*ent.User, error) {
 	return entUser.Update().
 		SetName(name).
 		Save(m.ctx)
 }
 
-func (m *UserManager) SetRole(name string, role user.Role) (*ent.User, error) {
+func (m *UserManager) UpdateRole(name string, role user.Role) (*ent.User, error) {
 	entUser, err := m.client.User.
 		Query().
 		Where(user.NameEQ(name)).
@@ -53,7 +53,7 @@ func (m *UserManager) SetRole(name string, role user.Role) (*ent.User, error) {
 		Save(m.ctx)
 }
 
-func (m *UserManager) createOrUpdateUser(userId int64, userName string, userType user.Type) *ent.User {
+func (m *UserManager) createOrUpdate(userId int64, userName string, userType user.Type) *ent.User {
 	entUser, err := m.client.User.
 		Query().
 		Where(user.And(

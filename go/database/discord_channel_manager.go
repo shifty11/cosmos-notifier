@@ -13,15 +13,15 @@ import (
 )
 
 type IDiscordChannelManager interface {
-	AddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error)
-	AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error)
-	CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool)
+	UpdateAddOrRemoveChain(tgChatId int64, chainId int) (hasContract bool, err error)
+	UpdateAddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error)
+	CreateOrUpdate(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool)
 	Delete(userId int64, channelId int64) error
-	GetChannelUsers(channelId int64) []*ent.User
-	CountSubscriptions(channelId int64) int
-	GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult
+	QueryUsers(channelId int64) []*ent.User
+	QuerySubscriptionsCount(channelId int64) int
+	QuerySubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult
 	DeleteMultiple(channelIds []int64)
-	GetAllIds() []types.DiscordChannelQueryResult
+	QueryAllIds() []types.DiscordChannelQueryResult
 }
 
 type DiscordChannelManager struct {
@@ -48,9 +48,9 @@ func NewDiscordChannelManager(
 	}
 }
 
-// AddOrRemoveChain adds or removes a chain from a discord channel
+// UpdateAddOrRemoveChain adds or removes a chain from a discord channel
 // Returns true if the contract is now added
-func (m *DiscordChannelManager) AddOrRemoveChain(dChannelId int64, chainId int) (hasContract bool, err error) {
+func (m *DiscordChannelManager) UpdateAddOrRemoveChain(dChannelId int64, chainId int) (hasContract bool, err error) {
 	log.Sugar.Debugf("Adding or removing chain %d from discord channel %d", chainId, dChannelId)
 	dChannel, err := m.client.DiscordChannel.
 		Query().
@@ -60,7 +60,7 @@ func (m *DiscordChannelManager) AddOrRemoveChain(dChannelId int64, chainId int) 
 		return false, err
 	}
 
-	entChain, err := m.chainManager.Get(chainId)
+	entChain, err := m.chainManager.QueryById(chainId)
 	if err != nil {
 		return false, err
 	}
@@ -92,9 +92,9 @@ func (m *DiscordChannelManager) AddOrRemoveChain(dChannelId int64, chainId int) 
 	return !exists, nil
 }
 
-// AddOrRemoveContract adds or removes a contract from a discord channel
+// UpdateAddOrRemoveContract adds or removes a contract from a discord channel
 // Returns true if the contract is now added
-func (m *DiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error) {
+func (m *DiscordChannelManager) UpdateAddOrRemoveContract(dChannelId int64, contractId int) (hasContract bool, err error) {
 	log.Sugar.Debugf("Adding or removing contract %d from discord channel %d", contractId, dChannelId)
 	dChannel, err := m.client.DiscordChannel.
 		Query().
@@ -104,7 +104,7 @@ func (m *DiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId
 		return false, err
 	}
 
-	dbContract, err := m.contractManager.Get(contractId)
+	dbContract, err := m.contractManager.QueryById(contractId)
 	if err != nil {
 		return false, err
 	}
@@ -136,11 +136,11 @@ func (m *DiscordChannelManager) AddOrRemoveContract(dChannelId int64, contractId
 	return !exists, nil
 }
 
-// CreateOrUpdateChannel Add adds a new discord channel to the database or updates an existing one
+// CreateOrUpdate Add adds a new discord channel to the database or updates an existing one
 // Returns the channel and a boolean indicating if the channel was created
-func (m *DiscordChannelManager) CreateOrUpdateChannel(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool) {
+func (m *DiscordChannelManager) CreateOrUpdate(userId int64, userName string, channelId int64, name string, isGroup bool) (dc *ent.DiscordChannel, created bool) {
 	log.Sugar.Debugf("Create or update Discord channel %s (%d) for user %s (%d)", name, channelId, userName, userId)
-	entUser := m.userManager.createOrUpdateUser(userId, userName, user.TypeDiscord)
+	entUser := m.userManager.createOrUpdate(userId, userName, user.TypeDiscord)
 	discordChannel, err := m.client.DiscordChannel.
 		Query().
 		Where(discordchannel.ChannelID(channelId)).
@@ -259,7 +259,7 @@ func (m *DiscordChannelManager) DeleteMultiple(channelIds []int64) {
 	}
 }
 
-func (m *DiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
+func (m *DiscordChannelManager) QueryUsers(channelId int64) []*ent.User {
 	users, err := m.client.DiscordChannel.
 		Query().
 		Where(discordchannel.ChannelID(channelId)).
@@ -271,7 +271,7 @@ func (m *DiscordChannelManager) GetChannelUsers(channelId int64) []*ent.User {
 	return users
 }
 
-func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
+func (m *DiscordChannelManager) QuerySubscriptionsCount(channelId int64) int {
 	countChains, err := m.client.DiscordChannel.
 		Query().
 		Where(discordchannel.ChannelIDEQ(channelId)).
@@ -291,7 +291,7 @@ func (m *DiscordChannelManager) CountSubscriptions(channelId int64) int {
 	return countChains + countContracts
 }
 
-func (m *DiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult {
+func (m *DiscordChannelManager) QuerySubscribedIds(query *ent.DiscordChannelQuery) []types.DiscordChannelQueryResult {
 	var v []types.DiscordChannelQueryResult
 	err := query.
 		Select(discordchannel.FieldChannelID, discordchannel.FieldName).
@@ -302,6 +302,6 @@ func (m *DiscordChannelManager) GetSubscribedIds(query *ent.DiscordChannelQuery)
 	return v
 }
 
-func (m *DiscordChannelManager) GetAllIds() []types.DiscordChannelQueryResult {
-	return m.GetSubscribedIds(m.client.DiscordChannel.Query())
+func (m *DiscordChannelManager) QueryAllIds() []types.DiscordChannelQueryResult {
+	return m.QuerySubscribedIds(m.client.DiscordChannel.Query())
 }

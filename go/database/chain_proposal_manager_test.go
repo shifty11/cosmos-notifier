@@ -135,7 +135,7 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 	}
 }
 
-func TestChainProposalManager_VotingPeriodExpired(t *testing.T) {
+func TestChainProposalManager_QueryVotingPeriodExpired(t *testing.T) {
 	m := newTestChainProposalManager(t)
 	cm := newTestChainManager(t)
 
@@ -176,7 +176,7 @@ func TestChainProposalManager_VotingPeriodExpired(t *testing.T) {
 		t.Errorf("Expected status %s, got %s", ProposalCreated, status)
 	}
 
-	props := m.VotingPeriodExpired(c)
+	props := m.QueryVotingPeriodExpired(c)
 	if len(props) != 1 {
 		t.Errorf("Expected 1, got %d", len(props))
 	}
@@ -191,7 +191,7 @@ func TestChainProposalManager_VotingPeriodExpired(t *testing.T) {
 		t.Errorf("Expected status %s, got %s", ProposalUpdated, status)
 	}
 
-	props = m.VotingPeriodExpired(c)
+	props = m.QueryVotingPeriodExpired(c)
 	if len(props) != 2 {
 		t.Errorf("Expected 2, got %d", len(props))
 	}

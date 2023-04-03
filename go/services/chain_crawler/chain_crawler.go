@@ -135,7 +135,7 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 			continue
 		}
 		var found = false
-		for _, entChain := range c.chainManager.All() {
+		for _, entChain := range c.chainManager.QueryAll() {
 			if entChain.Name == chain.Name {
 				found = true
 				if c.chainNeedsUpdate(entChain, &chain) {
@@ -159,9 +159,9 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 
 func (c *ChainCrawler) UpdateProposals() {
 	log.Sugar.Debug("Updating chain proposals")
-	for _, chainEnt := range c.chainManager.All() {
+	for _, chainEnt := range c.chainManager.QueryAll() {
 		log.Sugar.Debugf("Updating proposals for chain %v", chainEnt.PrettyName)
-		for _, entProposal := range c.chainProposalManager.VotingPeriodExpired(chainEnt) {
+		for _, entProposal := range c.chainProposalManager.QueryVotingPeriodExpired(chainEnt) {
 			url := fmt.Sprintf(urlProposals+"/%v", chainEnt.Path, entProposal.ProposalID)
 			c.updateProposal(chainEnt, url)
 		}
@@ -178,7 +178,7 @@ func (c *ChainCrawler) UpdateProposals() {
 
 func (c *ChainCrawler) CheckForVotingReminders() {
 	log.Sugar.Info("Checking for voting reminders")
-	for _, data := range c.addressTrackerManager.GetAllUnnotifiedTrackers() {
+	for _, data := range c.addressTrackerManager.QueryUnnotifiedTrackers() {
 		url := fmt.Sprintf(urlVote, data.ChainProposal.Edges.Chain.Path, data.ChainProposal.ProposalID, data.AddressTracker.Address)
 		var voteResponse types.ChainProposalVoteResponse
 		statusCode, err := common.GetJson(c.httpClient, url, &voteResponse)
@@ -196,7 +196,7 @@ func (c *ChainCrawler) CheckForVotingReminders() {
 			}
 		}
 		c.errorReporter.ResetErrorCount(data.ChainProposal.Edges.Chain.ID)
-		c.addressTrackerManager.SetNotified(data)
+		c.addressTrackerManager.UpdateSetNotified(data)
 	}
 }
 

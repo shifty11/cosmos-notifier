@@ -35,7 +35,7 @@ var makeAdminCmd = &cobra.Command{
 			role = user.RoleUser
 		}
 		println(cmd.Flag("remove").Value.String())
-		entUser, err := database.NewDefaultDbManagers().UserManager.SetRole(args[0], role)
+		entUser, err := database.NewDefaultDbManagers().UserManager.UpdateRole(args[0], role)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -48,7 +48,7 @@ var listAdminsCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List all admins",
 	Run: func(cmd *cobra.Command, args []string) {
-		admins, err := database.NewDefaultDbManagers().UserManager.GetAdmins()
+		admins, err := database.NewDefaultDbManagers().UserManager.QueryAdmins()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

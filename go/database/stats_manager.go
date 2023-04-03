@@ -31,7 +31,7 @@ type Stats struct {
 	DiscordSubscriptions  int
 }
 
-func (m *StatsManager) GetStats() (*Stats, error) {
+func (m *StatsManager) QueryStats() (*Stats, error) {
 	cntChains := m.client.Chain.
 		Query().
 		CountX(m.ctx)

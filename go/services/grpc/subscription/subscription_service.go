@@ -39,9 +39,9 @@ func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *empty
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	log.Sugar.Debugf("GetSubscriptions for user %v (%v)", entUser.Name, entUser.UserID)
+	log.Sugar.Debugf("QuerySubscriptions for user %v (%v)", entUser.Name, entUser.UserID)
 
-	res := server.subscriptionManager.GetSubscriptions(entUser)
+	res := server.subscriptionManager.QuerySubscriptions(entUser)
 	return res, nil
 }
 
@@ -52,9 +52,9 @@ func (server *SubscriptionServer) ToggleChainSubscription(ctx context.Context, r
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	log.Sugar.Debugf("ToggleChainSubscription %v for user %v (%v)", req.ChainId, entUser.Name, entUser.UserID)
+	log.Sugar.Debugf("UpdateToggleChainSubscription %v for user %v (%v)", req.ChainId, entUser.Name, entUser.UserID)
 
-	isSubscribed, err := server.subscriptionManager.ToggleChainSubscription(entUser, req.ChatRoomId, int(req.ChainId))
+	isSubscribed, err := server.subscriptionManager.UpdateToggleChainSubscription(entUser, req.ChatRoomId, int(req.ChainId))
 	if err != nil {
 		log.Sugar.Errorf("error while toggling subscription: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
@@ -70,9 +70,9 @@ func (server *SubscriptionServer) ToggleContractSubscription(ctx context.Context
 		return nil, status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	log.Sugar.Debugf("ToggleContractSubscription %v for user %v (%v)", req.ContractId, entUser.Name, entUser.UserID)
+	log.Sugar.Debugf("UpdateToggleContractSubscription %v for user %v (%v)", req.ContractId, entUser.Name, entUser.UserID)
 
-	isSubscribed, err := server.subscriptionManager.ToggleContractSubscription(entUser, req.ChatRoomId, int(req.ContractId))
+	isSubscribed, err := server.subscriptionManager.UpdateToggleContractSubscription(entUser, req.ChatRoomId, int(req.ContractId))
 	if err != nil {
 		log.Sugar.Errorf("error while toggling subscription: %v", err)
 		return nil, status.Errorf(codes.Internal, "Unknown error occurred")
@@ -94,7 +94,7 @@ func (server *SubscriptionServer) AddDao(req *pb.AddDaoRequest, stream pb.Subscr
 	}
 
 	var chain *ent.Chain
-	for _, c := range server.chainManager.All() {
+	for _, c := range server.chainManager.QueryAll() {
 		if c.Display != "" && strings.HasPrefix(req.ContractAddress, c.Display) {
 			chain = c
 			break
@@ -187,7 +187,7 @@ func (server *SubscriptionServer) EnableChain(_ context.Context, req *pb.EnableC
 	}
 
 	log.Sugar.Debugf("Delete DAO %v", req.ChainId)
-	err := server.chainManager.Enable(int(req.ChainId), req.IsEnabled)
+	err := server.chainManager.UpdateSetEnabled(int(req.ChainId), req.IsEnabled)
 	if err != nil && ent.IsNotFound(err) {
 		return nil, status.Errorf(codes.NotFound, "chain not found")
 	}

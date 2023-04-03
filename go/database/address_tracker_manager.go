@@ -24,7 +24,7 @@ func NewAddressTrackerManager(client *ent.Client, ctx context.Context) *AddressT
 	return &AddressTrackerManager{client: client, ctx: ctx}
 }
 
-func (manager *AddressTrackerManager) All(userEnt *ent.User) ([]*ent.AddressTracker, error) {
+func (manager *AddressTrackerManager) QueryByUser(userEnt *ent.User) ([]*ent.AddressTracker, error) {
 	return manager.client.AddressTracker.
 		Query().
 		Where(
@@ -38,7 +38,7 @@ func (manager *AddressTrackerManager) All(userEnt *ent.User) ([]*ent.AddressTrac
 		All(manager.ctx)
 }
 
-func (manager *AddressTrackerManager) AllByChatRoomsAndAddress(
+func (manager *AddressTrackerManager) QueryByChatRoomsAndAddress(
 	discordChannelId int,
 	telegramChatId int,
 	address string,
@@ -76,7 +76,7 @@ func (manager *AddressTrackerManager) AllByChatRoomsAndAddress(
 	return []*ent.AddressTracker{}, nil
 }
 
-func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain) {
+func (manager *AddressTrackerManager) QueryIsValid(address string) (bool, *ent.Chain) {
 	if address == "" {
 		return false, nil
 	}
@@ -97,7 +97,7 @@ func (manager *AddressTrackerManager) IsValid(address string) (bool, *ent.Chain)
 	return false, nil
 }
 
-func (manager *AddressTrackerManager) AddTracker(
+func (manager *AddressTrackerManager) Create(
 	ctx context.Context,
 	userEnt *ent.User,
 	address string,
@@ -105,7 +105,7 @@ func (manager *AddressTrackerManager) AddTracker(
 	telegramChatId int,
 	notificationInterval int64,
 ) (*ent.AddressTracker, error) {
-	isValid, chainEnt := manager.IsValid(address)
+	isValid, chainEnt := manager.QueryIsValid(address)
 	if !isValid {
 		return nil, errors.New("invalid address")
 	}
@@ -162,7 +162,7 @@ func (manager *AddressTrackerManager) AddTracker(
 		Only(ctx)
 }
 
-func (manager *AddressTrackerManager) UpdateTracker(
+func (manager *AddressTrackerManager) Update(
 	userEnt *ent.User,
 	addressTrackerId int,
 	discordChannelId int,
@@ -232,7 +232,7 @@ func (manager *AddressTrackerManager) UpdateTracker(
 		Only(manager.ctx)
 }
 
-func (manager *AddressTrackerManager) DeleteTracker(
+func (manager *AddressTrackerManager) Delete(
 	userEnt *ent.User,
 	addressTrackerId int,
 ) error {
@@ -257,7 +257,7 @@ type AddressTrackerWithChainProposal struct {
 	ChainProposal  *ent.ChainProposal
 }
 
-func (manager *AddressTrackerManager) GetAllUnnotifiedTrackers() []AddressTrackerWithChainProposal {
+func (manager *AddressTrackerManager) QueryUnnotifiedTrackers() []AddressTrackerWithChainProposal {
 	proposals, err := manager.client.AddressTracker.
 		Query().
 		QueryChain().
@@ -296,7 +296,7 @@ func (manager *AddressTrackerManager) GetAllUnnotifiedTrackers() []AddressTracke
 	return result
 }
 
-func (manager *AddressTrackerManager) SetNotified(data AddressTrackerWithChainProposal) {
+func (manager *AddressTrackerManager) UpdateSetNotified(data AddressTrackerWithChainProposal) {
 	err := data.AddressTracker.
 		Update().
 		AddChainProposals(data.ChainProposal).
@@ -306,7 +306,7 @@ func (manager *AddressTrackerManager) SetNotified(data AddressTrackerWithChainPr
 	}
 }
 
-func (manager *AddressTrackerManager) GetChatRooms(userEnt *ent.User) ([]*ent.DiscordChannel, []*ent.TelegramChat, error) {
+func (manager *AddressTrackerManager) QueryChatRooms(userEnt *ent.User) ([]*ent.DiscordChannel, []*ent.TelegramChat, error) {
 	discordChannels, err := userEnt.
 		QueryDiscordChannels().
 		WithValidators().
@@ -330,7 +330,7 @@ func (manager *AddressTrackerManager) GetChatRooms(userEnt *ent.User) ([]*ent.Di
 	return discordChannels, telegramChats, nil
 }
 
-func (manager *AddressTrackerManager) Exists(discordChannelId int, telegramChatId int, validatorAddress string) bool {
+func (manager *AddressTrackerManager) QueryDoesExist(discordChannelId int, telegramChatId int, validatorAddress string) bool {
 	if discordChannelId != 0 {
 		return manager.client.AddressTracker.
 			Query().

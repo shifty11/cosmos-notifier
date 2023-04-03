@@ -26,15 +26,15 @@ func addUsers(m *UserManager, number int, userType user.Type) []*ent.User {
 	users := make([]*ent.User, number)
 	for i := 0; i < number; i++ {
 		lastUserId++
-		u := m.createOrUpdateUser(lastUserId, fmt.Sprintf("userDto %d", lastUserId), userType)
+		u := m.createOrUpdate(lastUserId, fmt.Sprintf("userDto %d", lastUserId), userType)
 		users[i] = u
 	}
 	return users
 }
 
-func TestUserManager_CreateOrUpdateUser(t *testing.T) {
+func TestUserManager_CreateOrUpdate(t *testing.T) {
 	m := newTestUserManager(t)
-	u := m.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.createOrUpdate(1, "username", user.TypeDiscord)
 	if u.UserID != 1 {
 		t.Fatalf("Expected 1, got %d", u.UserID)
 	}
@@ -45,7 +45,7 @@ func TestUserManager_CreateOrUpdateUser(t *testing.T) {
 		t.Fatalf("Expected discord, got %s", u.Type)
 	}
 
-	u = m.createOrUpdateUser(1, "updated", user.TypeDiscord)
+	u = m.createOrUpdate(1, "updated", user.TypeDiscord)
 	if u.UserID != 1 {
 		t.Fatalf("Expected 1, got %d", u.UserID)
 	}
@@ -56,7 +56,7 @@ func TestUserManager_CreateOrUpdateUser(t *testing.T) {
 
 func TestUserManager_DeleteIfUnused(t *testing.T) {
 	m := newTestUserManager(t)
-	u := m.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dc := m.client.DiscordChannel.Create().AddUsers(u).SetChannelID(1).SetName("test").SetIsGroup(false).SaveX(m.ctx)
 	tg := m.client.TelegramChat.Create().AddUsers(u).SetChatID(1).SetName("test").SetIsGroup(false).SaveX(m.ctx)
@@ -78,19 +78,19 @@ func TestUserManager_DeleteIfUnused(t *testing.T) {
 	}
 }
 
-func TestUserManager_SetRole(t *testing.T) {
+func TestUserManager_UpdateRole(t *testing.T) {
 	m := newTestUserManager(t)
-	_, err := m.SetRole("non existent", user.RoleAdmin)
+	_, err := m.UpdateRole("non existent", user.RoleAdmin)
 	if !ent.IsNotFound(err) {
 		t.Fatalf("Expected not found error, got %s", err)
 	}
 
-	u := m.createOrUpdateUser(1, "username", user.TypeDiscord)
+	u := m.createOrUpdate(1, "username", user.TypeDiscord)
 	if u.Role != user.RoleUser {
 		t.Fatalf("Expected user, got %s", u.Role)
 	}
 
-	u, err = m.SetRole(u.Name, user.RoleAdmin)
+	u, err = m.UpdateRole(u.Name, user.RoleAdmin)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)
 	}

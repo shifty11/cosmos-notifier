@@ -48,11 +48,11 @@ func (s *DevServer) login(entUser *ent.User) (*authpb.LoginResponse, error) {
 func (s *DevServer) setRoleIfNecessary(req *pb.DevLoginRequest, userEnt *ent.User) (*ent.User, error) {
 	var desiredRole = user.Role(strings.ToLower(req.GetRole().String()))
 	if desiredRole != userEnt.Role {
-		_, err := s.userManager.SetRole(userEnt.Name, desiredRole)
+		_, err := s.userManager.UpdateRole(userEnt.Name, desiredRole)
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "failed to set role: %v", err)
 		}
-		userEnt, err = s.userManager.Get(userEnt.UserID, userEnt.Type)
+		userEnt, err = s.userManager.QueryById(userEnt.UserID, userEnt.Type)
 		if err != nil {
 			return nil, status.Errorf(codes.InvalidArgument, "failed to get user: %v", err)
 		}

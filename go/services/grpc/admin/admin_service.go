@@ -87,7 +87,7 @@ func (server *AdminServer) BroadcastMessage(req *pb.BroadcastMessageRequest, str
 }
 
 func (server *AdminServer) GetStats(_ context.Context, _ *emptypb.Empty) (*pb.GetStatsResponse, error) {
-	stats, err := server.statsManager.GetStats()
+	stats, err := server.statsManager.QueryStats()
 	if err != nil {
 		log.Sugar.Errorf("error while getting stats: %v", err)
 		return nil, status.Errorf(codes.Internal, "error while getting stats: %v", err)

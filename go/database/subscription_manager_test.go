@@ -41,24 +41,24 @@ func newTestSubscriptionManagerWithMocks(t *testing.T) (*SubscriptionManager, *g
 	return manager, ctrl, tgMock, dMock
 }
 
-func TestSubscriptionManager_ToggleSubscription(t *testing.T) {
+func TestSubscriptionManager_UpdateToggleContractSubscription(t *testing.T) {
 	m, ctrl, tgMock, dMock := newTestSubscriptionManagerWithMocks(t)
 	defer ctrl.Finish()
 
-	tgUser := m.userManager.createOrUpdateUser(1, "username", user.TypeTelegram)
+	tgUser := m.userManager.createOrUpdate(1, "username", user.TypeTelegram)
 
 	tgMock.EXPECT().AddOrRemoveContract(int64(1), 1).Return(true, nil)
 	//goland:noinspection GoUnhandledErrorResult
-	m.ToggleContractSubscription(tgUser, int64(1), 1)
+	m.UpdateToggleContractSubscription(tgUser, int64(1), 1)
 
-	discordUser := m.userManager.createOrUpdateUser(1, "username", user.TypeDiscord)
+	discordUser := m.userManager.createOrUpdate(1, "username", user.TypeDiscord)
 
 	dMock.EXPECT().AddOrRemoveContract(int64(1), 1).Return(true, nil)
 	//goland:noinspection GoUnhandledErrorResult
-	m.ToggleContractSubscription(discordUser, int64(1), 1)
+	m.UpdateToggleContractSubscription(discordUser, int64(1), 1)
 }
 
-func TestSubscriptionManager_getSubscriptions(t *testing.T) {
+func TestSubscriptionManager_querySubscriptions(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.ContractData{
@@ -78,7 +78,7 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 	c2, _ := m.contractManager.Create(data2)
 	c1, _ := m.contractManager.Create(data1)
 
-	subscriptions := m.getSubscriptions([]int{c1.ID}, "", false)
+	subscriptions := m.querySubscriptions([]int{c1.ID}, "", false)
 	if len(subscriptions) != 2 {
 		t.Fatalf("Expected 2 subscriptions, got %d", len(subscriptions))
 	}
@@ -109,7 +109,7 @@ func TestSubscriptionManager_getSubscriptions(t *testing.T) {
 
 }
 
-func TestSubscriptionManager_GetSubscriptions_Contracts(t *testing.T) {
+func TestSubscriptionManager_QuerySubscriptions_Contracts(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.ContractData{
@@ -129,24 +129,24 @@ func TestSubscriptionManager_GetSubscriptions_Contracts(t *testing.T) {
 	c2, _ := m.contractManager.Create(data2)
 	c1, _ := m.contractManager.Create(data1)
 
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 11, "chat1", false)
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
-	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 11, "chat1", false)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
+	m.discordChannelManager.CreateOrUpdate(1, "discorduser", 12, "channel1", false)
 
-	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
-	m.userManager.Get(2, user.TypeTelegram)
-	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+	tgUser1, _ := m.userManager.QueryById(1, user.TypeTelegram)
+	m.userManager.QueryById(2, user.TypeTelegram)
+	discordUser, _ := m.userManager.QueryById(1, user.TypeDiscord)
 
-	_, err := m.ToggleContractSubscription(tgUser1, int64(10), c1.ID)
+	_, err := m.UpdateToggleContractSubscription(tgUser1, int64(10), c1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleContractSubscription(discordUser, int64(12), c2.ID)
+	_, err = m.UpdateToggleContractSubscription(discordUser, int64(12), c2.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	response := m.GetSubscriptions(tgUser1)
+	response := m.QuerySubscriptions(tgUser1)
 	chatRooms := response.ContractChatRooms
 	if len(chatRooms) != 2 {
 		t.Fatalf("Expected 2 chatRooms, got %d", len(response.ChainChatRooms))
@@ -173,7 +173,7 @@ func TestSubscriptionManager_GetSubscriptions_Contracts(t *testing.T) {
 		t.Errorf("Expected false, true, false, false, got %t, %t, %t, %t", c1s1.IsSubscribed, c2s1.IsSubscribed, c1s2.IsSubscribed, c2s2.IsSubscribed)
 	}
 
-	response = m.GetSubscriptions(discordUser)
+	response = m.QuerySubscriptions(discordUser)
 	chatRooms = response.ContractChatRooms
 	if len(chatRooms) != 1 {
 		t.Errorf("Expected 1 chatRooms, got %d", len(chatRooms))
@@ -201,7 +201,7 @@ func TestSubscriptionManager_GetSubscriptions_Contracts(t *testing.T) {
 	}
 }
 
-func TestSubscriptionManager_GetSubscriptions_Chains(t *testing.T) {
+func TestSubscriptionManager_QuerySubscriptions_Chains(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.Chain{
@@ -221,24 +221,24 @@ func TestSubscriptionManager_GetSubscriptions_Chains(t *testing.T) {
 	c2 := m.chainManager.Create(data2, data2.Image)
 	c1 := m.chainManager.Create(data1, data1.Image)
 
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 11, "chat1", false)
-	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 11, "chat1", false)
+	m.discordChannelManager.CreateOrUpdate(1, "discorduser", 12, "channel1", false)
 
-	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
-	m.userManager.Get(2, user.TypeTelegram)
-	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+	tgUser1, _ := m.userManager.QueryById(1, user.TypeTelegram)
+	m.userManager.QueryById(2, user.TypeTelegram)
+	discordUser, _ := m.userManager.QueryById(1, user.TypeDiscord)
 
-	_, err := m.ToggleChainSubscription(tgUser1, int64(10), c1.ID)
+	_, err := m.UpdateToggleChainSubscription(tgUser1, int64(10), c1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleChainSubscription(discordUser, int64(12), c2.ID)
+	_, err = m.UpdateToggleChainSubscription(discordUser, int64(12), c2.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	response := m.GetSubscriptions(tgUser1)
+	response := m.QuerySubscriptions(tgUser1)
 	chatRooms := response.ChainChatRooms
 	if len(chatRooms) != 2 {
 		t.Fatalf("Expected 2 chatRooms, got %d", len(chatRooms))
@@ -265,7 +265,7 @@ func TestSubscriptionManager_GetSubscriptions_Chains(t *testing.T) {
 		t.Errorf("Expected (false, true, false, false), got (%v, %v, %v, %v)", c1s1.IsSubscribed, c2s1.IsSubscribed, c1s2.IsSubscribed, c2s2.IsSubscribed)
 	}
 
-	response = m.GetSubscriptions(discordUser)
+	response = m.QuerySubscriptions(discordUser)
 	chatRooms = response.ChainChatRooms
 	if len(chatRooms) != 1 {
 		t.Errorf("Expected 1 chatRooms, got %d", len(chatRooms))
@@ -293,7 +293,7 @@ func TestSubscriptionManager_GetSubscriptions_Chains(t *testing.T) {
 	}
 }
 
-func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
+func TestSubscriptionManager_QuerySubscriptions_ContractsAndChains(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.Chain{
@@ -321,28 +321,28 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 	c1 := m.chainManager.Create(data1, data1.Image)
 	contract1, _ := m.contractManager.Create(data3)
 
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 11, "chat1", false)
-	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 11, "chat1", false)
+	m.discordChannelManager.CreateOrUpdate(1, "discorduser", 12, "channel1", false)
 
-	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
-	m.userManager.Get(2, user.TypeTelegram)
-	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+	tgUser1, _ := m.userManager.QueryById(1, user.TypeTelegram)
+	m.userManager.QueryById(2, user.TypeTelegram)
+	discordUser, _ := m.userManager.QueryById(1, user.TypeDiscord)
 
-	_, err := m.ToggleChainSubscription(tgUser1, int64(10), c1.ID)
+	_, err := m.UpdateToggleChainSubscription(tgUser1, int64(10), c1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleChainSubscription(discordUser, int64(12), c2.ID)
+	_, err = m.UpdateToggleChainSubscription(discordUser, int64(12), c2.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleContractSubscription(discordUser, int64(12), contract1.ID)
+	_, err = m.UpdateToggleContractSubscription(discordUser, int64(12), contract1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	response := m.GetSubscriptions(tgUser1)
+	response := m.QuerySubscriptions(tgUser1)
 	chainChatRooms := response.ChainChatRooms
 	if len(chainChatRooms) != 2 {
 		t.Fatalf("Expected 2 chainChatRooms, got %d", len(chainChatRooms))
@@ -380,7 +380,7 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 		t.Errorf("Expected %v, got %v", false, contr1s1.IsSubscribed)
 	}
 
-	response = m.GetSubscriptions(discordUser)
+	response = m.QuerySubscriptions(discordUser)
 	chainChatRooms = response.ChainChatRooms
 	if len(chainChatRooms) != 1 {
 		t.Fatalf("Expected 1 chainChatRooms, got %d", len(chainChatRooms))
@@ -404,11 +404,11 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 		t.Errorf("Expected (false, true), got (%v, %v)", c1s1.IsSubscribed, c1s2.IsSubscribed)
 	}
 
-	_, err = m.ToggleChainSubscription(tgUser1, int64(10), c1.ID)
+	_, err = m.UpdateToggleChainSubscription(tgUser1, int64(10), c1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	response = m.GetSubscriptions(tgUser1)
+	response = m.QuerySubscriptions(tgUser1)
 	chainChatRooms = response.ChainChatRooms
 	c1s1, c1s2, c2s1, c2s2 = response.ChainChatRooms[0].Subscriptions[0],
 		response.ChainChatRooms[0].Subscriptions[1],
@@ -418,18 +418,18 @@ func TestSubscriptionManager_GetSubscriptions_ContractsAndChains(t *testing.T) {
 		t.Errorf("Expected (false, false, false, false), got (%v, %v, %v, %v)", c1s1.IsSubscribed, c2s1.IsSubscribed, c1s2.IsSubscribed, c2s2.IsSubscribed)
 	}
 
-	_, err = m.ToggleContractSubscription(discordUser, int64(12), c2.ID)
+	_, err = m.UpdateToggleContractSubscription(discordUser, int64(12), c2.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	response = m.GetSubscriptions(discordUser)
+	response = m.QuerySubscriptions(discordUser)
 	c1s1 = response.ContractChatRooms[0].Subscriptions[0]
 	if c1s1.IsSubscribed != false {
 		t.Errorf("Expected %v, got %v", false, c1s1.IsSubscribed)
 	}
 }
 
-func TestSubscriptionManager_GetSubscriptions_WithStats(t *testing.T) {
+func TestSubscriptionManager_QuerySubscriptions_WithStats(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.Chain{
@@ -457,35 +457,35 @@ func TestSubscriptionManager_GetSubscriptions_WithStats(t *testing.T) {
 	chain1 := m.chainManager.Create(data1, data1.Image)
 	contract1, _ := m.contractManager.Create(data3)
 
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 11, "chat1", false)
-	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
-	m.userManager.SetRole("telegramuser", user.RoleAdmin)
-	m.userManager.SetRole("discorduser", user.RoleAdmin)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 11, "chat1", false)
+	m.discordChannelManager.CreateOrUpdate(1, "discorduser", 12, "channel1", false)
+	m.userManager.UpdateRole("telegramuser", user.RoleAdmin)
+	m.userManager.UpdateRole("discorduser", user.RoleAdmin)
 
-	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
-	m.userManager.Get(2, user.TypeTelegram)
-	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+	tgUser1, _ := m.userManager.QueryById(1, user.TypeTelegram)
+	m.userManager.QueryById(2, user.TypeTelegram)
+	discordUser, _ := m.userManager.QueryById(1, user.TypeDiscord)
 
-	_, err := m.ToggleChainSubscription(tgUser1, int64(10), chain1.ID)
+	_, err := m.UpdateToggleChainSubscription(tgUser1, int64(10), chain1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleChainSubscription(discordUser, int64(12), chain2.ID)
+	_, err = m.UpdateToggleChainSubscription(discordUser, int64(12), chain2.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleContractSubscription(tgUser1, int64(10), contract1.ID)
+	_, err = m.UpdateToggleContractSubscription(tgUser1, int64(10), contract1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = m.ToggleContractSubscription(discordUser, int64(12), contract1.ID)
+	_, err = m.UpdateToggleContractSubscription(discordUser, int64(12), contract1.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for i, u := range []*ent.User{tgUser1, discordUser} {
-		response := m.GetSubscriptions(u)
+		response := m.QuerySubscriptions(u)
 		if i == 0 {
 			if len(response.ChainChatRooms) != 2 {
 				t.Fatalf("Expected 2 chainChatRooms, got %d", len(response.ChainChatRooms))
@@ -519,7 +519,7 @@ func TestSubscriptionManager_GetSubscriptions_WithStats(t *testing.T) {
 	}
 }
 
-func TestSubscriptionManager_GetSubscriptions_EnabledChains(t *testing.T) {
+func TestSubscriptionManager_QuerySubscriptions_EnabledChains(t *testing.T) {
 	m := newTestSubscriptionManager(t)
 
 	data1 := &types.Chain{
@@ -539,14 +539,14 @@ func TestSubscriptionManager_GetSubscriptions_EnabledChains(t *testing.T) {
 	m.chainManager.Create(data2, data2.Image)
 	chain1 := m.chainManager.Create(data1, data1.Image)
 
-	m.telegramChatManager.CreateOrUpdateChat(1, "telegramuser", 10, "chat2", true)
-	m.discordChannelManager.CreateOrUpdateChannel(1, "discorduser", 12, "channel1", false)
+	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
+	m.discordChannelManager.CreateOrUpdate(1, "discorduser", 12, "channel1", false)
 
-	tgUser1, _ := m.userManager.Get(1, user.TypeTelegram)
-	discordUser, _ := m.userManager.Get(1, user.TypeDiscord)
+	tgUser1, _ := m.userManager.QueryById(1, user.TypeTelegram)
+	discordUser, _ := m.userManager.QueryById(1, user.TypeDiscord)
 
 	for _, u := range []*ent.User{tgUser1, discordUser} {
-		response := m.GetSubscriptions(u)
+		response := m.QuerySubscriptions(u)
 		if len(response.ChainChatRooms[0].Subscriptions) != 2 {
 			t.Fatalf("Expected 2 subscriptions, got %d", len(response.ChainChatRooms[0].Subscriptions))
 		}
@@ -557,10 +557,10 @@ func TestSubscriptionManager_GetSubscriptions_EnabledChains(t *testing.T) {
 		}
 	}
 
-	m.chainManager.Enable(chain1.ID, false)
+	m.chainManager.UpdateSetEnabled(chain1.ID, false)
 
 	for _, u := range []*ent.User{tgUser1, discordUser} {
-		response := m.GetSubscriptions(u)
+		response := m.QuerySubscriptions(u)
 		if len(response.ChainChatRooms[0].Subscriptions) != 1 {
 			t.Fatalf("Expected 1 subscription, got %d", len(response.ChainChatRooms[0].Subscriptions))
 		}
@@ -571,11 +571,11 @@ func TestSubscriptionManager_GetSubscriptions_EnabledChains(t *testing.T) {
 		}
 	}
 
-	tgUser1, _ = m.userManager.SetRole("telegramuser", user.RoleAdmin)
-	discordUser, _ = m.userManager.SetRole("discorduser", user.RoleAdmin)
+	tgUser1, _ = m.userManager.UpdateRole("telegramuser", user.RoleAdmin)
+	discordUser, _ = m.userManager.UpdateRole("discorduser", user.RoleAdmin)
 
 	for _, u := range []*ent.User{tgUser1, discordUser} {
-		response := m.GetSubscriptions(u)
+		response := m.QuerySubscriptions(u)
 		if len(response.ChainChatRooms[0].Subscriptions) != 2 {
 			t.Fatalf("Expected 2 subscriptions, got %d", len(response.ChainChatRooms[0].Subscriptions))
 		}
