@@ -17,23 +17,23 @@ export 'dev_service.pbenum.dart';
 class DevLoginRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'DevLoginRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userId')
-    ..e<DevLoginRequest_UserType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: DevLoginRequest_UserType.TELEGRAM, valueOf: DevLoginRequest_UserType.valueOf, enumValues: DevLoginRequest_UserType.values)
-    ..e<DevLoginRequest_Role>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role', $pb.PbFieldType.OE, defaultOrMaker: DevLoginRequest_Role.ADMIN, valueOf: DevLoginRequest_Role.valueOf, enumValues: DevLoginRequest_Role.values)
+    ..e<DevLoginRequest_UserType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'userType', $pb.PbFieldType.OE, defaultOrMaker: DevLoginRequest_UserType.USER_TYPE_UNSPECIFIED, valueOf: DevLoginRequest_UserType.valueOf, enumValues: DevLoginRequest_UserType.values)
+    ..e<DevLoginRequest_Role>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'role', $pb.PbFieldType.OE, defaultOrMaker: DevLoginRequest_Role.ROLE_UNSPECIFIED, valueOf: DevLoginRequest_Role.valueOf, enumValues: DevLoginRequest_Role.values)
     ..hasRequiredFields = false
   ;
 
   DevLoginRequest._() : super();
   factory DevLoginRequest({
     $fixnum.Int64? userId,
-    DevLoginRequest_UserType? type,
+    DevLoginRequest_UserType? userType,
     DevLoginRequest_Role? role,
   }) {
     final _result = create();
     if (userId != null) {
       _result.userId = userId;
     }
-    if (type != null) {
-      _result.type = type;
+    if (userType != null) {
+      _result.userType = userType;
     }
     if (role != null) {
       _result.role = role;
@@ -71,13 +71,13 @@ class DevLoginRequest extends $pb.GeneratedMessage {
   void clearUserId() => clearField(1);
 
   @$pb.TagNumber(2)
-  DevLoginRequest_UserType get type => $_getN(1);
+  DevLoginRequest_UserType get userType => $_getN(1);
   @$pb.TagNumber(2)
-  set type(DevLoginRequest_UserType v) { setField(2, v); }
+  set userType(DevLoginRequest_UserType v) { setField(2, v); }
   @$pb.TagNumber(2)
-  $core.bool hasType() => $_has(1);
+  $core.bool hasUserType() => $_has(1);
   @$pb.TagNumber(2)
-  void clearType() => clearField(2);
+  void clearUserType() => clearField(2);
 
   @$pb.TagNumber(3)
   DevLoginRequest_Role get role => $_getN(2);

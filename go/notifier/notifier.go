@@ -6,7 +6,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/admin_service"
 	"time"
 )
 

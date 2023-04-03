@@ -7,8 +7,8 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/services/grpc/auth"
-	authpb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/auth_service"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/dev_service"
+	authpb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/auth_service"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/dev_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"strings"
@@ -61,10 +61,19 @@ func (s *DevServer) setRoleIfNecessary(req *pb.DevLoginRequest, userEnt *ent.Use
 }
 
 func (s *DevServer) Login(_ context.Context, req *pb.DevLoginRequest) (*authpb.LoginResponse, error) {
+	if req.GetRole() == pb.DevLoginRequest_ROLE_UNSPECIFIED {
+		log.Sugar.Errorf("invalid role")
+		return nil, status.Errorf(codes.InvalidArgument, "invalid role")
+	}
+	if req.GetUserType() == pb.DevLoginRequest_USER_TYPE_UNSPECIFIED {
+		log.Sugar.Errorf("invalid user type")
+		return nil, status.Errorf(codes.InvalidArgument, "invalid type")
+	}
+
 	client, ctx := database.ConnectDuringDevelopment()
 	if req.GetUserId() != 0 {
 		var userQuery = client.User.Query()
-		if req.GetType() == pb.DevLoginRequest_TELEGRAM {
+		if req.GetUserType() == pb.DevLoginRequest_TELEGRAM {
 			userQuery = userQuery.Where(
 				user.And(
 					user.HasTelegramChats(),
@@ -89,7 +98,7 @@ func (s *DevServer) Login(_ context.Context, req *pb.DevLoginRequest) (*authpb.L
 		return s.login(userEnt)
 	} else {
 		userQuery := client.User.Query()
-		if req.GetType() == pb.DevLoginRequest_TELEGRAM {
+		if req.GetUserType() == pb.DevLoginRequest_TELEGRAM {
 			userQuery = userQuery.Where(user.HasTelegramChats())
 		} else {
 			userQuery = userQuery.Where(user.HasDiscordChannels())

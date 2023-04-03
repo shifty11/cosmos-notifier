@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package cosmos_notifier_grpc;
 
-option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/pbcommon";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/pbcommon";
 
 
 message DiscordType {

@@ -86,6 +86,7 @@ class _LoginFormState extends State<LoginForm> {
               });
             },
             items: DevLoginRequest_UserType.values
+                .sublist(1)
                 .map((userType) => DropdownMenuItem(
               value: userType,
               child: Text(userType.toString().split('.').last.toLowerCase()),
@@ -104,6 +105,7 @@ class _LoginFormState extends State<LoginForm> {
               });
             },
             items: DevLoginRequest_Role.values
+                .sublist(1)
                 .map((roleType) => DropdownMenuItem(
               value: roleType,
               child: Text(roleType.toString().split('.').last.toLowerCase()),

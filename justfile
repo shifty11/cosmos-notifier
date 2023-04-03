@@ -3,10 +3,10 @@ mock:
     mockgen -source=go/database/discord_channel_manager.go -destination=go/database/mock_types/discord_channel_manager.go
 
 generate-protobufs:
-    protoc -I=go/services/grpc/protobuf/ --go_out=go/services/grpc/protobuf/ --go_opt=module=github.com/shifty11/cosmos-notifier/services/grpc/protobuf \
+    protoc -I=api/ --go_out=go/services/grpc/protobuf/ --go_opt=module=github.com/shifty11/cosmos-notifier/services/grpc/protobuf \
             --go-grpc_out=go/services/grpc/protobuf/ --go-grpc_opt=module=github.com/shifty11/cosmos-notifier/services/grpc/protobuf \
-            --dart_out=grpc:webapp/lib/api/protobuf/dart/ go/services/grpc/protobuf/*.proto && \
-    protoc -I=go/services/grpc/protobuf/ --dart_out=grpc:webapp/lib/api/protobuf/dart/ google/protobuf/timestamp.proto google/protobuf/empty.proto google/protobuf/duration.proto
+            --dart_out=grpc:webapp/lib/api/protobuf/dart/ api/*.proto && \
+    protoc -I=api/ --dart_out=grpc:webapp/lib/api/protobuf/dart/ google/protobuf/timestamp.proto google/protobuf/empty.proto google/protobuf/duration.proto
 
 generate-models:
     cd go && go generate ./ent

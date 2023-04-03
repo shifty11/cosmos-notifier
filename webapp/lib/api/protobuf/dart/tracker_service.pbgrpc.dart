@@ -15,22 +15,22 @@ import 'tracker_service.pb.dart' as $5;
 export 'tracker_service.pb.dart';
 
 class TrackerServiceClient extends $grpc.Client {
-  static final _$getTrackers =
-      $grpc.ClientMethod<$1.Empty, $5.GetTrackersResponse>(
-          '/cosmos_notifier_grpc.TrackerService/GetTrackers',
+  static final _$listTrackers =
+      $grpc.ClientMethod<$1.Empty, $5.ListTrackersResponse>(
+          '/cosmos_notifier_grpc.TrackerService/ListTrackers',
           ($1.Empty value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
-              $5.GetTrackersResponse.fromBuffer(value));
+              $5.ListTrackersResponse.fromBuffer(value));
   static final _$isAddressValid =
       $grpc.ClientMethod<$5.IsAddressValidRequest, $5.IsAddressValidResponse>(
           '/cosmos_notifier_grpc.TrackerService/IsAddressValid',
           ($5.IsAddressValidRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
               $5.IsAddressValidResponse.fromBuffer(value));
-  static final _$addTracker =
-      $grpc.ClientMethod<$5.AddTrackerRequest, $5.Tracker>(
-          '/cosmos_notifier_grpc.TrackerService/AddTracker',
-          ($5.AddTrackerRequest value) => value.writeToBuffer(),
+  static final _$createTracker =
+      $grpc.ClientMethod<$5.CreateTrackerRequest, $5.Tracker>(
+          '/cosmos_notifier_grpc.TrackerService/CreateTracker',
+          ($5.CreateTrackerRequest value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $5.Tracker.fromBuffer(value));
   static final _$updateTracker =
       $grpc.ClientMethod<$5.UpdateTrackerRequest, $5.Tracker>(
@@ -54,9 +54,9 @@ class TrackerServiceClient extends $grpc.Client {
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
 
-  $grpc.ResponseFuture<$5.GetTrackersResponse> getTrackers($1.Empty request,
+  $grpc.ResponseFuture<$5.ListTrackersResponse> listTrackers($1.Empty request,
       {$grpc.CallOptions? options}) {
-    return $createUnaryCall(_$getTrackers, request, options: options);
+    return $createUnaryCall(_$listTrackers, request, options: options);
   }
 
   $grpc.ResponseFuture<$5.IsAddressValidResponse> isAddressValid(
@@ -65,9 +65,10 @@ class TrackerServiceClient extends $grpc.Client {
     return $createUnaryCall(_$isAddressValid, request, options: options);
   }
 
-  $grpc.ResponseFuture<$5.Tracker> addTracker($5.AddTrackerRequest request,
+  $grpc.ResponseFuture<$5.Tracker> createTracker(
+      $5.CreateTrackerRequest request,
       {$grpc.CallOptions? options}) {
-    return $createUnaryCall(_$addTracker, request, options: options);
+    return $createUnaryCall(_$createTracker, request, options: options);
   }
 
   $grpc.ResponseFuture<$5.Tracker> updateTracker(
@@ -92,13 +93,13 @@ abstract class TrackerServiceBase extends $grpc.Service {
   $core.String get $name => 'cosmos_notifier_grpc.TrackerService';
 
   TrackerServiceBase() {
-    $addMethod($grpc.ServiceMethod<$1.Empty, $5.GetTrackersResponse>(
-        'GetTrackers',
-        getTrackers_Pre,
+    $addMethod($grpc.ServiceMethod<$1.Empty, $5.ListTrackersResponse>(
+        'ListTrackers',
+        listTrackers_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
-        ($5.GetTrackersResponse value) => value.writeToBuffer()));
+        ($5.ListTrackersResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$5.IsAddressValidRequest,
             $5.IsAddressValidResponse>(
         'IsAddressValid',
@@ -108,12 +109,13 @@ abstract class TrackerServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $5.IsAddressValidRequest.fromBuffer(value),
         ($5.IsAddressValidResponse value) => value.writeToBuffer()));
-    $addMethod($grpc.ServiceMethod<$5.AddTrackerRequest, $5.Tracker>(
-        'AddTracker',
-        addTracker_Pre,
+    $addMethod($grpc.ServiceMethod<$5.CreateTrackerRequest, $5.Tracker>(
+        'CreateTracker',
+        createTracker_Pre,
         false,
         false,
-        ($core.List<$core.int> value) => $5.AddTrackerRequest.fromBuffer(value),
+        ($core.List<$core.int> value) =>
+            $5.CreateTrackerRequest.fromBuffer(value),
         ($5.Tracker value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$5.UpdateTrackerRequest, $5.Tracker>(
         'UpdateTracker',
@@ -142,9 +144,9 @@ abstract class TrackerServiceBase extends $grpc.Service {
         ($5.TrackValidatorsResponse value) => value.writeToBuffer()));
   }
 
-  $async.Future<$5.GetTrackersResponse> getTrackers_Pre(
+  $async.Future<$5.ListTrackersResponse> listTrackers_Pre(
       $grpc.ServiceCall call, $async.Future<$1.Empty> request) async {
-    return getTrackers(call, await request);
+    return listTrackers(call, await request);
   }
 
   $async.Future<$5.IsAddressValidResponse> isAddressValid_Pre(
@@ -153,9 +155,9 @@ abstract class TrackerServiceBase extends $grpc.Service {
     return isAddressValid(call, await request);
   }
 
-  $async.Future<$5.Tracker> addTracker_Pre($grpc.ServiceCall call,
-      $async.Future<$5.AddTrackerRequest> request) async {
-    return addTracker(call, await request);
+  $async.Future<$5.Tracker> createTracker_Pre($grpc.ServiceCall call,
+      $async.Future<$5.CreateTrackerRequest> request) async {
+    return createTracker(call, await request);
   }
 
   $async.Future<$5.Tracker> updateTracker_Pre($grpc.ServiceCall call,
@@ -174,12 +176,12 @@ abstract class TrackerServiceBase extends $grpc.Service {
     return trackValidators(call, await request);
   }
 
-  $async.Future<$5.GetTrackersResponse> getTrackers(
+  $async.Future<$5.ListTrackersResponse> listTrackers(
       $grpc.ServiceCall call, $1.Empty request);
   $async.Future<$5.IsAddressValidResponse> isAddressValid(
       $grpc.ServiceCall call, $5.IsAddressValidRequest request);
-  $async.Future<$5.Tracker> addTracker(
-      $grpc.ServiceCall call, $5.AddTrackerRequest request);
+  $async.Future<$5.Tracker> createTracker(
+      $grpc.ServiceCall call, $5.CreateTrackerRequest request);
   $async.Future<$5.Tracker> updateTracker(
       $grpc.ServiceCall call, $5.UpdateTrackerRequest request);
   $async.Future<$1.Empty> deleteTracker(

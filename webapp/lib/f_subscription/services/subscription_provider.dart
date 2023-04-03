@@ -31,7 +31,7 @@ class SubscriptionListNotifier extends StateNotifier<SubscriptionListState> {
 
   Future<void> _loadSubscriptions() async {
     try {
-      final response = await _subsService.getSubscriptions(Empty());
+      final response = await _subsService.listSubscriptions(Empty());
       _chainChatRooms = response.chainChatRooms;
       _contractChatRooms = response.contractChatRooms;
       state = SubscriptionListState.data(chainChatRooms: _chainChatRooms, contractChatRooms: _contractChatRooms);

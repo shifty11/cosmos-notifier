@@ -8,7 +8,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/notifier"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/admin_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -35,9 +35,13 @@ func (server *AdminServer) BroadcastMessage(req *pb.BroadcastMessageRequest, str
 		return status.Errorf(codes.NotFound, "invalid user")
 	}
 
-	if req.Message == "" {
+	if req.GetMessage() == "" {
 		log.Sugar.Error("message is empty")
 		return status.Errorf(codes.InvalidArgument, "message is empty")
+	}
+	if req.GetType() == pb.BroadcastMessageRequest_MESSAGE_TYPE_UNSPECIFIED {
+		log.Sugar.Error("message type is unspecified")
+		return status.Errorf(codes.InvalidArgument, "message type is unspecified")
 	}
 
 	waitc := make(chan notifier.BroadcastMessageResult)

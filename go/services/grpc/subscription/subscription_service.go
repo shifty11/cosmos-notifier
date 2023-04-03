@@ -2,12 +2,13 @@ package subscription
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/shifty11/cosmos-notifier/common"
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
 	"github.com/shifty11/cosmos-notifier/services/contract_crawler"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/subscription_service"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/subscription_service"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -32,7 +33,7 @@ func NewSubscriptionsServer(managers *database.DbManagers, crawlerClient *contra
 	}
 }
 
-func (server *SubscriptionServer) GetSubscriptions(ctx context.Context, _ *emptypb.Empty) (*pb.GetSubscriptionsResponse, error) {
+func (server *SubscriptionServer) ListSubscriptions(ctx context.Context, _ *empty.Empty) (*pb.ListSubscriptionsResponse, error) {
 	entUser, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")

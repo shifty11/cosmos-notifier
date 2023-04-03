@@ -9,7 +9,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent/telegramchat"
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"github.com/shifty11/cosmos-notifier/log"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/subscription_service"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/subscription_service"
 )
 
 type SubscriptionManager struct {
@@ -207,15 +207,15 @@ func (m *SubscriptionManager) discordChannelsToChatRoom(discordChannels []*ent.D
 	return chats
 }
 
-func (m *SubscriptionManager) QuerySubscriptions(entUser *ent.User) *pb.GetSubscriptionsResponse {
+func (m *SubscriptionManager) QuerySubscriptions(entUser *ent.User) *pb.ListSubscriptionsResponse {
 	isAdmin := entUser.Role == user.RoleAdmin
 	if entUser.Type == user.TypeTelegram {
-		return &pb.GetSubscriptionsResponse{
+		return &pb.ListSubscriptionsResponse{
 			ChainChatRooms:    m.telegramChatsToChatRoom(m.queryTelegram(entUser, chainQuery), chainQuery, isAdmin),
 			ContractChatRooms: m.telegramChatsToChatRoom(m.queryTelegram(entUser, contractQuery), contractQuery, isAdmin),
 		}
 	} else {
-		return &pb.GetSubscriptionsResponse{
+		return &pb.ListSubscriptionsResponse{
 			ChainChatRooms:    m.discordChannelsToChatRoom(m.queryDiscord(entUser, chainQuery), chainQuery, isAdmin),
 			ContractChatRooms: m.discordChannelsToChatRoom(m.queryDiscord(entUser, contractQuery), contractQuery, isAdmin),
 		}

@@ -218,7 +218,7 @@ class AuthService extends AuthServiceClient with ChangeNotifier {
     try {
       final response = await devService.login(DevLoginRequest(
           userId: Int64(userId),
-          type: userType,
+          userType: userType,
           role: roleType,
       ));
       jwtManager.accessToken = response.accessToken;

@@ -11,8 +11,8 @@ import (
 	"github.com/shifty11/cosmos-notifier/database"
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/log"
-	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/pbcommon"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service"
+	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/pbcommon"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/tracker_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/types"
 	"golang.org/x/exp/slices"
 	"google.golang.org/grpc/codes"
@@ -135,7 +135,7 @@ func toValidatorBundles(validators []*ent.Validator, trackedMonikers map[string]
 	return validatorBundles
 }
 
-func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*pb.GetTrackersResponse, error) {
+func (server *TrackerServer) ListTrackers(ctx context.Context, _ *empty.Empty) (*pb.ListTrackersResponse, error) {
 	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
@@ -202,7 +202,7 @@ func (server *TrackerServer) GetTrackers(ctx context.Context, _ *empty.Empty) (*
 	validators := server.validatorManager.QueryActive()
 	pbValidatorBundles := toValidatorBundles(validators, trackedMonikers)
 
-	return &pb.GetTrackersResponse{
+	return &pb.ListTrackersResponse{
 		Trackers:         pbTrackers,
 		ChatRooms:        pbTrackerChatRooms,
 		ValidatorBundles: pbValidatorBundles,
@@ -216,7 +216,7 @@ func (server *TrackerServer) IsAddressValid(_ context.Context, req *pb.IsAddress
 	}, nil
 }
 
-func (server *TrackerServer) AddTracker(ctx context.Context, req *pb.AddTrackerRequest) (*pb.Tracker, error) {
+func (server *TrackerServer) CreateTracker(ctx context.Context, req *pb.CreateTrackerRequest) (*pb.Tracker, error) {
 	userEnt, ok := ctx.Value(common.ContextKeyUser).(*ent.User)
 	if !ok {
 		log.Sugar.Error("invalid user")
