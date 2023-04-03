@@ -13,7 +13,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/ent"
 	"github.com/shifty11/cosmos-notifier/ent/user"
 	"github.com/shifty11/cosmos-notifier/log"
-	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/auth_service"
+	pb "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/auth_service"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -10,7 +10,7 @@ import 'package:cosmos_notifier/f_tracking/services/tracker_service.dart';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-final trackerFutureProvider = FutureProvider<GetTrackersResponse>((ref) async {
+final trackerFutureProvider = FutureProvider<ListTrackersResponse>((ref) async {
   return await ref.read(trackerNotifierProvider.notifier).getTrackers();
 });
 
@@ -158,8 +158,8 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
     return ref.watch(trackerChatRoomsProvider).firstOrNull;
   }
 
-  Future<GetTrackersResponse> getTrackers() async {
-    var response = await trackerService.getTrackers(Empty());
+  Future<ListTrackersResponse> getTrackers() async {
+    var response = await trackerService.listTrackers(Empty());
     for (var tracker in response.trackers) {
       state = [
         ...state,
@@ -206,7 +206,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
       }
       if (tracker.address.isNotEmpty && tracker.isAddressValid && tracker.chatRoom != null) {
         try {
-          var response = await trackerService.addTracker(AddTrackerRequest(
+          var response = await trackerService.createTracker(CreateTrackerRequest(
             address: tracker.address,
             notificationInterval: tracker.notificationInterval,
             chatRoom: tracker.chatRoom,

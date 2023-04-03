@@ -4,7 +4,7 @@ import "auth_service.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/dev_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/dev_service";
 
 service DevService {
   rpc Login (DevLoginRequest) returns (LoginResponse) {}
@@ -13,13 +13,15 @@ service DevService {
 message DevLoginRequest {
   int64 user_id = 1;
   enum UserType {
-    TELEGRAM = 0;
-    DISCORD = 1;
+    USER_TYPE_UNSPECIFIED = 0;
+    TELEGRAM = 1;
+    DISCORD = 2;
   }
-  UserType type = 2;
+  UserType user_type = 2;
   enum Role {
-    ADMIN = 0;
-    USER = 1;
+    ROLE_UNSPECIFIED = 0;
+    ADMIN = 1;
+    USER = 2;
   }
   Role role = 3;
 }

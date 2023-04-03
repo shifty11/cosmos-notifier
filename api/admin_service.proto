@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/admin_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/admin_service";
 
 service AdminService {
   rpc BroadcastMessage (BroadcastMessageRequest) returns (stream BroadcastMessageResponse) {}
@@ -14,18 +14,20 @@ service AdminService {
 message BroadcastMessageRequest {
   string message = 1;
   enum MessageType {
-    TELEGRAM_TEST = 0;
-    DISCORD_TEST = 1;
-    TELEGRAM = 2;
-    DISCORD = 3;
+    MESSAGE_TYPE_UNSPECIFIED = 0;
+    TELEGRAM_TEST = 1;
+    DISCORD_TEST = 2;
+    TELEGRAM = 3;
+    DISCORD = 4;
   }
   MessageType type = 2;
 }
 
 message BroadcastMessageResponse {
   enum Status {
-    SENDING = 0;
-    SENT = 1;
+    STATUS_UNSPECIFIED = 0;
+    SENDING = 1;
+    SENT = 2;
     FAILED = 3;
   }
   Status status = 1;

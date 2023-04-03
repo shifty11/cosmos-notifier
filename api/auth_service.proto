@@ -4,7 +4,7 @@ import "google/protobuf/empty.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/auth_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/auth_service";
 
 service AuthService {
   rpc TelegramLogin (TelegramLoginRequest) returns (LoginResponse) {}

@@ -10,12 +10,14 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class BroadcastMessageRequest_MessageType extends $pb.ProtobufEnum {
-  static const BroadcastMessageRequest_MessageType TELEGRAM_TEST = BroadcastMessageRequest_MessageType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM_TEST');
-  static const BroadcastMessageRequest_MessageType DISCORD_TEST = BroadcastMessageRequest_MessageType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD_TEST');
-  static const BroadcastMessageRequest_MessageType TELEGRAM = BroadcastMessageRequest_MessageType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM');
-  static const BroadcastMessageRequest_MessageType DISCORD = BroadcastMessageRequest_MessageType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD');
+  static const BroadcastMessageRequest_MessageType MESSAGE_TYPE_UNSPECIFIED = BroadcastMessageRequest_MessageType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'MESSAGE_TYPE_UNSPECIFIED');
+  static const BroadcastMessageRequest_MessageType TELEGRAM_TEST = BroadcastMessageRequest_MessageType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM_TEST');
+  static const BroadcastMessageRequest_MessageType DISCORD_TEST = BroadcastMessageRequest_MessageType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD_TEST');
+  static const BroadcastMessageRequest_MessageType TELEGRAM = BroadcastMessageRequest_MessageType._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM');
+  static const BroadcastMessageRequest_MessageType DISCORD = BroadcastMessageRequest_MessageType._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD');
 
   static const $core.List<BroadcastMessageRequest_MessageType> values = <BroadcastMessageRequest_MessageType> [
+    MESSAGE_TYPE_UNSPECIFIED,
     TELEGRAM_TEST,
     DISCORD_TEST,
     TELEGRAM,
@@ -29,11 +31,13 @@ class BroadcastMessageRequest_MessageType extends $pb.ProtobufEnum {
 }
 
 class BroadcastMessageResponse_Status extends $pb.ProtobufEnum {
-  static const BroadcastMessageResponse_Status SENDING = BroadcastMessageResponse_Status._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SENDING');
-  static const BroadcastMessageResponse_Status SENT = BroadcastMessageResponse_Status._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SENT');
+  static const BroadcastMessageResponse_Status STATUS_UNSPECIFIED = BroadcastMessageResponse_Status._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'STATUS_UNSPECIFIED');
+  static const BroadcastMessageResponse_Status SENDING = BroadcastMessageResponse_Status._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SENDING');
+  static const BroadcastMessageResponse_Status SENT = BroadcastMessageResponse_Status._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SENT');
   static const BroadcastMessageResponse_Status FAILED = BroadcastMessageResponse_Status._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FAILED');
 
   static const $core.List<BroadcastMessageResponse_Status> values = <BroadcastMessageResponse_Status> [
+    STATUS_UNSPECIFIED,
     SENDING,
     SENT,
     FAILED,

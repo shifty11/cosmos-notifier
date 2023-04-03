@@ -7,12 +7,12 @@ import "pbcommon.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/tracker_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/tracker_service";
 
 service TrackerService {
-  rpc GetTrackers (google.protobuf.Empty) returns (GetTrackersResponse) {}
+  rpc ListTrackers (google.protobuf.Empty) returns (ListTrackersResponse) {}
   rpc IsAddressValid (IsAddressValidRequest) returns (IsAddressValidResponse) {}
-  rpc AddTracker (AddTrackerRequest) returns (Tracker) {}
+  rpc CreateTracker (CreateTrackerRequest) returns (Tracker) {}
   rpc UpdateTracker (UpdateTrackerRequest) returns (Tracker) {}
   rpc DeleteTracker (DeleteTrackerRequest) returns (google.protobuf.Empty) {}
   rpc TrackValidators (TrackValidatorsRequest) returns (TrackValidatorsResponse) {}
@@ -46,7 +46,7 @@ message ValidatorBundle {
   bool is_tracked = 3;
 }
 
-message GetTrackersResponse {
+message ListTrackersResponse {
   repeated Tracker trackers = 1;
   repeated TrackerChatRoom chatRooms = 2;
   repeated ValidatorBundle validator_bundles = 3;
@@ -60,7 +60,7 @@ message IsAddressValidResponse {
   bool isValid = 1;
 }
 
-message AddTrackerRequest {
+message CreateTrackerRequest {
   string address = 1;
   google.protobuf.Duration notificationInterval = 2;
   TrackerChatRoom chatRoom = 3;

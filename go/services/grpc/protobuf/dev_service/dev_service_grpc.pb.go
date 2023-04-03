@@ -8,7 +8,7 @@ package dev_service
 
 import (
 	context "context"
-	auth_service "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/auth_service"
+	auth_service "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/auth_service"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

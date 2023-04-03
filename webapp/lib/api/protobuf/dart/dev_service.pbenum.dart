@@ -10,10 +10,12 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class DevLoginRequest_UserType extends $pb.ProtobufEnum {
-  static const DevLoginRequest_UserType TELEGRAM = DevLoginRequest_UserType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM');
-  static const DevLoginRequest_UserType DISCORD = DevLoginRequest_UserType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD');
+  static const DevLoginRequest_UserType USER_TYPE_UNSPECIFIED = DevLoginRequest_UserType._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER_TYPE_UNSPECIFIED');
+  static const DevLoginRequest_UserType TELEGRAM = DevLoginRequest_UserType._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM');
+  static const DevLoginRequest_UserType DISCORD = DevLoginRequest_UserType._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD');
 
   static const $core.List<DevLoginRequest_UserType> values = <DevLoginRequest_UserType> [
+    USER_TYPE_UNSPECIFIED,
     TELEGRAM,
     DISCORD,
   ];
@@ -25,10 +27,12 @@ class DevLoginRequest_UserType extends $pb.ProtobufEnum {
 }
 
 class DevLoginRequest_Role extends $pb.ProtobufEnum {
-  static const DevLoginRequest_Role ADMIN = DevLoginRequest_Role._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADMIN');
-  static const DevLoginRequest_Role USER = DevLoginRequest_Role._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER');
+  static const DevLoginRequest_Role ROLE_UNSPECIFIED = DevLoginRequest_Role._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ROLE_UNSPECIFIED');
+  static const DevLoginRequest_Role ADMIN = DevLoginRequest_Role._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADMIN');
+  static const DevLoginRequest_Role USER = DevLoginRequest_Role._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'USER');
 
   static const $core.List<DevLoginRequest_Role> values = <DevLoginRequest_Role> [
+    ROLE_UNSPECIFIED,
     ADMIN,
     USER,
   ];

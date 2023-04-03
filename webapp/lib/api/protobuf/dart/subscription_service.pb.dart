@@ -226,7 +226,7 @@ class ChatRoom extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChatRoom', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..e<ChatRoom_Type>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: ChatRoom_Type.TELEGRAM, valueOf: ChatRoom_Type.valueOf, enumValues: ChatRoom_Type.values)
+    ..e<ChatRoom_Type>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE, defaultOrMaker: ChatRoom_Type.TYPE_UNSPECIFIED, valueOf: ChatRoom_Type.valueOf, enumValues: ChatRoom_Type.values)
     ..pc<Subscription>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscriptions', $pb.PbFieldType.PM, subBuilder: Subscription.create)
     ..hasRequiredFields = false
   ;
@@ -305,15 +305,15 @@ class ChatRoom extends $pb.GeneratedMessage {
   $core.List<Subscription> get subscriptions => $_getList(3);
 }
 
-class GetSubscriptionsResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetSubscriptionsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+class ListSubscriptionsResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListSubscriptionsResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..pc<ChatRoom>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chainChatRooms', $pb.PbFieldType.PM, subBuilder: ChatRoom.create)
     ..pc<ChatRoom>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractChatRooms', $pb.PbFieldType.PM, subBuilder: ChatRoom.create)
     ..hasRequiredFields = false
   ;
 
-  GetSubscriptionsResponse._() : super();
-  factory GetSubscriptionsResponse({
+  ListSubscriptionsResponse._() : super();
+  factory ListSubscriptionsResponse({
     $core.Iterable<ChatRoom>? chainChatRooms,
     $core.Iterable<ChatRoom>? contractChatRooms,
   }) {
@@ -326,26 +326,26 @@ class GetSubscriptionsResponse extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory GetSubscriptionsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory GetSubscriptionsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ListSubscriptionsResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ListSubscriptionsResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  GetSubscriptionsResponse clone() => GetSubscriptionsResponse()..mergeFromMessage(this);
+  ListSubscriptionsResponse clone() => ListSubscriptionsResponse()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  GetSubscriptionsResponse copyWith(void Function(GetSubscriptionsResponse) updates) => super.copyWith((message) => updates(message as GetSubscriptionsResponse)) as GetSubscriptionsResponse; // ignore: deprecated_member_use
+  ListSubscriptionsResponse copyWith(void Function(ListSubscriptionsResponse) updates) => super.copyWith((message) => updates(message as ListSubscriptionsResponse)) as ListSubscriptionsResponse; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static GetSubscriptionsResponse create() => GetSubscriptionsResponse._();
-  GetSubscriptionsResponse createEmptyInstance() => create();
-  static $pb.PbList<GetSubscriptionsResponse> createRepeated() => $pb.PbList<GetSubscriptionsResponse>();
+  static ListSubscriptionsResponse create() => ListSubscriptionsResponse._();
+  ListSubscriptionsResponse createEmptyInstance() => create();
+  static $pb.PbList<ListSubscriptionsResponse> createRepeated() => $pb.PbList<ListSubscriptionsResponse>();
   @$core.pragma('dart2js:noInline')
-  static GetSubscriptionsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetSubscriptionsResponse>(create);
-  static GetSubscriptionsResponse? _defaultInstance;
+  static ListSubscriptionsResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListSubscriptionsResponse>(create);
+  static ListSubscriptionsResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<ChatRoom> get chainChatRooms => $_getList(0);
@@ -586,7 +586,7 @@ class AddDaoRequest extends $pb.GeneratedMessage {
 
 class AddDaoResponse extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddDaoResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
-    ..e<AddDaoResponse_Status>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OE, defaultOrMaker: AddDaoResponse_Status.ADDED, valueOf: AddDaoResponse_Status.valueOf, enumValues: AddDaoResponse_Status.values)
+    ..e<AddDaoResponse_Status>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'status', $pb.PbFieldType.OE, defaultOrMaker: AddDaoResponse_Status.STATUS_UNSPECIFIED, valueOf: AddDaoResponse_Status.valueOf, enumValues: AddDaoResponse_Status.values)
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'contractAddress', protoName: 'contractAddress')
     ..hasRequiredFields = false

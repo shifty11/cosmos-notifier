@@ -15,12 +15,12 @@ import 'subscription_service.pb.dart' as $4;
 export 'subscription_service.pb.dart';
 
 class SubscriptionServiceClient extends $grpc.Client {
-  static final _$getSubscriptions =
-      $grpc.ClientMethod<$1.Empty, $4.GetSubscriptionsResponse>(
-          '/cosmos_notifier_grpc.SubscriptionService/GetSubscriptions',
+  static final _$listSubscriptions =
+      $grpc.ClientMethod<$1.Empty, $4.ListSubscriptionsResponse>(
+          '/cosmos_notifier_grpc.SubscriptionService/ListSubscriptions',
           ($1.Empty value) => value.writeToBuffer(),
           ($core.List<$core.int> value) =>
-              $4.GetSubscriptionsResponse.fromBuffer(value));
+              $4.ListSubscriptionsResponse.fromBuffer(value));
   static final _$toggleChainSubscription = $grpc.ClientMethod<
           $4.ToggleChainSubscriptionRequest, $4.ToggleSubscriptionResponse>(
       '/cosmos_notifier_grpc.SubscriptionService/ToggleChainSubscription',
@@ -53,10 +53,10 @@ class SubscriptionServiceClient extends $grpc.Client {
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
 
-  $grpc.ResponseFuture<$4.GetSubscriptionsResponse> getSubscriptions(
+  $grpc.ResponseFuture<$4.ListSubscriptionsResponse> listSubscriptions(
       $1.Empty request,
       {$grpc.CallOptions? options}) {
-    return $createUnaryCall(_$getSubscriptions, request, options: options);
+    return $createUnaryCall(_$listSubscriptions, request, options: options);
   }
 
   $grpc.ResponseFuture<$4.ToggleSubscriptionResponse> toggleChainSubscription(
@@ -94,13 +94,13 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
   $core.String get $name => 'cosmos_notifier_grpc.SubscriptionService';
 
   SubscriptionServiceBase() {
-    $addMethod($grpc.ServiceMethod<$1.Empty, $4.GetSubscriptionsResponse>(
-        'GetSubscriptions',
-        getSubscriptions_Pre,
+    $addMethod($grpc.ServiceMethod<$1.Empty, $4.ListSubscriptionsResponse>(
+        'ListSubscriptions',
+        listSubscriptions_Pre,
         false,
         false,
         ($core.List<$core.int> value) => $1.Empty.fromBuffer(value),
-        ($4.GetSubscriptionsResponse value) => value.writeToBuffer()));
+        ($4.ListSubscriptionsResponse value) => value.writeToBuffer()));
     $addMethod($grpc.ServiceMethod<$4.ToggleChainSubscriptionRequest,
             $4.ToggleSubscriptionResponse>(
         'ToggleChainSubscription',
@@ -143,9 +143,9 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
         ($1.Empty value) => value.writeToBuffer()));
   }
 
-  $async.Future<$4.GetSubscriptionsResponse> getSubscriptions_Pre(
+  $async.Future<$4.ListSubscriptionsResponse> listSubscriptions_Pre(
       $grpc.ServiceCall call, $async.Future<$1.Empty> request) async {
-    return getSubscriptions(call, await request);
+    return listSubscriptions(call, await request);
   }
 
   $async.Future<$4.ToggleSubscriptionResponse> toggleChainSubscription_Pre(
@@ -175,7 +175,7 @@ abstract class SubscriptionServiceBase extends $grpc.Service {
     return enableChain(call, await request);
   }
 
-  $async.Future<$4.GetSubscriptionsResponse> getSubscriptions(
+  $async.Future<$4.ListSubscriptionsResponse> listSubscriptions(
       $grpc.ServiceCall call, $1.Empty request);
   $async.Future<$4.ToggleSubscriptionResponse> toggleChainSubscription(
       $grpc.ServiceCall call, $4.ToggleChainSubscriptionRequest request);

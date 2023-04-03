@@ -10,10 +10,12 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class ChatRoom_Type extends $pb.ProtobufEnum {
-  static const ChatRoom_Type TELEGRAM = ChatRoom_Type._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM');
-  static const ChatRoom_Type DISCORD = ChatRoom_Type._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD');
+  static const ChatRoom_Type TYPE_UNSPECIFIED = ChatRoom_Type._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TYPE_UNSPECIFIED');
+  static const ChatRoom_Type TELEGRAM = ChatRoom_Type._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'TELEGRAM');
+  static const ChatRoom_Type DISCORD = ChatRoom_Type._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'DISCORD');
 
   static const $core.List<ChatRoom_Type> values = <ChatRoom_Type> [
+    TYPE_UNSPECIFIED,
     TELEGRAM,
     DISCORD,
   ];
@@ -25,12 +27,14 @@ class ChatRoom_Type extends $pb.ProtobufEnum {
 }
 
 class AddDaoResponse_Status extends $pb.ProtobufEnum {
-  static const AddDaoResponse_Status ADDED = AddDaoResponse_Status._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADDED');
-  static const AddDaoResponse_Status ALREADY_ADDED = AddDaoResponse_Status._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ALREADY_ADDED');
-  static const AddDaoResponse_Status IS_ADDING = AddDaoResponse_Status._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'IS_ADDING');
-  static const AddDaoResponse_Status FAILED = AddDaoResponse_Status._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FAILED');
+  static const AddDaoResponse_Status STATUS_UNSPECIFIED = AddDaoResponse_Status._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'STATUS_UNSPECIFIED');
+  static const AddDaoResponse_Status ADDED = AddDaoResponse_Status._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ADDED');
+  static const AddDaoResponse_Status ALREADY_ADDED = AddDaoResponse_Status._(2, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'ALREADY_ADDED');
+  static const AddDaoResponse_Status IS_ADDING = AddDaoResponse_Status._(3, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'IS_ADDING');
+  static const AddDaoResponse_Status FAILED = AddDaoResponse_Status._(4, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'FAILED');
 
   static const $core.List<AddDaoResponse_Status> values = <AddDaoResponse_Status> [
+    STATUS_UNSPECIFIED,
     ADDED,
     ALREADY_ADDED,
     IS_ADDING,

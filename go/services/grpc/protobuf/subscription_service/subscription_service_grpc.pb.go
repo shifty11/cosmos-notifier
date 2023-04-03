@@ -20,7 +20,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	SubscriptionService_GetSubscriptions_FullMethodName           = "/cosmos_notifier_grpc.SubscriptionService/GetSubscriptions"
+	SubscriptionService_ListSubscriptions_FullMethodName          = "/cosmos_notifier_grpc.SubscriptionService/ListSubscriptions"
 	SubscriptionService_ToggleChainSubscription_FullMethodName    = "/cosmos_notifier_grpc.SubscriptionService/ToggleChainSubscription"
 	SubscriptionService_ToggleContractSubscription_FullMethodName = "/cosmos_notifier_grpc.SubscriptionService/ToggleContractSubscription"
 	SubscriptionService_AddDao_FullMethodName                     = "/cosmos_notifier_grpc.SubscriptionService/AddDao"
@@ -32,7 +32,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SubscriptionServiceClient interface {
-	GetSubscriptions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetSubscriptionsResponse, error)
+	ListSubscriptions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error)
 	ToggleChainSubscription(ctx context.Context, in *ToggleChainSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error)
 	ToggleContractSubscription(ctx context.Context, in *ToggleContractSubscriptionRequest, opts ...grpc.CallOption) (*ToggleSubscriptionResponse, error)
 	AddDao(ctx context.Context, in *AddDaoRequest, opts ...grpc.CallOption) (SubscriptionService_AddDaoClient, error)
@@ -48,9 +48,9 @@ func NewSubscriptionServiceClient(cc grpc.ClientConnInterface) SubscriptionServi
 	return &subscriptionServiceClient{cc}
 }
 
-func (c *subscriptionServiceClient) GetSubscriptions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*GetSubscriptionsResponse, error) {
-	out := new(GetSubscriptionsResponse)
-	err := c.cc.Invoke(ctx, SubscriptionService_GetSubscriptions_FullMethodName, in, out, opts...)
+func (c *subscriptionServiceClient) ListSubscriptions(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*ListSubscriptionsResponse, error) {
+	out := new(ListSubscriptionsResponse)
+	err := c.cc.Invoke(ctx, SubscriptionService_ListSubscriptions_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +129,7 @@ func (c *subscriptionServiceClient) EnableChain(ctx context.Context, in *EnableC
 // All implementations must embed UnimplementedSubscriptionServiceServer
 // for forward compatibility
 type SubscriptionServiceServer interface {
-	GetSubscriptions(context.Context, *empty.Empty) (*GetSubscriptionsResponse, error)
+	ListSubscriptions(context.Context, *empty.Empty) (*ListSubscriptionsResponse, error)
 	ToggleChainSubscription(context.Context, *ToggleChainSubscriptionRequest) (*ToggleSubscriptionResponse, error)
 	ToggleContractSubscription(context.Context, *ToggleContractSubscriptionRequest) (*ToggleSubscriptionResponse, error)
 	AddDao(*AddDaoRequest, SubscriptionService_AddDaoServer) error
@@ -142,8 +142,8 @@ type SubscriptionServiceServer interface {
 type UnimplementedSubscriptionServiceServer struct {
 }
 
-func (UnimplementedSubscriptionServiceServer) GetSubscriptions(context.Context, *empty.Empty) (*GetSubscriptionsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSubscriptions not implemented")
+func (UnimplementedSubscriptionServiceServer) ListSubscriptions(context.Context, *empty.Empty) (*ListSubscriptionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSubscriptions not implemented")
 }
 func (UnimplementedSubscriptionServiceServer) ToggleChainSubscription(context.Context, *ToggleChainSubscriptionRequest) (*ToggleSubscriptionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ToggleChainSubscription not implemented")
@@ -173,20 +173,20 @@ func RegisterSubscriptionServiceServer(s grpc.ServiceRegistrar, srv Subscription
 	s.RegisterService(&SubscriptionService_ServiceDesc, srv)
 }
 
-func _SubscriptionService_GetSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _SubscriptionService_ListSubscriptions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(empty.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SubscriptionServiceServer).GetSubscriptions(ctx, in)
+		return srv.(SubscriptionServiceServer).ListSubscriptions(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SubscriptionService_GetSubscriptions_FullMethodName,
+		FullMethod: SubscriptionService_ListSubscriptions_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SubscriptionServiceServer).GetSubscriptions(ctx, req.(*empty.Empty))
+		return srv.(SubscriptionServiceServer).ListSubscriptions(ctx, req.(*empty.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -292,8 +292,8 @@ var SubscriptionService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SubscriptionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetSubscriptions",
-			Handler:    _SubscriptionService_GetSubscriptions_Handler,
+			MethodName: "ListSubscriptions",
+			Handler:    _SubscriptionService_ListSubscriptions_Handler,
 		},
 		{
 			MethodName: "ToggleChainSubscription",

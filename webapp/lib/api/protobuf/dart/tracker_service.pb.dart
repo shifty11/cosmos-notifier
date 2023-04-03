@@ -361,16 +361,16 @@ class ValidatorBundle extends $pb.GeneratedMessage {
   void clearIsTracked() => clearField(3);
 }
 
-class GetTrackersResponse extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'GetTrackersResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+class ListTrackersResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ListTrackersResponse', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..pc<Tracker>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackers', $pb.PbFieldType.PM, subBuilder: Tracker.create)
     ..pc<TrackerChatRoom>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRooms', $pb.PbFieldType.PM, protoName: 'chatRooms', subBuilder: TrackerChatRoom.create)
     ..pc<ValidatorBundle>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorBundles', $pb.PbFieldType.PM, subBuilder: ValidatorBundle.create)
     ..hasRequiredFields = false
   ;
 
-  GetTrackersResponse._() : super();
-  factory GetTrackersResponse({
+  ListTrackersResponse._() : super();
+  factory ListTrackersResponse({
     $core.Iterable<Tracker>? trackers,
     $core.Iterable<TrackerChatRoom>? chatRooms,
     $core.Iterable<ValidatorBundle>? validatorBundles,
@@ -387,26 +387,26 @@ class GetTrackersResponse extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory GetTrackersResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory GetTrackersResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory ListTrackersResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory ListTrackersResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  GetTrackersResponse clone() => GetTrackersResponse()..mergeFromMessage(this);
+  ListTrackersResponse clone() => ListTrackersResponse()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  GetTrackersResponse copyWith(void Function(GetTrackersResponse) updates) => super.copyWith((message) => updates(message as GetTrackersResponse)) as GetTrackersResponse; // ignore: deprecated_member_use
+  ListTrackersResponse copyWith(void Function(ListTrackersResponse) updates) => super.copyWith((message) => updates(message as ListTrackersResponse)) as ListTrackersResponse; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static GetTrackersResponse create() => GetTrackersResponse._();
-  GetTrackersResponse createEmptyInstance() => create();
-  static $pb.PbList<GetTrackersResponse> createRepeated() => $pb.PbList<GetTrackersResponse>();
+  static ListTrackersResponse create() => ListTrackersResponse._();
+  ListTrackersResponse createEmptyInstance() => create();
+  static $pb.PbList<ListTrackersResponse> createRepeated() => $pb.PbList<ListTrackersResponse>();
   @$core.pragma('dart2js:noInline')
-  static GetTrackersResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<GetTrackersResponse>(create);
-  static GetTrackersResponse? _defaultInstance;
+  static ListTrackersResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListTrackersResponse>(create);
+  static ListTrackersResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.List<Tracker> get trackers => $_getList(0);
@@ -512,16 +512,16 @@ class IsAddressValidResponse extends $pb.GeneratedMessage {
   void clearIsValid() => clearField(1);
 }
 
-class AddTrackerRequest extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'AddTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
+class CreateTrackerRequest extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
     ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
     ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
 
-  AddTrackerRequest._() : super();
-  factory AddTrackerRequest({
+  CreateTrackerRequest._() : super();
+  factory CreateTrackerRequest({
     $core.String? address,
     $7.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
@@ -538,26 +538,26 @@ class AddTrackerRequest extends $pb.GeneratedMessage {
     }
     return _result;
   }
-  factory AddTrackerRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AddTrackerRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CreateTrackerRequest.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory CreateTrackerRequest.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
   'Will be removed in next major version')
-  AddTrackerRequest clone() => AddTrackerRequest()..mergeFromMessage(this);
+  CreateTrackerRequest clone() => CreateTrackerRequest()..mergeFromMessage(this);
   @$core.Deprecated(
   'Using this can add significant overhead to your binary. '
   'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
   'Will be removed in next major version')
-  AddTrackerRequest copyWith(void Function(AddTrackerRequest) updates) => super.copyWith((message) => updates(message as AddTrackerRequest)) as AddTrackerRequest; // ignore: deprecated_member_use
+  CreateTrackerRequest copyWith(void Function(CreateTrackerRequest) updates) => super.copyWith((message) => updates(message as CreateTrackerRequest)) as CreateTrackerRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static AddTrackerRequest create() => AddTrackerRequest._();
-  AddTrackerRequest createEmptyInstance() => create();
-  static $pb.PbList<AddTrackerRequest> createRepeated() => $pb.PbList<AddTrackerRequest>();
+  static CreateTrackerRequest create() => CreateTrackerRequest._();
+  CreateTrackerRequest createEmptyInstance() => create();
+  static $pb.PbList<CreateTrackerRequest> createRepeated() => $pb.PbList<CreateTrackerRequest>();
   @$core.pragma('dart2js:noInline')
-  static AddTrackerRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AddTrackerRequest>(create);
-  static AddTrackerRequest? _defaultInstance;
+  static CreateTrackerRequest getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CreateTrackerRequest>(create);
+  static CreateTrackerRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
   $core.String get address => $_getSZ(0);

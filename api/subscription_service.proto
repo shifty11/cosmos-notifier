@@ -4,10 +4,10 @@ import "google/protobuf/empty.proto";
 
 package cosmos_notifier_grpc;
 
-option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/go/subscription_service";
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/subscription_service";
 
 service SubscriptionService {
-  rpc GetSubscriptions (google.protobuf.Empty) returns (GetSubscriptionsResponse) {}
+  rpc ListSubscriptions (google.protobuf.Empty) returns (ListSubscriptionsResponse) {}
   rpc ToggleChainSubscription (ToggleChainSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
   rpc ToggleContractSubscription (ToggleContractSubscriptionRequest) returns (ToggleSubscriptionResponse) {}
   rpc AddDao (AddDaoRequest) returns (stream AddDaoResponse) {}
@@ -35,14 +35,15 @@ message ChatRoom {
   int64 id = 1;
   string name = 2;
   enum Type {
-    TELEGRAM = 0;
-    DISCORD = 1;
+    TYPE_UNSPECIFIED = 0;
+    TELEGRAM = 1;
+    DISCORD = 2;
   }
   Type type = 3;
   repeated Subscription subscriptions = 4;
 }
 
-message GetSubscriptionsResponse {
+message ListSubscriptionsResponse {
   repeated ChatRoom chain_chat_rooms = 1;
   repeated ChatRoom contract_chat_rooms = 2;
 }
@@ -68,10 +69,11 @@ message AddDaoRequest {
 
 message AddDaoResponse {
   enum Status {
-    ADDED = 0;
-    ALREADY_ADDED = 1;
-    IS_ADDING = 2;
-    FAILED = 3;
+    STATUS_UNSPECIFIED = 0;
+    ADDED = 1;
+    ALREADY_ADDED = 2;
+    IS_ADDING = 3;
+    FAILED = 4;
   }
   Status status = 1;
   string name = 2;
