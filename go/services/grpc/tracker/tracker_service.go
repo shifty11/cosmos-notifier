@@ -154,12 +154,17 @@ func (server *TrackerServer) ListTrackers(ctx context.Context, _ *empty.Empty) (
 		if err != nil {
 			return nil, status.Errorf(codes.Internal, "error while getting trackers")
 		}
+		var validatorMoniker string
+		if tracker.Edges.Validator != nil {
+			validatorMoniker = tracker.Edges.Validator.Moniker
+		}
 		pbTrackers = append(pbTrackers, &pb.Tracker{
 			Id:                   int64(tracker.ID),
 			Address:              tracker.Address,
 			NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 			ChatRoom:             chatRoom,
 			UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
+			ValidatorMoniker:     validatorMoniker,
 		})
 	}
 
@@ -403,12 +408,17 @@ func (server *TrackerServer) TrackValidators(ctx context.Context, req *pb.TrackV
 			if err != nil {
 				return nil, status.Errorf(codes.Internal, "error while adding tracker")
 			}
+			var validatorMoniker string
+			if tracker.Edges.Validator != nil {
+				validatorMoniker = tracker.Edges.Validator.Moniker
+			}
 			trackers = append(trackers, &pb.Tracker{
 				Id:                   int64(tracker.ID),
 				Address:              tracker.Address,
 				NotificationInterval: &duration.Duration{Seconds: tracker.NotificationInterval},
 				ChatRoom:             chatRoom,
 				UpdatedAt:            &timestamp.Timestamp{Seconds: tracker.UpdateTime.Unix()},
+				ValidatorMoniker:     validatorMoniker,
 			})
 		}
 	}

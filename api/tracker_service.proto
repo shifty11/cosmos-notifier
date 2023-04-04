@@ -32,6 +32,7 @@ message Tracker {
   google.protobuf.Duration notificationInterval = 3;
   TrackerChatRoom chatRoom = 4;
   google.protobuf.Timestamp updatedAt = 5;
+  string validatorMoniker = 6;
 }
 
 message Validator {

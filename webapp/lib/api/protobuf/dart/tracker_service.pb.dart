@@ -115,6 +115,7 @@ class Tracker extends $pb.GeneratedMessage {
     ..aOM<$7.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
     ..aOM<TrackerChatRoom>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..aOM<$8.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $8.Timestamp.create)
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorMoniker', protoName: 'validatorMoniker')
     ..hasRequiredFields = false
   ;
 
@@ -125,6 +126,7 @@ class Tracker extends $pb.GeneratedMessage {
     $7.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
     $8.Timestamp? updatedAt,
+    $core.String? validatorMoniker,
   }) {
     final _result = create();
     if (id != null) {
@@ -141,6 +143,9 @@ class Tracker extends $pb.GeneratedMessage {
     }
     if (updatedAt != null) {
       _result.updatedAt = updatedAt;
+    }
+    if (validatorMoniker != null) {
+      _result.validatorMoniker = validatorMoniker;
     }
     return _result;
   }
@@ -215,6 +220,15 @@ class Tracker extends $pb.GeneratedMessage {
   void clearUpdatedAt() => clearField(5);
   @$pb.TagNumber(5)
   $8.Timestamp ensureUpdatedAt() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  $core.String get validatorMoniker => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set validatorMoniker($core.String v) { $_setString(5, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasValidatorMoniker() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearValidatorMoniker() => clearField(6);
 }
 
 class Validator extends $pb.GeneratedMessage {

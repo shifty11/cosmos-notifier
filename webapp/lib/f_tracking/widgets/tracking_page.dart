@@ -175,7 +175,9 @@ class TrackingPage extends StatelessWidget {
                     addressSize = AddressSize.long;
                   }
                   return DataRow(cells: [
-                    DataCell(trackerRow.isSaved ? Text(trackerRow.shortenedAddress(addressSize)) : AddressInputWidget(ref, trackerRow)),
+                    DataCell(trackerRow.isSaved
+                        ? Text(trackerRow.shortenedAddress(addressSize) + (trackerRow.validatorMoniker.isNotEmpty ? " (${trackerRow.validatorMoniker})" : ""))
+                        : AddressInputWidget(ref, trackerRow)),
                     DataCell(
                       GestureDetector(
                         onTap: () async =>
