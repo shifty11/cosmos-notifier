@@ -21,6 +21,7 @@ mixin _$TrackerRow {
   pb.Duration get notificationInterval => throw _privateConstructorUsedError;
   TrackerChatRoom? get chatRoom => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
+  String get validatorMoniker => throw _privateConstructorUsedError;
   bool get isAddressValid => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
@@ -40,6 +41,7 @@ abstract class $TrackerRowCopyWith<$Res> {
       pb.Duration notificationInterval,
       TrackerChatRoom? chatRoom,
       DateTime? updatedAt,
+      String validatorMoniker,
       bool isAddressValid});
 }
 
@@ -61,6 +63,7 @@ class _$TrackerRowCopyWithImpl<$Res, $Val extends TrackerRow>
     Object? notificationInterval = null,
     Object? chatRoom = freezed,
     Object? updatedAt = freezed,
+    Object? validatorMoniker = null,
     Object? isAddressValid = null,
   }) {
     return _then(_value.copyWith(
@@ -84,6 +87,10 @@ class _$TrackerRowCopyWithImpl<$Res, $Val extends TrackerRow>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      validatorMoniker: null == validatorMoniker
+          ? _value.validatorMoniker
+          : validatorMoniker // ignore: cast_nullable_to_non_nullable
+              as String,
       isAddressValid: null == isAddressValid
           ? _value.isAddressValid
           : isAddressValid // ignore: cast_nullable_to_non_nullable
@@ -106,6 +113,7 @@ abstract class _$$_TrackerRowCopyWith<$Res>
       pb.Duration notificationInterval,
       TrackerChatRoom? chatRoom,
       DateTime? updatedAt,
+      String validatorMoniker,
       bool isAddressValid});
 }
 
@@ -125,6 +133,7 @@ class __$$_TrackerRowCopyWithImpl<$Res>
     Object? notificationInterval = null,
     Object? chatRoom = freezed,
     Object? updatedAt = freezed,
+    Object? validatorMoniker = null,
     Object? isAddressValid = null,
   }) {
     return _then(_$_TrackerRow(
@@ -148,6 +157,10 @@ class __$$_TrackerRowCopyWithImpl<$Res>
           ? _value.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime?,
+      validatorMoniker: null == validatorMoniker
+          ? _value.validatorMoniker
+          : validatorMoniker // ignore: cast_nullable_to_non_nullable
+              as String,
       isAddressValid: null == isAddressValid
           ? _value.isAddressValid
           : isAddressValid // ignore: cast_nullable_to_non_nullable
@@ -165,6 +178,7 @@ class _$_TrackerRow extends _TrackerRow {
       required this.notificationInterval,
       required this.chatRoom,
       required this.updatedAt,
+      required this.validatorMoniker,
       this.isAddressValid = true})
       : super._();
 
@@ -179,12 +193,14 @@ class _$_TrackerRow extends _TrackerRow {
   @override
   final DateTime? updatedAt;
   @override
+  final String validatorMoniker;
+  @override
   @JsonKey()
   final bool isAddressValid;
 
   @override
   String toString() {
-    return 'TrackerRow(id: $id, address: $address, notificationInterval: $notificationInterval, chatRoom: $chatRoom, updatedAt: $updatedAt, isAddressValid: $isAddressValid)';
+    return 'TrackerRow(id: $id, address: $address, notificationInterval: $notificationInterval, chatRoom: $chatRoom, updatedAt: $updatedAt, validatorMoniker: $validatorMoniker, isAddressValid: $isAddressValid)';
   }
 
   @override
@@ -200,13 +216,22 @@ class _$_TrackerRow extends _TrackerRow {
                 other.chatRoom == chatRoom) &&
             (identical(other.updatedAt, updatedAt) ||
                 other.updatedAt == updatedAt) &&
+            (identical(other.validatorMoniker, validatorMoniker) ||
+                other.validatorMoniker == validatorMoniker) &&
             (identical(other.isAddressValid, isAddressValid) ||
                 other.isAddressValid == isAddressValid));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, address,
-      notificationInterval, chatRoom, updatedAt, isAddressValid);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      address,
+      notificationInterval,
+      chatRoom,
+      updatedAt,
+      validatorMoniker,
+      isAddressValid);
 
   @JsonKey(ignore: true)
   @override
@@ -222,6 +247,7 @@ abstract class _TrackerRow extends TrackerRow {
       required final pb.Duration notificationInterval,
       required final TrackerChatRoom? chatRoom,
       required final DateTime? updatedAt,
+      required final String validatorMoniker,
       final bool isAddressValid}) = _$_TrackerRow;
   const _TrackerRow._() : super._();
 
@@ -235,6 +261,8 @@ abstract class _TrackerRow extends TrackerRow {
   TrackerChatRoom? get chatRoom;
   @override
   DateTime? get updatedAt;
+  @override
+  String get validatorMoniker;
   @override
   bool get isAddressValid;
   @override

@@ -21,6 +21,7 @@ class TrackerRow with _$TrackerRow {
     required pb.Duration notificationInterval,
     required TrackerChatRoom? chatRoom,
     required DateTime? updatedAt,
+    required String validatorMoniker,
     @Default(true) bool isAddressValid,
   }) = _TrackerRow;
 

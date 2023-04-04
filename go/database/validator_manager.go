@@ -243,8 +243,9 @@ func (manager *ValidatorManager) UpdateTrackValidator(
 	} else {
 		updateQuery = updateQuery.AddDiscordChannelIDs(discordChannelId)
 	}
+	var tracker *ent.AddressTracker
 	if !manager.addressTrackerManager.QueryDoesExist(discordChannelId, telegramChatId, validatorEnt.Address) {
-		tracker, err := manager.addressTrackerManager.Create(
+		newTracker, err := manager.addressTrackerManager.Create(
 			ctx,
 			userEnt,
 			validatorEnt.Address,
@@ -255,9 +256,7 @@ func (manager *ValidatorManager) UpdateTrackValidator(
 		if err != nil {
 			return nil, err
 		}
-		return tracker, updateQuery.
-			AddAddressTrackers(tracker).
-			Exec(ctx)
+		tracker = newTracker
 	} else {
 		trackers, err := manager.addressTrackerManager.
 			QueryByChatRoomsAndAddress(discordChannelId, telegramChatId, validatorEnt.Address)
@@ -268,10 +267,21 @@ func (manager *ValidatorManager) UpdateTrackValidator(
 			log.Sugar.Errorf("no address tracker found for address %s", validatorEnt.Address) // should never happen
 			return nil, errors.New("no address tracker found")
 		}
-		return trackers[0], updateQuery.
-			AddAddressTrackers(trackers[0]).
-			Exec(ctx)
+		tracker = trackers[0]
 	}
+	err := updateQuery.
+		AddAddressTrackers(tracker).
+		Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return client.AddressTracker.
+		Query().
+		Where(addresstracker.ID(tracker.ID)).
+		WithValidator().
+		WithDiscordChannel().
+		WithTelegramChat().
+		Only(ctx)
 }
 
 func (manager *ValidatorManager) UpdateUntrackValidator(ctx context.Context, userEnt *ent.User, validatorEnt *ent.Validator) ([]int, error) {

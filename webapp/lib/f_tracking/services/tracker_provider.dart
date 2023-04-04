@@ -169,6 +169,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
           notificationInterval: tracker.notificationInterval,
           chatRoom: tracker.chatRoom,
           updatedAt: tracker.updatedAt.toDateTime(),
+          validatorMoniker: tracker.validatorMoniker,
         )
       ];
     }
@@ -185,6 +186,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
         notificationInterval: getDefaultNotificationInterval(),
         chatRoom: getDefaultChatRoom(),
         updatedAt: null,
+        validatorMoniker: "",
       ),
     ];
   }
@@ -295,6 +297,7 @@ class TrackerNotifier extends StateNotifier<List<TrackerRow>> {
               notificationInterval: tracker.notificationInterval,
               chatRoom: tracker.chatRoom,
               updatedAt: tracker.updatedAt.toDateTime(),
+              validatorMoniker: tracker.validatorMoniker,
             ))
       ];
       ref.read(validatorBundleProvider.notifier).selectValidatorBundles(toBeAdded, toBeDeleted);

@@ -35,6 +35,7 @@ func (manager *AddressTrackerManager) QueryByUser(userEnt *ent.User) ([]*ent.Add
 		).
 		WithDiscordChannel().
 		WithTelegramChat().
+		WithValidator().
 		All(manager.ctx)
 }
 
