@@ -1,0 +1,23 @@
+[package]
+name = "cosmos-notifier-frontend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sycamore = { version = "0.8", features = ["suspense"] }
+tonic = { version = "0.8", default-features = false, features = ["codegen", "prost"] }
+prost = { version = "0.11", default-features = false }
+grpc-web-client = {git = "https://github.com/shifty11/grpc-web-client.git"}
+log = "0.4.17"
+console_log = {version = "1.0.0", features = ["wasm-bindgen"] }
+console_error_panic_hook = "0.1.7"
+prost-types = "0.11.8"
+web-sys = { version = "0.3.61", features = ["Storage", "StorageEvent", "Window"] }
+wasm-bindgen = "0.2.84"
+jsonwebtoken = "8.3.0"
+serde = "1.0.159"
+
+[build-dependencies]
+tonic-build = { version = "0.8", default-features = false, features = ["prost"] }

@@ -22,3 +22,9 @@ migrate:
 
 test-go:
     cd go && go test ./...
+
+install-web:
+    cd web && nvm use 18 && npm install -D tailwindcss
+
+web:
+    cd web && trunk serve
