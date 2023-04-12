@@ -4,7 +4,6 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use gloo_storage::{LocalStorage, Storage};
-use jsonwebtoken::{decode, DecodingKey, TokenData, Validation};
 use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
