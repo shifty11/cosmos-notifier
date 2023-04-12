@@ -4,13 +4,16 @@ use std::borrow::Borrow;
 use std::fmt::Display;
 use std::ops::Deref;
 use std::rc::Rc;
+use std::time::Duration;
 
+use js_sys;
 use log::debug;
 use log::Level;
 use sycamore::futures::spawn_local;
 use sycamore::prelude::*;
 use tonic::Status;
 
+use crate::services::auth::AuthClient;
 use crate::services::grpc::{GrpcClient, LoginResponse};
 
 mod services;
@@ -102,9 +105,16 @@ fn SubComponent<G: Html>(cx: Scope) -> View<G> {
     )
 }
 
-async fn timer_function() {
-    // Do something here
-    debug!("Timer function executed!");
+fn check_jwt_after_timeout() {
+    spawn_local(async {
+        gloo_timers::future::TimeoutFuture::new(1000).await;
+        let auth_client = AuthClient::new();
+        debug!("is_jwt_valid: {}", auth_client.is_jwt_valid());
+        if auth_client.is_jwt_about_to_expire() {
+            auth_client.refresh_access_token().await;
+        }
+        check_jwt_after_timeout();
+    });
 }
 
 
@@ -112,6 +122,8 @@ async fn timer_function() {
 fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     provide_context(cx, Services::new());
     provide_context(cx, AppState::new());
+
+    check_jwt_after_timeout();
 
     view! {cx,
         h1 { "Hello, World!" }
