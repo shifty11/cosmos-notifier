@@ -13,7 +13,7 @@ use crate::services::grpc::GrpcClient;
 mod services;
 mod config;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct Services {
     pub grpc_client: RcSignal<GrpcClient>,
     pub auth_manager: RcSignal<AuthManager>,
