@@ -15,6 +15,7 @@ import (
 	"github.com/shifty11/cosmos-notifier/services/telegram"
 	"github.com/shifty11/cosmos-notifier/services/validator_crawler"
 	"golang.org/x/oauth2"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -167,10 +168,20 @@ var startGrpcServerCmd = &cobra.Command{
 		nodejsUrl := common.GetEnvX("NODEJS_URL")
 		assetsPath := common.GetEnvX("ASSETS_PATH")
 		cannyPrivateKey := common.GetEnvX("CANNY_PRIVATE_KEY")
+		accessTokenDurationStr := common.GetEnvX("ACCESS_TOKEN_DURATION")
+		accessTokenDuration, err := time.ParseDuration(accessTokenDurationStr)
+		if err != nil {
+			log.Panicf("Invalid access token duration: %s", err)
+		}
+		refreshTokenDurationStr := common.GetEnvX("REFRESH_TOKEN_DURATION")
+		refreshTokenDuration, err := time.ParseDuration(refreshTokenDurationStr)
+		if err != nil {
+			log.Panicf("Invalid refresh token duration: %s", err)
+		}
 		var config = &grpc.Config{
 			Port:                 ":50051",
-			AccessTokenDuration:  time.Minute * 15,
-			RefreshTokenDuration: time.Hour * 24 * 7,
+			AccessTokenDuration:  accessTokenDuration,
+			RefreshTokenDuration: refreshTokenDuration,
 			JwtSecretKey:         jwtSecretKey,
 			TelegramToken:        telegramBotToken,
 			DiscordOAuth2Config: &oauth2.Config{

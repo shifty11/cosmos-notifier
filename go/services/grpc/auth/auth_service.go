@@ -76,10 +76,11 @@ func (s *AuthServer) isValid(dataStr string, secretKey []byte, hash string) bool
 }
 
 var (
-	ErrorLoginFailed  = status.Error(codes.Unauthenticated, "login failed")
-	ErrorUserNotFound = status.Error(codes.NotFound, "user not found")
-	ErrorLoginExpired = status.Error(codes.Unauthenticated, "login expired")
-	ErrorInternal     = status.Error(codes.Internal, "internal error")
+	ErrorLoginFailed             = status.Error(codes.Unauthenticated, "login failed")
+	ErrorUserNotFound            = status.Error(codes.NotFound, "user not found")
+	ErrorLoginExpired            = status.Error(codes.Unauthenticated, "login expired")
+	ErrorInternal                = status.Error(codes.Internal, "internal error")
+	ErrorTokenVerificationFailed = status.Error(codes.Unauthenticated, "token verification failed")
 )
 
 func (s *AuthServer) login(entUser *ent.User, username string) (*pb.LoginResponse, error) {
@@ -169,7 +170,7 @@ func (s *AuthServer) DiscordLogin(_ context.Context, req *pb.DiscordLoginRequest
 func (s *AuthServer) RefreshAccessToken(_ context.Context, req *pb.RefreshAccessTokenRequest) (*pb.RefreshAccessTokenResponse, error) {
 	claims, err := s.jwtManager.Verify(req.RefreshToken)
 	if err != nil {
-		return nil, ErrorLoginFailed
+		return nil, ErrorTokenVerificationFailed
 	}
 
 	entUser, err := s.userManager.QueryById(claims.UserId, claims.Type)
