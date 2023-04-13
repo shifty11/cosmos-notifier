@@ -101,7 +101,7 @@ fn SubComponent<G: Html>(cx: Scope) -> View<G> {
     )
 }
 
-fn check_jwt_after_timeout() {
+fn start_jwt_refresh_timer() {
     spawn_local(async {
         gloo_timers::future::TimeoutFuture::new(1000).await;
         let auth_client = AuthManager::new();
@@ -109,17 +109,7 @@ fn check_jwt_after_timeout() {
         if auth_client.is_jwt_about_to_expire() {
             auth_client.refresh_access_token().await;
         }
-        // TODO: How to track this and set the auth_state to LoggedOut?
-        // if !auth_client.is_jwt_valid() {
-        //     create_effect(cx, move || {
-        //         signal.track(); // Same as calling `.get()` but without returning a value.
-        //         wasm_bindgen_futures::spawn_local(async move {
-        //             // This scope is not tracked because spawn_local runs on the next microtask tick (in other words, some time later).
-        //         };
-        //         // Everything that is accessed until here is tracked. Once this closure returns, nothing is tracked.
-        //     });
-        // }
-        check_jwt_after_timeout();
+        start_jwt_refresh_timer();
     });
 }
 
@@ -129,7 +119,7 @@ fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     provide_context(cx, Services::new());
     provide_context(cx, AppState::new());
 
-    check_jwt_after_timeout();
+    start_jwt_refresh_timer();
 
     view! {cx,
         h1 { "Hello, World!" }
