@@ -1,32 +1,29 @@
 #![allow(non_snake_case)]
 
-use std::borrow::Borrow;
 use std::fmt::Display;
-use std::ops::Deref;
-use std::rc::Rc;
-use std::time::Duration;
 
-use js_sys;
 use log::debug;
 use log::Level;
 use sycamore::futures::spawn_local;
 use sycamore::prelude::*;
-use tonic::Status;
 
-use crate::services::auth::AuthClient;
-use crate::services::grpc::{GrpcClient, LoginResponse};
+use crate::services::auth::AuthManager;
+use crate::services::grpc::GrpcClient;
 
 mod services;
+mod config;
 
 #[derive(Debug, Default, Clone)]
 pub struct Services {
     pub grpc_client: RcSignal<GrpcClient>,
+    pub auth_manager: RcSignal<AuthManager>,
 }
 
 impl Services {
     pub fn new() -> Self {
         Self {
             grpc_client: create_rc_signal(GrpcClient::default()),
+            auth_manager: create_rc_signal(AuthManager::default()),
         }
     }
 }
@@ -64,11 +61,10 @@ impl AppState {
 #[component]
 async fn InitComponent<G: Html>(cx: Scope<'_>) -> View<G> {
     let auth_state = use_context::<AppState>(cx).auth_state.get();
-    let auth_state = match *auth_state {
+    match *auth_state {
         AuthState::LoggedOut => {
             debug!("Try to login");
-            let mut grpc_client = use_context::<Services>(cx).grpc_client.modify();
-            let response = grpc_client.login().await;
+            let response = use_context::<Services>(cx).auth_manager.modify().login().await;
             match response {
                 Ok(_) => {
                     debug!("Login successful");
@@ -108,11 +104,21 @@ fn SubComponent<G: Html>(cx: Scope) -> View<G> {
 fn check_jwt_after_timeout() {
     spawn_local(async {
         gloo_timers::future::TimeoutFuture::new(1000).await;
-        let auth_client = AuthClient::new();
+        let auth_client = AuthManager::new();
         debug!("is_jwt_valid: {}", auth_client.is_jwt_valid());
         if auth_client.is_jwt_about_to_expire() {
             auth_client.refresh_access_token().await;
         }
+        // TODO: How to track this and set the auth_state to LoggedOut?
+        // if !auth_client.is_jwt_valid() {
+        //     create_effect(cx, move || {
+        //         signal.track(); // Same as calling `.get()` but without returning a value.
+        //         wasm_bindgen_futures::spawn_local(async move {
+        //             // This scope is not tracked because spawn_local runs on the next microtask tick (in other words, some time later).
+        //         };
+        //         // Everything that is accessed until here is tracked. Once this closure returns, nothing is tracked.
+        //     });
+        // }
         check_jwt_after_timeout();
     });
 }

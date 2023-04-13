@@ -1,3 +1,5 @@
+set dotenv-load
+
 mock:
     mockgen -source=go/database/telegram_chat_manager.go -destination=go/database/mock_types/telegram_chat_manager.go
     mockgen -source=go/database/discord_channel_manager.go -destination=go/database/mock_types/discord_channel_manager.go

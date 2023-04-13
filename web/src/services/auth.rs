@@ -1,18 +1,17 @@
 use std::error::Error;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use base64::Engine;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use gloo_storage::{LocalStorage, Storage};
 use log::debug;
 use serde::{Deserialize, Serialize};
-use serde_json::{Map, Value};
 use simple_error::bail;
-use sycamore::rt::JsValue;
-use tonic::metadata::MetadataValue;
+use tonic::Status;
+use crate::config::keys;
 
 use crate::services::grpc::auth_service_client::AuthServiceClient;
-use crate::services::grpc::RefreshAccessTokenRequest;
+use crate::services::grpc::{DevLoginRequest, LoginResponse, RefreshAccessTokenRequest};
+use crate::services::grpc::dev_service_client::DevServiceClient;
 
 #[derive(Debug, Clone)]
 enum UserType {
@@ -103,15 +102,16 @@ impl Claims {
     }
 }
 
-const ACCESS_TOKEN_KEY: &str = "access_token";
-const REFRESH_TOKEN_KEY: &str = "refresh_token";
+#[derive(Debug, Clone, Default)]
+pub struct AuthManager {
+    endpoint_url: String,
+}
 
-#[derive(Clone)]
-pub struct AuthClient {}
-
-impl AuthClient {
+impl AuthManager {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            endpoint_url: env!("GRPC_ENDPOINT_URL").to_string(),
+        }
     }
 
     pub fn is_jwt_valid(&self) -> bool {
@@ -156,17 +156,17 @@ impl AuthClient {
         Ok(decoded_str)
     }
 
-    fn get_access_token(&self) -> gloo_storage::Result<String> {
-        LocalStorage::get(ACCESS_TOKEN_KEY)
+    pub fn get_access_token(&self) -> gloo_storage::Result<String> {
+        LocalStorage::get(keys::LS_KEY_ACCESS_TOKEN)
     }
 
     fn get_refresh_token(&self) -> gloo_storage::Result<String> {
-        LocalStorage::get(REFRESH_TOKEN_KEY)
+        LocalStorage::get(keys::LS_KEY_REFRESH_TOKEN)
     }
 
     pub async fn refresh_access_token(&self) {
         debug!("refresh_access_token");
-        let client = grpc_web_client::Client::new("http://test.mydomain.com:8090".to_string());
+        let client = grpc_web_client::Client::new(self.endpoint_url.clone());
         let mut auth_service = AuthServiceClient::new(client);
         if let Ok(token) = self.get_refresh_token() {
             let req = RefreshAccessTokenRequest {
@@ -176,10 +176,29 @@ impl AuthClient {
             match resp {
                 Ok(resp) => {
                     debug!("set access token");
-                    LocalStorage::set(ACCESS_TOKEN_KEY, resp.into_inner().access_token).unwrap();
+                    LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, resp.into_inner().access_token).unwrap();
                 }
                 Err(_) => {}
             }
         }
+    }
+
+    pub async fn login(&mut self) -> Result<LoginResponse, Status> {
+        let request = DevLoginRequest {
+            user_id: 0,
+            user_type: UserType::Discord as i32,
+            role: Role::Admin as i32,
+        };
+        let client = grpc_web_client::Client::new(self.endpoint_url.clone());
+        let response = DevServiceClient::new(client).login(request).await.map(|res| res.into_inner());
+
+        match response.clone() {
+            Ok(result) => {
+                LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, result.access_token).unwrap();
+                LocalStorage::set(keys::LS_KEY_REFRESH_TOKEN, result.refresh_token).unwrap();
+            }
+            Err(_) => {}
+        }
+        response
     }
 }
