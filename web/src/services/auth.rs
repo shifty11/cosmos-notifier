@@ -137,7 +137,7 @@ impl AuthManager {
     fn get_jwt_claims(&self) -> Result<Claims, Box<dyn Error>> {
         match self.get_access_token() {
             Ok(token) => self.decode_jwt(&token),
-            Err(err) => err,
+            Err(err) => Err(Box::try_from(err).unwrap()),
         }
     }
 

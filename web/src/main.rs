@@ -6,6 +6,7 @@ use log::debug;
 use log::Level;
 use sycamore::futures::spawn_local;
 use sycamore::prelude::*;
+use sycamore_router::{Route, Router, RouterProps};
 
 use crate::services::auth::AuthManager;
 use crate::services::grpc::GrpcClient;
@@ -128,10 +129,32 @@ fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     }
 }
 
+#[derive(Route)]
+enum AppRoutes {
+    #[to("/")]
+    Index,
+    #[to("/about")]
+    About,
+    #[not_found]
+    NotFound,
+}
+
 fn main() {
     console_error_panic_hook::set_once();
     console_log::init_with_level(Level::Debug).unwrap();
     debug!("Console log level set to debug");
 
     sycamore::render(|cx| view! { cx, App()});
+    // sycamore::render(|cx| view! {
+    //     Router(
+    //         integration=HistoryIntegration::new(),
+    //         view=|cx, route: &ReadSignal<AppRoutes>| {
+    //             match *route.get() {
+    //                 AppRoutes::Index => view!(cx, App()),
+    //                 AppRoutes::About => view!(cx, p { "About" }),
+    //                 AppRoutes::NotFound => view!(cx, p { "Not found" }),
+    //             }
+    //         }
+    //     )
+    // });
 }
