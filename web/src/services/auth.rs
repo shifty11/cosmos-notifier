@@ -137,10 +137,7 @@ impl AuthManager {
     fn get_jwt_claims(&self) -> Result<Claims, Box<dyn Error>> {
         match self.get_access_token() {
             Ok(token) => self.decode_jwt(&token),
-            Err(err) => {
-                debug!("get_jwt_claims: {}", err);
-                Err(Box::try_from(err).unwrap())
-            }
+            Err(err) => err,
         }
     }
 
@@ -184,7 +181,15 @@ impl AuthManager {
                     debug!("set access token");
                     LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, resp.into_inner().access_token).unwrap();
                 }
-                Err(_) => {}
+                Err(status) => {
+                    if status.code() == tonic::Code::Unauthenticated {
+                        debug!("refresh_access_token: Unauthenticated");
+                        LocalStorage::delete(keys::LS_KEY_ACCESS_TOKEN);
+                        LocalStorage::delete(keys::LS_KEY_REFRESH_TOKEN);
+                    } else {
+                        debug!("refresh_access_token: {}", status);
+                    }
+                }
             }
         }
     }

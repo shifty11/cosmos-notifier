@@ -103,7 +103,7 @@ fn SubComponent<G: Html>(cx: Scope) -> View<G> {
 
 fn start_jwt_refresh_timer() {
     spawn_local(async {
-        gloo_timers::future::TimeoutFuture::new(1000).await;
+        gloo_timers::future::TimeoutFuture::new(1000 * 60).await;
         let auth_client = AuthManager::new();
         debug!("is_jwt_valid: {}", auth_client.is_jwt_valid());
         if auth_client.is_jwt_about_to_expire() {
