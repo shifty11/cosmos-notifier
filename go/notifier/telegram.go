@@ -138,23 +138,26 @@ func (n *telegramNotifier) sendVoteReminder(
 	chainName string,
 	proposalId int,
 	proposalTitle string,
+	voter string,
 	remainingTimeText string,
 ) {
 	log.Sugar.Debugf("Sending vote reminder for proposal %v on chain %v to telegram chat %v (%v)", proposalId, chainName, telegramChat.Name, telegramChat.ChatID)
 
 	var textMsg string
 	if remainingTimeText == "" {
-		textMsg = fmt.Sprintf("🗳️  <b>%v - Proposal Reminder %v\n\n%v</b>\n\nYou missed the voting deadline!",
+		textMsg = fmt.Sprintf("🗳️  <b>%v - Reminder Proposal %v\n\n%v</b>\n\n%v missed the voting deadline!",
 			chainName,
 			proposalId,
 			proposalTitle,
+			voter,
 		)
 
 	} else {
-		textMsg = fmt.Sprintf("🗳️  <b>%v - Proposal Reminder %v\n\n%v</b>\n\nYou did not vote yet! You have <b>%v</b> left to vote.",
+		textMsg = fmt.Sprintf("🗳️  <b>%v - Reminder Proposal %v\n\n%v</b>\n\n%v did not vote yet!\n**%v** until the vote ends.",
 			chainName,
 			proposalId,
 			proposalTitle,
+			voter,
 			remainingTimeText,
 		)
 	}

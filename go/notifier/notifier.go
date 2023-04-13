@@ -130,6 +130,13 @@ func createRemainingTimeText(remainingTime time.Duration) string {
 	return ""
 }
 
+func getVoter(data database.AddressTrackerWithChainProposal) string {
+	if data.AddressTracker.Edges.Validator != nil {
+		return data.AddressTracker.Edges.Validator.Moniker
+	}
+	return data.AddressTracker.Address
+}
+
 func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainProposal) {
 	var remainingTime = data.ChainProposal.VotingEndTime.Sub(time.Now())
 	var remainingTimeText = createRemainingTimeText(remainingTime)
@@ -140,6 +147,7 @@ func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainPr
 			data.ChainProposal.Edges.Chain.PrettyName,
 			data.ChainProposal.ProposalID,
 			data.ChainProposal.Title,
+			getVoter(data),
 			remainingTimeText,
 		)
 	}
@@ -149,6 +157,7 @@ func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainPr
 			data.ChainProposal.Edges.Chain.PrettyName,
 			data.ChainProposal.ProposalID,
 			data.ChainProposal.Title,
+			getVoter(data),
 			remainingTimeText,
 		)
 	}

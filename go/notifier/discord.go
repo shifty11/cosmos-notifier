@@ -158,6 +158,7 @@ func (n *DiscordNotifier) sendVoteReminder(
 	chainName string,
 	proposalId int,
 	proposalTitle string,
+	voter string,
 	remainingTimeText string,
 ) {
 	log.Sugar.Debugf("Sending vote reminder for proposal %v on chain %v to discord channel %v (%v)", proposalId, chainName, dc.Name, dc.ChannelID)
@@ -169,16 +170,18 @@ func (n *DiscordNotifier) sendVoteReminder(
 
 	var msgText string
 	if remainingTimeText == "" {
-		msgText = fmt.Sprintf("🗳️  **%v - Proposal Reminder %v\n\n%v**\n\nYou missed the voting deadline!",
+		msgText = fmt.Sprintf("🗳️  **%v - Reminder Proposal %v\n\n%v**\n\n%v missed the voting deadline!",
 			chainName,
 			proposalId,
 			p.Sanitize(proposalTitle),
+			voter,
 		)
 	} else {
-		msgText = fmt.Sprintf("🗳️  **%v - Proposal Reminder %v\n\n%v**\n\nYou did not vote yet! You have **%v** left to vote.",
+		msgText = fmt.Sprintf("🗳️  **%v - Reminder Proposal %v\n\n%v**\n\n%v did not vote yet!\n**%v** until the vote ends.",
 			chainName,
 			proposalId,
 			p.Sanitize(proposalTitle),
+			voter,
 			remainingTimeText,
 		)
 	}

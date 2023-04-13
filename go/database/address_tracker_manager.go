@@ -283,6 +283,7 @@ func (manager *AddressTrackerManager) QueryUnnotifiedTrackers() []AddressTracker
 			).
 			WithTelegramChat().
 			WithDiscordChannel().
+			WithValidator().
 			All(manager.ctx)
 		if err != nil {
 			log.Sugar.Panicf("error while getting address trackers: %v", err)
