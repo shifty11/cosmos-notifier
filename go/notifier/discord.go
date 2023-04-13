@@ -170,14 +170,14 @@ func (n *DiscordNotifier) sendVoteReminder(
 
 	var msgText string
 	if remainingTimeText == "" {
-		msgText = fmt.Sprintf("🗳️  **%v - Reminder Proposal %v\n\n%v**\n\n%v missed the voting deadline!",
+		msgText = fmt.Sprintf("🗳️  **%v - Reminder Proposal %v\n\n%v**\n\n**%v** missed the voting deadline!",
 			chainName,
 			proposalId,
 			p.Sanitize(proposalTitle),
 			voter,
 		)
 	} else {
-		msgText = fmt.Sprintf("🗳️  **%v - Reminder Proposal %v\n\n%v**\n\n%v did not vote yet!\n**%v** until the vote ends.",
+		msgText = fmt.Sprintf("🗳️  **%v - Reminder Proposal %v\n\n%v**\n\n**%v** did not vote yet!\n**%v** until the vote ends.",
 			chainName,
 			proposalId,
 			p.Sanitize(proposalTitle),

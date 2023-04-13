@@ -134,7 +134,11 @@ func getVoter(data database.AddressTrackerWithChainProposal) string {
 	if data.AddressTracker.Edges.Validator != nil {
 		return data.AddressTracker.Edges.Validator.Moniker
 	}
-	return data.AddressTracker.Address
+	address := data.AddressTracker.Address
+	if len(address) > 20 {
+		return address[:10] + "..." + address[len(address)-6:]
+	}
+	return address
 }
 
 func (n *chainNotifier) SendVoteReminder(data database.AddressTrackerWithChainProposal) {
