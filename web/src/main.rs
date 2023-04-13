@@ -71,7 +71,7 @@ async fn InitComponent<G: Html>(cx: Scope<'_>) -> View<G> {
                     let mut auth_state = use_context::<AppState>(cx).auth_state.modify();
                     *auth_state = AuthState::LoggedIn;
                 }
-                Err(_) => {}
+                Err(status) => debug!("Login failed with error: {:?}", status),
             }
         }
         _ => {}

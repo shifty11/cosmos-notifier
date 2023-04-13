@@ -10,13 +10,13 @@ use tonic::Status;
 use crate::config::keys;
 
 use crate::services::grpc::auth_service_client::AuthServiceClient;
-use crate::services::grpc::{DevLoginRequest, LoginResponse, RefreshAccessTokenRequest};
+use crate::services::grpc::{dev_login_request, DevLoginRequest, LoginResponse, RefreshAccessTokenRequest};
 use crate::services::grpc::dev_service_client::DevServiceClient;
 
 #[derive(Debug, Clone)]
 enum UserType {
-    Discord,
-    Telegram,
+    Discord = dev_login_request::UserType::Discord as isize,
+    Telegram = dev_login_request::UserType::Telegram as isize,
 }
 
 impl<'de> Deserialize<'de> for UserType {
@@ -48,8 +48,8 @@ impl<'de> Serialize for UserType {
 
 #[derive(Debug, Clone)]
 enum Role {
-    Admin,
-    User,
+    User = dev_login_request::Role::User as isize,
+    Admin = dev_login_request::Role::Admin as isize
 }
 
 impl<'de> Deserialize<'de> for Role {
@@ -102,9 +102,15 @@ impl Claims {
     }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct AuthManager {
     endpoint_url: String,
+}
+
+impl Default for AuthManager {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl AuthManager {
@@ -186,8 +192,8 @@ impl AuthManager {
     pub async fn login(&mut self) -> Result<LoginResponse, Status> {
         let request = DevLoginRequest {
             user_id: 0,
-            user_type: UserType::Discord as i32,
-            role: Role::Admin as i32,
+            user_type: dev_login_request::UserType::Discord as i32,
+            role: dev_login_request::Role::Admin as i32,
         };
         let client = grpc_web_client::Client::new(self.endpoint_url.clone());
         let response = DevServiceClient::new(client).login(request).await.map(|res| res.into_inner());

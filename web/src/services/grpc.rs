@@ -11,10 +11,16 @@ use crate::services::grpc::tracker_service_client::TrackerServiceClient;
 tonic::include_proto!("cosmos_notifier_grpc");
 
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct GrpcClient {
     endpoint_url: String,
     auth_manager: AuthManager,
+}
+
+impl Default for GrpcClient {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl GrpcClient {
