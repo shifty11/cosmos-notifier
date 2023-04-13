@@ -14,6 +14,7 @@ use crate::services::grpc::GrpcClient;
 mod services;
 mod config;
 mod pages;
+mod components;
 
 #[derive(Route, Debug, Clone)]
 pub enum AppRoutes {
@@ -21,6 +22,10 @@ pub enum AppRoutes {
     Home,
     #[to("/overview")]
     Overview,
+    #[to("/reminders")]
+    Reminders,
+    #[to("/communication")]
+    Communication,
     #[to("/login")]
     Login,
     #[not_found]
@@ -32,6 +37,8 @@ impl ToString for AppRoutes {
         match self {
             AppRoutes::Home => "/".to_string(),
             AppRoutes::Overview => "/overview".to_string(),
+            AppRoutes::Reminders => "/reminders".to_string(),
+            AppRoutes::Communication => "/communication".to_string(),
             AppRoutes::Login => "/login".to_string(),
             AppRoutes::NotFound => "/404".to_string(),
         }
@@ -118,6 +125,8 @@ pub fn App<G: Html>(cx: Scope) -> View<G> {
                             match route.get().as_ref() {
                                 AppRoutes::Home => pages::home::page::Home(cx),
                                 AppRoutes::Overview => pages::overview::page::Overview(cx),
+                                AppRoutes::Reminders => pages::reminders::page::Reminders(cx),
+                                AppRoutes::Communication => pages::communication::page::Communication(cx),
                                 AppRoutes::Login => pages::login::page::Login(cx),
                                 AppRoutes::NotFound => view! { cx, "404 Not Found"}
                             }
