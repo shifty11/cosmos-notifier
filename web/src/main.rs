@@ -6,13 +6,37 @@ use log::debug;
 use log::Level;
 use sycamore::futures::spawn_local;
 use sycamore::prelude::*;
-use sycamore_router::{Route, Router, RouterProps};
+use sycamore_router::{HistoryIntegration, Route, Router};
 
 use crate::services::auth::AuthManager;
 use crate::services::grpc::GrpcClient;
 
 mod services;
 mod config;
+mod pages;
+
+#[derive(Route, Debug, Clone)]
+pub enum AppRoutes {
+    #[to("/")]
+    Home,
+    #[to("/overview")]
+    Overview,
+    #[to("/login")]
+    Login,
+    #[not_found]
+    NotFound,
+}
+
+impl ToString for AppRoutes {
+    fn to_string(&self) -> String {
+        match self {
+            AppRoutes::Home => "/".to_string(),
+            AppRoutes::Overview => "/overview".to_string(),
+            AppRoutes::Login => "/login".to_string(),
+            AppRoutes::NotFound => "/404".to_string(),
+        }
+    }
+}
 
 #[derive(Debug, Clone)]
 pub struct Services {
@@ -49,57 +73,20 @@ impl Display for AuthState {
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub auth_state: RcSignal<AuthState>,
+    pub route: RcSignal<AppRoutes>,
 }
 
 impl AppState {
-    pub fn new() -> Self {
+    pub fn new(auth_manager: &AuthManager) -> Self {
+        let auth_state = match auth_manager.is_jwt_valid() {
+            true => AuthState::LoggedIn,
+            false => AuthState::LoggedOut,
+        };
         Self {
-            auth_state: create_rc_signal(AuthState::LoggedOut),
+            auth_state: create_rc_signal(auth_state),
+            route: create_rc_signal(AppRoutes::Overview),
         }
     }
-}
-
-#[component]
-async fn InitComponent<G: Html>(cx: Scope<'_>) -> View<G> {
-    let auth_state = use_context::<AppState>(cx).auth_state.get();
-    match *auth_state {
-        AuthState::LoggedOut => {
-            debug!("Try to login");
-            let response = use_context::<Services>(cx).auth_manager.modify().login().await;
-            match response {
-                Ok(_) => {
-                    debug!("Login successful");
-                    let mut auth_state = use_context::<AppState>(cx).auth_state.modify();
-                    *auth_state = AuthState::LoggedIn;
-                }
-                Err(status) => debug!("Login failed with error: {:?}", status),
-            }
-        }
-        _ => {}
-    };
-
-    view!(cx,
-        p { "Hello, Fetch!" }
-        p { (use_context::<AppState>(cx).auth_state.get()) }
-    )
-}
-
-#[component]
-fn SubComponent<G: Html>(cx: Scope) -> View<G> {
-    let app_state = use_context::<AppState>(cx);
-    let text = create_selector(cx, || {
-        debug!("auth_state changed: {}", app_state.auth_state.get());
-        match *app_state.auth_state.get() {
-            AuthState::LoggedOut => "LoggedOut",
-            AuthState::LoggedIn => "LoggedIn",
-            AuthState::LoggingIn => "LoggingIn",
-        }
-    });
-
-    view!(cx,
-        p { "Hello, SubComponent!" }
-        p { (text.get()) }
-    )
 }
 
 fn start_jwt_refresh_timer() {
@@ -114,30 +101,34 @@ fn start_jwt_refresh_timer() {
     });
 }
 
-
 #[component]
-fn App<G: Html>(cx: Scope<'_>) -> View<G> {
-    provide_context(cx, Services::new());
-    provide_context(cx, AppState::new());
+pub fn App<G: Html>(cx: Scope) -> View<G> {
+    let services = Services::new();
+    provide_context(cx, services.clone());
+    provide_context(cx, AppState::new(services.auth_manager.get_untracked().as_ref()));
 
     start_jwt_refresh_timer();
 
     view! {cx,
-        h1 { "Hello, World!" }
-        InitComponent()
-        SubComponent()
+        div(class="h-full w-full") {
+            Router(
+                integration=HistoryIntegration::new(),
+                view=|cx, route: &ReadSignal<AppRoutes>| {
+                    view! {cx, (
+                            match route.get().as_ref() {
+                                AppRoutes::Home => pages::home::page::Home(cx),
+                                AppRoutes::Overview => pages::overview::page::Overview(cx),
+                                AppRoutes::Login => pages::login::page::Login(cx),
+                                AppRoutes::NotFound => view! { cx, "404 Not Found"}
+                            }
+                        )
+                    }
+                }
+            )
+        }
     }
 }
 
-#[derive(Route)]
-enum AppRoutes {
-    #[to("/")]
-    Index,
-    #[to("/about")]
-    About,
-    #[not_found]
-    NotFound,
-}
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -145,16 +136,4 @@ fn main() {
     debug!("Console log level set to debug");
 
     sycamore::render(|cx| view! { cx, App()});
-    // sycamore::render(|cx| view! {
-    //     Router(
-    //         integration=HistoryIntegration::new(),
-    //         view=|cx, route: &ReadSignal<AppRoutes>| {
-    //             match *route.get() {
-    //                 AppRoutes::Index => view!(cx, App()),
-    //                 AppRoutes::About => view!(cx, p { "About" }),
-    //                 AppRoutes::NotFound => view!(cx, p { "Not found" }),
-    //             }
-    //         }
-    //     )
-    // });
 }
