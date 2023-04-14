@@ -4,7 +4,7 @@ use grpc_web_client::Client;
 use tonic::metadata::MetadataValue;
 use tonic::Request;
 
-use crate::services::auth::AuthManager;
+use crate::services::auth::AuthService;
 use crate::services::grpc::auth_service_client::AuthServiceClient;
 use crate::services::grpc::tracker_service_client::TrackerServiceClient;
 
@@ -13,7 +13,7 @@ tonic::include_proto!("cosmos_notifier_grpc");
 #[derive(Debug, Clone)]
 pub struct GrpcClient {
     endpoint_url: String,
-    auth_manager: AuthManager,
+    auth_manager: AuthService,
 }
 
 impl Default for GrpcClient {
@@ -26,7 +26,7 @@ impl GrpcClient {
     pub fn new() -> Self {
         Self {
             endpoint_url: env!("GRPC_ENDPOINT_URL").to_string(),
-            auth_manager: AuthManager::new(),
+            auth_manager: AuthService::new(),
         }
     }
 

@@ -8,7 +8,7 @@ use sycamore::futures::spawn_local;
 use sycamore::prelude::*;
 use sycamore_router::{HistoryIntegration, Route, Router};
 
-use crate::services::auth::AuthManager;
+use crate::services::auth::AuthService;
 use crate::services::grpc::GrpcClient;
 
 mod components;
@@ -47,15 +47,15 @@ impl ToString for AppRoutes {
 
 #[derive(Debug, Clone)]
 pub struct Services {
-    pub grpc_client: RcSignal<GrpcClient>,
-    pub auth_manager: RcSignal<AuthManager>,
+    pub grpc_client: GrpcClient,
+    pub auth_manager: AuthService,
 }
 
 impl Services {
     pub fn new() -> Self {
         Self {
-            grpc_client: create_rc_signal(GrpcClient::default()),
-            auth_manager: create_rc_signal(AuthManager::default()),
+            grpc_client: GrpcClient::default(),
+            auth_manager: AuthService::default(),
         }
     }
 }
@@ -90,7 +90,7 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(auth_manager: &AuthManager) -> Self {
+    pub fn new(auth_manager: AuthService) -> Self {
         let auth_state = match auth_manager.is_jwt_valid() {
             true => AuthState::LoggedIn,
             false => AuthState::LoggedOut,
@@ -105,7 +105,7 @@ impl AppState {
 fn start_jwt_refresh_timer() {
     spawn_local(async {
         gloo_timers::future::TimeoutFuture::new(1000 * 60).await;
-        let auth_client = AuthManager::new();
+        let auth_client = AuthService::new();
         debug!("is_jwt_valid: {}", auth_client.is_jwt_valid());
         if auth_client.is_jwt_about_to_expire() {
             auth_client.refresh_access_token().await;
@@ -120,10 +120,12 @@ pub fn App<G: Html>(cx: Scope) -> View<G> {
     provide_context(cx, services.clone());
     provide_context(
         cx,
-        AppState::new(services.auth_manager.get_untracked().as_ref()),
+        AppState::new(services.auth_manager.clone()),
     );
+    let x = services.auth_manager.clone().has_login_query_params();
+    debug!("has_login_query_params: {}", x);
 
-    start_jwt_refresh_timer();
+    start_jwt_refresh_timer();  //TODO: make this with a scope and updating the state
 
     view! {cx,
         div(class="h-full w-full") {

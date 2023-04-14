@@ -33,7 +33,7 @@ pub async fn Login<G: Html>(cx: Scope<'_>) -> View<G> {
             spawn_local_scoped(cx, async move {
                 if *app_state.auth_state.get() == AuthState::LoggedOut {
                     debug!("Try to login");
-                    let response = use_context::<Services>(cx).auth_manager.modify().login().await;
+                    let response = use_context::<Services>(cx).auth_manager.clone().login().await;
                     match response {
                         Ok(_) => {
                             debug!("Login successful");
@@ -46,6 +46,6 @@ pub async fn Login<G: Html>(cx: Scope<'_>) -> View<G> {
             });
         }) { "Login" }
         a(href=AppRoutes::Home) { "Home" }
-        a(href=env!("DISCORD_OAUTH2_URL")) { "Discord" }
+        a(href=env!("DISCORD_OAUTH2_URL"), rel="external") { "Discord" }
     )
 }

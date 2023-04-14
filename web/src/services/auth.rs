@@ -3,17 +3,18 @@ use std::error::Error;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use gloo_storage::{LocalStorage, Storage};
+use grpc_web_client::Client;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use simple_error::bail;
 use tonic::Status;
+use wasm_bindgen::JsValue;
+use web_sys::{window};
 
 use crate::config::keys;
 use crate::services::grpc::auth_service_client::AuthServiceClient;
 use crate::services::grpc::dev_service_client::DevServiceClient;
-use crate::services::grpc::{
-    dev_login_request, DevLoginRequest, LoginResponse, RefreshAccessTokenRequest,
-};
+use crate::services::grpc::{dev_login_request, DevLoginRequest, DiscordLoginRequest, LoginResponse, RefreshAccessTokenRequest};
 
 #[derive(Debug, Clone)]
 enum UserType {
@@ -108,21 +109,26 @@ impl Claims {
 }
 
 #[derive(Debug, Clone)]
-pub struct AuthManager {
+pub struct AuthService {
     endpoint_url: String,
 }
 
-impl Default for AuthManager {
+impl Default for AuthService {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl AuthManager {
+impl AuthService {
     pub fn new() -> Self {
         Self {
             endpoint_url: env!("GRPC_ENDPOINT_URL").to_string(),
         }
+    }
+
+    fn auth_service(&self) -> AuthServiceClient<Client> {
+        let client = Client::new(self.endpoint_url.clone());
+        AuthServiceClient::new(client)
     }
 
     pub fn is_jwt_valid(&self) -> bool {
@@ -176,8 +182,7 @@ impl AuthManager {
 
     pub async fn refresh_access_token(&self) {
         debug!("refresh_access_token");
-        let client = grpc_web_client::Client::new(self.endpoint_url.clone());
-        let mut auth_service = AuthServiceClient::new(client);
+        let mut auth_service = self.auth_service();
         if let Ok(token) = self.get_refresh_token() {
             let req = RefreshAccessTokenRequest {
                 refresh_token: token,
@@ -208,15 +213,71 @@ impl AuthManager {
             user_type: dev_login_request::UserType::Discord as i32,
             role: dev_login_request::Role::Admin as i32,
         };
-        let client = grpc_web_client::Client::new(self.endpoint_url.clone());
+        let client = Client::new(self.endpoint_url.clone());
         let response = DevServiceClient::new(client)
             .login(request)
             .await
             .map(|res| res.into_inner());
-        if let Ok(result) = response.clone() {
-            LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, result.access_token).unwrap();
-            LocalStorage::set(keys::LS_KEY_REFRESH_TOKEN, result.refresh_token).unwrap();
-        }
+        self.save_login_response(response.clone().unwrap());
         response
+    }
+
+    fn save_login_response(&self, response: LoginResponse) {
+        LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, response.access_token).unwrap();
+        LocalStorage::set(keys::LS_KEY_REFRESH_TOKEN, response.refresh_token).unwrap();
+    }
+
+    pub async fn login_with_query_params(&self) {
+        if self.has_discord_login_query_params() {
+            self.login_with_discord_query_params().await;
+        } else if self.has_telegram_login_query_params() {
+            // self.login_with_telegram_query_params();
+        }
+    }
+
+    async fn login_with_discord_query_params(&self) -> Result<LoginResponse, Status> {
+        debug!("login_with_discord_query_params");
+        let mut auth_service = self.auth_service();
+        let code = self.get_query_params()
+            .iter()
+            .find(|params: &&(String, String)| params.0 == "code")
+            .unwrap()
+            .1
+            .clone();
+        let req = DiscordLoginRequest { code };
+        let resp = auth_service.discord_login(req).await.map(|res| res.into_inner());
+        self.save_login_response(resp.clone().unwrap());
+        resp
+    }
+
+    pub fn has_login_query_params(&self) -> bool {
+        self.has_telegram_login_query_params() || self.has_discord_login_query_params()
+    }
+
+    fn has_telegram_login_query_params(&self) -> bool {
+        self.get_query_params()
+            .iter()
+            .map(|params: &(String, String)| params.0 == "hash")
+            .any(|x| x)
+    }
+
+    fn has_discord_login_query_params(&self) -> bool {
+        self.get_query_params()
+            .iter()
+            .map(|params: &(String, String)| params.0 == "code")
+            .any(|x| x)
+    }
+
+    fn get_query_params(&self) -> Vec<(String, String)> {
+        let location = window().expect("window not available").location();
+        let search: Result<String, JsValue> = location.search();
+        let mut params = Vec::new();
+        for s in search.unwrap().trim_start_matches('?').split('&') {
+            let mut kv = s.split('=');
+            let k = kv.next().unwrap();
+            let v = kv.next().unwrap();
+            params.push((k.to_string(), v.to_string()));
+        }
+        params
     }
 }
