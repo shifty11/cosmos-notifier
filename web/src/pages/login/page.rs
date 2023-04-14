@@ -31,20 +31,17 @@ pub async fn Login<G: Html>(cx: Scope<'_>) -> View<G> {
         p { (app_state.auth_state.get()) }
         button(on:click=move |_| {
             spawn_local_scoped(cx, async move {
-                match *app_state.auth_state.get() {
-                    AuthState::LoggedOut => {
-                        debug!("Try to login");
-                        let response = use_context::<Services>(cx).auth_manager.modify().login().await;
-                        match response {
-                            Ok(_) => {
-                                debug!("Login successful");
-                                let mut auth_state = use_context::<AppState>(cx).auth_state.modify();
-                                *auth_state = AuthState::LoggedIn;
-                            }
-                            Err(status) => debug!("Login failed with error: {:?}", status),
+                if *app_state.auth_state.get() == AuthState::LoggedOut {
+                    debug!("Try to login");
+                    let response = use_context::<Services>(cx).auth_manager.modify().login().await;
+                    match response {
+                        Ok(_) => {
+                            debug!("Login successful");
+                            let mut auth_state = use_context::<AppState>(cx).auth_state.modify();
+                            *auth_state = AuthState::LoggedIn;
                         }
+                        Err(status) => debug!("Login failed with error: {:?}", status),
                     }
-                    _ => {}
                 };
             });
         }) { "Login" }

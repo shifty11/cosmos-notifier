@@ -28,8 +28,8 @@ test-go:
 install-web:
     cd web && nvm use 18 && npm install -D tailwindcss
 
-clippy-web:
-    cd web && cargo clippy
+format-web:
+    cd web && cargo fmt && cargo clippy
 
 web:
     cd web && trunk serve

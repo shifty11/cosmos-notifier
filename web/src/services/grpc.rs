@@ -33,11 +33,10 @@ impl GrpcClient {
     pub fn create_request<T>(&self, message: T) -> Request<T> {
         let token = self.auth_manager.get_access_token();
         let mut req = Request::new(message);
-        if token.is_ok() {
+        if let Ok(token) = token {
             req.metadata_mut().insert(
                 "authorization",
-                MetadataValue::try_from(token.unwrap())
-                    .unwrap_or_else(|_| MetadataValue::from_static("")),
+                MetadataValue::try_from(token).unwrap_or_else(|_| MetadataValue::from_static("")),
             );
         }
         req

@@ -60,6 +60,12 @@ impl Services {
     }
 }
 
+impl Default for Services {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum AuthState {
     LoggedOut,

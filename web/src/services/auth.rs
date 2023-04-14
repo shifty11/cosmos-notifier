@@ -1,6 +1,5 @@
 use std::error::Error;
 
-use crate::config::keys;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine;
 use gloo_storage::{LocalStorage, Storage};
@@ -9,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use simple_error::bail;
 use tonic::Status;
 
+use crate::config::keys;
 use crate::services::grpc::auth_service_client::AuthServiceClient;
 use crate::services::grpc::dev_service_client::DevServiceClient;
 use crate::services::grpc::{
@@ -39,7 +39,7 @@ impl<'de> Deserialize<'de> for UserType {
     }
 }
 
-impl<'de> Serialize for UserType {
+impl Serialize for UserType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -72,7 +72,7 @@ impl<'de> Deserialize<'de> for Role {
     }
 }
 
-impl<'de> Serialize for Role {
+impl Serialize for Role {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
@@ -160,7 +160,7 @@ impl AuthManager {
 
     fn decode_base64(&self, input: &str) -> Result<String, String> {
         let decoded_bytes = URL_SAFE_NO_PAD
-            .decode(&input)
+            .decode(input)
             .map_err(|_| "Illegal base64 string.")?;
         let decoded_str = String::from_utf8(decoded_bytes).map_err(|_| "Invalid UTF-8 string.")?;
         Ok(decoded_str)
@@ -213,13 +213,9 @@ impl AuthManager {
             .login(request)
             .await
             .map(|res| res.into_inner());
-
-        match response.clone() {
-            Ok(result) => {
-                LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, result.access_token).unwrap();
-                LocalStorage::set(keys::LS_KEY_REFRESH_TOKEN, result.refresh_token).unwrap();
-            }
-            Err(_) => {}
+        if let Ok(result) = response.clone() {
+            LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, result.access_token).unwrap();
+            LocalStorage::set(keys::LS_KEY_REFRESH_TOKEN, result.refresh_token).unwrap();
         }
         response
     }
