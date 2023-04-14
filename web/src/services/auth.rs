@@ -14,7 +14,7 @@ use web_sys::{window};
 use crate::config::keys;
 use crate::services::grpc::auth_service_client::AuthServiceClient;
 use crate::services::grpc::dev_service_client::DevServiceClient;
-use crate::services::grpc::{dev_login_request, DevLoginRequest, DiscordLoginRequest, LoginResponse, RefreshAccessTokenRequest};
+use crate::services::grpc::{dev_login_request, DevLoginRequest, DiscordLoginRequest, LoginResponse, RefreshAccessTokenRequest, TelegramLoginRequest};
 
 #[derive(Debug, Clone)]
 enum UserType {
@@ -227,12 +227,16 @@ impl AuthService {
         LocalStorage::set(keys::LS_KEY_REFRESH_TOKEN, response.refresh_token).unwrap();
     }
 
-    pub async fn login_with_query_params(&self) {
+    pub async fn login_with_query_params(&self) -> Result<LoginResponse, Status> {
         if self.has_discord_login_query_params() {
-            self.login_with_discord_query_params().await;
+            return self.login_with_discord_query_params().await;
         } else if self.has_telegram_login_query_params() {
-            // self.login_with_telegram_query_params();
+            return self.login_with_telegram_query_params().await;
         }
+        Err(Status::new(
+            tonic::Code::InvalidArgument,
+            "Invalid query params".to_string(),
+        ))
     }
 
     async fn login_with_discord_query_params(&self) -> Result<LoginResponse, Status> {
@@ -247,6 +251,22 @@ impl AuthService {
         let req = DiscordLoginRequest { code };
         let resp = auth_service.discord_login(req).await.map(|res| res.into_inner());
         self.save_login_response(resp.clone().unwrap());
+        resp
+    }
+
+    async fn login_with_telegram_query_params(&self) -> Result<LoginResponse, Status> {
+        // TODO: fix this
+        debug!("login_with_telegram_query_params");
+        let mut auth_service = self.auth_service();
+        let hash = self.get_query_params()
+            .iter()
+            .find(|params: &&(String, String)| params.0 == "hash")
+            .unwrap()
+            .1
+            .clone();
+        let req = TelegramLoginRequest { user_id: 0, data_str: "".to_string(), username: "".to_string(), auth_date: 0, hash };
+        let resp = auth_service.telegram_login(req).await.map(|res| res.into_inner());
+        debug!("login_with_telegram_query_params: {:?}", resp);
         resp
     }
 

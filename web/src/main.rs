@@ -4,12 +4,13 @@ use std::fmt::Display;
 
 use log::debug;
 use log::Level;
-use sycamore::futures::spawn_local;
+use sycamore::futures::{spawn_local, spawn_local_scoped};
 use sycamore::prelude::*;
 use sycamore_router::{HistoryIntegration, Route, Router};
+use tonic::Status;
 
 use crate::services::auth::AuthService;
-use crate::services::grpc::GrpcClient;
+use crate::services::grpc::{GrpcClient, LoginResponse};
 
 mod components;
 mod config;
@@ -115,15 +116,26 @@ fn start_jwt_refresh_timer() {
 }
 
 #[component]
-pub fn App<G: Html>(cx: Scope) -> View<G> {
+pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     let services = Services::new();
+    let app_state = AppState::new(services.auth_manager.clone());
+
+    // TODO: make this cleaner
+    if services.auth_manager.clone().has_login_query_params() {
+        debug!("Logging in...");
+        let resp = services.auth_manager.clone().login().await;
+        match resp {
+            Ok(_) => {
+                app_state.auth_state.set(AuthState::LoggedIn);
+                app_state.route.set(AppRoutes::Overview);
+                debug!("Logged in successfully");
+            }
+            Err(_) => {}
+        }
+    }
+
     provide_context(cx, services.clone());
-    provide_context(
-        cx,
-        AppState::new(services.auth_manager.clone()),
-    );
-    let x = services.auth_manager.clone().has_login_query_params();
-    debug!("has_login_query_params: {}", x);
+    provide_context(cx, app_state.clone());
 
     start_jwt_refresh_timer();  //TODO: make this with a scope and updating the state
 
