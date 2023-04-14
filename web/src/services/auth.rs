@@ -1,17 +1,19 @@
 use std::error::Error;
 
-use base64::Engine;
+use crate::config::keys;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use base64::Engine;
 use gloo_storage::{LocalStorage, Storage};
 use log::debug;
 use serde::{Deserialize, Serialize};
 use simple_error::bail;
 use tonic::Status;
-use crate::config::keys;
 
 use crate::services::grpc::auth_service_client::AuthServiceClient;
-use crate::services::grpc::{dev_login_request, DevLoginRequest, LoginResponse, RefreshAccessTokenRequest};
 use crate::services::grpc::dev_service_client::DevServiceClient;
+use crate::services::grpc::{
+    dev_login_request, DevLoginRequest, LoginResponse, RefreshAccessTokenRequest,
+};
 
 #[derive(Debug, Clone)]
 enum UserType {
@@ -21,23 +23,26 @@ enum UserType {
 
 impl<'de> Deserialize<'de> for UserType {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: serde::Deserializer<'de>,
+    where
+        D: serde::Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
 
         match s.as_str() {
             "discord" => Ok(UserType::Discord),
             "telegram" => Ok(UserType::Telegram),
-            _ => Err(serde::de::Error::unknown_variant(&s, &["discord", "telegram"])),
+            _ => Err(serde::de::Error::unknown_variant(
+                &s,
+                &["discord", "telegram"],
+            )),
         }
     }
 }
 
 impl<'de> Serialize for UserType {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
+    where
+        S: serde::Serializer,
     {
         match self {
             UserType::Discord => serializer.serialize_str("discord"),
@@ -49,13 +54,13 @@ impl<'de> Serialize for UserType {
 #[derive(Debug, Clone)]
 enum Role {
     User = dev_login_request::Role::User as isize,
-    Admin = dev_login_request::Role::Admin as isize
+    Admin = dev_login_request::Role::Admin as isize,
 }
 
 impl<'de> Deserialize<'de> for Role {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: serde::Deserializer<'de>,
+    where
+        D: serde::Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
 
@@ -69,8 +74,8 @@ impl<'de> Deserialize<'de> for Role {
 
 impl<'de> Serialize for Role {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: serde::Serializer,
+    where
+        S: serde::Serializer,
     {
         match self {
             Role::Admin => serializer.serialize_str("admin"),
@@ -88,7 +93,7 @@ struct Claims {
     role: Role,
 }
 
-const IS_ABOUT_TO_EXPIRE: usize = 60 * 5;    // seconds
+const IS_ABOUT_TO_EXPIRE: usize = 60 * 5; // seconds
 
 impl Claims {
     fn is_expired(&self) -> bool {
@@ -154,7 +159,9 @@ impl AuthManager {
     }
 
     fn decode_base64(&self, input: &str) -> Result<String, String> {
-        let decoded_bytes = URL_SAFE_NO_PAD.decode(&input).map_err(|_| "Illegal base64 string.")?;
+        let decoded_bytes = URL_SAFE_NO_PAD
+            .decode(&input)
+            .map_err(|_| "Illegal base64 string.")?;
         let decoded_str = String::from_utf8(decoded_bytes).map_err(|_| "Invalid UTF-8 string.")?;
         Ok(decoded_str)
     }
@@ -179,7 +186,8 @@ impl AuthManager {
             match resp {
                 Ok(resp) => {
                     debug!("set access token");
-                    LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, resp.into_inner().access_token).unwrap();
+                    LocalStorage::set(keys::LS_KEY_ACCESS_TOKEN, resp.into_inner().access_token)
+                        .unwrap();
                 }
                 Err(status) => {
                     if status.code() == tonic::Code::Unauthenticated {
@@ -201,7 +209,10 @@ impl AuthManager {
             role: dev_login_request::Role::Admin as i32,
         };
         let client = grpc_web_client::Client::new(self.endpoint_url.clone());
-        let response = DevServiceClient::new(client).login(request).await.map(|res| res.into_inner());
+        let response = DevServiceClient::new(client)
+            .login(request)
+            .await
+            .map(|res| res.into_inner());
 
         match response.clone() {
             Ok(result) => {

@@ -1,5 +1,5 @@
-use sycamore::prelude::*;
 use crate::AppRoutes;
+use sycamore::prelude::*;
 
 #[component]
 pub fn Home<G: Html>(cx: Scope) -> View<G> {

@@ -1,15 +1,14 @@
-use std::fmt::{Debug};
+use std::fmt::Debug;
 
 use grpc_web_client::Client;
-use tonic::{Request};
 use tonic::metadata::MetadataValue;
+use tonic::Request;
 
 use crate::services::auth::AuthManager;
 use crate::services::grpc::auth_service_client::AuthServiceClient;
 use crate::services::grpc::tracker_service_client::TrackerServiceClient;
 
 tonic::include_proto!("cosmos_notifier_grpc");
-
 
 #[derive(Debug, Clone)]
 pub struct GrpcClient {
@@ -37,7 +36,8 @@ impl GrpcClient {
         if token.is_ok() {
             req.metadata_mut().insert(
                 "authorization",
-                MetadataValue::try_from(token.unwrap()).unwrap_or_else(|_| MetadataValue::from_static("")),
+                MetadataValue::try_from(token.unwrap())
+                    .unwrap_or_else(|_| MetadataValue::from_static("")),
             );
         }
         req

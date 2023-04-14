@@ -11,10 +11,10 @@ use sycamore_router::{HistoryIntegration, Route, Router};
 use crate::services::auth::AuthManager;
 use crate::services::grpc::GrpcClient;
 
-mod services;
+mod components;
 mod config;
 mod pages;
-mod components;
+mod services;
 
 #[derive(Route, Debug, Clone)]
 pub enum AppRoutes {
@@ -112,7 +112,10 @@ fn start_jwt_refresh_timer() {
 pub fn App<G: Html>(cx: Scope) -> View<G> {
     let services = Services::new();
     provide_context(cx, services.clone());
-    provide_context(cx, AppState::new(services.auth_manager.get_untracked().as_ref()));
+    provide_context(
+        cx,
+        AppState::new(services.auth_manager.get_untracked().as_ref()),
+    );
 
     start_jwt_refresh_timer();
 
@@ -137,7 +140,6 @@ pub fn App<G: Html>(cx: Scope) -> View<G> {
         }
     }
 }
-
 
 fn main() {
     console_error_panic_hook::set_once();

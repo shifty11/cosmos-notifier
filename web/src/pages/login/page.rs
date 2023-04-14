@@ -49,5 +49,6 @@ pub async fn Login<G: Html>(cx: Scope<'_>) -> View<G> {
             });
         }) { "Login" }
         a(href=AppRoutes::Home) { "Home" }
+        a(href=env!("DISCORD_OAUTH2_URL")) { "Discord" }
     )
 }
