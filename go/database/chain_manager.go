@@ -24,9 +24,9 @@ func (manager *ChainManager) QueryByName(name string) (*ent.Chain, error) {
 		Only(manager.ctx)
 }
 
-func (manager *ChainManager) UpdateSetEnabled(chainId int, isEnabled bool) error {
+func (manager *ChainManager) UpdateSetEnabled(id int, isEnabled bool) error {
 	return manager.client.Chain.
-		UpdateOneID(chainId).
+		UpdateOneID(id).
 		SetIsEnabled(isEnabled).
 		Exec(manager.ctx)
 }
