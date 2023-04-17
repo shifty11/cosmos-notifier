@@ -26,7 +26,9 @@ test-go:
     cd go && go test ./...
 
 install-web:
-    cd web && nvm use 18 && npm install -D tailwindcss
+    cd web
+    cargo install --locked trunk
+    nvm use 18 && npm install -D tailwindcss
 
 format-web:
     cd web && cargo fmt && cargo clippy
