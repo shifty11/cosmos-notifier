@@ -4,13 +4,15 @@ use std::fmt::Display;
 
 use log::debug;
 use log::Level;
-use sycamore::futures::{spawn_local, spawn_local_scoped};
+use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
+use sycamore::suspense::Suspense;
 use sycamore_router::{HistoryIntegration, Route, Router};
-use tonic::Status;
+use uuid::Uuid;
 
+use crate::components::error_overlay::{create_message, ErrorOverlay};
 use crate::services::auth::AuthService;
-use crate::services::grpc::{GrpcClient, LoginResponse};
+use crate::services::grpc::GrpcClient;
 
 mod components;
 mod config;
@@ -84,10 +86,25 @@ impl Display for AuthState {
     }
 }
 
+#[repr(usize)]
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum InfoLevel {
+    Error = 1,
+    Info,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct InfoMsg {
+    pub id: Uuid,
+    pub msg: String,
+    pub level: InfoLevel,
+}
+
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub auth_state: RcSignal<AuthState>,
     pub route: RcSignal<AppRoutes>,
+    pub messages: RcSignal<Vec<RcSignal<InfoMsg>>>,
 }
 
 impl AppState {
@@ -99,19 +116,34 @@ impl AppState {
         Self {
             auth_state: create_rc_signal(auth_state),
             route: create_rc_signal(AppRoutes::Overview),
+            messages: create_rc_signal(vec![]),
         }
+    }
+
+    pub fn add_message(&self, msg: String, level: InfoLevel) -> Uuid {
+        let uuid = Uuid::new_v4();
+        self.messages.modify().push(create_rc_signal(InfoMsg {
+            id: uuid,
+            msg,
+            level,
+        }));
+        uuid
+    }
+
+    pub fn remove_message(&self, id: Uuid) {
+        self.messages.modify().retain(|m| m.get().id != id);
     }
 }
 
-fn start_jwt_refresh_timer() {
-    spawn_local(async {
+fn start_jwt_refresh_timer(cx: Scope) {
+    spawn_local_scoped(cx, async move {
         gloo_timers::future::TimeoutFuture::new(1000 * 60).await;
         let auth_client = AuthService::new();
         debug!("is_jwt_valid: {}", auth_client.is_jwt_valid());
         if auth_client.is_jwt_about_to_expire() {
             auth_client.refresh_access_token().await;
         }
-        start_jwt_refresh_timer();
+        start_jwt_refresh_timer(cx.to_owned());
     });
 }
 
@@ -120,27 +152,29 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     let services = Services::new();
     let app_state = AppState::new(services.auth_manager.clone());
 
-    // TODO: make this cleaner
     if services.auth_manager.clone().has_login_query_params() {
         debug!("Logging in...");
-        let resp = services.auth_manager.clone().login().await;
+        let resp = services.auth_manager.clone().login_with_query_params().await;
         match resp {
             Ok(_) => {
                 app_state.auth_state.set(AuthState::LoggedIn);
                 app_state.route.set(AppRoutes::Overview);
-                debug!("Logged in successfully");
+                create_message(cx, "Logged in successfully".to_string(), InfoLevel::Info);
             }
-            Err(_) => {}
+            Err(e) => create_message(cx, e.to_string(), InfoLevel::Error),
         }
     }
 
     provide_context(cx, services.clone());
     provide_context(cx, app_state.clone());
 
-    start_jwt_refresh_timer();  //TODO: make this with a scope and updating the state
+    start_jwt_refresh_timer(cx.to_owned());  //TODO: make this with a scope and updating the state
 
     view! {cx,
         div(class="h-full w-full") {
+            div() {
+                ErrorOverlay {}
+            }
             Router(
                 integration=HistoryIntegration::new(),
                 view=|cx, route: &ReadSignal<AppRoutes>| {
@@ -166,5 +200,9 @@ fn main() {
     console_log::init_with_level(Level::Debug).unwrap();
     debug!("Console log level set to debug");
 
-    sycamore::render(|cx| view! { cx, App()});
+    sycamore::render(|cx| view! { cx,
+        Suspense(fallback=view! { cx, "Loading..." }) {
+            App {}
+        }
+    });
 }

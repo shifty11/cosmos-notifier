@@ -1,0 +1,57 @@
+use log::debug;
+use sycamore::futures::spawn_local_scoped;
+use sycamore::prelude::*;
+
+use crate::{AppState, InfoLevel};
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct IndexedItem<T> {
+    index: usize,
+    item: T,
+}
+
+#[component]
+pub fn ErrorOverlay<G: Html>(cx: Scope) -> View<G> {
+    let app_state = use_context::<AppState>(cx);
+    let errors = create_selector(cx, ||
+        app_state.messages
+            .get()
+            .iter()
+            .enumerate()
+            .map(|(index, msg)| IndexedItem { index, item: msg.clone() })
+            .collect::<Vec<_>>());
+
+    view!(
+        cx,
+        Indexed(
+            iterable=errors,
+            view=move |cx, iItem| {
+                // let position = format!("bottom-0 left-1/2 transform -translate-x-1/2");
+                let margin = format!("margin-bottom: {}rem;", 4 * iItem.index + 2);
+                debug!("rendering error message: {:?}", iItem.index);
+                let color = match iItem.item.get().level {
+                    InfoLevel::Error => "bg-red-500",
+                    InfoLevel::Info => "bg-blue-500",
+                };
+                view! { cx,
+                    div(class=format!("fixed bottom-0 left-1/2 transform -translate-x-1/2 text-white p-3 rounded-md shadow-lg {}", color), style=margin) {
+                        (iItem.item.get().msg)
+                    }
+                }
+            },
+        )
+    )
+}
+
+pub fn create_message(cx: Scope, message: String, level: InfoLevel) {
+    let app_state = use_context::<AppState>(cx);
+    let uuid = app_state.add_message(message, level);
+    create_effect(cx, move || {
+        debug!("remove message effect");
+        spawn_local_scoped(cx, async move {
+            gloo_timers::future::TimeoutFuture::new(1000 * 10).await;
+            debug!("removing messages");
+            app_state.remove_message(uuid);
+        });
+    });
+}

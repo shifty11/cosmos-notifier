@@ -250,7 +250,7 @@ impl AuthService {
             .clone();
         let req = DiscordLoginRequest { code };
         let resp = auth_service.discord_login(req).await.map(|res| res.into_inner());
-        self.save_login_response(resp.clone().unwrap());
+        self.save_login_response(resp.clone()?);
         resp
     }
 
@@ -293,6 +293,9 @@ impl AuthService {
         let search: Result<String, JsValue> = location.search();
         let mut params = Vec::new();
         for s in search.unwrap().trim_start_matches('?').split('&') {
+            if s.is_empty() {
+                continue;
+            }
             let mut kv = s.split('=');
             let k = kv.next().unwrap();
             let v = kv.next().unwrap();

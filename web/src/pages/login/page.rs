@@ -4,24 +4,6 @@ use sycamore::prelude::*;
 
 use crate::{AppRoutes, AppState, AuthState, Services};
 
-// #[component]
-// fn SubComponent<G: Html>(cx: Scope) -> View<G> {
-//     let app_state = use_context::<AppState>(cx);
-//     let text = create_selector(cx, || {
-//         debug!("auth_state changed: {}", app_state.auth_state.get());
-//         match *app_state.auth_state.get() {
-//             AuthState::LoggedOut => "LoggedOut",
-//             AuthState::LoggedIn => "LoggedIn",
-//             AuthState::LoggingIn => "LoggingIn",
-//         }
-//     });
-//
-//     view!(cx,
-//         p { "Hello, SubComponent!" }
-//         p { (text.get()) }
-//     )
-// }
-
 #[component]
 pub async fn Login<G: Html>(cx: Scope<'_>) -> View<G> {
     let app_state = use_context::<AppState>(cx);
