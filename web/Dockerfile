@@ -26,7 +26,6 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Copy your project's files into the container
 COPY . .
 
-RUN mkdir ./api
 COPY --from=ghcr.io/shifty11/cosmos-notifier-api:latest /. /app/api/
 
 # TODO: Make this configurable
