@@ -1,0 +1,74 @@
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches: ['feat/sycamore-frontend']
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v2.11.1
+        id: changes
+        with:
+          filters: |
+            api:
+              - 'api/**'
+            web:
+              - 'web/**'
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.3.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push api Docker image
+        uses: docker/build-push-action@v4.0.0
+        if: steps.changes.outputs.web == 'true'
+        with:
+          context: api/
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-api:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push web Docker image
+        uses: docker/build-push-action@v4.0.0
+        if: steps.changes.outputs.web == 'true'
+        with:
+          context: web/
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-web:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Deploy to swarm
+        uses: wshihadeh/docker-deployment-action@v2
+        with:
+          remote_docker_host: ubuntu@188.166.38.235
+          ssh_private_key: ${{ secrets.SWARMY_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.SWARMY_SSH_PUBLIC_KEY }}
+          deployment_mode: docker-swarm
+          copy_stack_file: true
+          deploy_path: /home/ubuntu
+          stack_file_name: swarm-prod-cosmos-notifier.yml
+          keep_files: 5
+          args: cosmos-notifier

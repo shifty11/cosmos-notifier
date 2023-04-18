@@ -122,6 +122,29 @@ services:
         constraints:
           - node.role != manager
 
+  web:
+    image: ghcr.io/shifty11/cosmos-notifier-web:latest
+    networks:
+      - caddy
+      - default
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+          - node.labels.host == daodao-notifier
+
+  whoami-sycamore:
+    image: jwilder/whoami
+    networks:
+      - caddy
+    deploy:
+      labels:
+        caddy: rust.decrypto.online
+        caddy.reverse_proxy: "web:80"
+      placement:
+        constraints:
+          - node.role != manager
+
   db:
     image: postgres:14.5
     volumes:
