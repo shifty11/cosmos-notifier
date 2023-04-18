@@ -175,7 +175,7 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
         }
     }
 
-    start_jwt_refresh_timer(cx.to_owned());  //TODO: make this with a scope and updating the state
+    start_jwt_refresh_timer(cx.to_owned());
 
     view! {cx,
         div(class="h-full w-full") {
