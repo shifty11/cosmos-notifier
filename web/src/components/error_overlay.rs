@@ -1,6 +1,7 @@
-use log::debug;
+use log::{debug, error};
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
+use tonic::Status;
 
 use crate::{AppState, InfoLevel};
 
@@ -54,4 +55,10 @@ pub fn create_message(cx: Scope, message: String, level: InfoLevel) {
             app_state.remove_message(uuid);
         });
     });
+}
+
+pub fn create_error_msg_from_status(cx: Scope, status: Status) {
+    let msg = format!("{}: {}", status.code(), status.message());
+    error!("Error during API call: {}", msg);
+    create_message(cx,  msg, InfoLevel::Error);
 }

@@ -10,7 +10,7 @@ use sycamore::suspense::Suspense;
 use sycamore_router::{HistoryIntegration, Route, Router};
 use uuid::Uuid;
 
-use crate::components::error_overlay::{create_message, ErrorOverlay};
+use crate::components::error_overlay::{create_error_msg_from_status, create_message, ErrorOverlay};
 use crate::services::auth::AuthService;
 use crate::services::grpc::GrpcClient;
 
@@ -137,13 +137,20 @@ impl AppState {
 
 fn start_jwt_refresh_timer(cx: Scope) {
     spawn_local_scoped(cx, async move {
-        gloo_timers::future::TimeoutFuture::new(1000 * 60).await;
+        gloo_timers::future::TimeoutFuture::new(1000 * 3).await;
         let auth_client = AuthService::new();
         debug!("is_jwt_valid: {}", auth_client.is_jwt_valid());
         if auth_client.is_jwt_about_to_expire() {
             auth_client.refresh_access_token().await;
         }
-        start_jwt_refresh_timer(cx.to_owned());
+        if auth_client.is_jwt_valid() {
+            start_jwt_refresh_timer(cx.to_owned());
+        } else {
+            debug!("JWT is not valid anymore");
+            auth_client.logout();
+            let app_state = use_context::<AppState>(cx);
+            app_state.auth_state.set(AuthState::LoggedOut);
+        }
     });
 }
 
@@ -151,6 +158,9 @@ fn start_jwt_refresh_timer(cx: Scope) {
 pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     let services = Services::new();
     let app_state = AppState::new(services.auth_manager.clone());
+
+    provide_context(cx, services.clone());
+    provide_context(cx, app_state.clone());
 
     if services.auth_manager.clone().has_login_query_params() {
         debug!("Logging in...");
@@ -161,12 +171,9 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
                 app_state.route.set(AppRoutes::Overview);
                 create_message(cx, "Logged in successfully".to_string(), InfoLevel::Info);
             }
-            Err(e) => create_message(cx, e.to_string(), InfoLevel::Error),
+            Err(e) => create_error_msg_from_status(cx, e),
         }
     }
-
-    provide_context(cx, services.clone());
-    provide_context(cx, app_state.clone());
 
     start_jwt_refresh_timer(cx.to_owned());  //TODO: make this with a scope and updating the state
 

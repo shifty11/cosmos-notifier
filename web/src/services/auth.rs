@@ -197,8 +197,7 @@ impl AuthService {
                 Err(status) => {
                     if status.code() == tonic::Code::Unauthenticated {
                         debug!("refresh_access_token: Unauthenticated");
-                        LocalStorage::delete(keys::LS_KEY_ACCESS_TOKEN);
-                        LocalStorage::delete(keys::LS_KEY_REFRESH_TOKEN);
+                        self.logout();
                     } else {
                         debug!("refresh_access_token: {}", status);
                     }
@@ -220,6 +219,11 @@ impl AuthService {
             .map(|res| res.into_inner());
         self.save_login_response(response.clone().unwrap());
         response
+    }
+
+    pub fn logout(&self) {
+        LocalStorage::delete(keys::LS_KEY_ACCESS_TOKEN);
+        LocalStorage::delete(keys::LS_KEY_REFRESH_TOKEN);
     }
 
     fn save_login_response(&self, response: LoginResponse) {
