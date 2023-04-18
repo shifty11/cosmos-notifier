@@ -7,7 +7,7 @@ use log::Level;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use sycamore::suspense::Suspense;
-use sycamore_router::{HistoryIntegration, Route, Router};
+use sycamore_router::{HistoryIntegration, navigate, Route, Router};
 use uuid::Uuid;
 
 use crate::components::error_overlay::{create_error_msg_from_status, create_message, ErrorOverlay};
@@ -185,6 +185,17 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
             Router(
                 integration=HistoryIntegration::new(),
                 view=|cx, route: &ReadSignal<AppRoutes>| {
+                    create_effect(cx, move || {
+                        let app_state = use_context::<AppState>(cx);
+                        let auth_state = app_state.auth_state.get();
+                        debug!("Auth state changed: {}", auth_state);
+                        match auth_state.as_ref() {
+                            AuthState::LoggedOut => navigate(AppRoutes::Login.to_string().as_str()),
+                            AuthState::LoggedIn => navigate(AppRoutes::Overview.to_string().as_str()),
+                            AuthState::LoggingIn => {}
+                        }
+                    });
+
                     view! {cx, (
                             match route.get().as_ref() {
                                 AppRoutes::Home => pages::home::page::Home(cx),
