@@ -30,7 +30,7 @@ COPY --from=ghcr.io/shifty11/cosmos-notifier-api:latest /. /app/api/
 
 # TODO: Make this configurable
 ENV GRPC_ENDPOINT_URL https://rust.decrypto.online
-ENV DISCORD_OAUTH2_URL https://discord.com/api/oauth2/authorize?client_id=955835724714872942&redirect_uri=https%3A%2F%2Frust.decrypto.online%3A8080&response_type=code&scope=identify
+ENV DISCORD_OAUTH2_URL https://discord.com/api/oauth2/authorize?client_id=955835724714872942&redirect_uri=https%3A%2F%2Frust.decrypto.online&response_type=code&scope=identify
 
 # Build your Sycamore project using Trunk
 RUN trunk build --release
