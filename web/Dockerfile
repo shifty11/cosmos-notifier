@@ -7,9 +7,9 @@ RUN cargo install trunk --locked
 # Install Rust WASM target
 RUN rustup target add wasm32-unknown-unknown
 
-# Install system dependencies
+# Install curl and protobuf compiler
 RUN apt-get update && \
-    apt-get install -y curl
+    apt-get install -y curl protobuf-compiler
 
 # Install Node.js and npm
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
@@ -37,5 +37,5 @@ RUN trunk build --release
 
 # Stage 2 - Create the run-time image
 FROM caddy:2.5.2-alpine
-COPY --from=build-env /app/build/web /var/www/cosmos-notifier-sycamore
+COPY --from=build-env /app/dist /var/www/cosmos-notifier-sycamore
 COPY Caddyfile /etc/caddy/Caddyfile
