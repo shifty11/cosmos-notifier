@@ -20,7 +20,7 @@ WORKDIR /app
 
 RUN npm install -D tailwindcss
 
-# add node_modules to path
+# Add node_modules to path
 ENV PATH="/app/node_modules/.bin:${PATH}"
 
 # Copy your project's files into the container
