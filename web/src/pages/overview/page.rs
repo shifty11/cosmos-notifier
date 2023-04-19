@@ -1,9 +1,9 @@
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 
-use crate::{AppRoutes, InfoLevel};
 use crate::components::error_overlay::create_message;
 use crate::components::sidebar::Sidebar;
+use crate::{AppRoutes, InfoLevel};
 
 #[component]
 pub fn Overview<G: Html>(cx: Scope) -> View<G> {

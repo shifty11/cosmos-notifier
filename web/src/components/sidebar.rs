@@ -1,13 +1,9 @@
-use std::rc::Rc;
-use gloo_history::History;
-use log::debug;
 use sycamore::prelude::*;
-use sycamore_router::Route;
 
 use crate::{AppRoutes, AppState};
 
 fn get_class_for_route(route: &AppRoutes, current_route: &AppRoutes) -> String {
-    if route.to_string() == current_route.to_string(){
+    if route.to_string() == current_route.to_string() {
         "text-blue-500".to_string()
     } else {
         "".to_string()

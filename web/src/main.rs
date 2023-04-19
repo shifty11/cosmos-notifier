@@ -7,10 +7,12 @@ use log::Level;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use sycamore::suspense::Suspense;
-use sycamore_router::{HistoryIntegration, navigate, Route, Router};
+use sycamore_router::{navigate, HistoryIntegration, Route, Router};
 use uuid::Uuid;
 
-use crate::components::error_overlay::{create_error_msg_from_status, create_message, ErrorOverlay};
+use crate::components::error_overlay::{
+    create_error_msg_from_status, create_message, ErrorOverlay,
+};
 use crate::services::auth::AuthService;
 use crate::services::grpc::GrpcClient;
 
@@ -178,7 +180,11 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
 
     if services.auth_manager.clone().has_login_query_params() {
         debug!("Logging in...");
-        let resp = services.auth_manager.clone().login_with_query_params().await;
+        let resp = services
+            .auth_manager
+            .clone()
+            .login_with_query_params()
+            .await;
         match resp {
             Ok(_) => {
                 app_state.auth_state.set(AuthState::LoggedIn);
@@ -223,9 +229,11 @@ fn main() {
     console_log::init_with_level(Level::Debug).unwrap();
     debug!("Console log level set to debug");
 
-    sycamore::render(|cx| view! { cx,
-        Suspense(fallback=view! { cx, "Loading..." }) {
-            App {}
+    sycamore::render(|cx| {
+        view! { cx,
+            Suspense(fallback=components::loading::LoadingSpinner(cx)) {
+                App {}
+            }
         }
     });
 }

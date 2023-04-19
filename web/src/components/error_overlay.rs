@@ -14,20 +14,24 @@ pub struct IndexedItem<T> {
 #[component]
 pub fn ErrorOverlay<G: Html>(cx: Scope) -> View<G> {
     let app_state = use_context::<AppState>(cx);
-    let errors = create_selector(cx, ||
-        app_state.messages
+    let messages = create_selector(cx, || {
+        app_state
+            .messages
             .get()
             .iter()
             .enumerate()
-            .map(|(index, msg)| IndexedItem { index, item: msg.clone() })
-            .collect::<Vec<_>>());
+            .map(|(index, msg)| IndexedItem {
+                index,
+                item: msg.clone(),
+            })
+            .collect::<Vec<_>>()
+    });
 
     view!(
         cx,
         Indexed(
-            iterable=errors,
-            view=move |cx, iItem| {
-                // let position = format!("bottom-0 left-1/2 transform -translate-x-1/2");
+            iterable = messages,
+            view = move |cx, iItem| {
                 let margin = format!("margin-bottom: {}rem;", 4 * iItem.index + 2);
                 debug!("rendering error message: {:?}", iItem.index);
                 let color = match iItem.item.get().level {
@@ -35,7 +39,7 @@ pub fn ErrorOverlay<G: Html>(cx: Scope) -> View<G> {
                     InfoLevel::Info => "bg-blue-500",
                 };
                 view! { cx,
-                    div(class=format!("fixed bottom-0 left-1/2 transform -translate-x-1/2 text-white p-3 rounded-md shadow-lg {}", color), style=margin) {
+                    div(class=format!("fixed bottom-0 left-1/2 transform -translate-x-1/2 text-white p-3 rounded-md shadow-lg {color}"), style=margin) {
                         (iItem.item.get().msg)
                     }
                 }
@@ -60,5 +64,5 @@ pub fn create_message(cx: Scope, message: String, level: InfoLevel) {
 pub fn create_error_msg_from_status(cx: Scope, status: Status) {
     let msg = format!("{}: {}", status.code(), status.message());
     error!("Error during API call: {}", msg);
-    create_message(cx,  msg, InfoLevel::Error);
+    create_message(cx, msg, InfoLevel::Error);
 }
