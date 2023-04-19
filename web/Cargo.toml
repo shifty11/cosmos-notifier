@@ -11,6 +11,7 @@ console_error_panic_hook = "0.1.7"
 console_log = {version = "1.0.0", features = ["wasm-bindgen"] }
 gloo-storage = "0.2.2"
 gloo-timers = { version = "0.2.6", features = ["futures"] }
+gloo-utils = "0.1.6"
 grpc-web-client = {git = "https://github.com/shifty11/grpc-web-client.git"}
 js-sys = "0.3.61"
 jsonwebtoken = "8.3.0"

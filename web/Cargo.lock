@@ -136,6 +136,7 @@ dependencies = [
  "console_log",
  "gloo-storage",
  "gloo-timers",
+ "gloo-utils",
  "grpc-web-client",
  "js-sys",
  "jsonwebtoken",

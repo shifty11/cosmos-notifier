@@ -7,13 +7,13 @@ use log::Level;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use sycamore::suspense::Suspense;
-use sycamore_router::{HistoryIntegration, navigate, Route, Router};
+use sycamore_router::{navigate, HistoryIntegration, Route, Router};
 use uuid::Uuid;
 
 use crate::components::error_overlay::{
     create_error_msg_from_status, create_message, ErrorOverlay,
 };
-use crate::components::sidebar::SidebarWrapper;
+use crate::components::layout::LayoutWrapper;
 use crate::pages::communication::page::Communication;
 use crate::pages::home::page::Home;
 use crate::pages::login::page::Login;
@@ -110,18 +110,20 @@ pub struct InfoMsg {
 
 #[derive(Debug, Clone)]
 pub struct AppState {
+    auth_service: AuthService,
     pub auth_state: RcSignal<AuthState>,
     pub route: RcSignal<AppRoutes>,
     pub messages: RcSignal<Vec<RcSignal<InfoMsg>>>,
 }
 
 impl AppState {
-    pub fn new(auth_manager: AuthService) -> Self {
-        let auth_state = match auth_manager.is_jwt_valid() {
+    pub fn new(auth_service: AuthService) -> Self {
+        let auth_state = match auth_service.is_jwt_valid() {
             true => AuthState::LoggedIn,
             false => AuthState::LoggedOut,
         };
         Self {
+            auth_service,
             auth_state: create_rc_signal(auth_state),
             route: create_rc_signal(AppRoutes::Overview),
             messages: create_rc_signal(vec![]),
@@ -141,6 +143,11 @@ impl AppState {
     pub fn remove_message(&self, id: Uuid) {
         self.messages.modify().retain(|m| m.get().id != id);
     }
+
+    pub fn logout(&self) {
+        self.auth_service.logout();
+        self.auth_state.set(AuthState::LoggedOut);
+    }
 }
 
 fn start_jwt_refresh_timer(cx: Scope) {
@@ -155,9 +162,8 @@ fn start_jwt_refresh_timer(cx: Scope) {
             start_jwt_refresh_timer(cx.to_owned());
         } else {
             debug!("JWT is not valid anymore");
-            auth_client.logout();
             let app_state = use_context::<AppState>(cx);
-            app_state.auth_state.set(AuthState::LoggedOut);
+            app_state.logout();
         }
     });
 }
@@ -167,10 +173,10 @@ fn get_active_view<G: Html>(cx: Scope, route: &AppRoutes) -> View<G> {
     app_state.route.set(route.clone());
     debug!("Route changed to: {:?}", route);
     match route {
-        AppRoutes::Home => view!(cx, SidebarWrapper{Home {}}),
-        AppRoutes::Overview => view!(cx, SidebarWrapper{Overview {}}),
-        AppRoutes::Reminders => view!(cx, SidebarWrapper{Reminders {}}),
-        AppRoutes::Communication => view!(cx, SidebarWrapper{Communication {}}),
+        AppRoutes::Home => view!(cx, LayoutWrapper{Home {}}),
+        AppRoutes::Overview => view!(cx, LayoutWrapper{Overview {}}),
+        AppRoutes::Reminders => view!(cx, LayoutWrapper{Reminders {}}),
+        AppRoutes::Communication => view!(cx, LayoutWrapper{Communication {}}),
         AppRoutes::Login => Login(cx),
         AppRoutes::NotFound => view! { cx, "404 Not Found"},
     }
@@ -208,6 +214,7 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
             Router(
                 integration=HistoryIntegration::new(),
                 view=|cx, route: &ReadSignal<AppRoutes>| {
+                    debug!("Router: create_effect");
                     create_effect(cx, move || {
                         let app_state = use_context::<AppState>(cx);
                         let auth_state = app_state.auth_state.get();

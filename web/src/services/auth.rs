@@ -310,7 +310,7 @@ impl AuthService {
     }
 
     fn get_query_params(&self) -> Vec<(String, String)> {
-        let location = window().expect("window not available").location();
+        let location = gloo_utils::window().location();
         let search: Result<String, JsValue> = location.search();
         let mut params = Vec::new();
         for s in search.unwrap().trim_start_matches('?').split('&') {
