@@ -159,7 +159,7 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 
 func (c *ChainCrawler) UpdateProposals() {
 	log.Sugar.Debug("Updating chain proposals")
-	for _, chainEnt := range c.chainManager.QueryAll() {
+	for _, chainEnt := range c.chainManager.QueryEnabled() {
 		log.Sugar.Debugf("Updating proposals for chain %v", chainEnt.PrettyName)
 		for _, entProposal := range c.chainProposalManager.QueryVotingPeriodExpired(chainEnt) {
 			url := fmt.Sprintf(urlProposals+"/%v", chainEnt.Path, entProposal.ProposalID)
