@@ -9,7 +9,6 @@ use serde::{Deserialize, Serialize};
 use simple_error::bail;
 use tonic::Status;
 use wasm_bindgen::JsValue;
-use web_sys::window;
 
 use crate::config::keys;
 use crate::services::grpc::auth_service_client::AuthServiceClient;

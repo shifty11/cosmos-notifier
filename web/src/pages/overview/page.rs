@@ -1,7 +1,7 @@
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 
-use crate::components::error_overlay::create_message;
+use crate::components::messages::create_message;
 use crate::{AppRoutes, InfoLevel};
 
 #[component]
@@ -11,8 +11,8 @@ pub fn Overview<G: Html>(cx: Scope) -> View<G> {
         a(href=AppRoutes::Home) { "Home" }
         button(on:click=move |_| {
             spawn_local_scoped(cx, async move {
-                create_message(cx, "new error".to_string(), InfoLevel::Error);
-                create_message(cx, "new info".to_string(), InfoLevel::Info);
+                create_message(cx, "Error", "New error", InfoLevel::Error);
+                create_message(cx, "Info", "New info", InfoLevel::Info);
             });
         }) { "Add error" }
     }

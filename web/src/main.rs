@@ -10,10 +10,8 @@ use sycamore::suspense::Suspense;
 use sycamore_router::{navigate, HistoryIntegration, Route, Router};
 use uuid::Uuid;
 
-use crate::components::error_overlay::{
-    create_error_msg_from_status, create_message, ErrorOverlay,
-};
 use crate::components::layout::LayoutWrapper;
+use crate::components::messages::{create_error_msg_from_status, create_message, MessageOverlay};
 use crate::pages::communication::page::Communication;
 use crate::pages::home::page::Home;
 use crate::pages::login::page::Login;
@@ -104,7 +102,8 @@ pub enum InfoLevel {
 #[derive(Debug, Clone, PartialEq)]
 pub struct InfoMsg {
     pub id: Uuid,
-    pub msg: String,
+    pub title: String,
+    pub message: String,
     pub level: InfoLevel,
 }
 
@@ -130,11 +129,12 @@ impl AppState {
         }
     }
 
-    pub fn add_message(&self, msg: String, level: InfoLevel) -> Uuid {
+    pub fn add_message(&self, title: String, message: String, level: InfoLevel) -> Uuid {
         let uuid = Uuid::new_v4();
         self.messages.modify().push(create_rc_signal(InfoMsg {
             id: uuid,
-            msg,
+            title,
+            message,
             level,
         }));
         uuid
@@ -200,7 +200,12 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
         match resp {
             Ok(_) => {
                 app_state.auth_state.set(AuthState::LoggedIn);
-                create_message(cx, "Logged in successfully".to_string(), InfoLevel::Info);
+                create_message(
+                    cx,
+                    "Login success",
+                    "Logged in successfully",
+                    InfoLevel::Info,
+                );
             }
             Err(e) => create_error_msg_from_status(cx, e),
         }
@@ -210,7 +215,7 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
 
     view! {cx,
         div(class="flex min-h-screen") {
-            ErrorOverlay {}
+            MessageOverlay {}
             Router(
                 integration=HistoryIntegration::new(),
                 view=|cx, route: &ReadSignal<AppRoutes>| {
