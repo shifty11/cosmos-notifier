@@ -48,10 +48,10 @@ pub fn create_message(cx: Scope, message: String, level: InfoLevel) {
     let app_state = use_context::<AppState>(cx);
     let uuid = app_state.add_message(message, level);
     create_effect(cx, move || {
-        debug!("remove message effect");
         spawn_local_scoped(cx, async move {
+            debug!("wait 10 seconds before removing message");
             gloo_timers::future::TimeoutFuture::new(1000 * 10).await;
-            debug!("removing messages");
+            debug!("removing message");
             app_state.remove_message(uuid);
         });
     });

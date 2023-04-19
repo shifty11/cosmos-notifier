@@ -154,6 +154,20 @@ fn start_jwt_refresh_timer(cx: Scope) {
     });
 }
 
+fn get_active_view<G: Html>(cx: Scope, route: &AppRoutes) -> View<G> {
+    let app_state = use_context::<AppState>(cx);
+    app_state.route.set(route.clone());
+    debug!("Route changed to: {:?}", route);
+    match route {
+        AppRoutes::Home => pages::home::page::Home(cx),
+        AppRoutes::Overview => pages::overview::page::Overview(cx),
+        AppRoutes::Reminders => pages::reminders::page::Reminders(cx),
+        AppRoutes::Communication => pages::communication::page::Communication(cx),
+        AppRoutes::Login => pages::login::page::Login(cx),
+        AppRoutes::NotFound => view! { cx, "404 Not Found"},
+    }
+}
+
 #[component]
 pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     let services = Services::new();
@@ -168,7 +182,6 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
         match resp {
             Ok(_) => {
                 app_state.auth_state.set(AuthState::LoggedIn);
-                app_state.route.set(AppRoutes::Overview);
                 create_message(cx, "Logged in successfully".to_string(), InfoLevel::Info);
             }
             Err(e) => create_error_msg_from_status(cx, e),
@@ -195,16 +208,8 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
                             AuthState::LoggingIn => {}
                         }
                     });
-
                     view! {cx, (
-                            match route.get().as_ref() {
-                                AppRoutes::Home => pages::home::page::Home(cx),
-                                AppRoutes::Overview => pages::overview::page::Overview(cx),
-                                AppRoutes::Reminders => pages::reminders::page::Reminders(cx),
-                                AppRoutes::Communication => pages::communication::page::Communication(cx),
-                                AppRoutes::Login => pages::login::page::Login(cx),
-                                AppRoutes::NotFound => view! { cx, "404 Not Found"}
-                            }
+                            get_active_view(cx, route.get().as_ref())
                         )
                     }
                 }
