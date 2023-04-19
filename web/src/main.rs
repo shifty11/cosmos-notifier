@@ -7,12 +7,18 @@ use log::Level;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::prelude::*;
 use sycamore::suspense::Suspense;
-use sycamore_router::{navigate, HistoryIntegration, Route, Router};
+use sycamore_router::{HistoryIntegration, navigate, Route, Router};
 use uuid::Uuid;
 
 use crate::components::error_overlay::{
     create_error_msg_from_status, create_message, ErrorOverlay,
 };
+use crate::components::sidebar::SidebarWrapper;
+use crate::pages::communication::page::Communication;
+use crate::pages::home::page::Home;
+use crate::pages::login::page::Login;
+use crate::pages::overview::page::Overview;
+use crate::pages::reminders::page::Reminders;
 use crate::services::auth::AuthService;
 use crate::services::grpc::GrpcClient;
 
@@ -161,11 +167,11 @@ fn get_active_view<G: Html>(cx: Scope, route: &AppRoutes) -> View<G> {
     app_state.route.set(route.clone());
     debug!("Route changed to: {:?}", route);
     match route {
-        AppRoutes::Home => pages::home::page::Home(cx),
-        AppRoutes::Overview => pages::overview::page::Overview(cx),
-        AppRoutes::Reminders => pages::reminders::page::Reminders(cx),
-        AppRoutes::Communication => pages::communication::page::Communication(cx),
-        AppRoutes::Login => pages::login::page::Login(cx),
+        AppRoutes::Home => view!(cx, SidebarWrapper{Home {}}),
+        AppRoutes::Overview => view!(cx, SidebarWrapper{Overview {}}),
+        AppRoutes::Reminders => view!(cx, SidebarWrapper{Reminders {}}),
+        AppRoutes::Communication => view!(cx, SidebarWrapper{Communication {}}),
+        AppRoutes::Login => Login(cx),
         AppRoutes::NotFound => view! { cx, "404 Not Found"},
     }
 }
@@ -197,10 +203,8 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
     start_jwt_refresh_timer(cx.to_owned());
 
     view! {cx,
-        div(class="h-full w-full") {
-            div() {
-                ErrorOverlay {}
-            }
+        div(class="flex min-h-screen") {
+            ErrorOverlay {}
             Router(
                 integration=HistoryIntegration::new(),
                 view=|cx, route: &ReadSignal<AppRoutes>| {

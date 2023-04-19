@@ -15,7 +15,7 @@ pub fn Sidebar<G: Html>(cx: Scope) -> View<G> {
     let app_state = use_context::<AppState>(cx);
 
     view! {cx,
-        div(class="fixed top-0 left-0 h-screen w-64 py-6 px-4 bg-gray-800 text-white") {
+        div(class="flex min-h-screen w-64 py-6 px-4 bg-gray-800 text-white") {
             ul(class="flex flex-col space-y-2") {
                 li() {
                     a(href=AppRoutes::Home, class=format!("p-3 rounded-md hover:bg-gray-600 block text-base font-medium {}",
@@ -46,6 +46,17 @@ pub fn Sidebar<G: Html>(cx: Scope) -> View<G> {
                     }
                 }
             }
+        }
+    }
+}
+
+#[component(inline_props)]
+pub fn SidebarWrapper<'a, G: Html>(cx: Scope<'a>, children: Children<'a, G>) -> View<G> {
+    let children = children.call(cx);
+    view! { cx,
+        Sidebar{}
+        div() {
+            (children)
         }
     }
 }
