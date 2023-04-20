@@ -7,7 +7,7 @@ pub fn Header<G: Html>(cx: Scope) -> View<G> {
     let app_state = use_context::<AppState>(cx);
 
     view!(cx,
-        div(class="fixed w-full flex items-center justify-between h-14 text-white z-10") {
+        div(class="w-full flex items-center justify-between h-14 text-white z-10") {
             div(class="flex items-center justify-start pl-4 pl-3 w-14 md:w-64 h-14 bg-blue-800 dark:bg-gray-800 border-none") {
                 img(class="w-7 h-7 md:w-10 md:h-10 mr-2 rounded-md overflow-hidden", src=app_state.get_user_avatar())
                 span(class="hidden md:block") { (app_state.get_user_name()) }
@@ -57,7 +57,7 @@ pub fn Sidebar<G: Html>(cx: Scope) -> View<G> {
     let span_text_class = "ml-2 text-sm tracking-wide truncate";
 
     view! { cx,
-        div(class="fixed flex flex-col top-14 left-0 w-14 hover:w-64 md:w-64 bg-blue-900 dark:bg-gray-900 h-full text-white transition-all duration-300 border-none z-10 sidebar") {
+        div(class="h-full flex flex-col top-14 left-0 w-14 hover:w-64 md:w-64 bg-blue-900 dark:bg-gray-900 h-full text-white transition-all duration-300 border-none z-10 sidebar") {
             div(class="overflow-y-auto overflow-x-hidden flex flex-col justify-between flex-grow") {
                 ul(class="flex flex-col py-4 space-y-1") {
                     li(class="px-5 hidden md:block") {
@@ -107,11 +107,15 @@ pub fn Sidebar<G: Html>(cx: Scope) -> View<G> {
 pub fn LayoutWrapper<'a, G: Html>(cx: Scope<'a>, children: Children<'a, G>) -> View<G> {
     let children = children.call(cx);
     view! { cx,
-        div(class="min-h-screen flex flex-col flex-auto flex-shrink-0 antialiased bg-white dark:bg-gray-700 text-black dark:text-white") {
-            Header{}
-            Sidebar{}
-            div(class="h-full ml-14 mt-14 mb-10 md:ml-64") {
-                (children)
+        div(class="min-h-screen flex justify-center items-center flex-auto flex-shrink-0 antialiased bg-white dark:bg-gray-700 text-black dark:text-white") {
+            div(class="flex flex-col h-full w-full max-w-screen-lg") {
+                Header{}
+                div(class="flex flex-row h-full w-full") {
+                    Sidebar{}
+                    div(class="h-full w-full") {
+                        (children)
+                    }
+                }
             }
         }
     }
