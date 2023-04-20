@@ -1,5 +1,5 @@
 use gloo_timers::future::TimeoutFuture;
-use gloo_utils::window;
+use js_sys;
 use log::debug;
 use sycamore::futures::spawn_local_scoped;
 use sycamore::motion::create_raf;
@@ -44,21 +44,24 @@ pub fn MessageOverlay<G: Html>(cx: Scope) -> View<G> {
                 let item = iItem.item.get();
                 let title = item.title.clone();
                 let message = item.message.clone();
+                let created_at = item.created_at.clone();
                 let id = item.id;
 
                 let state = create_signal(cx, 1.0);
-                let performance = window().performance().unwrap();
-                let start_time = performance.now();
                 let (_running, start, stop) = create_raf(cx, move || {
-                    let elapsed = performance.now() - start_time;
+                    let elapsed = js_sys::Date::now() - created_at;
                     if elapsed > 7000.0 {
-                        state.set(*state.get() * 0.96);
+                        let new_state = 1.0 - (elapsed - 7000.0) / 3000.0;
+                        state.set(new_state);
+                        if new_state <= 0.0 {
+                            app_state.remove_message(id);
+                        }
                     }
                 });
                 start();
 
                 view! { cx,
-                    div(class=format!("fixed bottom-0 right-0 w-96 z-50 p-2 m-2 bg-white border-l-4 {}", color), style=format!("{} opacity: {}", style, state.get())) {
+                    div(class=format!("fixed bottom-0 right-0 w-96 z-50 p-2 m-2 bg-white border-l-4 {}", color), style=format!("{} opacity: {}", style, state.get().as_ref())) {
                         h3(class="text-lg font-bold") { (title) }
                         p(class="text-sm") { (message) }
                         button(
@@ -79,9 +82,9 @@ pub fn MessageOverlay<G: Html>(cx: Scope) -> View<G> {
     )
 }
 
-pub fn create_message<'a>(cx: Scope, title: &'a str, message: &'a str, level: InfoLevel) {
+pub fn create_message<S: Into<String>>(cx: Scope, title: S, message: S, level: InfoLevel) {
     let app_state = use_context::<AppState>(cx);
-    let uuid = app_state.add_message(title.to_string(), message.to_string(), level);
+    let uuid = app_state.add_message(title.into(), message.into(), level);
     create_effect(cx, move || {
         spawn_local_scoped(cx, async move {
             debug!("wait 10 seconds before removing message");
