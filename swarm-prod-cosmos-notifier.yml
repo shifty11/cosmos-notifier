@@ -254,4 +254,5 @@ secrets:
     external: true
   pgadmin-password:
     external: true
-
+  cosmos-notifier-sycamore-env:
+    external: true
