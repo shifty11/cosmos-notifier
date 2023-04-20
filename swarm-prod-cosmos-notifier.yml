@@ -127,7 +127,7 @@ services:
     working_dir: /app
     secrets:
       - cosmos-notifier-env
-    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && export WEBAPP_URL=https://rust.decrypto.online && /cosmos-notifier service grpc"
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && export WEBAPP_URL=https://rust.decrypto.online && export ACCESS_TOKEN_DURATION=15m && export REFRESH_TOKEN_DURATION=1440h && SENTRY_DSN="" && /cosmos-notifier service grpc"
     deploy:
       placement:
         constraints:
