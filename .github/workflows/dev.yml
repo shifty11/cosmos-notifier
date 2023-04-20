@@ -69,7 +69,7 @@ jobs:
         if: steps.changes.outputs.envoy == 'true'
         with:
           context: docker/envoy/
-          file: docker/envoy/envoy-sycamore.Dockerfile
+          file: docker/envoy/envoy-sycamore/envoy.Dockerfile
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-envoy-sycamore:latest
           labels: ${{ steps.meta.outputs.labels }}
