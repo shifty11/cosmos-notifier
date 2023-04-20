@@ -2,7 +2,11 @@
 module.exports = {
   content: [ "./src/**/*.rs", "./index.html" ],
   theme: {
-    extend: {},
+    screens: {
+        sm: "768px",
+        md: "1024px",
+        lg: "1280px",
+    }
   },
   plugins: [],
 }
