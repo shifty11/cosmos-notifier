@@ -31,6 +31,10 @@ jobs:
         id: changes
         with:
           filters: |
+            envoy-sycamore:
+              - 'docker/envoy-sycamore/**'
+            go:
+              - 'go/**'
             api:
               - 'api/**'
             web:
@@ -49,6 +53,25 @@ jobs:
           context: api/
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-api:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push go Docker image
+        uses: docker/build-push-action@v4.0.0
+        if: steps.changes.outputs.go == 'true'
+        with:
+          context: go/
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-go-sycamore:latest
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Build and push envoy Docker image
+        uses: docker/build-push-action@v4.0.0
+        if: steps.changes.outputs.envoy == 'true'
+        with:
+          context: docker/envoy/
+          file: docker/envoy/envoy-sycamore.Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/cosmos-notifier-envoy-sycamore:latest
           labels: ${{ steps.meta.outputs.labels }}
 
       - name: Build and push web Docker image

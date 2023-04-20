@@ -122,6 +122,24 @@ services:
         constraints:
           - node.role != manager
 
+  grpc-sycamore:
+    image: ghcr.io/shifty11/cosmos-notifier-go-sycamore:latest
+    working_dir: /app
+    secrets:
+      - cosmos-notifier-env
+    command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && export WEBAPP_URL=https://rust.decrypto.online && /cosmos-notifier service grpc"
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
+  envoy-sycamore:
+    image: ghcr.io/shifty11/cosmos-notifier-envoy-sycamore:latest
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+
   web:
     image: ghcr.io/shifty11/cosmos-notifier-web:latest
     networks:
