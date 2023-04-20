@@ -126,7 +126,7 @@ services:
     image: ghcr.io/shifty11/cosmos-notifier-go-sycamore:latest
     working_dir: /app
     secrets:
-      - cosmos-notifier-env
+      - cosmos-notifier-sycamore-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-sycamore-env && /cosmos-notifier service grpc"
     deploy:
       placement:
