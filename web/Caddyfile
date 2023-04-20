@@ -13,6 +13,8 @@
         root * /var/www/cosmos-notifier-sycamore
         encode gzip
 
+        try_files {path} /
+
         # Enable the static file server.
         file_server
 
