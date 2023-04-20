@@ -31,7 +31,7 @@ jobs:
         id: changes
         with:
           filters: |
-            envoy-sycamore:
+            envoy:
               - 'docker/envoy-sycamore/**'
             go:
               - 'go/**'
@@ -48,7 +48,7 @@ jobs:
 
       - name: Build and push api Docker image
         uses: docker/build-push-action@v4.0.0
-        if: steps.changes.outputs.web == 'true'
+        if: steps.changes.outputs.api == 'true'
         with:
           context: api/
           push: true
