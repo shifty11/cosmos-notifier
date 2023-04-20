@@ -54,7 +54,7 @@ impl Serialize for UserType {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 enum Role {
     User = dev_login_request::Role::User as isize,
     Admin = dev_login_request::Role::Admin as isize,
@@ -322,5 +322,17 @@ impl AuthService {
             params.push((k.to_string(), v.to_string()));
         }
         params
+    }
+
+    pub fn is_admin(&self) -> bool {
+        self.get_jwt_claims()
+            .map(|claims| claims.role == Role::Admin)
+            .unwrap_or(false)
+    }
+
+    pub fn is_user(&self) -> bool {
+        self.get_jwt_claims()
+            .map(|claims| claims.role == Role::User)
+            .unwrap_or(false)
     }
 }

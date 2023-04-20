@@ -92,9 +92,9 @@ pub fn Sidebar<G: Html>(cx: Scope) -> View<G> {
                     li() {
                         a(href=AppRoutes::Communication, class=format!("{} {}", a_class, highlight_active_route(&AppRoutes::Communication, app_state.route.get().as_ref()))) {
                             span(class=span_icon_class) {
-                                i(class="fas fa-user") {}
+                                i(class="fas fa-message") {}
                             }
-                            span(class=span_text_class) { "Profile" }
+                            span(class=span_text_class) { "Communication" }
                         }
                     }
                 }

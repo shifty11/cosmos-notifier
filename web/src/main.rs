@@ -97,8 +97,10 @@ impl Display for AuthState {
 #[repr(usize)]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum InfoLevel {
-    Error = 1,
-    Info,
+    Info = 1,
+    Success,
+    Warning,
+    Error,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -192,17 +194,42 @@ fn start_jwt_refresh_timer(cx: Scope) {
     });
 }
 
-fn get_active_view<G: Html>(cx: Scope, route: &AppRoutes) -> View<G> {
-    let app_state = use_context::<AppState>(cx);
-    app_state.route.set(route.clone());
-    debug!("Route changed to: {:?}", route);
+fn has_access_permission(auth_service: &AuthService, route: &AppRoutes) -> bool {
+    let is_admin = auth_service.is_admin();
+    let is_user = auth_service.is_user();
     match route {
-        AppRoutes::Home => view!(cx, LayoutWrapper{Home {}}),
-        AppRoutes::Overview => view!(cx, LayoutWrapper{Overview {}}),
-        AppRoutes::Reminders => view!(cx, LayoutWrapper{Reminders {}}),
-        AppRoutes::Communication => view!(cx, LayoutWrapper{Communication {}}),
-        AppRoutes::Login => Login(cx),
-        AppRoutes::NotFound => view! { cx, "404 Not Found"},
+        AppRoutes::Home => true,
+        AppRoutes::Overview => is_user || is_admin,
+        AppRoutes::Reminders => is_user || is_admin,
+        AppRoutes::Communication => is_user || is_admin,
+        AppRoutes::Login => true,
+        AppRoutes::NotFound => true,
+    }
+}
+
+fn activate_view<G: Html>(cx: Scope, route: &AppRoutes) -> View<G> {
+    debug!("Route changed to: {:?}", route);
+    let app_state = use_context::<AppState>(cx);
+    let services = use_context::<Services>(cx);
+    if has_access_permission(&services.auth_manager, route) {
+        app_state.route.set(route.clone());
+        match route {
+            AppRoutes::Home => view!(cx, LayoutWrapper{Home {}}),
+            AppRoutes::Overview => view!(cx, LayoutWrapper{Overview {}}),
+            AppRoutes::Reminders => view!(cx, LayoutWrapper{Reminders {}}),
+            AppRoutes::Communication => view!(cx, LayoutWrapper{Communication {}}),
+            AppRoutes::Login => Login(cx),
+            AppRoutes::NotFound => view! { cx, "404 Not Found"},
+        }
+    } else {
+        app_state.route.set(AppRoutes::Login);
+        create_message(
+            cx,
+            "Access denied".to_string(),
+            "Please login to access this page",
+            InfoLevel::Info,
+        );
+        Login(cx)
     }
 }
 
@@ -277,7 +304,7 @@ pub async fn App<G: Html>(cx: Scope<'_>) -> View<G> {
                         }
                     });
                     view! {cx, (
-                            get_active_view(cx, route.get().as_ref())
+                            activate_view(cx, route.get().as_ref())
                         )
                     }
                 }

@@ -38,8 +38,10 @@ pub fn MessageOverlay<G: Html>(cx: Scope) -> View<G> {
                 debug!("Rendering message: {:?}", iItem.index);
                 let style = format!("margin-bottom: {}rem;", 5 * iItem.index + 2);
                 let color = match iItem.item.get().level {
+                    InfoLevel::Info => "bg-blue-100 border-blue-500 text-blue-700",
+                    InfoLevel::Success => "bg-green-100 border-green-500 text-green-700",
+                    InfoLevel::Warning => "bg-yellow-100 border-yellow-500 text-yellow-700",
                     InfoLevel::Error => "bg-red-100 border-red-500 text-red-700",
-                    InfoLevel::Info => "bg-green-100 border-green-500 text-green-700",
                 };
                 let item = iItem.item.get();
                 let title = item.title.clone();
@@ -82,7 +84,12 @@ pub fn MessageOverlay<G: Html>(cx: Scope) -> View<G> {
     )
 }
 
-pub fn create_message<S: Into<String>>(cx: Scope, title: S, message: S, level: InfoLevel) {
+pub fn create_message(
+    cx: Scope,
+    title: impl Into<String>,
+    message: impl Into<String>,
+    level: InfoLevel,
+) {
     let app_state = use_context::<AppState>(cx);
     let uuid = app_state.add_message(title.into(), message.into(), level);
     create_effect(cx, move || {
