@@ -10,9 +10,9 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'pbcommon.pb.dart' as $6;
-import 'google/protobuf/duration.pb.dart' as $7;
-import 'google/protobuf/timestamp.pb.dart' as $8;
+import 'pbcommon.pb.dart' as $7;
+import 'google/protobuf/duration.pb.dart' as $8;
+import 'google/protobuf/timestamp.pb.dart' as $9;
 
 enum TrackerChatRoom_Type {
   discord, 
@@ -29,16 +29,16 @@ class TrackerChatRoom extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackerChatRoom', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..oo(0, [2, 3])
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'name')
-    ..aOM<$6.DiscordType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discord', subBuilder: $6.DiscordType.create)
-    ..aOM<$6.TelegramType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegram', subBuilder: $6.TelegramType.create)
+    ..aOM<$7.DiscordType>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'discord', subBuilder: $7.DiscordType.create)
+    ..aOM<$7.TelegramType>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'telegram', subBuilder: $7.TelegramType.create)
     ..hasRequiredFields = false
   ;
 
   TrackerChatRoom._() : super();
   factory TrackerChatRoom({
     $core.String? name,
-    $6.DiscordType? discord,
-    $6.TelegramType? telegram,
+    $7.DiscordType? discord,
+    $7.TelegramType? telegram,
   }) {
     final _result = create();
     if (name != null) {
@@ -86,35 +86,35 @@ class TrackerChatRoom extends $pb.GeneratedMessage {
   void clearName() => clearField(1);
 
   @$pb.TagNumber(2)
-  $6.DiscordType get discord => $_getN(1);
+  $7.DiscordType get discord => $_getN(1);
   @$pb.TagNumber(2)
-  set discord($6.DiscordType v) { setField(2, v); }
+  set discord($7.DiscordType v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasDiscord() => $_has(1);
   @$pb.TagNumber(2)
   void clearDiscord() => clearField(2);
   @$pb.TagNumber(2)
-  $6.DiscordType ensureDiscord() => $_ensure(1);
+  $7.DiscordType ensureDiscord() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $6.TelegramType get telegram => $_getN(2);
+  $7.TelegramType get telegram => $_getN(2);
   @$pb.TagNumber(3)
-  set telegram($6.TelegramType v) { setField(3, v); }
+  set telegram($7.TelegramType v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasTelegram() => $_has(2);
   @$pb.TagNumber(3)
   void clearTelegram() => clearField(3);
   @$pb.TagNumber(3)
-  $6.TelegramType ensureTelegram() => $_ensure(2);
+  $7.TelegramType ensureTelegram() => $_ensure(2);
 }
 
 class Tracker extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Tracker', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'id')
     ..aOS(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$7.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
+    ..aOM<$8.Duration>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $8.Duration.create)
     ..aOM<TrackerChatRoom>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
-    ..aOM<$8.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $8.Timestamp.create)
+    ..aOM<$9.Timestamp>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updatedAt', protoName: 'updatedAt', subBuilder: $9.Timestamp.create)
     ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'validatorMoniker', protoName: 'validatorMoniker')
     ..hasRequiredFields = false
   ;
@@ -123,9 +123,9 @@ class Tracker extends $pb.GeneratedMessage {
   factory Tracker({
     $fixnum.Int64? id,
     $core.String? address,
-    $7.Duration? notificationInterval,
+    $8.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
-    $8.Timestamp? updatedAt,
+    $9.Timestamp? updatedAt,
     $core.String? validatorMoniker,
   }) {
     final _result = create();
@@ -189,15 +189,15 @@ class Tracker extends $pb.GeneratedMessage {
   void clearAddress() => clearField(2);
 
   @$pb.TagNumber(3)
-  $7.Duration get notificationInterval => $_getN(2);
+  $8.Duration get notificationInterval => $_getN(2);
   @$pb.TagNumber(3)
-  set notificationInterval($7.Duration v) { setField(3, v); }
+  set notificationInterval($8.Duration v) { setField(3, v); }
   @$pb.TagNumber(3)
   $core.bool hasNotificationInterval() => $_has(2);
   @$pb.TagNumber(3)
   void clearNotificationInterval() => clearField(3);
   @$pb.TagNumber(3)
-  $7.Duration ensureNotificationInterval() => $_ensure(2);
+  $8.Duration ensureNotificationInterval() => $_ensure(2);
 
   @$pb.TagNumber(4)
   TrackerChatRoom get chatRoom => $_getN(3);
@@ -211,15 +211,15 @@ class Tracker extends $pb.GeneratedMessage {
   TrackerChatRoom ensureChatRoom() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  $8.Timestamp get updatedAt => $_getN(4);
+  $9.Timestamp get updatedAt => $_getN(4);
   @$pb.TagNumber(5)
-  set updatedAt($8.Timestamp v) { setField(5, v); }
+  set updatedAt($9.Timestamp v) { setField(5, v); }
   @$pb.TagNumber(5)
   $core.bool hasUpdatedAt() => $_has(4);
   @$pb.TagNumber(5)
   void clearUpdatedAt() => clearField(5);
   @$pb.TagNumber(5)
-  $8.Timestamp ensureUpdatedAt() => $_ensure(4);
+  $9.Timestamp ensureUpdatedAt() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $core.String get validatorMoniker => $_getSZ(5);
@@ -529,7 +529,7 @@ class IsAddressValidResponse extends $pb.GeneratedMessage {
 class CreateTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'CreateTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'address')
-    ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
+    ..aOM<$8.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $8.Duration.create)
     ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
@@ -537,7 +537,7 @@ class CreateTrackerRequest extends $pb.GeneratedMessage {
   CreateTrackerRequest._() : super();
   factory CreateTrackerRequest({
     $core.String? address,
-    $7.Duration? notificationInterval,
+    $8.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
@@ -583,15 +583,15 @@ class CreateTrackerRequest extends $pb.GeneratedMessage {
   void clearAddress() => clearField(1);
 
   @$pb.TagNumber(2)
-  $7.Duration get notificationInterval => $_getN(1);
+  $8.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($7.Duration v) { setField(2, v); }
+  set notificationInterval($8.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
   @$pb.TagNumber(2)
-  $7.Duration ensureNotificationInterval() => $_ensure(1);
+  $8.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   TrackerChatRoom get chatRoom => $_getN(2);
@@ -608,7 +608,7 @@ class CreateTrackerRequest extends $pb.GeneratedMessage {
 class UpdateTrackerRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'UpdateTrackerRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..aInt64(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackerId', protoName: 'trackerId')
-    ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
+    ..aOM<$8.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $8.Duration.create)
     ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
@@ -616,7 +616,7 @@ class UpdateTrackerRequest extends $pb.GeneratedMessage {
   UpdateTrackerRequest._() : super();
   factory UpdateTrackerRequest({
     $fixnum.Int64? trackerId,
-    $7.Duration? notificationInterval,
+    $8.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
@@ -662,15 +662,15 @@ class UpdateTrackerRequest extends $pb.GeneratedMessage {
   void clearTrackerId() => clearField(1);
 
   @$pb.TagNumber(2)
-  $7.Duration get notificationInterval => $_getN(1);
+  $8.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($7.Duration v) { setField(2, v); }
+  set notificationInterval($8.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
   @$pb.TagNumber(2)
-  $7.Duration ensureNotificationInterval() => $_ensure(1);
+  $8.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   TrackerChatRoom get chatRoom => $_getN(2);
@@ -734,7 +734,7 @@ class DeleteTrackerRequest extends $pb.GeneratedMessage {
 class TrackValidatorsRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'TrackValidatorsRequest', package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'cosmos_notifier_grpc'), createEmptyInstance: create)
     ..pPS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'monikers')
-    ..aOM<$7.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $7.Duration.create)
+    ..aOM<$8.Duration>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'notificationInterval', protoName: 'notificationInterval', subBuilder: $8.Duration.create)
     ..aOM<TrackerChatRoom>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'chatRoom', protoName: 'chatRoom', subBuilder: TrackerChatRoom.create)
     ..hasRequiredFields = false
   ;
@@ -742,7 +742,7 @@ class TrackValidatorsRequest extends $pb.GeneratedMessage {
   TrackValidatorsRequest._() : super();
   factory TrackValidatorsRequest({
     $core.Iterable<$core.String>? monikers,
-    $7.Duration? notificationInterval,
+    $8.Duration? notificationInterval,
     TrackerChatRoom? chatRoom,
   }) {
     final _result = create();
@@ -782,15 +782,15 @@ class TrackValidatorsRequest extends $pb.GeneratedMessage {
   $core.List<$core.String> get monikers => $_getList(0);
 
   @$pb.TagNumber(2)
-  $7.Duration get notificationInterval => $_getN(1);
+  $8.Duration get notificationInterval => $_getN(1);
   @$pb.TagNumber(2)
-  set notificationInterval($7.Duration v) { setField(2, v); }
+  set notificationInterval($8.Duration v) { setField(2, v); }
   @$pb.TagNumber(2)
   $core.bool hasNotificationInterval() => $_has(1);
   @$pb.TagNumber(2)
   void clearNotificationInterval() => clearField(2);
   @$pb.TagNumber(2)
-  $7.Duration ensureNotificationInterval() => $_ensure(1);
+  $8.Duration ensureNotificationInterval() => $_ensure(1);
 
   @$pb.TagNumber(3)
   TrackerChatRoom get chatRoom => $_getN(2);

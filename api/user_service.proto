@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+package cosmos_notifier_grpc;
+
+option go_package = "github.com/shifty11/cosmos-notifier/services/grpc/protobuf/user_service";
+
+service UserService {
+  rpc GetUser (google.protobuf.Empty) returns (User) {}
+}
+
+message User {
+  string name = 1;
+  string avatar = 2;
+}

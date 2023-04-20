@@ -7,6 +7,7 @@ use tonic::Request;
 use crate::services::auth::AuthService;
 use crate::services::grpc::auth_service_client::AuthServiceClient;
 use crate::services::grpc::tracker_service_client::TrackerServiceClient;
+use crate::services::grpc::user_service_client::UserServiceClient;
 
 tonic::include_proto!("cosmos_notifier_grpc");
 
@@ -48,5 +49,9 @@ impl GrpcClient {
 
     pub fn get_tracker_service(&self) -> TrackerServiceClient<Client> {
         TrackerServiceClient::new(Client::new(self.endpoint_url.clone()))
+    }
+
+    pub fn get_user_service(&self) -> UserServiceClient<Client> {
+        UserServiceClient::new(Client::new(self.endpoint_url.clone()))
     }
 }

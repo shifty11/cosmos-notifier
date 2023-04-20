@@ -7,8 +7,7 @@ mock:
 generate-protobufs:
     protoc -I=api/ --go_out=go/services/grpc/protobuf/ --go_opt=module=github.com/shifty11/cosmos-notifier/services/grpc/protobuf \
             --go-grpc_out=go/services/grpc/protobuf/ --go-grpc_opt=module=github.com/shifty11/cosmos-notifier/services/grpc/protobuf \
-            --dart_out=grpc:webapp/lib/api/protobuf/dart/ api/*.proto && \
-    protoc -I=api/ --dart_out=grpc:webapp/lib/api/protobuf/dart/ google/protobuf/timestamp.proto google/protobuf/empty.proto google/protobuf/duration.proto
+            api/*.proto
 
 generate-models:
     cd go && go generate ./ent

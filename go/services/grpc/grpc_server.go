@@ -13,8 +13,10 @@ import (
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/dev_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/subscription_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/tracker_service"
+	"github.com/shifty11/cosmos-notifier/services/grpc/protobuf/user_service"
 	"github.com/shifty11/cosmos-notifier/services/grpc/subscription"
 	"github.com/shifty11/cosmos-notifier/services/grpc/tracker"
+	"github.com/shifty11/cosmos-notifier/services/grpc/user"
 	"golang.org/x/oauth2"
 	"google.golang.org/grpc"
 	"net"
@@ -64,6 +66,7 @@ func (s GRPCServer) Run() {
 	adminServer := admin.NewAdminServer(s.generalNotifier, s.dbManagers)
 	trackerServer := tracker.NewTrackerServer(s.dbManagers)
 	devServer := dev.NewDevServer(s.dbManagers, jwtManager)
+	userServer := user.NewUserServer()
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(interceptor.Unary()),
@@ -74,6 +77,7 @@ func (s GRPCServer) Run() {
 	subscription_service.RegisterSubscriptionServiceServer(server, subsServer)
 	admin_service.RegisterAdminServiceServer(server, adminServer)
 	tracker_service.RegisterTrackerServiceServer(server, trackerServer)
+	user_service.RegisterUserServiceServer(server, userServer)
 	if os.Getenv("DEV") == "true" {
 		dev_service.RegisterDevServiceServer(server, devServer)
 	}
