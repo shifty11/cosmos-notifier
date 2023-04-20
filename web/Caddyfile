@@ -9,6 +9,8 @@
 # domain name.
 
 :80 {
+        reverse_proxy /cosmos_notifier_grpc* envoy:8090
+
         # Set this path to your site's directory.
         root * /var/www/cosmos-notifier-sycamore
         encode gzip
@@ -17,8 +19,6 @@
 
         # Enable the static file server.
         file_server
-
-        reverse_proxy /cosmos_notifier_grpc* envoy:8090
 }
 
 # Refer to the Caddy docs for more information:
