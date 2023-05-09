@@ -116,7 +116,7 @@ var runContractCrawlerCmd = &cobra.Command{
 		managers := database.NewDefaultDbManagers()
 		notifier := notifier.NewContractNotifier(managers, telegramBotToken, apiEndpoint, discordBotToken)
 		c := contract_crawler.NewContractCrawler(managers, notifier, nodejsUrl, assetsPath)
-		c.AddContracts()
+		//c.AddContracts() // this doesn't work right now. I need a new DAO DAO indexer
 		c.UpdateContracts()
 
 		if cmd.Flag("repeat").Value.String() == "true" {

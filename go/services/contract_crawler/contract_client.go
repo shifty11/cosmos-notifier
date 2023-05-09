@@ -83,8 +83,11 @@ func (cc *ContractClient) proposals(query string) (*types.ProposalList, error) {
 	if err != nil {
 		if errors.Is(err, UnknownVariantError) {
 			proposalModules, _ := cc.proposalModules()
-			if len(proposalModules) > 0 {
-				return NewContractClient(cc.URL, proposalModules[0], cc.RpcEndpoint).proposals("")
+			for _, proposalModule := range proposalModules {
+				proposalList, err := NewContractClient(cc.URL, proposalModule, cc.RpcEndpoint).proposals(query)
+				if err == nil {
+					return proposalList, nil
+				}
 			}
 			return nil, errors.New(fmt.Sprintf("found no proposal_modules for %v", cc.ContractAddress))
 		}
