@@ -77,7 +77,7 @@ func (cc *ContractClient) config(contractVersion types.ContractVersion) (*types.
 
 func (cc *ContractClient) proposals(query string) (*types.ProposalList, error) {
 	if query == "" {
-		query = "{\"list_proposals\":{}}"
+		query = "{\"reverse_proposals\":{}}"
 	}
 	resp, err := cc.querySmartContract(query)
 	if err != nil {
