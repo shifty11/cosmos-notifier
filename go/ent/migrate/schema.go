@@ -66,7 +66,7 @@ var (
 		{Name: "update_time", Type: field.TypeTime},
 		{Name: "chain_id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "pretty_name", Type: field.TypeString, Unique: true},
+		{Name: "pretty_name", Type: field.TypeString},
 		{Name: "path", Type: field.TypeString},
 		{Name: "display", Type: field.TypeString, Default: ""},
 		{Name: "is_enabled", Type: field.TypeBool, Default: true},
@@ -97,7 +97,7 @@ var (
 		{Name: "description", Type: field.TypeString},
 		{Name: "voting_start_time", Type: field.TypeTime},
 		{Name: "voting_end_time", Type: field.TypeTime},
-		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED", "PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD"}},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"PROPOSAL_STATUS_UNSPECIFIED", "PROPOSAL_STATUS_DEPOSIT_PERIOD", "PROPOSAL_STATUS_VOTING_PERIOD", "PROPOSAL_STATUS_PASSED", "PROPOSAL_STATUS_REJECTED", "PROPOSAL_STATUS_FAILED"}},
 		{Name: "chain_chain_proposals", Type: field.TypeInt, Nullable: true},
 	}
 	// ChainProposalsTable holds the schema information for the "chain_proposals" table.

@@ -26,8 +26,7 @@ func (Chain) Fields() []ent.Field {
 		field.String("chain_id"),
 		field.String("name").
 			Unique(),
-		field.String("pretty_name").
-			Unique(),
+		field.String("pretty_name"),
 		field.String("path"),
 		field.String("display").
 			Default(""),

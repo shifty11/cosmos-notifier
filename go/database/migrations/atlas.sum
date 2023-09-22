@@ -1,4 +1,4 @@
-h1:YHIL6sG4THcUyeWiwXHNyJxE+LjoUv9vo2valwX+f6U=
+h1:+NoFN+Bz3u4It176tl+4F9HMTEGdh+xtI+Tcw/okids=
 20220814170947_migration.down.sql h1:VMKZ7FxnIMV9a/7v5JchtwTHRJUJcs2uw2CYlbPmLh4=
 20220814170947_migration.up.sql h1:lCigt8EnN+3mTOm4JqV+6NtgiFWBhdUaP0rzY4LnEtU=
 20220814171447_migration.down.sql h1:tHmp9QsnwJ4MEJMr1fLiiIs/Ss9HYxCRXpwOeDk41dw=
@@ -57,3 +57,5 @@ h1:YHIL6sG4THcUyeWiwXHNyJxE+LjoUv9vo2valwX+f6U=
 20230403122513_migration.up.sql h1:SYSwGbPReki0O4SdKoiv+6EgzMKZHozTX40SxlBsZJk=
 20230414105328_migration.down.sql h1:7yT54+S58Q1CxpHVLl7FRi6z2N7BadILpN3Vui239LE=
 20230414105328_migration.up.sql h1:9MAyFhDg5pzXsPVASoIhIUvUEw/7MxDNm/3W70Ib5SU=
+20230922094637_migration.down.sql h1:IzDuFHBF/VD/kG+FJVY8HEd1BA/P/YZZALupwkk08y8=
+20230922094637_migration.up.sql h1:iUJrQnXOZE80T7K9FWvDq5IBmDHq71m6tCWvUdhz51M=
