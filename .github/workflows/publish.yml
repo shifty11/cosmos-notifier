@@ -88,12 +88,12 @@ jobs:
       - name: Deploy to swarm
         uses: wshihadeh/docker-deployment-action@v2
         with:
-          remote_docker_host: ubuntu@188.166.38.235
-          ssh_private_key: ${{ secrets.SWARMY_SSH_PRIVATE_KEY }}
-          ssh_public_key: ${{ secrets.SWARMY_SSH_PUBLIC_KEY }}
+          remote_docker_host: swarm@88.99.139.11
+          ssh_private_key: ${{ secrets.ODIN_SSH_PRIVATE_KEY }}
+          ssh_public_key: ${{ secrets.ODIN_SSH_PUBLIC_KEY }}
           deployment_mode: docker-swarm
           copy_stack_file: true
-          deploy_path: /home/ubuntu
+          deploy_path: /home/swarm
           stack_file_name: swarm-prod-cosmos-notifier.yml
           keep_files: 5
-          args: cosmos-notifier
+          args: cosmos-notifier --with-registry-auth

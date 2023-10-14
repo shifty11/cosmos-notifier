@@ -12,10 +12,6 @@ services:
       interval: 10s
       retries: 3
       timeout: 10s
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
 
   telegram:
     image: ghcr.io/shifty11/cosmos-notifier-go:latest
@@ -23,10 +19,6 @@ services:
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service telegram"
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
 
   discord:
     image: ghcr.io/shifty11/cosmos-notifier-go:latest
@@ -34,10 +26,6 @@ services:
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service discord"
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
 
   grpc:
     image: ghcr.io/shifty11/cosmos-notifier-go:latest
@@ -45,10 +33,6 @@ services:
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier db migrate && /cosmos-notifier service grpc"
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
 
   contract-crawler:
     image: ghcr.io/shifty11/cosmos-notifier-go:latest
@@ -58,11 +42,6 @@ services:
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service contract-crawler --repeat"
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
 
   chain-crawler:
     image: ghcr.io/shifty11/cosmos-notifier-go:latest
@@ -72,11 +51,6 @@ services:
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service chain-crawler --repeat"
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
 
   validator-crawler:
     image: ghcr.io/shifty11/cosmos-notifier-go:latest
@@ -84,18 +58,9 @@ services:
     secrets:
       - cosmos-notifier-env
     command: /bin/sh -c "source /run/secrets/cosmos-notifier-env && /cosmos-notifier service validator-crawler --repeat"
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
 
   envoy:
     image: ghcr.io/shifty11/cosmos-notifier-envoy:latest
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
 
   webapp:
     image: ghcr.io/shifty11/cosmos-notifier-webapp:latest
@@ -104,11 +69,6 @@ services:
     networks:
       - caddy
       - default
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
 
   whoami:
     image: jwilder/whoami
@@ -118,9 +78,6 @@ services:
       labels:
         caddy: cosmos-notifier.decrypto.online
         caddy.reverse_proxy: "webapp:80"
-      placement:
-        constraints:
-          - node.role != manager
 
   db:
     image: postgres:14.5
@@ -135,8 +92,7 @@ services:
     deploy:
       placement:
         constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
+          - node.labels.node == data-1
 
   pgbackups:
     image: prodrigestivill/postgres-backup-local
@@ -156,11 +112,6 @@ services:
       - BACKUP_KEEP_WEEKS=4
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=8080
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -177,11 +128,6 @@ services:
     volumes:
       - pgadmin:/var/lib/pgadmin
       - /var/opt/pgbackups:/backups
-    deploy:
-      placement:
-        constraints:
-          - node.role != manager
-          - node.labels.host == daodao-notifier
 
   whoami-pgadmin:
     image: jwilder/whoami
@@ -191,9 +137,6 @@ services:
       labels:
         caddy: pgadmin.decrypto.online
         caddy.reverse_proxy: "pgadmin:80"
-      placement:
-        constraints:
-          - node.role != manager
 
 volumes:
   images:
