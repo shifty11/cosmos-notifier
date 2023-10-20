@@ -24,8 +24,7 @@ func (Chain) Mixin() []ent.Mixin {
 func (Chain) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("chain_id"),
-		field.String("name").
-			Unique(),
+		field.String("name"),
 		field.String("pretty_name"),
 		field.String("path"),
 		field.String("display").
@@ -69,7 +68,6 @@ func (Chain) Edges() []ent.Edge {
 
 func (Chain) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("name").
-			Unique(),
+		index.Fields("name"),
 	}
 }
