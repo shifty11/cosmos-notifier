@@ -96,4 +96,4 @@ jobs:
           deploy_path: /home/swarm
           stack_file_name: swarm-prod-cosmos-notifier.yml
           keep_files: 5
-          args: cosmos-notifier --with-registry-auth --host unix:///run/user/$(id -u)/docker.sock
+          args: cosmos-notifier --with-registry-auth
