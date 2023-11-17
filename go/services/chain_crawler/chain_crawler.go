@@ -150,7 +150,11 @@ func (c *ChainCrawler) AddOrUpdateChains() {
 		}
 		if !found && chain.NetworkType == "mainnet" {
 			thumbnailUrl := c.downloadThumbnail(&chain)
-			chainEnt := c.chainManager.Create(&chain, thumbnailUrl)
+			chainEnt, err := c.chainManager.Create(&chain, thumbnailUrl)
+			if err != nil {
+				log.Sugar.Errorf("Error while creating chain %v (%v): %v", chain.Name, chain.ChainId, err)
+				continue
+			}
 			url := fmt.Sprintf(urlProposals, chainEnt.Path)
 			c.addProposals(chainEnt, url)
 		}

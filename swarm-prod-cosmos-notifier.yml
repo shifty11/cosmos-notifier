@@ -140,8 +140,6 @@ services:
 
 volumes:
   images:
-  data:
-    name: cosmos_notifier_data
   pgadmin:
     name: pgadmin_data
 

@@ -72,7 +72,7 @@ func TestTelegramChatManager_UpdateAddOrRemoveChain(t *testing.T) {
 		Image:       "https://image.com",
 	}
 
-	c := m.chainManager.Create(data, data.Image)
+	c, _ := m.chainManager.Create(data, data.Image)
 	hasChain, err := m.UpdateAddOrRemoveChain(dc.ChatID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)

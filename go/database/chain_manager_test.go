@@ -15,7 +15,7 @@ func newTestChainManager(t *testing.T) *ChainManager {
 
 func addChains(manager *ChainManager) []*ent.Chain {
 	var chains []*ent.Chain
-	chainDto := manager.Create(&types.Chain{
+	chainDto, _ := manager.Create(&types.Chain{
 		ChainId:      "cosmoshub-3",
 		Name:         "Cosmos",
 		PrettyName:   "Cosmos Hub",
@@ -26,7 +26,7 @@ func addChains(manager *ChainManager) []*ent.Chain {
 		Bech32Prefix: "cosmos",
 	}, "")
 	chains = append(chains, chainDto)
-	chainDto = manager.Create(&types.Chain{
+	chainDto, _ = manager.Create(&types.Chain{
 		ChainId:      "osmosis-1",
 		Name:         "Osmosis",
 		Path:         "osmosis",
@@ -36,7 +36,7 @@ func addChains(manager *ChainManager) []*ent.Chain {
 		Bech32Prefix: "osmo",
 	}, "")
 	chains = append(chains, chainDto)
-	chainDto = manager.Create(&types.Chain{
+	chainDto, _ = manager.Create(&types.Chain{
 		ChainId:      "comdex-1",
 		Name:         "Comdex",
 		PrettyName:   "Comdex",

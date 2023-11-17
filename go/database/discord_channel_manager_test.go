@@ -72,7 +72,7 @@ func TestDiscordChannelManager_UpdateAddOrRemoveChain(t *testing.T) {
 		Image:       "https://image.com",
 	}
 
-	c := m.chainManager.Create(data, data.Image)
+	c, _ := m.chainManager.Create(data, data.Image)
 	added, err := m.UpdateAddOrRemoveChain(dc.ChannelID, c.ID)
 	if err != nil {
 		t.Fatalf("Expected nil, got %s", err)

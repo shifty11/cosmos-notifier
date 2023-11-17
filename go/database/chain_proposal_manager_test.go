@@ -51,7 +51,7 @@ func TestChainProposalManager_CreateOrUpdate(t *testing.T) {
 		NetworkType: "mainnet",
 		Image:       "https://image.com",
 	}
-	c := cm.Create(data, data.Image)
+	c, _ := cm.Create(data, data.Image)
 
 	atTime, err := time.Parse(time.RFC3339, "2021-01-01T00:00:00Z")
 	if err != nil {
@@ -146,7 +146,7 @@ func TestChainProposalManager_QueryVotingPeriodExpired(t *testing.T) {
 		NetworkType: "mainnet",
 		Image:       "https://image.com",
 	}
-	c := cm.Create(data, data.Image)
+	c, _ := cm.Create(data, data.Image)
 
 	atTime, err := time.Parse(time.RFC3339, "2021-01-01T00:00:00Z")
 	if err != nil {

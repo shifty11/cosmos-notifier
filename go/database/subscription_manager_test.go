@@ -218,8 +218,8 @@ func TestSubscriptionManager_QuerySubscriptions_Chains(t *testing.T) {
 		NetworkType: "mainnet",
 		Image:       "https://image2.png",
 	}
-	c2 := m.chainManager.Create(data2, data2.Image)
-	c1 := m.chainManager.Create(data1, data1.Image)
+	c2, _ := m.chainManager.Create(data2, data2.Image)
+	c1, _ := m.chainManager.Create(data1, data1.Image)
 
 	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
 	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 11, "chat1", false)
@@ -317,8 +317,8 @@ func TestSubscriptionManager_QuerySubscriptions_ContractsAndChains(t *testing.T)
 		ImageUrl:        "url1",
 		ContractVersion: types.ContractVersionUnknown,
 	}
-	c2 := m.chainManager.Create(data2, data2.Image)
-	c1 := m.chainManager.Create(data1, data1.Image)
+	c2, _ := m.chainManager.Create(data2, data2.Image)
+	c1, _ := m.chainManager.Create(data1, data1.Image)
 	contract1, _ := m.contractManager.Create(data3)
 
 	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
@@ -453,8 +453,8 @@ func TestSubscriptionManager_QuerySubscriptions_WithStats(t *testing.T) {
 		ImageUrl:        "url1",
 		ContractVersion: types.ContractVersionUnknown,
 	}
-	chain2 := m.chainManager.Create(data2, data2.Image)
-	chain1 := m.chainManager.Create(data1, data1.Image)
+	chain2, _ := m.chainManager.Create(data2, data2.Image)
+	chain1, _ := m.chainManager.Create(data1, data1.Image)
 	contract1, _ := m.contractManager.Create(data3)
 
 	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
@@ -537,7 +537,7 @@ func TestSubscriptionManager_QuerySubscriptions_EnabledChains(t *testing.T) {
 		Image:       "https://image2.png",
 	}
 	m.chainManager.Create(data2, data2.Image)
-	chain1 := m.chainManager.Create(data1, data1.Image)
+	chain1, _ := m.chainManager.Create(data1, data1.Image)
 
 	m.telegramChatManager.CreateOrUpdate(1, "telegramuser", 10, "chat2", true)
 	m.discordChannelManager.CreateOrUpdate(1, "discorduser", 12, "channel1", false)
