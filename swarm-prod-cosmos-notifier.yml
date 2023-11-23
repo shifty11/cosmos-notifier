@@ -127,7 +127,7 @@ services:
       - default
     volumes:
       - pgadmin:/var/lib/pgadmin
-      - /var/opt/pgbackups:/backups
+      - /home/swarm/storage/cosmos-notifier/pgbackups:/backups
 
   whoami-pgadmin:
     image: jwilder/whoami
