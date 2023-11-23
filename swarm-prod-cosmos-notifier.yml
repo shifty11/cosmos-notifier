@@ -82,7 +82,7 @@ services:
   db:
     image: postgres:14.5
     volumes:
-      - /mnt/storage/swarm/cosmos-notifier/data:/var/lib/postgresql/data
+      - /home/swarm/storage/cosmos-notifier/data:/var/lib/postgresql/data
     secrets:
       - cosmos-notifier-db-password-env
     environment:
@@ -97,7 +97,7 @@ services:
   pgbackups:
     image: prodrigestivill/postgres-backup-local
     volumes:
-      - /mnt/storage/swarm/cosmos-notifier/pgbackup:/backups
+      - /home/swarm/storage/cosmos-notifier/pgbackup:/backups
     secrets:
       - cosmos-notifier-db-password-env
     environment:
