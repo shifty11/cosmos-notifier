@@ -82,7 +82,7 @@ services:
   db:
     image: postgres:14.5
     volumes:
-      - /mnt/raid1/swarm/cosmos-notifier/data:/var/lib/postgresql/data
+      - /home/swarm/raid/cosmos-notifier/data:/var/lib/postgresql/data
     secrets:
       - cosmos-notifier-db-password-env
     environment:
@@ -97,7 +97,7 @@ services:
   pgbackups:
     image: prodrigestivill/postgres-backup-local
     volumes:
-      - /mnt/raid1/swarm/cosmos-notifier/pgbackup:/backups
+      - /home/swarm/raid/cosmos-notifier/pgbackup:/backups
     secrets:
       - cosmos-notifier-db-password-env
     environment:
@@ -126,8 +126,8 @@ services:
       - caddy
       - default
     volumes:
-      - pgadmin:/var/lib/pgadmin
-      - /mnt/raid1/swarm/cosmos-notifier/pgbackups:/backups
+      - /home/swarm/raid/cosmos-notifier/pgadmin:/var/lib/pgadmin
+      - /home/swarm/raid/cosmos-notifier/pgbackups:/backups
 
   whoami-pgadmin:
     image: jwilder/whoami
@@ -140,8 +140,6 @@ services:
 
 volumes:
   images:
-  pgadmin:
-    name: pgadmin_data
 
 networks:
   caddy:
