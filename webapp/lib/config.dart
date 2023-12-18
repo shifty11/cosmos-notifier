@@ -39,10 +39,10 @@ const bool cDebugMode = true;
 
 final tgBotUrl = Uri.parse('https://t.me/cosmos_gov_bot');
 final discordBotUrl = Uri.parse(
-    'https://discord.com/api/oauth2/authorize?client_id=953923165808107540&permissions=2048&redirect_uri=https%3A%2F%2Fcosmos-notifier.decrypto.online&response_type=code&scope=bot%20identify');
+    'https://discord.com/api/oauth2/authorize?client_id=953923165808107540&permissions=2048&redirect_uri=https%3A%2F%2Fcosmos-notifier.odincloud.xyz&response_type=code&scope=bot%20identify');
 final discordOAuth2Url = kReleaseMode
     ? Uri.parse(
-        'https://discord.com/api/oauth2/authorize?client_id=953923165808107540&redirect_uri=https%3A%2F%2Fcosmos-notifier.decrypto.online&response_type=code&scope=identify')
+        'https://discord.com/api/oauth2/authorize?client_id=953923165808107540&redirect_uri=https%3A%2F%2Fcosmos-notifier.odincloud.xyz&response_type=code&scope=identify')
     : Uri.parse(
         'https://discord.com/api/oauth2/authorize?client_id=955835724714872942&redirect_uri=http%3A%2F%2Ftest.mydomain.com%3A40001&response_type=code&scope=identify');
 

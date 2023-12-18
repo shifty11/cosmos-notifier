@@ -76,7 +76,7 @@ services:
       - caddy
     deploy:
       labels:
-        caddy: cosmos-notifier.decrypto.online
+        caddy: cosmos-notifier.odincloud.xyz
         caddy.reverse_proxy: "webapp:80"
 
   db:
@@ -135,7 +135,7 @@ services:
       - caddy
     deploy:
       labels:
-        caddy: pgadmin.decrypto.online
+        caddy: pgadmin-cosmos-notifier.odincloud.xyz
         caddy.reverse_proxy: "pgadmin:80"
 
 volumes:
