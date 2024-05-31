@@ -113,30 +113,30 @@ services:
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=8080
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    secrets:
-      - pgadmin-password
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin-password
-#    logging:
-#      driver: "none"
-    networks:
-      - caddy
-      - default
-    volumes:
-      - /home/swarm/raid/cosmos-notifier/pgadmin:/var/lib/pgadmin
-      - /home/swarm/raid/cosmos-notifier/pgbackup:/backups
+  #pgadmin:
+  #  image: dpage/pgadmin4:latest
+  #  secrets:
+  #    - pgadmin-password
+  #  environment:
+  #    PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+  #    PGADMIN_DEFAULT_PASSWORD_FILE: /run/secrets/pgadmin-password
+# #   logging:
+# #     driver: "none"
+  #  networks:
+  #    - caddy
+  #    - default
+  #  volumes:
+  #    - /home/swarm/raid/cosmos-notifier/pgadmin:/var/lib/pgadmin
+  #    - /home/swarm/raid/cosmos-notifier/pgbackup:/backups
 
-  whoami-pgadmin:
-    image: jwilder/whoami
-    networks:
-      - caddy
-    deploy:
-      labels:
-        caddy: pgadmin-cosmos-notifier.odincloud.xyz
-        caddy.reverse_proxy: "pgadmin:80"
+  #whoami-pgadmin:
+  #  image: jwilder/whoami
+  #  networks:
+  #    - caddy
+  #  deploy:
+  #    labels:
+  #      caddy: pgadmin-cosmos-notifier.odincloud.xyz
+  #      caddy.reverse_proxy: "pgadmin:80"
 
 volumes:
   images:
